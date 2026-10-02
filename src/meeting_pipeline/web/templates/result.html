@@ -10,7 +10,9 @@
   <div><strong>{{ source_count }}</strong><span>Nguồn ghi âm</span></div>
   <div><strong>{{ segments|length }}</strong><span>Đoạn tiếng nói</span></div>
   <div><strong>{{ identified_count }}</strong><span>Người đã nhận diện</span></div>
-  <div><strong>{{ unknown_count }}</strong><span>Người chưa rõ danh tính</span></div>
+  <div><strong>{{ stranger_cluster_count if stranger_cluster_count is defined else unknown_count }}</strong><span>Cụm người lạ</span></div>
+  {% if ambiguous_count %}<div><strong>{{ ambiguous_count }}</strong><span>Đoạn chưa rõ</span></div>{% endif %}
+  {% if overlap_not_run_count %}<div><strong>{{ overlap_not_run_count }}</strong><span>Vùng nói chồng</span></div>{% endif %}
 </section>
 <section class="card method-summary">
   <div><span class="eyebrow">PHƯƠNG PHÁP ĐÃ CHẠY</span><h2>{{ fusion_used or "Chưa có dữ liệu" }}</h2>
@@ -20,7 +22,7 @@
   {% if fusion_fallback %}<p class="notice">Phương pháp yêu cầu {{ fusion_requested }} đã chuyển sang {{ fusion_used }}. {{ manifest.warnings|join(" · ") }}</p>{% endif %}
   {% if not fusion_used %}<p class="notice">Run cũ không lưu phương pháp fusion đã dùng.</p>{% endif %}
 </section>
-<nav class="page-nav" aria-label="Nội dung kết quả"><a href="#timeline">Timeline</a><a href="#sources-section">Nguồn âm thanh</a><a href="#downloads">Tải kết quả</a></nav>
+<nav class="page-nav" aria-label="Nội dung kết quả"><a href="#timeline">Timeline</a><a href="#speaker-management">Người nói</a><a href="#sources-section">Nguồn âm thanh</a><a href="#downloads">Tải kết quả</a></nav>
 
 <section class="card timeline-section" id="timeline">
   <div class="section-heading"><div><p class="eyebrow">AI NÓI GÌ</p><h2>Timeline cuộc họp</h2>
@@ -33,6 +35,12 @@
       {% for speaker in segments|map(attribute="speaker_label")|unique|list %}
       {% if speaker %}<option value="{{ speaker }}">{{ speaker }}</option>{% endif %}{% endfor %}
     </select>
+    <label for="source-filter">Nguồn</label>
+    <select id="source-filter"><option value="">Tất cả</option>
+      {% for src in sources %}
+      <option value="{{ src.source_id }}">{{ source_names.get(src.source_id, src.source_id) }}</option>
+      {% endfor %}
+    </select>
     <label class="check-line"><input id="review-only" type="checkbox"> Cần kiểm tra</label>
   </div>
   {% if segments %}
@@ -40,7 +48,7 @@
     {% for segment in segments %}
     {% set source_id = segment.selected_source_id or (segment.provenance.primary_source_id if segment.provenance is defined else none) %}
     {% set clip = artifact_url(segment.evidence_clip_artifact_id or segment.processed_clip_artifact_id) %}
-    <article class="segment" data-speaker="{{ segment.speaker_label or 'Chưa rõ' }}" data-search="{{ segment.text }} {{ segment.speaker_label }} {{ source_names.get(source_id, source_id) }}" data-review="{{ 'true' if segment.needs_review else 'false' }}">
+    <article class="segment" data-speaker="{{ segment.speaker_label or 'Chưa rõ' }}" data-source="{{ source_id }}" data-search="{{ segment.text }} {{ segment.speaker_label }} {{ source_names.get(source_id, source_id) }}" data-review="{{ 'true' if segment.needs_review else 'false' }}">
       <div class="segment-top">
         <span class="time">{{ segment.start_sec|clock }} – {{ segment.end_sec|clock }}</span>
         <span class="speaker">{{ segment.speaker_label or "Chưa rõ" }}</span>
@@ -136,6 +144,53 @@
   <p id="filter-empty" class="empty" hidden>Không có đoạn nào khớp bộ lọc.</p>
   {% else %}<p class="empty">Không phát hiện đoạn tiếng nói nào.</p>{% endif %}
 </section>
+
+{% if meeting_speakers %}
+<section class="card" id="speaker-management">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">DANH TÍNH</p>
+      <h2>Quản lý người nói trong cuộc họp</h2>
+      <p>Đổi nhãn hiển thị cho Người lạ N mà không sửa lại âm thanh hoặc kết quả nhận diện gốc.</p>
+    </div>
+  </div>
+  <div class="scroll-table">
+    <table class="sources-table speakers-table">
+      <thead>
+        <tr>
+          <th>Mã họp</th>
+          <th>Trạng thái</th>
+          <th>Nhãn hiển thị</th>
+          <th>Số lượt</th>
+          <th>Thời lượng</th>
+          <th>Đổi nhãn</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for spk in meeting_speakers %}
+        <tr>
+          <td><code>{{ spk.meeting_speaker_id }}</code></td>
+          <td>
+            <span class="badge {{ 'badge-identified' if spk.speaker_status == 'identified' else 'badge-anonymous' }}">
+              {{ "Đã khớp hồ sơ" if spk.speaker_status == "identified" else "Người lạ" }}
+            </span>
+          </td>
+          <td><strong>{{ spk.speaker_label }}</strong></td>
+          <td>{{ spk.turn_count }} lượt</td>
+          <td>{{ spk.total_speech_sec|number(1, "s") }}</td>
+          <td>
+            <div class="inline-rename-form">
+              <input type="text" id="rename-input-{{ spk.meeting_speaker_id }}" value="{{ spk.speaker_label }}" class="rename-input" maxlength="100">
+              <button type="button" class="button rename-button" data-speaker-id="{{ spk.meeting_speaker_id }}">Lưu</button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
 
 <section class="card" id="sources-section">
   <div class="section-heading"><div><p class="eyebrow">ĐỐI CHIẾU</p><h2>Nguồn âm thanh đã đồng bộ</h2><p>Các file aligned nằm trên cùng trục thời gian để nghe so sánh.</p></div></div>

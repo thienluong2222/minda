@@ -371,3 +371,69 @@ def test_running_job_is_failed_after_restart(tmp_path: Path) -> None:
     config.paths.data_dir = data_dir
     client = TestClient(create_app(config))
     assert client.get("/api/runs/stale").json()["status"] == "failed"
+
+
+def test_get_meeting_speakers_and_rename_label(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+    run = _fixture_run(tmp_path, "2.0")
+    timeline_path = run / "timeline.json"
+    timeline = json.loads(timeline_path.read_text(encoding="utf-8"))
+    timeline["segments"][0].update(
+        meeting_speaker_id="ms-0001",
+        speaker_label="Người lạ 1",
+        speaker_status="anonymous",
+    )
+    timeline_path.write_text(json.dumps(timeline), encoding="utf-8")
+    _job(client, run)
+
+    # 1. GET /api/runs/demo-1/speakers
+    res = client.get("/api/runs/demo-1/speakers")
+    assert res.status_code == 200
+    speakers = res.json()
+    assert len(speakers) == 1
+    assert speakers[0]["meeting_speaker_id"] == "ms-0001"
+    assert speakers[0]["speaker_label"] == "Người lạ 1"
+    assert speakers[0]["speaker_status"] == "anonymous"
+
+    # 2. POST /api/runs/demo-1/rename-speaker with valid label
+    rename_res = client.post(
+        "/api/runs/demo-1/rename-speaker",
+        json={"meeting_speaker_id": "ms-0001", "new_label": "Chị Hoa"},
+    )
+    assert rename_res.status_code == 200
+    data = rename_res.json()
+    assert data["status"] == "ok"
+    assert data["old_label"] == "Người lạ 1"
+    assert data["new_label"] == "Chị Hoa"
+
+    # Verify timeline updated but status remains anonymous
+    updated_timeline = json.loads(timeline_path.read_text(encoding="utf-8"))
+    assert updated_timeline["segments"][0]["speaker_label"] == "Chị Hoa"
+    assert updated_timeline["segments"][0]["speaker_status"] == "anonymous"
+
+    # Verify audit file
+    audit_file = run / "speaker_labels.json"
+    assert audit_file.is_file()
+    audit_data = json.loads(audit_file.read_text(encoding="utf-8"))
+    assert audit_data["labels"]["ms-0001"] == "Chị Hoa"
+    assert len(audit_data["history"]) == 1
+
+    # Verify exports updated
+    result_csv = (run / "exports" / "result.csv").read_text(encoding="utf-8")
+    assert "Chị Hoa" in result_csv
+    result_txt = (run / "exports" / "result.txt").read_text(encoding="utf-8")
+    assert "Chị Hoa" in result_txt
+
+    # 3. Error cases
+    assert client.post(
+        "/api/runs/demo-1/rename-speaker",
+        json={"meeting_speaker_id": "", "new_label": "Test"},
+    ).status_code == 400
+    assert client.post(
+        "/api/runs/demo-1/rename-speaker",
+        json={"meeting_speaker_id": "ms-0001", "new_label": "   "},
+    ).status_code == 400
+    assert client.post(
+        "/api/runs/demo-1/rename-speaker",
+        json={"meeting_speaker_id": "ms-9999", "new_label": "Test"},
+    ).status_code == 404

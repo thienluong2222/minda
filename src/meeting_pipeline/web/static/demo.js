@@ -61,6 +61,7 @@
 
   const search = document.getElementById("search");
   const speaker = document.getElementById("speaker-filter");
+  const sourceFilter = document.getElementById("source-filter");
   const review = document.getElementById("review-only");
   if (search && speaker && review) {
     const update = () => {
@@ -69,13 +70,42 @@
       for (const card of document.querySelectorAll(".segment")) {
         const matched = (!query || card.dataset.search.toLocaleLowerCase("vi").includes(query))
           && (!speaker.value || card.dataset.speaker === speaker.value)
+          && (!sourceFilter || !sourceFilter.value || card.dataset.source === sourceFilter.value)
           && (!review.checked || card.dataset.review === "true");
         card.hidden = !matched;
         if (matched) visible++;
       }
       document.getElementById("filter-empty").hidden = visible !== 0;
     };
-    for (const element of [search, speaker, review]) element.addEventListener("input", update);
+    for (const element of [search, speaker, sourceFilter, review].filter(Boolean)) {
+      element.addEventListener("input", update);
+    }
+  }
+
+  for (const button of document.querySelectorAll(".rename-button")) {
+    button.addEventListener("click", async () => {
+      const speakerId = button.dataset.speakerId;
+      const input = document.getElementById(`rename-input-${speakerId}`);
+      if (!input || !input.value.trim()) return;
+      const newLabel = input.value.trim();
+      const jobId = window.location.pathname.split("/").pop();
+      button.disabled = true;
+      button.textContent = "Đang lưu…";
+      try {
+        const res = await fetch(`/api/runs/${jobId}/rename-speaker`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({meeting_speaker_id: speakerId, new_label: newLabel}),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Đổi tên thất bại");
+        window.location.reload();
+      } catch (err) {
+        alert(err.message);
+        button.disabled = false;
+        button.textContent = "Lưu";
+      }
+    });
   }
 
   // Listening to one source at a time avoids accidental simultaneous playback.

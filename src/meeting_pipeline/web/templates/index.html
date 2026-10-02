@@ -51,13 +51,14 @@
         </div>
         <div><label for="fusion_method">Dung hợp transcript</label>
           <select id="fusion_method" name="fusion_method">
-            <option value="F5_RULE_WEIGHTED" selected>F5 · Âm thanh + ASR + đồng thuận</option>
+            <option value="F5_RULE_WEIGHTED_CORRECTED" selected>F5 sửa · Bảo vệ nguồn chính & chống ảo giác</option>
+            <option value="F5_RULE_WEIGHTED">F5 · Âm thanh + ASR + đồng thuận</option>
             <option value="F1_BEST_SEGMENT">F1 · Nguồn tốt nhất</option>
             <option value="F3_ROVER">F3 · Bỏ phiếu đều</option>
             <option value="F4_ASR_WEIGHTED">F4 · Theo confidence ASR</option>
             <option value="F6_LEARNED">F6 · Mô hình học</option>
           </select>
-          <p class="hint" data-method-description="fusion_method">{{ fusion_methods.F5_RULE_WEIGHTED }}</p>
+          <p class="hint" data-method-description="fusion_method">{{ fusion_methods.F5_RULE_WEIGHTED_CORRECTED or fusion_methods.F5_RULE_WEIGHTED }}</p>
         </div>
       </div>
       <label for="sources">Tệp âm thanh</label>

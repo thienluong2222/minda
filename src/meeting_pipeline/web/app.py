@@ -34,6 +34,7 @@ FUSION_METHODS = {
     "F3_ROVER": "Căn hàng từ rồi bỏ phiếu đều giữa các nguồn; hòa phiếu ưu tiên bỏ từ.",
     "F4_ASR_WEIGHTED": "Căn hàng từ rồi cộng điểm theo confidence ASR của từng token.",
     "F5_RULE_WEIGHTED": "Căn hàng từ rồi cộng điểm chất lượng transcript nhân confidence token.",
+    "F5_RULE_WEIGHTED_CORRECTED": "F5 sửa: Luật bảo vệ nguồn chính, chống hallucination nguồn phụ.",
     "F6_LEARNED": "Căn hàng từ rồi dùng mô hình đã huấn luyện để chấm token; có thể chuyển về F5.",
 }
 IDENTITY_METHODS = {
@@ -258,7 +259,26 @@ def _result_context(
         "source_count": source_count,
         "duration": duration,
         "identified_count": len(
-            {str(row.get("speaker_id")) for row in segments if row.get("speaker_id")}
+            {
+                str(row.get("speaker_id"))
+                for row in segments
+                if row.get("speaker_status") == "identified" and row.get("speaker_id")
+            }
+        ),
+        "stranger_cluster_count": len(
+            {
+                str(row.get("meeting_speaker_id") or row.get("speaker_label"))
+                for row in segments
+                if row.get("speaker_status") == "anonymous"
+            }
+        ),
+        "ambiguous_count": sum(
+            1 for row in segments if row.get("speaker_status") == "ambiguous"
+        ),
+        "overlap_not_run_count": sum(
+            1
+            for row in segments
+            if (row.get("asr_status") == "not_run" or row.get("overlap_group_id") is not None)
         ),
         "unknown_count": len(
             {
@@ -267,6 +287,31 @@ def _result_context(
                 if row.get("speaker_status") != "identified"
             }
         ),
+        "meeting_speakers": [
+            {
+                "meeting_speaker_id": m_id,
+                "speaker_label": group[0].get("speaker_label") or "Chưa rõ",
+                "speaker_status": group[0].get("speaker_status") or "unknown",
+                "speaker_id": group[0].get("speaker_id"),
+                "turn_count": len(group),
+                "total_speech_sec": round(
+                    sum(
+                        max(0.0, float(r.get("end_sec") or 0.0) - float(r.get("start_sec") or 0.0))
+                        for r in group
+                    ),
+                    2,
+                ),
+            }
+            for m_id, group in (
+                (
+                    m_id,
+                    [r for r in segments if r.get("meeting_speaker_id") == m_id],
+                )
+                for m_id in dict.fromkeys(
+                    r.get("meeting_speaker_id") for r in segments if r.get("meeting_speaker_id")
+                )
+            )
+        ],
         "reference_source_id": coverage.get("reference_source_id"),
         "aligned_files": aligned_files,
         "extra_aligned_files": [
@@ -377,6 +422,103 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
             title=str(job.get("meeting_name", "")),
             **_result_context(job_id, job, run_dir, store.speakers),
         )
+
+    @app.get("/api/runs/{job_id}/speakers")
+    def get_run_speakers(job_id: str) -> list[dict[str, Any]]:
+        job = _job_or_404(store, job_id)
+        run_dir = _run_dir(job)
+        timeline_data = _read_json(run_dir / "timeline.json")
+        segments = timeline_data.get("segments") or []
+        meeting_speakers_map: dict[str, dict[str, Any]] = {}
+        for row in segments:
+            m_id = row.get("meeting_speaker_id")
+            if not m_id:
+                continue
+            if m_id not in meeting_speakers_map:
+                meeting_speakers_map[m_id] = {
+                    "meeting_speaker_id": m_id,
+                    "speaker_label": row.get("speaker_label") or "Chưa rõ",
+                    "speaker_status": row.get("speaker_status") or "unknown",
+                    "speaker_id": row.get("speaker_id"),
+                    "turn_count": 0,
+                    "total_speech_sec": 0.0,
+                }
+            entry = meeting_speakers_map[m_id]
+            entry["turn_count"] += 1
+            s_sec = float(row.get("start_sec") or 0.0)
+            e_sec = float(row.get("end_sec") or 0.0)
+            entry["total_speech_sec"] = round(
+                entry["total_speech_sec"] + max(0.0, e_sec - s_sec), 2
+            )
+        return list(meeting_speakers_map.values())
+
+    @app.post("/api/runs/{job_id}/rename-speaker")
+    def rename_speaker(
+        job_id: str,
+        payload: dict[str, Any],
+    ) -> dict[str, Any]:
+        job = _job_or_404(store, job_id)
+        run_dir = _run_dir(job)
+        meeting_speaker_id = str(payload.get("meeting_speaker_id", "")).strip()
+        new_label = str(payload.get("new_label", "")).strip()
+        if not meeting_speaker_id:
+            raise HTTPException(status_code=400, detail="Thiếu meeting_speaker_id")
+        if not new_label:
+            raise HTTPException(status_code=400, detail="Nhãn mới không được để trống")
+        if len(new_label) > 100:
+            raise HTTPException(status_code=400, detail="Nhãn quá dài (tối đa 100 ký tự)")
+        clean_label = re.sub(r"[\r\n\t]+", " ", new_label).strip()
+
+        timeline_path = run_dir / "timeline.json"
+        timeline_data = _read_json(timeline_path)
+        segments = timeline_data.get("segments") or []
+        if not segments:
+            raise HTTPException(status_code=404, detail="Không tìm thấy timeline")
+
+        matched = False
+        old_label = ""
+        for seg in segments:
+            if seg.get("meeting_speaker_id") == meeting_speaker_id:
+                if not old_label:
+                    old_label = str(seg.get("speaker_label", ""))
+                seg["speaker_label"] = clean_label
+                matched = True
+
+        if not matched:
+            raise HTTPException(
+                status_code=404, detail=f"Không tìm thấy speaker {meeting_speaker_id}"
+            )
+
+        timeline_data["segments"] = segments
+        _write_json(timeline_path, timeline_data)
+
+        labels_path = run_dir / "speaker_labels.json"
+        audit_data = _read_json(labels_path)
+        history = audit_data.get("history") or []
+        labels_map = audit_data.get("labels") or {}
+        labels_map[meeting_speaker_id] = clean_label
+        history.append({
+            "meeting_speaker_id": meeting_speaker_id,
+            "old_label": old_label,
+            "new_label": clean_label,
+            "updated_at": _now(),
+        })
+        _write_json(labels_path, {
+            "schema_version": "2.0",
+            "updated_at": _now(),
+            "labels": labels_map,
+            "history": history,
+        })
+
+        MultiSourceFusionPipeline._write_exports(run_dir, segments)
+
+        return {
+            "status": "ok",
+            "job_id": job_id,
+            "meeting_speaker_id": meeting_speaker_id,
+            "old_label": old_label,
+            "new_label": clean_label,
+        }
 
     @app.get("/api/runs/{job_id}/timeline")
     def timeline(job_id: str) -> FileResponse:
