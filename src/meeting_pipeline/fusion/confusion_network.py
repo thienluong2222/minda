@@ -26,38 +26,31 @@ def build_confusion_network(
     backbone_source_id: str | None = None,
 ) -> list[ConfusionBin]:
     """Build a multi-source confusion network aligned to a backbone hypothesis."""
-    source_hypotheses = {
+    active_sources = {
         source_id: hypothesis
         for source_id, hypothesis in source_hypotheses.items()
         if hypothesis.asr_status == "transcribed" and hypothesis.text.strip()
     }
-    if not source_hypotheses:
+    if not active_sources:
         return []
 
     # Pick backbone: source with highest transcript_quality_score or longest text
-    if backbone_source_id and backbone_source_id in source_hypotheses:
+    if backbone_source_id and backbone_source_id in active_sources:
         bb_id = backbone_source_id
     else:
         bb_id = max(
-            source_hypotheses.keys(),
+            active_sources.keys(),
             key=lambda k: (
-                source_hypotheses[k].transcript_quality_score,
-                len(source_hypotheses[k].text.split()),
+                active_sources[k].transcript_quality_score,
+                len(active_sources[k].text.split()),
             ),
         )
 
-    bb_hyp = source_hypotheses[bb_id]
+    bb_hyp = active_sources[bb_id]
     bb_tokens = [w for w in bb_hyp.text.split() if w.strip()]
 
-    # If all sources are empty
     if not bb_tokens:
-        # Check if any other source has tokens
-        other_with_tokens = [k for k, h in source_hypotheses.items() if h.text.strip()]
-        if not other_with_tokens:
-            return []
-        bb_id = max(other_with_tokens, key=lambda k: len(source_hypotheses[k].text.split()))
-        bb_hyp = source_hypotheses[bb_id]
-        bb_tokens = [w for w in bb_hyp.text.split() if w.strip()]
+        return []
 
     # Word confidence lookup helper
     def get_word_conf(hyp: SourceHypothesis, token: str, idx: int) -> float:
@@ -78,11 +71,11 @@ def build_confusion_network(
         c_bin.source_scores[bb_id] = bb_hyp.transcript_quality_score
         bins.append(c_bin)
 
-    # Align every other source against the backbone
-    other_sources = [s for s in sorted(source_hypotheses.keys()) if s != bb_id]
+    # Align every other active source against the backbone
+    other_sources = [s for s in sorted(active_sources.keys()) if s != bb_id]
 
     for src_id in other_sources:
-        hyp = source_hypotheses[src_id]
+        hyp = active_sources[src_id]
         tokens = [w for w in hyp.text.split() if w.strip()]
 
         bb_aligned, src_aligned = align_word_sequences(bb_tokens, tokens)
@@ -108,7 +101,6 @@ def build_confusion_network(
                 bb_ptr += 1
             else:
                 # Insertion in source not present in backbone
-                # Insert a new bin before current bb_ptr
                 new_bin = ConfusionBin(bin_idx=len(bins))
                 new_bin.candidates[bb_id] = EPSILON_TOKEN
                 new_bin.confidences[bb_id] = 0.0
@@ -120,7 +112,7 @@ def build_confusion_network(
                         break
                     new_bin.candidates[prev_src] = EPSILON_TOKEN
                     new_bin.confidences[prev_src] = 0.0
-                    new_bin.source_scores[prev_src] = source_hypotheses[
+                    new_bin.source_scores[prev_src] = active_sources[
                         prev_src
                     ].transcript_quality_score
 
@@ -131,13 +123,17 @@ def build_confusion_network(
                 bins.insert(bb_ptr, new_bin)
                 bb_ptr += 1
 
-    # Ensure all bins have entries for all sources
-    all_source_ids = sorted(source_hypotheses.keys())
+    # Fill all evaluated transcribed sources with EPSILON if missing;
+    # abstain/unreliable sources are excluded from voting pool
+    transcribed_source_ids = sorted(
+        s_id for s_id, s_hyp in source_hypotheses.items() if s_hyp.asr_status == "transcribed"
+    )
     for b in bins:
-        for s_id in all_source_ids:
+        for s_id in transcribed_source_ids:
             if s_id not in b.candidates:
+                s_hyp = source_hypotheses[s_id]
                 b.candidates[s_id] = EPSILON_TOKEN
                 b.confidences[s_id] = 0.0
-                b.source_scores[s_id] = source_hypotheses[s_id].transcript_quality_score
+                b.source_scores[s_id] = s_hyp.transcript_quality_score
 
     return bins

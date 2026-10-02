@@ -66,6 +66,7 @@ def build_final_timeline_item(
                 supporting_sources=supporting,
                 source_scores={s: round(sc, 3) for s, sc in per_source_scores.items()},
                 representative_source_id=rep_src,
+                needs_review=bool(d.get("needs_review", False)),
             )
         )
 

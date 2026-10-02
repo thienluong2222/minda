@@ -145,6 +145,7 @@ class WordProvenance(BaseModel):
     supporting_sources: list[str]
     source_scores: dict[str, float] = Field(default_factory=dict)
     representative_source_id: str
+    needs_review: bool = False
 
 
 class FinalTimelineItem(BaseModel):

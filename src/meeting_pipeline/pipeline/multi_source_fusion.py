@@ -40,6 +40,7 @@ from meeting_pipeline.fusion.baselines import (
     fuse_f3_rover,
     fuse_f4_asr_weighted,
     fuse_f5_rule_weighted,
+    fuse_f5_rule_weighted_corrected,
     fuse_f6_learned,
 )
 from meeting_pipeline.fusion.confusion_network import ConfusionBin, build_confusion_network
@@ -73,6 +74,7 @@ SUPPORTED_FUSION_METHODS = {
     "F3_ROVER",
     "F4_ASR_WEIGHTED",
     "F5_RULE_WEIGHTED",
+    "F5_RULE_WEIGHTED_CORRECTED",
     "F6_LEARNED",
 }
 
@@ -1047,6 +1049,8 @@ class MultiSourceFusionPipeline:
             return fuse_f4_asr_weighted(bins)
         if method == "F6_LEARNED":
             return fuse_f6_learned(bins, learned_model)
+        if method == "F5_RULE_WEIGHTED_CORRECTED":
+            return fuse_f5_rule_weighted_corrected(bins, source_hypotheses=hypotheses)
         return fuse_f5_rule_weighted(bins)
 
     def _build_mfcc_assigner(self, profiles: list[SpeakerProfileInput]) -> MFCCKNNSpeakerClassifier:
@@ -1158,6 +1162,12 @@ class MultiSourceFusionPipeline:
             )
 
         word_provenance = item.get("word_provenance", [])
+        if any(
+            (w.get("needs_review") if isinstance(w, dict) else getattr(w, "needs_review", False))
+            for w in word_provenance
+        ):
+            warnings.append("unverified_fusion_consensus")
+
         return {
             "segment_id": item["segment_id"],
             "track_id": str(

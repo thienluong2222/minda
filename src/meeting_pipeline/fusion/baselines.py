@@ -11,7 +11,7 @@ import jiwer
 import numpy as np
 
 from meeting_pipeline.domain.contracts import SourceHypothesis
-from meeting_pipeline.fusion.alignment import EPSILON_TOKEN
+from meeting_pipeline.fusion.alignment import ABSTAIN_TOKEN, EPSILON_TOKEN
 from meeting_pipeline.fusion.confusion_network import ConfusionBin
 from meeting_pipeline.fusion.model import LearnedFusionModel
 
@@ -100,13 +100,18 @@ def fuse_f3_rover(
     decisions: list[dict[str, Any]] = []
 
     for b in bins:
-        # Count token votes (excluding epsilon)
+        # Count token votes (excluding epsilon and abstain)
         vote_counts: dict[str, int] = {}
         source_support: dict[str, list[str]] = {}
 
         for src_id, token in b.candidates.items():
+            if token == ABSTAIN_TOKEN:
+                continue
             vote_counts[token] = vote_counts.get(token, 0) + 1
             source_support.setdefault(token, []).append(src_id)
+
+        if not vote_counts:
+            continue
 
         # Winner
         # Prefer deletion on a tie. With two devices, a token supported by only
@@ -117,7 +122,8 @@ def fuse_f3_rover(
         )
         if winner_token != EPSILON_TOKEN:
             chosen_words.append(winner_token)
-            conf = float(vote_counts[winner_token] / len(b.candidates))
+            total_eligible = sum(1 for tok in b.candidates.values() if tok != ABSTAIN_TOKEN)
+            conf = float(vote_counts[winner_token] / max(total_eligible, 1))
             decisions.append(
                 {
                     "word": winner_token,
@@ -142,10 +148,15 @@ def fuse_f4_asr_weighted(
         source_support: dict[str, list[str]] = {}
 
         for src_id, token in b.candidates.items():
+            if token == ABSTAIN_TOKEN:
+                continue
             raw_conf = b.confidences.get(src_id, 0.5)
             conf = 1.0 - raw_conf if token == EPSILON_TOKEN else raw_conf
             weighted_votes[token] = weighted_votes.get(token, 0.0) + conf
             source_support.setdefault(token, []).append(src_id)
+
+        if not weighted_votes:
+            continue
 
         winner_token = max(weighted_votes.keys(), key=lambda t: weighted_votes[t])
         if winner_token != EPSILON_TOKEN:
@@ -179,6 +190,8 @@ def fuse_f5_rule_weighted(
         source_support: dict[str, list[str]] = {}
 
         for src_id, token in b.candidates.items():
+            if token == ABSTAIN_TOKEN:
+                continue
             # A missing token is a real vote, not a zero-weight placeholder.
             # This prevents a single hallucinating source from injecting long
             # unsupported spans into the fused transcript.
@@ -189,6 +202,9 @@ def fuse_f5_rule_weighted(
 
             weighted_votes[token] = weighted_votes.get(token, 0.0) + w
             source_support.setdefault(token, []).append(src_id)
+
+        if not weighted_votes:
+            continue
 
         winner_token = max(weighted_votes.keys(), key=lambda t: weighted_votes[t])
         if winner_token != EPSILON_TOKEN:
@@ -205,6 +221,117 @@ def fuse_f5_rule_weighted(
                     "confidence": round(conf, 3),
                     "supporting_sources": source_support[winner_token],
                     "representative_source_id": rep_src,
+                }
+            )
+
+    return " ".join(chosen_words), decisions
+
+
+def fuse_f5_rule_weighted_corrected(
+    bins: list[ConfusionBin],
+    source_hypotheses: dict[str, SourceHypothesis] | None = None,
+) -> tuple[str, list[dict[str, Any]]]:
+    """Corrected F5 rule-weighted fusion: protects best source from unverified hallucinations."""
+    chosen_words: list[str] = []
+    decisions: list[dict[str, Any]] = []
+
+    best_source_id: str | None = None
+    if source_hypotheses:
+        transcribed_sources = {
+            sid: hyp for sid, hyp in source_hypotheses.items() if hyp.asr_status == "transcribed"
+        }
+        if transcribed_sources:
+            best_source_id = max(
+                transcribed_sources.keys(),
+                key=lambda s: transcribed_sources[s].transcript_quality_score,
+            )
+
+    for b in bins:
+        weighted_votes: dict[str, float] = {}
+        source_support: dict[str, list[str]] = {}
+
+        for src_id, token in b.candidates.items():
+            if token == ABSTAIN_TOKEN:
+                continue
+
+            q_score = b.source_scores.get(src_id, 0.5)
+            asr_c = b.confidences.get(src_id, 0.5)
+            token_confidence = 1.0 - asr_c if token == EPSILON_TOKEN else asr_c
+            w = float(q_score * token_confidence)
+
+            weighted_votes[token] = weighted_votes.get(token, 0.0) + w
+            source_support.setdefault(token, []).append(src_id)
+
+        if not weighted_votes:
+            continue
+
+        candidate_winner = max(weighted_votes.keys(), key=lambda t: weighted_votes[t])
+
+        # Local best source for this bin if global not available
+        eligible_sources = [s for s, tok in b.candidates.items() if tok != ABSTAIN_TOKEN]
+        if not eligible_sources:
+            continue
+
+        b_best_src = (
+            best_source_id
+            if (best_source_id and best_source_id in eligible_sources)
+            else max(eligible_sources, key=lambda s: b.source_scores.get(s, 0.0))
+        )
+        best_src_token = b.candidates.get(b_best_src, EPSILON_TOKEN)
+
+        winner_token = candidate_winner
+        needs_review = False
+        # If candidate_winner disagrees with best source, require strong consensus
+        if best_src_token in weighted_votes and candidate_winner != best_src_token:
+            best_vote = weighted_votes.get(best_src_token, 0.0)
+            cand_vote = weighted_votes.get(candidate_winner, 0.0)
+            margin = cand_vote - best_vote
+            supporters = source_support.get(candidate_winner, [])
+
+            if best_src_token == EPSILON_TOKEN:
+                # Primary source is silent. Only accept candidate token
+                # if it beats epsilon by margin >= 0.15
+                if margin >= 0.15:
+                    winner_token = candidate_winner
+                else:
+                    winner_token = EPSILON_TOKEN
+                    needs_review = True
+            elif candidate_winner == EPSILON_TOKEN:
+                # Primary source has a word, other sources want to delete it.
+                # Only delete if margin >= 0.15 AND at least 2 sources agree to delete.
+                if margin >= 0.15 and len(supporters) >= 2:
+                    winner_token = EPSILON_TOKEN
+                else:
+                    winner_token = best_src_token
+                    needs_review = True
+            else:
+                # Primary source has word A, candidate is word B.
+                # Only switch if candidate beats primary by >= 0.15 AND has at least 2 supporters.
+                if margin >= 0.15 and len(supporters) >= 2:
+                    winner_token = candidate_winner
+                else:
+                    winner_token = best_src_token
+                    needs_review = True
+
+        if winner_token != EPSILON_TOKEN:
+            chosen_words.append(winner_token)
+            total_v = sum(weighted_votes.values())
+            conf = float(weighted_votes[winner_token] / max(total_v, 1e-6))
+            rep_src = (
+                max(
+                    source_support[winner_token],
+                    key=lambda s: b.source_scores.get(s, 0.0) * b.confidences.get(s, 0.0),
+                )
+                if source_support.get(winner_token)
+                else b_best_src
+            )
+            decisions.append(
+                {
+                    "word": winner_token,
+                    "confidence": round(conf, 3),
+                    "supporting_sources": source_support.get(winner_token, [rep_src]),
+                    "representative_source_id": rep_src,
+                    "needs_review": needs_review or (winner_token != candidate_winner),
                 }
             )
 

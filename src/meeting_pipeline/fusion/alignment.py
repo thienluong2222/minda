@@ -8,6 +8,7 @@ from __future__ import annotations
 import numpy as np
 
 EPSILON_TOKEN = "<eps>"
+ABSTAIN_TOKEN = "<abstain>"
 
 
 def align_word_sequences(
