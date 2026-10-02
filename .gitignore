@@ -2,12 +2,12 @@
 .env
 .env.*
 !.env.example
-.venv/
+/.venv/
 __pycache__/
 *.py[cod]
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
+/.pytest_cache/
+/.mypy_cache/
+/.ruff_cache/
 .coverage
 htmlcov/
 playwright-report/
@@ -15,11 +15,11 @@ test-results/
 *.log
 *.sqlite
 *.sqlite3
-dataset/
-data/
-artifacts/
-reports/
-scratch/
-Tài liệu tham khảo/
-Tài liệu tham khảo/
+/dataset/
+/data/
+/artifacts/
+/reports/
+/scratch/
+/Tài liệu tham khảo/
+/Tài liệu tham khảo/
 *Ta*lie*u*tham*kha*o*

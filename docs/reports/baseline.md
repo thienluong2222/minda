@@ -1,0 +1,24 @@
+# Baseline Environment and Execution Report (WP0)
+
+- **Date:** 2026-10-03
+- **Baseline Commit SHA:** `8f5139aa3c87fd90356d96ad92beef8706ce4560`
+- **Branch:** `codex/vad-speaker-asr-fusion`
+- **Environment:**
+  - Python: 3.11.14 (macOS darwin arm64)
+  - Package manager: `uv` (locked via `uv.lock`)
+  - Tooling: `pytest 9.1.1`, `ruff 0.9.x`, `mypy 1.15.x`
+  - Audio backend: ffmpeg, ffprobe, librosa, soundfile
+- **Prepared Model Revisions (in local cache):**
+  - Segmentation: `pyannote/segmentation-3.0`
+  - Speaker ID ECAPA: `speechbrain/spkrec-ecapa-voxceleb`
+  - Speaker ID WeSpeaker: `pyannote/wespeaker-voxceleb-resnet34-LM` (`837717ddb9ff5507820346191109dc79c958d614`)
+  - ASR: `vinai/PhoWhisper-medium` (`55a7e3eb6c906de891f8f06a107754427dd3be79`), `vinai/PhoWhisper-small`
+- **Baseline Test Status:**
+  - `uv run pytest tests/unit tests/integration`: 102 passed in 11.79s
+  - `uv run ruff check .`: passed
+  - `uv run mypy src/meeting_pipeline`: passed
+  - `uv run meeting-pipeline doctor`: all OK
+- **Repository Safety & Data Hygiene:**
+  - `.gitignore` fully updated and verified.
+  - `data/` (9.9 GB), `artifacts/` (11 MB), `reports/` (48 MB), `dataset/` (1.9 MB), `.venv/` (1.4 GB) and raw media files are strictly ignored and will not be committed.
+  - Frozen benchmark calibration (`frozen-calibration.json`) has been preserved in `configs/calibration/frozen-calibration.json`.
