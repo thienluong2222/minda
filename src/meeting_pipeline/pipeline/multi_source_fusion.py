@@ -46,7 +46,15 @@ from meeting_pipeline.fusion.provenance import build_final_timeline_item
 from meeting_pipeline.pipeline.overlap_separation import TwoSpeakerSeparator
 from meeting_pipeline.pipeline.speaker_turns import SpeakerTurn, SpeakerTurnDetector
 from meeting_pipeline.pipeline.stages.shared_segmentation import run_shared_pyannote_segmentation
-from meeting_pipeline.speaker.encoder import ECAPAEncoder
+from meeting_pipeline.speaker.clustering import (
+    GlobalSpeakerClusterer,
+    TurnAssignment,
+)
+from meeting_pipeline.speaker.encoder import (
+    BaseSpeakerEncoder,
+    ECAPAEncoder,
+    create_speaker_encoder,
+)
 
 FloatArray = np.ndarray[Any, np.dtype[np.float32]]
 SegmentExtractor = Callable[[dict[str, FloatArray], VadConfig, str, int], list[MeetingSegment]]
@@ -238,6 +246,8 @@ class MultiSourceFusionPipeline:
         segment_extractor: SegmentExtractor | None = None,
         turn_detector: SpeakerTurnDetector | None = None,
         separator: TwoSpeakerSeparator | None = None,
+        speaker_encoder: BaseSpeakerEncoder | None = None,
+        clusterer: GlobalSpeakerClusterer | None = None,
     ) -> None:
         self.config = config
         self.sample_rate = config.audio.analysis_sample_rate
@@ -245,6 +255,8 @@ class MultiSourceFusionPipeline:
         self.segment_extractor = segment_extractor or extract_shared_meeting_segments
         self.turn_detector = turn_detector
         self.separator = separator
+        self.speaker_encoder = speaker_encoder
+        self.clusterer = clusterer
 
     def run(
         self,
@@ -362,8 +374,66 @@ class MultiSourceFusionPipeline:
         )
 
         profiles = list(speaker_profiles or [])
-        ecapa_assigner = _MultiSourceSpeakerAssigner(self.config, profiles)
-        mfcc_assigner = self._build_mfcc_assigner(profiles)
+        identity_method = str(self.config.identity.get("method", "prototype_cosine"))
+
+        assignments: dict[str, TurnAssignment] = {}
+        cluster_summary: dict[str, Any] = {
+            "total_clusters": 0,
+            "identified_count": 0,
+            "unknown_count": 0,
+            "ambiguous_turns_count": 0,
+            "clusters": [],
+        }
+
+        if identity_method == "mfcc_knn":
+            mfcc_assigner = self._build_mfcc_assigner(profiles)
+        else:
+            if self.clusterer is None:
+                if self.speaker_encoder is None:
+                    encoder_model_id = str(
+                        self.config.identity.get("model_id", "speechbrain/spkrec-ecapa-voxceleb")
+                    )
+                    encoder_type = (
+                        "wespeaker"
+                        if "wespeaker" in encoder_model_id.lower()
+                        else "ecapa"
+                    )
+                    self.speaker_encoder = create_speaker_encoder(
+                        encoder_type=encoder_type,
+                        model_id=encoder_model_id,
+                        revision=str(self.config.identity.get("model_revision", "")),
+                        cache_dir=self.config.paths.model_cache_dir,
+                    )
+                cluster_thresh = float(
+                    str(
+                        self.config.identity.get(
+                            "cluster_threshold",
+                            self.config.identity.get("anonymous_cluster_threshold", 0.40),
+                        )
+                    )
+                )
+                assign_thresh = float(str(self.config.identity.get("assign_threshold", 0.35)))
+                assign_margin = float(str(self.config.identity.get("assign_margin", 0.05)))
+                enrolled_thresh = float(str(self.config.identity.get("identity_threshold", 0.45)))
+                enrolled_margin = float(str(self.config.identity.get("identity_margin", 0.08)))
+                self.clusterer = GlobalSpeakerClusterer(
+                    encoder=self.speaker_encoder,
+                    cluster_threshold=cluster_thresh,
+                    assign_threshold=assign_thresh,
+                    assign_margin=assign_margin,
+                    enrolled_match_threshold=enrolled_thresh,
+                    enrolled_margin=enrolled_margin,
+                )
+
+            assignments, _cluster_decisions, cluster_summary = (
+                self.clusterer.cluster_and_identify(
+                    turns=turns,
+                    aligned_signals=aligned,
+                    sample_rate=self.sample_rate,
+                    profiles=profiles,
+                )
+            )
+
         learned_model = self._load_learned_model()
         actual_method = requested_method
         run_warnings: list[str] = []
@@ -453,15 +523,58 @@ class MultiSourceFusionPipeline:
                 and previous_turn.end_sec >= turn.start_sec - 0.1
                 and previous_turn.track_id in track_speakers
             ):
-                excluded.add(str(track_speakers[previous_turn.track_id]["speaker_id"]))
-            if str(self.config.identity.get("method", "prototype_cosine")) == "mfcc_knn":
+                excluded.add(str(track_speakers[previous_turn.track_id].get("speaker_id", "")))
+
+            if identity_method == "mfcc_knn":
                 primary_wave = segment_waves.get(final_item.primary_source_id)
                 if primary_wave is None:
                     primary_wave = next(iter(segment_waves.values()))
-                speaker = mfcc_assigner.assign_speaker(primary_wave, excluded)
-                speaker["source_weights"] = _normalized_weights(audio_scores, 1.0)
+                raw_speaker = mfcc_assigner.assign_speaker(primary_wave, excluded)
+                spk_id = str(raw_speaker.get("speaker_id", "unknown"))
+                meeting_spk = (
+                    f"ms-{spk_id.replace('anonymous-', ''):0>4}"
+                    if "anonymous" in spk_id
+                    else spk_id
+                )
+                speaker = {
+                    **raw_speaker,
+                    "meeting_speaker_id": meeting_spk,
+                    "speaker_evidence": raw_speaker,
+                    "source_weights": _normalized_weights(audio_scores, 1.0),
+                }
             else:
-                speaker = ecapa_assigner.assign(segment_waves, audio_scores, excluded)
+                turn_assign = assignments.get(turn.turn_id)
+                if turn_assign is not None:
+                    speaker = {
+                        "speaker_id": turn_assign.speaker_id,
+                        "profile_id": turn_assign.speaker_id,
+                        "meeting_speaker_id": turn_assign.meeting_speaker_id,
+                        "speaker_label": turn_assign.speaker_label,
+                        "speaker_status": turn_assign.speaker_status,
+                        "speaker_match_score": turn_assign.match_score,
+                        "speaker_top_candidates": turn_assign.top_candidates,
+                        "identity_decision_reason": turn_assign.decision_reason,
+                        "speaker_evidence": turn_assign.as_dict(),
+                        "warnings": turn_assign.warnings,
+                        "needs_review": turn_assign.needs_review,
+                        "source_weights": _normalized_weights(audio_scores, 1.0),
+                    }
+                else:
+                    speaker = {
+                        "speaker_id": None,
+                        "profile_id": None,
+                        "meeting_speaker_id": None,
+                        "speaker_label": "Chưa xác định",
+                        "speaker_status": "unknown",
+                        "speaker_match_score": None,
+                        "speaker_top_candidates": [],
+                        "identity_decision_reason": "turn_not_assigned",
+                        "speaker_evidence": {},
+                        "warnings": ["unassigned_turn"],
+                        "needs_review": True,
+                        "source_weights": _normalized_weights(audio_scores, 1.0),
+                    }
+
             if turn.track_id in track_speakers and not turn.track_id.startswith("unresolved"):
                 previous_identity = track_speakers[turn.track_id]
                 if previous_identity.get("speaker_id") != speaker.get("speaker_id"):
@@ -520,6 +633,15 @@ class MultiSourceFusionPipeline:
                 }
             )
             previous_turn = turn
+
+        _write_json(run_dir / "speaker_clusters.json", cluster_summary)
+        _write_json(
+            run_dir / "speaker_decisions.json",
+            {
+                "schema_version": "1.0",
+                "turns": [a.as_dict() for a in assignments.values()],
+            },
+        )
 
         self._write_artifacts(
             run_dir,
@@ -695,12 +817,17 @@ class MultiSourceFusionPipeline:
             "speaker_count": turn.speaker_count,
             "start_sec": turn.start_sec,
             "end_sec": turn.end_sec,
+            "meeting_speaker_id": None,
             "speaker_id": None,
-            "speaker_label": "Chưa xác định",
-            "speaker_status": "unknown",
+            "speaker_label": "Nói chồng",
+            "speaker_status": "ambiguous",
             "speaker_match_score": None,
             "speaker_top_candidates": [],
             "identity_decision_reason": "overlap_skipped",
+            "speaker_evidence": {
+                "decision_reason": "overlap_skipped",
+                "speaker_count": turn.speaker_count,
+            },
             "overlap_group_id": turn.overlap_group_id,
             "text": "",
             "transcript_confidence": None,
@@ -950,15 +1077,21 @@ class MultiSourceFusionPipeline:
         word_provenance = item.get("word_provenance", [])
         return {
             "segment_id": item["segment_id"],
-            "track_id": str(speaker.get("speaker_id", "unknown")),
+            "track_id": str(
+                speaker.get("speaker_id")
+                or speaker.get("meeting_speaker_id")
+                or "unknown"
+            ),
             "start_sec": item["start_sec"],
             "end_sec": item["end_sec"],
-            "speaker_id": speaker.get("profile_id"),
+            "meeting_speaker_id": speaker.get("meeting_speaker_id"),
+            "speaker_id": speaker.get("profile_id") or speaker.get("speaker_id"),
             "speaker_label": speaker.get("speaker_label", "Unknown"),
             "speaker_status": speaker.get("speaker_status", "unknown"),
             "speaker_match_score": speaker.get("speaker_match_score"),
             "speaker_top_candidates": speaker.get("speaker_top_candidates", []),
             "identity_decision_reason": speaker.get("identity_decision_reason", ""),
+            "speaker_evidence": speaker.get("speaker_evidence", {}),
             "overlap_group_id": None,
             "text": item.get("text", ""),
             "transcript_confidence": item.get("transcript_confidence"),
@@ -972,7 +1105,7 @@ class MultiSourceFusionPipeline:
                 if any(h.asr_status == "failed" for h in hypotheses.values())
                 else "empty"
             ),
-            "needs_review": bool(warnings),
+            "needs_review": bool(warnings) or bool(speaker.get("needs_review", False)),
             "warnings": list(dict.fromkeys(warnings)),
             "selected_source_id": primary_source,
             "selected_spans": [
@@ -1072,6 +1205,8 @@ class MultiSourceFusionPipeline:
                     "coverage.json",
                     "activity_regions.json",
                     "speaker_turns.json",
+                    "speaker_clusters.json",
+                    "speaker_decisions.json",
                     "source_hypotheses.json",
                     "fusion_decisions.json",
                     "timeline.json",
@@ -1094,6 +1229,7 @@ class MultiSourceFusionPipeline:
                     "start_sec",
                     "end_sec",
                     "speaker_status",
+                    "meeting_speaker_id",
                     "speaker_id",
                     "speaker_label",
                     "text",
@@ -1107,6 +1243,7 @@ class MultiSourceFusionPipeline:
                         segment["start_sec"],
                         segment["end_sec"],
                         segment["speaker_status"],
+                        segment.get("meeting_speaker_id") or "",
                         segment.get("speaker_id") or "",
                         segment.get("speaker_label") or "",
                         segment["text"],

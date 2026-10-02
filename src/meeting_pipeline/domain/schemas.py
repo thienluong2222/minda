@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -137,11 +137,13 @@ class TimelineSegment(BaseModel):
     track_id: str
     start_sec: NonNegativeFloat
     end_sec: PositiveFloat
+    meeting_speaker_id: str | None = None
     speaker_id: str | None
     speaker_label: str | None = None
     speaker_status: SpeakerStatus
     speaker_match_score: float | None = Field(default=None, ge=-1, le=1)
     speaker_top_candidates: list[SpeakerCandidate] = Field(default_factory=list)
+    speaker_evidence: dict[str, Any] = Field(default_factory=dict)
     overlap_group_id: str | None = None
     text: str
     asr_status: Literal["transcribed", "empty", "failed", "not_run"]
