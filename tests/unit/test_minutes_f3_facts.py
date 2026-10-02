@@ -1,8 +1,10 @@
-"""Unit tests for Phase F3: Evidence retrieval, fact extraction, decision gating, and transcript editing."""
+"""Unit tests for Phase F3: Evidence retrieval, fact extraction, and transcript editing."""
 
 from __future__ import annotations
 
 from pathlib import Path
+
+import pytest
 
 from meeting_pipeline.minutes.converter import normalize_template
 from meeting_pipeline.minutes.doc_parser import parse_template_document
@@ -11,7 +13,10 @@ from meeting_pipeline.minutes.evidence_retrieval import (
     TurnSearchIndex,
     load_indexed_turns,
 )
-from meeting_pipeline.minutes.fact_extractor import M2RuleFactExtractor
+from meeting_pipeline.minutes.fact_extractor import (
+    M2RuleFactExtractor,
+    M3Qwen3FactExtractor,
+)
 from meeting_pipeline.minutes.schema_mapper import M0RuleSchemaMapper
 from meeting_pipeline.minutes.schemas import FactStatus
 
@@ -55,11 +60,11 @@ def test_fact_extraction_mau_bien_ban_hop_chung(tmp_path: Path) -> None:
     assert facts_by_id["topic"].value == "Ôn tập thi chuyên ngành"
 
     # Start and End time parsed from speech ('hai giờ rưỡi du học ba giờ về')
-    start_time_fact = [f for f in facts if f.field_id.startswith("start_time")][0]
+    start_time_fact = next(f for f in facts if f.field_id.startswith("start_time"))
     assert start_time_fact.status == FactStatus.SUPPORTED
     assert "14:30" in str(start_time_fact.value)
 
-    end_time_fact = [f for f in facts if f.field_id.startswith("end_time")][0]
+    end_time_fact = next(f for f in facts if f.field_id.startswith("end_time"))
     assert end_time_fact.status == FactStatus.SUPPORTED
     assert "15:00" in str(end_time_fact.value)
 
@@ -171,7 +176,7 @@ def test_transcript_edit_without_asr_rerun() -> None:
     )
     extractor = M2RuleFactExtractor()
     facts_v1 = extractor.extract_facts(schema, [turn_with_typo])
-    end_time_v1 = [f for f in facts_v1 if f.field_id.startswith("end_time")][0]
+    end_time_v1 = next(f for f in facts_v1 if f.field_id.startswith("end_time"))
     assert "14:30" in str(end_time_v1.value)
 
     # User manually edits transcript: "kết thúc lúc mười sáu giờ đúng" (16:00)
@@ -191,5 +196,88 @@ def test_transcript_edit_without_asr_rerun() -> None:
     )
 
     facts_v2 = extractor.extract_facts(schema, [edited_turn])
-    end_time_v2 = [f for f in facts_v2 if f.field_id.startswith("end_time")][0]
+    end_time_v2 = next(f for f in facts_v2 if f.field_id.startswith("end_time"))
     assert "16:00" in str(end_time_v2.value)
+
+
+def test_m3_not_run_when_no_weights() -> None:
+    """M3 returns status not_run cleanly when local model is not loaded."""
+    extractor = M3Qwen3FactExtractor(base_url="http://127.0.0.1:99999")  # Unreachable port
+    assert not extractor.is_available()
+
+    schema = M0RuleSchemaMapper().propose_schema(
+        parse_template_document(
+            normalize_template(
+                FIXTURES_DIR / "mau_bien_ban_hop_chung.doc", Path("/tmp")
+            ).normalized_docx_path
+        )
+    )
+    turns = load_indexed_turns(RUN_DIR)
+    facts, status, dur = extractor.extract_free_form_facts(schema, turns, run_id="test-run")
+    assert facts is None
+    assert status == "not_run"
+    assert dur >= 0.0
+
+
+def test_m3_mocked_success(monkeypatch: pytest.MonkeyPatch) -> None:
+    """M3 parses JSON output and creates grounded facts when local LLM returns results."""
+    extractor = M3Qwen3FactExtractor()
+
+    # Mock get_resolved_model to simulate installed model
+    monkeypatch.setattr(extractor, "get_resolved_model", lambda: "qwen2.5:3b")
+
+    mock_llm_response = {
+        "message": {
+            "content": (
+                '{"results": [{'
+                '"field_id": "discussion_summary", '
+                '"value": "Các bên đã thảo luận về tiến độ dự án.", '
+                '"status": "supported", '
+                '"reason": "M3 tóm tắt từ lượt thoại", '
+                '"turn_ids": ["seg_0000"]'
+                '}]}'
+            )
+        }
+    }
+
+    import json
+    import urllib.request
+
+    class MockResponse:
+        def __init__(self, data: dict):
+            self.data = json.dumps(data).encode("utf-8")
+
+        def read(self) -> bytes:
+            return self.data
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+    monkeypatch.setattr(
+        urllib.request,
+        "urlopen",
+        lambda req, timeout=None: MockResponse(mock_llm_response),
+    )
+
+    schema = M0RuleSchemaMapper().propose_schema(
+        parse_template_document(
+            normalize_template(
+                FIXTURES_DIR / "mau_bien_ban_hop_chung.doc", Path("/tmp")
+            ).normalized_docx_path
+        )
+    )
+    turns = load_indexed_turns(RUN_DIR)
+
+    facts, status, _dur = extractor.extract_free_form_facts(schema, turns, run_id="test-run")
+    assert status == "success"
+    assert facts is not None
+    assert len(facts) == 1
+    assert facts[0].field_id == "discussion_summary"
+    assert facts[0].status == FactStatus.SUPPORTED
+    assert "thảo luận về tiến độ" in facts[0].value
+    assert len(facts[0].evidence_refs) == 1
+    assert facts[0].evidence_refs[0].turn_id == "seg_0000"
+

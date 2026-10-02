@@ -271,20 +271,20 @@
       </thead>
       <tbody>
         {% for fact in minutes_facts %}
-        {% set field_info = none %}
+        {% set field_ns = namespace(info=none) %}
         {% if minutes_schema and minutes_schema.fields %}
           {% for f in minutes_schema.fields %}
             {% if f.field_id == fact.field_id %}
-              {% set field_info = f %}
+              {% set field_ns.info = f %}
             {% endif %}
           {% endfor %}
         {% endif %}
         <tr data-field-id="{{ fact.field_id }}">
           <td data-label="Trường">
             <strong>{{ fact.field_id }}</strong><br>
-            <small class="hint">{{ field_info.label if field_info else fact.field_id }}</small>
-            {% if field_info and field_info.section %}
-              <br><span class="badge badge-anonymous" style="font-size: 0.75rem;">{{ field_info.section }}</span>
+            <small class="hint">{{ field_ns.info.raw_label if field_ns.info else fact.field_id }}</small>
+            {% if field_ns.info and field_ns.info.section %}
+              <br><span class="badge badge-anonymous" style="font-size: 0.75rem;">{{ field_ns.info.section }}</span>
             {% endif %}
           </td>
           <td data-label="Trạng thái">
@@ -305,22 +305,22 @@
             <textarea class="fact-value-input" data-field-id="{{ fact.field_id }}" style="width: 100%; min-width: 220px; font-family: inherit; font-size: 0.9rem; padding: 0.4rem; border: 1px solid #ccc; border-radius: 4px;" rows="2">{{ fact.value or "" }}</textarea>
           </td>
           <td data-label="Bằng chứng">
-            {% if fact.evidence and fact.evidence|length > 0 %}
-              {% for ev in fact.evidence %}
+            {% if fact.evidence_refs and fact.evidence_refs|length > 0 %}
+              {% for ev in fact.evidence_refs %}
                 <div style="margin-bottom: 0.4rem;">
-                  <small><strong>{{ ev.speaker_label or "Người nói" }}:</strong> "{{ ev.turn_text or "" }}"</small><br>
+                  <small><strong>{{ ev.turn_id }} · {{ ev.source_id }}:</strong> "{{ ev.text_snippet or "" }}"</small><br>
                   <small class="hint">({{ ev.start_sec|clock }} – {{ ev.end_sec|clock }})</small>
                 </div>
               {% endfor %}
             {% else %}
-              <span class="hint">{{ fact.notes or "Không có phát biểu liên quan" }}</span>
+              <span class="hint">{{ fact.reason or "Không có phát biểu liên quan" }}</span>
             {% endif %}
           </td>
           <td data-label="Đối chiếu">
-            {% if fact.evidence and fact.evidence|length > 0 %}
-              {% for ev in fact.evidence %}
-                {% if ev.audio_clip_path %}
-                  {% set clip_url = artifact_url(ev.audio_clip_path) %}
+            {% if fact.evidence_refs and fact.evidence_refs|length > 0 %}
+              {% for ev in fact.evidence_refs %}
+                {% if ev.clip_path %}
+                  {% set clip_url = artifact_url(ev.clip_path) %}
                   {% if clip_url %}
                     <audio controls preload="none" style="height: 32px; width: 170px;" src="{{ clip_url }}"></audio>
                   {% endif %}

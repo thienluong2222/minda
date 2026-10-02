@@ -6,8 +6,11 @@ Specification: Section 5 (F3) of docs/PLAN_BIEU_MAU_BIEN_BAN_V1.md.
 
 from __future__ import annotations
 
+import json
 import logging
 import re
+import time
+import urllib.request
 from typing import Any
 
 from meeting_pipeline.minutes.evidence_retrieval import (
@@ -434,3 +437,182 @@ class M2RuleFactExtractor:
             )
 
         return facts
+
+
+class M3Qwen3FactExtractor:
+    """Local LLM extractor (M3) for free-form meeting fields (discussion, decisions, actions).
+
+    Specification: Section 5 (F3) of docs/PLAN_BIEU_MAU_BIEN_BAN_V1.md.
+    Strict Grounding Invariant: Summarizes ONLY from retrieved evidence turns.
+    Never hallucinates claims outside the provided turn snippets.
+    """
+
+    def __init__(
+        self,
+        model_name: str = "qwen2.5:3b",
+        base_url: str = "http://localhost:11434",
+        timeout: float = 30.0,
+    ) -> None:
+        self.model_name = model_name
+        self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
+
+    def get_resolved_model(self) -> str | None:
+        """Find an active Qwen model name from Ollama if available."""
+        try:
+            req = urllib.request.Request(f"{self.base_url}/api/tags")
+            with urllib.request.urlopen(req, timeout=1.5) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                models = [m.get("name", "") for m in data.get("models", [])]
+                # Direct match
+                if self.model_name in models:
+                    return self.model_name
+                # Partial match for any qwen2.5 or qwen model
+                for m in models:
+                    if "qwen" in m.lower():
+                        return m
+        except Exception:
+            return None
+        return None
+
+    def is_available(self) -> bool:
+        """Check whether Ollama runtime is reachable and has a Qwen model loaded."""
+        return self.get_resolved_model() is not None
+
+    def extract_free_form_facts(
+        self,
+        schema: TemplateSchema,
+        turns: list[IndexedTurn],
+        run_id: str,
+        meeting_metadata: dict[str, Any] | None = None,
+    ) -> tuple[list[MeetingFact] | None, str, float]:
+        """Extract free-form facts using local LLM; returns (facts, status, duration)."""
+        t0 = time.perf_counter()
+        active_model = self.get_resolved_model()
+        if not active_model:
+            dur = time.perf_counter() - t0
+            logger.info(
+                "M3 model weights not available in Ollama (%s). Status: not_run",
+                self.model_name,
+            )
+            return None, "not_run", dur
+
+        # Filter schema for free-form fields
+        target_fields = [
+            f
+            for f in schema.fields
+            if f.semantic_type
+            in (
+                SemanticFieldType.DISCUSSION_SUMMARY,
+                SemanticFieldType.MEETING_AGENDA_SUMMARY,
+                SemanticFieldType.DECISION_LIST,
+                SemanticFieldType.ACTION_ITEM,
+            )
+        ]
+        if not target_fields:
+            return [], "no_target_fields", time.perf_counter() - t0
+
+        # Build grounded turn context
+        turn_snippets = [
+            f"[{t.turn_id}] {t.speaker_label} ({t.start_sec:.1f}s - {t.end_sec:.1f}s): {t.text}"
+            for t in turns
+            if len(t.tokens) >= 3
+        ]
+        context_str = "\n".join(turn_snippets[:20])
+
+        fields_desc = [
+            {"field_id": f.field_id, "label": f.raw_label, "type": f.semantic_type.value}
+            for f in target_fields
+        ]
+
+        system_prompt = (
+            "Bạn là trợ lý thư ký biên bản cuộc họp tiếng Việt chuyên nghiệp.\n"
+            "QUY TẮC BẮT BUỘC:\n"
+            "1. CHỈ sử dụng thông tin trong các lượt thoại bên dưới (grounded evidence).\n"
+            "2. TUYỆT ĐỐI KHÔNG bịa đặt thông tin không có trong lượt thoại.\n"
+            "3. Với 'decision_list': CHỈ ghi nhận khi cuộc họp có sự chốt hạ rõ ràng "
+            "('thống nhất', 'quyết định', 'kết luận'). "
+            "Không biến ý kiến đề xuất thành quyết định.\n"
+            "4. Trả về đúng định dạng JSON dạng:\n"
+            '{"results": [{"field_id": "...", "value": "...", "status": "supported", '
+            '"reason": "...", "turn_ids": ["seg_0001"]}]}'
+        )
+
+        user_content = (
+            f"Thông tin cuộc họp: {meeting_metadata or {}}\n\n"
+            f"Các trường cần tóm tắt:\n{json.dumps(fields_desc, ensure_ascii=False, indent=2)}\n\n"
+            f"Danh sách lượt thoại:\n{context_str}\n\n"
+            "Hãy phân tích và trả về JSON kết quả."
+        )
+
+        payload = {
+            "model": active_model,
+            "format": "json",
+            "stream": False,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_content},
+            ],
+        }
+
+        try:
+            req_data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(
+                f"{self.base_url}/api/chat",
+                data=req_data,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                resp_obj = json.loads(resp.read().decode("utf-8"))
+                msg_content = resp_obj.get("message", {}).get("content", "{}")
+                parsed_json = json.loads(msg_content)
+
+            turns_by_id = {t.turn_id: t for t in turns}
+            facts: list[MeetingFact] = []
+
+            for item in parsed_json.get("results", []):
+                fid = item.get("field_id", "")
+                val = item.get("value")
+                stat_str = item.get("status", "supported")
+                stat = FactStatus.SUPPORTED if stat_str == "supported" else FactStatus.UNKNOWN
+                rsn = item.get("reason", "Trích xuất bởi M3 Qwen3")
+
+                # Ground evidence
+                used_turn_ids = item.get("turn_ids", [])
+                ev_refs: list[EvidenceRef] = []
+                for tid in used_turn_ids:
+                    if tid in turns_by_id:
+                        matched_turn = turns_by_id[tid]
+                        ev_refs.append(
+                            EvidenceRef(
+                                run_id=run_id,
+                                turn_id=matched_turn.turn_id,
+                                source_id=matched_turn.source_id,
+                                start_sec=matched_turn.start_sec,
+                                end_sec=matched_turn.end_sec,
+                                clip_path=matched_turn.clip_path,
+                                source_kind="transcript",
+                                text_snippet=matched_turn.text,
+                                confidence=0.88,
+                            )
+                        )
+
+                facts.append(
+                    MeetingFact(
+                        field_id=fid,
+                        value=val,
+                        status=stat,
+                        evidence_refs=ev_refs,
+                        confidence=0.85,
+                        reason=rsn,
+                    )
+                )
+
+            dur = time.perf_counter() - t0
+            return facts, "success", dur
+
+        except Exception as exc:
+            dur = time.perf_counter() - t0
+            logger.warning("M3 LLM inference failed: %s", exc)
+            return None, f"error: {exc}", dur

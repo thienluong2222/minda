@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import logging
 import time
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -264,13 +265,35 @@ class M1Qwen3SchemaMapper:
     Specification: Section 5 (F2) of docs/PLAN_BIEU_MAU_BIEN_BAN_V1.md.
     """
 
-    def __init__(self, model_name: str = "Qwen/Qwen3-4B-Instruct-2507") -> None:
+    def __init__(
+        self,
+        model_name: str = "qwen2.5:3b",
+        base_url: str = "http://localhost:11434",
+        timeout: float = 30.0,
+    ) -> None:
         self.model_name = model_name
+        self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
+
+    def get_resolved_model(self) -> str | None:
+        """Find an active Qwen model name from Ollama if available."""
+        try:
+            req = urllib.request.Request(f"{self.base_url}/api/tags")
+            with urllib.request.urlopen(req, timeout=1.5) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                models = [m.get("name", "") for m in data.get("models", [])]
+                if self.model_name in models:
+                    return self.model_name
+                for m in models:
+                    if "qwen" in m.lower():
+                        return m
+        except Exception:
+            return None
+        return None
 
     def is_available(self) -> bool:
         """Check whether local runtime weights are available."""
-        # Check if local weights exist in cache or ollama
-        return False  # Weights not downloaded locally
+        return self.get_resolved_model() is not None
 
     def propose_schema(self, doc_graph: DocGraph) -> tuple[TemplateSchema | None, str, float]:
         """Propose schema via local LLM if available; otherwise report not_run.

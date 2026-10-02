@@ -17,7 +17,7 @@ from typing import Any
 from meeting_pipeline.minutes.converter import normalize_template
 from meeting_pipeline.minutes.doc_parser import parse_template_document
 from meeting_pipeline.minutes.evidence_retrieval import load_indexed_turns
-from meeting_pipeline.minutes.fact_extractor import M2RuleFactExtractor
+from meeting_pipeline.minutes.fact_extractor import M2RuleFactExtractor, M3Qwen3FactExtractor
 from meeting_pipeline.minutes.manifest import generate_minutes_manifest, save_minutes_manifest
 from meeting_pipeline.minutes.renderer import render_completed_document
 from meeting_pipeline.minutes.schema_mapper import (
@@ -110,7 +110,7 @@ class MinutesService:
         metrics.turn_count = len(turns)
         metrics.retrieval_sec = round(time.perf_counter() - t0, 4)
 
-        # 5. Extract facts (M2 rule-based baseline)
+        # 5. Extract facts (M2 rule baseline + M3 model if enabled)
         t0 = time.perf_counter()
         extractor = M2RuleFactExtractor()
         facts = extractor.extract_facts(
@@ -119,6 +119,26 @@ class MinutesService:
             meeting_metadata=meeting_metadata,
             run_id=run_dir.name,
         )
+
+        m3_status = "not_run"
+        if use_model:
+            m3_extractor = M3Qwen3FactExtractor()
+            m3_facts, m3_status, _ = m3_extractor.extract_free_form_facts(
+                schema=proposed_schema,
+                turns=turns,
+                run_id=run_dir.name,
+                meeting_metadata=meeting_metadata,
+            )
+            if m3_facts:
+                m3_by_id = {f.field_id: f for f in m3_facts}
+                updated_facts = []
+                for f in facts:
+                    if f.field_id in m3_by_id:
+                        updated_facts.append(m3_by_id[f.field_id])
+                    else:
+                        updated_facts.append(f)
+                facts = updated_facts
+
         _write_json(minutes_dir / "facts.json", [f.model_dump() for f in facts])
         metrics.extraction_sec = round(time.perf_counter() - t0, 4)
 
@@ -155,7 +175,12 @@ class MinutesService:
             normalized_docx_sha256=converted.normalized_docx_sha256,
             completed_docx_sha256=completed_sha,
             timings=timings_dict,
-            models={"m0_schema": "rules", "m1_status": m1_status, "m2_facts": "rules"},
+            models={
+                "m0_schema": "rules",
+                "m1_status": m1_status,
+                "m2_facts": "rules",
+                "m3_status": m3_status,
+            },
         )
         save_minutes_manifest(manifest, minutes_dir / "manifest.json")
 
