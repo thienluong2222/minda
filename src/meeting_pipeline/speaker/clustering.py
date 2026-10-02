@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, cast
+from typing import Any
 
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering  # type: ignore[import-untyped]
@@ -20,6 +20,12 @@ from meeting_pipeline.speaker.encoder import (
     BaseSpeakerEncoder,
     ECAPAEncoder,
     WeSpeakerEncoder,
+)
+from meeting_pipeline.speaker.source_quality import (
+    SpeakerFusionPolicy,
+    compute_normalized_source_weights,
+    evaluate_source_quality_for_speaker_id,
+    fuse_turn_speaker_embeddings,
 )
 
 logger = logging.getLogger(__name__)
@@ -83,6 +89,7 @@ class TurnAssignment:
     match_score: float | None = None
     top_candidates: list[dict[str, Any]] = field(default_factory=list)
     decision_reason: str = ""
+    source_evidence: list[dict[str, Any]] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     needs_review: bool = False
 
@@ -97,6 +104,7 @@ class TurnAssignment:
             "match_score": round(self.match_score, 3) if self.match_score is not None else None,
             "top_candidates": self.top_candidates,
             "decision_reason": self.decision_reason,
+            "source_evidence": self.source_evidence,
             "warnings": self.warnings,
             "needs_review": self.needs_review,
         }
@@ -114,6 +122,7 @@ class GlobalSpeakerClusterer:
         enrolled_match_threshold: float = 0.45,
         enrolled_margin: float = 0.08,
         min_seed_duration_sec: float = 0.8,
+        fusion_policy: SpeakerFusionPolicy = SpeakerFusionPolicy.P2_EMBEDDING_FUSION,
     ) -> None:
         self.encoder = encoder
         self.cluster_threshold = cluster_threshold
@@ -122,16 +131,17 @@ class GlobalSpeakerClusterer:
         self.enrolled_match_threshold = enrolled_match_threshold
         self.enrolled_margin = enrolled_margin
         self.min_seed_duration_sec = min_seed_duration_sec
+        self.fusion_policy = fusion_policy
 
     def _extract_turn_embedding(
         self,
         turn: SpeakerTurn,
         aligned_signals: dict[str, np.ndarray],
         sample_rate: int,
-    ) -> np.ndarray | None:
-        """Extract multi-source quality-weighted embedding for a single-speaker turn."""
+    ) -> tuple[np.ndarray | None, list[dict[str, Any]]]:
+        """Extract multi-source quality-weighted embedding and source evidence for a turn."""
         if turn.speaker_count != 1:
-            return None
+            return None, []
 
         # Interior crop 0.05s at boundaries to avoid edge bleed
         edge_crop = 0.05
@@ -146,8 +156,8 @@ class GlobalSpeakerClusterer:
         s_sample = max(0, int(start_s * sample_rate))
         e_sample = int(end_s * sample_rate)
 
-        source_embs: list[np.ndarray] = []
-        source_weights: list[float] = []
+        evaluations: dict[str, Any] = {}
+        source_embs: dict[str, np.ndarray] = {}
 
         for source_id, signal in aligned_signals.items():
             if len(signal) < e_sample or e_sample <= s_sample:
@@ -156,20 +166,30 @@ class GlobalSpeakerClusterer:
             if len(clip) == 0:
                 continue
 
-            rms = float(np.sqrt(np.mean(clip**2)))
-            if rms < 1e-4:
+            q_res = evaluate_source_quality_for_speaker_id(
+                source_id=source_id,
+                turn_waveform=clip,
+                sample_rate=sample_rate,
+                full_signal=signal,
+                turn_start_sec=start_s,
+                turn_end_sec=end_s,
+            )
+            evaluations[source_id] = q_res
+
+            if not q_res.is_eligible:
                 continue
 
-            # Need sufficient samples for encoder
             min_samples = int(0.5 * sample_rate)
-            if len(clip) < min_samples:
-                clip = np.pad(clip, (0, min_samples - len(clip)))
+            padded = clip
+            if len(padded) < min_samples:
+                padded = np.pad(padded, (0, min_samples - len(padded)))
 
             try:
-                emb = self.encoder.encode(clip)
-                source_embs.append(emb)
-                source_weights.append(max(0.01, rms))
+                emb = self.encoder.encode(padded)
+                source_embs[source_id] = emb
             except Exception as exc:
+                q_res.is_eligible = False
+                q_res.exclusion_reason = f"encoding_failed: {exc}"
                 logger.debug(
                     "Failed to encode turn %s source %s: %s",
                     turn.turn_id,
@@ -177,17 +197,29 @@ class GlobalSpeakerClusterer:
                     exc,
                 )
 
+        weights = compute_normalized_source_weights(evaluations)
+        for sid, w in weights.items():
+            if sid in evaluations:
+                evaluations[sid].identity_weight = w
+
+        source_evidence_list = [evaluations[sid].as_dict() for sid in evaluations]
+
         if not source_embs:
-            return None
+            return None, source_evidence_list
 
-        weights = np.array(source_weights, dtype=np.float32)
-        weights /= np.sum(weights)
+        if self.fusion_policy == SpeakerFusionPolicy.P0_FIXED_REFERENCE:
+            ref_id = next(iter(source_embs))
+            return source_embs[ref_id], source_evidence_list
 
-        fused = np.sum(np.stack(source_embs) * weights[:, np.newaxis], axis=0)
-        norm = float(np.linalg.norm(fused))
-        if norm > 1e-8:
-            fused /= norm
-        return cast(np.ndarray, fused.astype(np.float32))
+        if self.fusion_policy == SpeakerFusionPolicy.P1_TOP1_QUALITY:
+            best_sid = max(
+                source_embs,
+                key=lambda sid: evaluations[sid].identity_quality_score,
+            )
+            return source_embs[best_sid], source_evidence_list
+
+        fused = fuse_turn_speaker_embeddings(source_embs, weights)
+        return fused, source_evidence_list
 
     def cluster_and_identify(
         self,
@@ -199,9 +231,11 @@ class GlobalSpeakerClusterer:
         """Run two-pass clustering and matching across full meeting turns."""
         single_speaker_turns = [t for t in turns if t.speaker_count == 1]
         turn_embeddings: dict[str, np.ndarray] = {}
+        turn_evidences: dict[str, list[dict[str, Any]]] = {}
 
         for turn in single_speaker_turns:
-            emb = self._extract_turn_embedding(turn, aligned_signals, sample_rate)
+            emb, evidence = self._extract_turn_embedding(turn, aligned_signals, sample_rate)
+            turn_evidences[turn.turn_id] = evidence
             if emb is not None:
                 turn_embeddings[turn.turn_id] = emb
 
@@ -425,6 +459,7 @@ class GlobalSpeakerClusterer:
                     speaker_label="Nói chồng",
                     speaker_status="ambiguous",
                     decision_reason="overlap_not_run",
+                    source_evidence=turn_evidences.get(tid, []),
                     warnings=["simultaneous_speech"],
                     needs_review=True,
                 )
@@ -437,6 +472,7 @@ class GlobalSpeakerClusterer:
                     speaker_label="Chưa xác định",
                     speaker_status="ambiguous",
                     decision_reason="insufficient_cluster_evidence",
+                    source_evidence=turn_evidences.get(tid, []),
                     warnings=["ambiguous_speaker_evidence"],
                     needs_review=True,
                 )
@@ -453,6 +489,7 @@ class GlobalSpeakerClusterer:
                     match_score=cd.match_score,
                     top_candidates=cd.top_candidates,
                     decision_reason=cd.decision_reason,
+                    source_evidence=turn_evidences.get(tid, []),
                     warnings=list(cd.warnings),
                     needs_review=False,
                 )

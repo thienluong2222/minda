@@ -31,11 +31,11 @@ class DummyEncoder:
     ) -> np.ndarray[Any, np.dtype[np.float32]]:
         mean_val = float(np.mean(waveform))
         vec = np.zeros(self.embedding_dimension, dtype=np.float32)
-        if abs(mean_val - 1.0) < 0.2:
+        if abs(mean_val - 0.2) < 0.1:
             vec[0] = 1.0
-        elif abs(mean_val - 2.0) < 0.2:
+        elif abs(mean_val - 0.5) < 0.1:
             vec[1] = 1.0
-        elif abs(mean_val - 3.0) < 0.2:
+        elif abs(mean_val - 0.7) < 0.1:
             vec[2] = 1.0
         else:
             np.random.seed(len(waveform) % 1000)
@@ -78,10 +78,10 @@ def test_clustering_zero_enrolled_profiles() -> None:
 
     total_len = int(8.0 * sr)
     sig = np.zeros(total_len, dtype=np.float32)
-    sig[int(0.0 * sr) : int(1.5 * sr)] = 1.0
-    sig[int(2.0 * sr) : int(3.5 * sr)] = 2.0
-    sig[int(4.0 * sr) : int(5.5 * sr)] = 1.0
-    sig[int(6.0 * sr) : int(7.5 * sr)] = 2.0
+    sig[int(0.0 * sr) : int(1.5 * sr)] = 0.2
+    sig[int(2.0 * sr) : int(3.5 * sr)] = 0.5
+    sig[int(4.0 * sr) : int(5.5 * sr)] = 0.2
+    sig[int(6.0 * sr) : int(7.5 * sr)] = 0.5
 
     aligned = {"mic-1": sig}
     turns = [
@@ -128,8 +128,8 @@ def test_clustering_partial_enrollment() -> None:
     )
 
     sig = np.zeros(int(4.0 * sr), dtype=np.float32)
-    sig[int(0.0 * sr) : int(1.5 * sr)] = 1.0  # Speaker A
-    sig[int(2.0 * sr) : int(3.5 * sr)] = 2.0  # Speaker B
+    sig[int(0.0 * sr) : int(1.5 * sr)] = 0.2  # Speaker A
+    sig[int(2.0 * sr) : int(3.5 * sr)] = 0.5  # Speaker B
 
     aligned = {"mic-1": sig}
     turns = [
@@ -177,8 +177,8 @@ def test_clustering_overlap_and_ambiguous_short_turns() -> None:
     )
 
     sig = np.zeros(int(4.0 * sr), dtype=np.float32)
-    sig[int(0.0 * sr) : int(1.5 * sr)] = 1.0  # Seed turn
-    sig[int(2.0 * sr) : int(2.4 * sr)] = 3.0  # Short unassigned turn
+    sig[int(0.0 * sr) : int(1.5 * sr)] = 0.2  # Seed turn
+    sig[int(2.0 * sr) : int(2.4 * sr)] = 0.7  # Short unassigned turn
 
     aligned = {"mic-1": sig}
     turns = [

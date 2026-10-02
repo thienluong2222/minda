@@ -55,6 +55,7 @@ from meeting_pipeline.speaker.encoder import (
     ECAPAEncoder,
     create_speaker_encoder,
 )
+from meeting_pipeline.speaker.source_quality import SpeakerFusionPolicy
 
 FloatArray = np.ndarray[Any, np.dtype[np.float32]]
 SegmentExtractor = Callable[[dict[str, FloatArray], VadConfig, str, int], list[MeetingSegment]]
@@ -416,6 +417,10 @@ class MultiSourceFusionPipeline:
                 assign_margin = float(str(self.config.identity.get("assign_margin", 0.05)))
                 enrolled_thresh = float(str(self.config.identity.get("identity_threshold", 0.45)))
                 enrolled_margin = float(str(self.config.identity.get("identity_margin", 0.08)))
+                policy_name = str(self.config.identity.get("fusion_policy", "P2_EMBEDDING_FUSION"))
+                policy = getattr(
+                    SpeakerFusionPolicy, policy_name, SpeakerFusionPolicy.P2_EMBEDDING_FUSION
+                )
                 self.clusterer = GlobalSpeakerClusterer(
                     encoder=self.speaker_encoder,
                     cluster_threshold=cluster_thresh,
@@ -423,6 +428,7 @@ class MultiSourceFusionPipeline:
                     assign_margin=assign_margin,
                     enrolled_match_threshold=enrolled_thresh,
                     enrolled_margin=enrolled_margin,
+                    fusion_policy=policy,
                 )
 
             assignments, _cluster_decisions, cluster_summary = (
@@ -1050,8 +1056,22 @@ class MultiSourceFusionPipeline:
         if confidence is not None and float(confidence) < 0.5:
             warnings.append("low_transcript_confidence")
 
+        speaker_ev_by_source: dict[str, dict[str, Any]] = {}
+        raw_spk_ev = speaker.get("speaker_evidence", {})
+        if isinstance(raw_spk_ev, dict):
+            src_ev_list = raw_spk_ev.get("source_evidence", [])
+            if isinstance(src_ev_list, list):
+                for entry in src_ev_list:
+                    if isinstance(entry, dict) and "source_id" in entry:
+                        speaker_ev_by_source[str(entry["source_id"])] = entry
+
         source_evidence = []
         for source_id, hypothesis in hypotheses.items():
+            spk_ev = speaker_ev_by_source.get(source_id, {})
+            spk_weight = spk_ev.get("identity_weight", identity_weights.get(source_id, 0.0))
+            spk_eligible = spk_ev.get("is_eligible", True)
+            spk_exclusion = spk_ev.get("exclusion_reason")
+
             source_evidence.append(
                 {
                     "source_id": source_id,
@@ -1060,12 +1080,18 @@ class MultiSourceFusionPipeline:
                     and bool(hypothesis.text.strip()),
                     "asr_status": hypothesis.asr_status,
                     "asr_warnings": hypothesis.asr_warnings,
-                    "identity_weight": identity_weights.get(source_id, 0.0),
+                    "identity_weight": spk_weight,
+                    "identity_eligible": spk_eligible,
+                    "identity_exclusion_reason": spk_exclusion,
                     "selection_weight": fusion_weights.get(source_id, 0.0),
-                    "raw_quality_features": hypothesis.audio_features,
+                    "raw_quality_features": {
+                        **hypothesis.audio_features,
+                        "speaker_id_features": spk_ev.get("raw_features", {}),
+                    },
                     "candidate_scores": {
                         "transcript": hypothesis.text,
                         "audio_quality_score": hypothesis.audio_quality_score,
+                        "identity_quality_score": spk_ev.get("identity_quality_score"),
                         "asr_confidence": hypothesis.asr_features.get("mean_confidence"),
                         "word_agreement": agreement.get(source_id),
                         "transcript_quality_score": hypothesis.transcript_quality_score,

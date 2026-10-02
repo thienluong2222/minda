@@ -79,7 +79,7 @@ def evaluate_sample_quality(
 
 
 class SpeakerRegistry:
-    """Create and load immutable demo profiles with quality screening and cross-encoder migration."""
+    """Create and load demo profiles with quality screening and cross-encoder migration."""
 
     def __init__(self, config: PipelineConfig) -> None:
         self.config = config
@@ -88,8 +88,10 @@ class SpeakerRegistry:
 
     def _get_encoder(self) -> ECAPAEncoder | WeSpeakerEncoder:
         if self._encoder is None:
-            model_id = str(self.config.identity.get("model_id", "speechbrain/spkrec-ecapa-voxceleb"))
-            revision = str(self.config.identity.get("model_revision", "0f99f2d0ebe89ac095bcc5903c4dd8f72b367286"))
+            default_m = "speechbrain/spkrec-ecapa-voxceleb"
+            default_rev = "0f99f2d0ebe89ac095bcc5903c4dd8f72b367286"
+            model_id = str(self.config.identity.get("model_id", default_m))
+            revision = str(self.config.identity.get("model_revision", default_rev))
             self._encoder = create_speaker_encoder(
                 model_id=model_id,
                 revision=revision,
@@ -148,7 +150,9 @@ class SpeakerRegistry:
             embeddings.append(self.encode(waveform))
 
         if not embeddings:
-            raise ValueError("Không có mẫu nào đủ tiếng nói hợp lệ (tối thiểu 0.5 giây giọng nói thực)")
+            raise ValueError(
+                "Không có mẫu nào đủ tiếng nói hợp lệ (tối thiểu 0.5 giây giọng nói thực)"
+            )
 
         if len(embeddings) == 1:
             warnings.append("single_sample_low_evidence")
@@ -220,7 +224,8 @@ class SpeakerRegistry:
             if saved_emb.shape[0] != target_dim:
                 if samples:
                     logger.info(
-                        "Re-encoding speaker %s (%s) from raw audio for current encoder dimension %d",
+                        "Re-encoding speaker %s (%s) from raw audio for current encoder dimension"
+                        " %d",
                         speaker_id,
                         metadata.get("display_name"),
                         target_dim,
@@ -231,8 +236,9 @@ class SpeakerRegistry:
                     saved_emb = prototype.astype(np.float32)
                     np.save(embedding_path, saved_emb)
                 else:
+                    d_name = metadata.get("display_name")
                     raise ValueError(
-                        f"Hồ sơ '{metadata.get('display_name')}' có embedding {saved_emb.shape[0]}D "
+                        f"Hồ sơ '{d_name}' có embedding {saved_emb.shape[0]}D "
                         f"không khớp encoder hiện tại ({target_dim}D) và thiếu file âm thanh gốc. "
                         f"Vui lòng đăng ký lại mẫu cho model này."
                     )
