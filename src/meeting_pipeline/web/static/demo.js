@@ -108,6 +108,111 @@
     });
   }
 
+  // Handle template upload
+  const templateForm = document.getElementById("template-upload-form");
+  if (templateForm) {
+    templateForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById("template-file");
+      if (!fileInput || !fileInput.files.length) return;
+      const file = fileInput.files[0];
+      const jobId = window.location.pathname.split("/").pop();
+      const statusSpan = document.getElementById("upload-status");
+      const submitBtn = document.getElementById("btn-upload-template");
+      if (statusSpan) statusSpan.textContent = "Đang phân tích mẫu và điền Word…";
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Đang xử lý…";
+      }
+      const formData = new FormData();
+      formData.append("template", file);
+      try {
+        const res = await fetch(`/api/runs/${jobId}/template`, {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Xử lý biểu mẫu thất bại");
+        if (statusSpan) statusSpan.textContent = "Thành công! Đang tải lại…";
+        window.location.reload();
+      } catch (err) {
+        alert(err.message);
+        if (statusSpan) statusSpan.textContent = "Lỗi: " + err.message;
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Xử lý biểu mẫu";
+        }
+      }
+    });
+  }
+
+  // Handle saving edited facts
+  const saveFactsBtn = document.getElementById("btn-save-facts");
+  if (saveFactsBtn) {
+    saveFactsBtn.addEventListener("click", async () => {
+      const jobId = window.location.pathname.split("/").pop();
+      const statusSpan = document.getElementById("save-facts-status");
+      const factInputs = document.querySelectorAll(".fact-value-input");
+      const facts = [];
+      for (const input of factInputs) {
+        const fieldId = input.dataset.fieldId;
+        const val = input.value;
+        facts.push({
+          field_id: fieldId,
+          value: val.trim() ? val : null,
+          status: val.trim() ? "supported" : "unknown",
+          user_edited: true,
+        });
+      }
+      saveFactsBtn.disabled = true;
+      saveFactsBtn.textContent = "Đang lưu…";
+      if (statusSpan) statusSpan.textContent = "Đang cập nhật Word & manifest…";
+      try {
+        const res = await fetch(`/api/runs/${jobId}/minutes/facts`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({facts: facts}),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Lưu thất bại");
+        if (statusSpan) statusSpan.textContent = "Đã lưu thành công!";
+        setTimeout(() => window.location.reload(), 700);
+      } catch (err) {
+        alert(err.message);
+        if (statusSpan) statusSpan.textContent = "Lỗi: " + err.message;
+        saveFactsBtn.disabled = false;
+        saveFactsBtn.textContent = "Lưu chỉnh sửa & Điền lại Word";
+      }
+    });
+  }
+
+  // Handle editing individual transcript segments
+  for (const button of document.querySelectorAll(".edit-transcript-button")) {
+    button.addEventListener("click", async () => {
+      const segIdx = button.dataset.segmentIndex;
+      const input = button.parentElement.querySelector(".edit-transcript-input");
+      if (!input) return;
+      const newText = input.value.trim();
+      const jobId = window.location.pathname.split("/").pop();
+      button.disabled = true;
+      button.textContent = "…";
+      try {
+        const res = await fetch(`/api/runs/${jobId}/edit-transcript`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({segment_index: parseInt(segIdx, 10), new_text: newText}),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Sửa transcript thất bại");
+        window.location.reload();
+      } catch (err) {
+        alert(err.message);
+        button.disabled = false;
+        button.textContent = "Lưu";
+      }
+    });
+  }
+
   // Listening to one source at a time avoids accidental simultaneous playback.
   document.addEventListener("play", event => {
     if (!(event.target instanceof HTMLAudioElement)) return;

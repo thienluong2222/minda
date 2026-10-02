@@ -172,3 +172,29 @@ identity:
 asr:
   max_chunk_seconds: 25            # Cắt nhỏ đoạn nói dài tối đa 25s cho PhoWhisper
 ```
+
+---
+
+## 5. Luồng Biểu Mẫu và Biên Bản Cuộc Họp (Meeting Minutes & Template Workflow v1.0)
+
+Luồng biểu mẫu và biên bản hoạt động trên kết quả timeline của pipeline âm thanh mà không sửa đổi hoặc chạy lại VAD/ASR/Diarization:
+
+1. **Chuẩn hóa Biểu mẫu Word (Normalization):**
+   - Hỗ trợ cả `.doc` Word 97-2003 binary (chuyển đổi native qua `textutil` trên macOS hoặc LibreOffice `soffice`) và `.docx` native.
+   - Thao tác hoàn toàn trên bản sao (`normalized.docx`), bảo toàn nguyên vẹn file gốc và lưu mã băm SHA-256.
+2. **Phân tích Cấu trúc & Vị trí Neo (OOXML Parsing & DocGraph):**
+   - Duyệt qua đoạn văn bản và bảng biểu, tự động tìm kiếm các `CandidateAnchor`: dòng chấm lửng (`...`), gạch dưới (`___`), ô bảng trống (`empty_cell`), prompt văn bản có hướng dẫn hoặc dấu `:` và khối chữ ký.
+3. **Ánh xạ Schema (Schema Mapping):**
+   - **M0 Baseline (Rule-based):** Ánh xạ ngữ cảnh văn bản hành chính Việt Nam (ngày tháng, thời gian bắt đầu/kết thúc, địa điểm, chủ tọa, thư ký, ý kiến thảo luận, biểu quyết, kết luận, và các trường chi bộ đặc thù).
+   - **M1 Adapter (Qwen3 LLM):** Adapter tạo prompt JSON có cấu trúc cho Qwen3-4B-Instruct-2507 kèm bộ kiểm chứng `SchemaValidator` (chặn anchor bịa đặt, chặn trùng lặp).
+4. **Truy xuất Bằng chứng & Trích xuất Fact (Evidence Retrieval & Fact Extraction):**
+   - Đánh chỉ mục BM25 trên timeline turns và liên kết audio clips thực tế.
+   - **M2 Baseline (Rule-based):** Trích xuất giờ họp tiếng Việt, tóm tắt thảo luận, chủ tọa.
+   - **Quy tắc Quyết định (Decision Gating):** Chỉ ghi nhận khi có từ khóa chốt ("thống nhất", "quyết định", "kết luận"), loại trừ đề xuất suông.
+   - **Bảo toàn Bất biến Chi bộ:** Các trường đảng phí, học tập đạo đức HCM khi âm thanh không đề cập giữ nguyên trạng thái `unknown`, không bịa đặt cuộc họp giả.
+5. **Điền Bản sao & Xuất bản (Rendering & Traceability Manifest):**
+   - Điền trực tiếp vào bản sao `completed.docx`, bảo toàn font, cỡ chữ, viền bảng và định dạng gốc.
+   - Xuất `manifest.json` truy vết đầy đủ từ Field $\to$ Value $\to$ Evidence Turn/Clip/Time $\to$ Anchor.
+   - Cho phép sửa trực tiếp Fact hoặc sửa Transcript mà **không gọi lại ASR**.
+   - Xuất ảnh Visual QA trước/sau để kiểm tra bố cục trang.
+

@@ -1,0 +1,30 @@
+{
+  "template_filename": "mau_bien_ban_hop_chung.doc",
+  "template_type": "bien_ban_hop_chung",
+  "expected_anchor_count": 23,
+  "fields": [
+    {"field_id": "co_quan", "raw_label": "CƠ QUAN, ĐƠN VỊ", "semantic_type": "organization", "section": "Header", "condition": "none"},
+    {"field_id": "so_bien_ban", "raw_label": "Số:", "semantic_type": "document_number", "section": "Header", "condition": "none"},
+    {"field_id": "dia_diem_ngay_ky", "raw_label": "Địa điểm, ngày tháng năm lập", "semantic_type": "document_date_place", "section": "Header", "condition": "none"},
+    {"field_id": "ve_viec", "raw_label": "Về việc", "semantic_type": "meeting_topic", "section": "Title", "condition": "none"},
+    {"field_id": "thoi_gian_bat_dau", "raw_label": "Thời gian bắt đầu", "semantic_type": "meeting_start_time", "section": "TimeLocation", "condition": "none"},
+    {"field_id": "dia_diem_hop", "raw_label": "Địa điểm họp", "semantic_type": "meeting_location", "section": "TimeLocation", "condition": "none"},
+    {"field_id": "noi_dung_tom_tat", "raw_label": "Nội dung họp", "semantic_type": "meeting_agenda_summary", "section": "TimeLocation", "condition": "none"},
+    {"field_id": "chu_tri_ten", "raw_label": "Chủ trì: Ông/Bà", "semantic_type": "person_name", "section": "Attendees", "condition": "none"},
+    {"field_id": "chu_tri_chuc_vu", "raw_label": "Chức vụ chủ trì", "semantic_type": "person_role", "section": "Attendees", "condition": "none"},
+    {"field_id": "thu_ky_ten", "raw_label": "Thư ký: Ông/Bà", "semantic_type": "person_name", "section": "Attendees", "condition": "none"},
+    {"field_id": "thu_ky_chuc_vu", "raw_label": "Chức vụ thư ký", "semantic_type": "person_role", "section": "Attendees", "condition": "none"},
+    {"field_id": "thanh_phan_khac", "raw_label": "Thành phần khác", "semantic_type": "attendee_list", "section": "Attendees", "condition": "none"},
+    {"field_id": "noi_dung_cuoc_hop", "raw_label": "II. Nội dung cuộc họp", "semantic_type": "discussion_summary", "section": "Content", "condition": "none"},
+    {"field_id": "tong_so_phieu", "raw_label": "Tổng số phiếu", "semantic_type": "voting_total", "section": "Voting", "condition": "conditional"},
+    {"field_id": "phieu_tan_thanh_so", "raw_label": "Số phiếu tán thành", "semantic_type": "voting_approved_count", "section": "Voting", "condition": "conditional"},
+    {"field_id": "phieu_tan_thanh_pt", "raw_label": "Tỷ lệ tán thành", "semantic_type": "voting_approved_percent", "section": "Voting", "condition": "conditional"},
+    {"field_id": "phieu_khong_tan_thanh_so", "raw_label": "Số phiếu không tán thành", "semantic_type": "voting_rejected_count", "section": "Voting", "condition": "conditional"},
+    {"field_id": "phieu_khong_tan_thanh_pt", "raw_label": "Tỷ lệ không tán thành", "semantic_type": "voting_rejected_percent", "section": "Voting", "condition": "conditional"},
+    {"field_id": "ket_luan", "raw_label": "IV. Kết luận cuộc họp", "semantic_type": "decision_list", "section": "Conclusions", "condition": "none"},
+    {"field_id": "thoi_gian_ket_thuc", "raw_label": "Cuộc họp kết thúc vào lúc", "semantic_type": "meeting_end_time", "section": "Closing", "condition": "none"},
+    {"field_id": "chu_ky_thu_ky", "raw_label": "THƯ KÝ (Ký, ghi rõ họ tên)", "semantic_type": "signature", "section": "Signatures", "condition": "none"},
+    {"field_id": "chu_ky_chu_toa", "raw_label": "CHỦ TỌA (Ký, ghi rõ họ tên)", "semantic_type": "signature", "section": "Signatures", "condition": "none"},
+    {"field_id": "chu_ky_thanh_vien", "raw_label": "CÁC THÀNH VIÊN KHÁC", "semantic_type": "signature", "section": "Signatures", "condition": "none"}
+  ]
+}

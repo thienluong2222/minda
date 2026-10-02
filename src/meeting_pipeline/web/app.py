@@ -21,6 +21,12 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from meeting_pipeline.adapters.audio_io import probe_audio
 from meeting_pipeline.application.speakers import SpeakerRegistry
 from meeting_pipeline.config import PipelineConfig, load_config
+from meeting_pipeline.minutes.evidence_retrieval import load_indexed_turns
+from meeting_pipeline.minutes.fact_extractor import M2RuleFactExtractor
+from meeting_pipeline.minutes.renderer import render_completed_document
+from meeting_pipeline.minutes.schema_mapper import load_schema
+from meeting_pipeline.minutes.schemas import DocGraph
+from meeting_pipeline.minutes.service import MinutesService
 from meeting_pipeline.pipeline.multi_source_fusion import MultiSourceFusionPipeline
 
 Job = dict[str, Any]
@@ -122,6 +128,21 @@ class DemoJobs:
     def read(self, job_id: str) -> Job:
         path = self.path(job_id)
         if not path.is_file():
+            for run_path in self.config.paths.data_dir.glob(f"meetings/*/runs/{job_id}"):
+                if run_path.is_dir():
+                    manifest = _read_json(run_path / "manifest.json")
+                    return {
+                        "job_id": job_id,
+                        "meeting_name": manifest.get("meeting_name", f"Cuộc họp {job_id[:8]}"),
+                        "status": "succeeded",
+                        "run_dir": str(run_path.resolve()),
+                        "source_paths": [],
+                        "source_names": [
+                            str(s.get("original_name", s.get("source_id", "")))
+                            for s in manifest.get("sources", [])
+                        ],
+                        "created_at": manifest.get("created_at", _now()),
+                    }
             raise KeyError(job_id)
         return _read_json(path)
 
@@ -130,6 +151,27 @@ class DemoJobs:
 
     def list(self) -> list[Job]:
         jobs = [_read_json(path) for path in self.root.glob("*.json")]
+        existing_ids = {str(j.get("job_id")) for j in jobs}
+        for run_path in self.config.paths.data_dir.glob("meetings/*/runs/*"):
+            if run_path.is_dir() and run_path.name not in existing_ids:
+                manifest = _read_json(run_path / "manifest.json")
+                if manifest:
+                    jobs.append(
+                        {
+                            "job_id": run_path.name,
+                            "meeting_name": manifest.get(
+                                "meeting_name", f"Cuộc họp {run_path.name[:8]}"
+                            ),
+                            "status": "succeeded",
+                            "run_dir": str(run_path.resolve()),
+                            "source_paths": [],
+                            "source_names": [
+                                str(s.get("original_name", s.get("source_id", "")))
+                                for s in manifest.get("sources", [])
+                            ],
+                            "created_at": manifest.get("created_at", _now()),
+                        }
+                    )
         return sorted(jobs, key=lambda item: str(item.get("created_at", "")), reverse=True)
 
     def execute(self, job_id: str) -> None:
@@ -206,6 +248,29 @@ async def _save_uploads(uploads: list[UploadFile], destination: Path, max_bytes:
         shutil.rmtree(destination, ignore_errors=True)
         raise
     return saved
+
+
+async def _save_template_upload(
+    upload: UploadFile, destination_file: Path, max_bytes: int = 50 * 1024 * 1024
+) -> Path:
+    destination_file.parent.mkdir(parents=True, exist_ok=True)
+    filename = upload.filename or "template.docx"
+    ext = Path(filename).suffix.lower()
+    if ext not in {".doc", ".docx"}:
+        raise HTTPException(status_code=400, detail="Chỉ hỗ trợ tệp Word (.doc, .docx)")
+    size = 0
+    with destination_file.open("wb") as buffer:
+        while chunk := await upload.read(1024 * 1024):
+            size += len(chunk)
+            if size > max_bytes:
+                raise HTTPException(
+                    status_code=413, detail="Tệp mẫu Word vượt quá dung lượng cho phép"
+                )
+            buffer.write(chunk)
+    await upload.close()
+    if size == 0:
+        raise HTTPException(status_code=400, detail="Tệp mẫu Word rỗng")
+    return destination_file
 
 
 def _result_context(
@@ -322,6 +387,37 @@ def _result_context(
             for profile in speakers.list_profiles()
         },
         "artifact_url": artifact_url,
+        "has_minutes": bool((run_dir / "exports" / "completed.docx").is_file()),
+        "minutes_manifest": _read_json(run_dir / "minutes" / "manifest.json")
+        if (run_dir / "minutes" / "manifest.json").is_file()
+        else None,
+        "minutes_schema": _read_json(run_dir / "template" / "schema.json")
+        if (run_dir / "template" / "schema.json").is_file()
+        else None,
+        "minutes_facts": json.loads(
+            (run_dir / "minutes" / "facts.json").read_text(encoding="utf-8")
+        )
+        if (run_dir / "minutes" / "facts.json").is_file()
+        else [],
+        "has_preview_before": (run_dir / "template" / "preview_before.png").is_file(),
+        "has_preview_after": (run_dir / "exports" / "preview_after.png").is_file(),
+        "preview_before_url": artifact_url("template/preview_before.png"),
+        "preview_after_url": artifact_url("exports/preview_after.png"),
+        "has_completed_docx": (run_dir / "exports" / "completed.docx").is_file(),
+        "has_completed_zip": (run_dir / "exports" / "completed_minutes.zip").is_file(),
+        "doc_graph_summary": {
+            "template_id": _read_json(run_dir / "template" / "doc_graph.json").get(
+                "template_id", ""
+            ),
+            "candidate_count": len(
+                _read_json(run_dir / "template" / "doc_graph.json").get("candidates", [])
+            ),
+            "block_count": len(
+                _read_json(run_dir / "template" / "doc_graph.json").get("blocks", [])
+            ),
+        }
+        if (run_dir / "template" / "doc_graph.json").is_file()
+        else None,
     }
 
 
@@ -540,6 +636,216 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
     def artifact(job_id: str, relative_path: str) -> FileResponse:
         path = _artifact_path(_run_dir(_job_or_404(store, job_id)), relative_path)
         return FileResponse(path)
+
+    @app.post("/api/runs/{job_id}/template")
+    async def upload_run_template(
+        job_id: str,
+        template: Annotated[UploadFile, File()],
+        use_model: Annotated[bool, Form()] = False,
+    ) -> JSONResponse:
+        job = _job_or_404(store, job_id)
+        run_dir = _run_dir(job)
+        temp_dest = run_dir / "template" / "upload_temp" / (template.filename or "template.docx")
+        saved_path = await _save_template_upload(template, temp_dest)
+        meeting_meta = {
+            "meeting_name": job.get("meeting_name", ""),
+            "job_id": job_id,
+        }
+        minutes_svc = MinutesService()
+        try:
+            result = minutes_svc.process_template_for_run(
+                template_file_path=saved_path,
+                run_dir=run_dir,
+                meeting_metadata=meeting_meta,
+                use_model=use_model,
+            )
+            return JSONResponse(result)
+        except Exception as exc:
+            raise HTTPException(
+                status_code=500, detail=f"Lỗi xử lý biểu mẫu Word: {exc}"
+            ) from exc
+        finally:
+            if saved_path.is_file():
+                shutil.rmtree(temp_dest.parent, ignore_errors=True)
+
+    @app.get("/api/runs/{job_id}/minutes")
+    def get_run_minutes(job_id: str) -> dict[str, Any]:
+        job = _job_or_404(store, job_id)
+        run_dir = _run_dir(job)
+        manifest_path = run_dir / "minutes" / "manifest.json"
+        schema_path = run_dir / "template" / "schema.json"
+        facts_path = run_dir / "minutes" / "facts.json"
+        doc_graph_path = run_dir / "template" / "doc_graph.json"
+
+        has_template = (run_dir / "exports" / "completed.docx").is_file()
+        return {
+            "has_template": has_template,
+            "manifest": _read_json(manifest_path) if manifest_path.is_file() else None,
+            "schema": _read_json(schema_path) if schema_path.is_file() else None,
+            "facts": json.loads(facts_path.read_text(encoding="utf-8"))
+            if facts_path.is_file()
+            else [],
+            "doc_graph_summary": {
+                "template_id": _read_json(doc_graph_path).get("template_id", ""),
+                "candidate_count": len(_read_json(doc_graph_path).get("candidates", [])),
+            }
+            if doc_graph_path.is_file()
+            else None,
+            "has_preview_before": (run_dir / "template" / "preview_before.png").is_file(),
+            "has_preview_after": (run_dir / "exports" / "preview_after.png").is_file(),
+        }
+
+    @app.post("/api/runs/{job_id}/template/schema")
+    def update_run_schema(
+        job_id: str,
+        payload: dict[str, Any],
+    ) -> dict[str, Any]:
+        job = _job_or_404(store, job_id)
+        run_dir = _run_dir(job)
+        fields = payload.get("fields")
+        if not isinstance(fields, list):
+            raise HTTPException(status_code=400, detail="Trường 'fields' phải là danh sách")
+        minutes_svc = MinutesService()
+        try:
+            minutes_svc.update_schema_and_re_extract(run_dir, fields)
+            return {"status": "ok", "message": "Đã cập nhật schema và trích xuất lại fact"}
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/api/runs/{job_id}/minutes/facts")
+    def update_run_facts(
+        job_id: str,
+        payload: dict[str, Any],
+    ) -> dict[str, Any]:
+        job = _job_or_404(store, job_id)
+        run_dir = _run_dir(job)
+        facts = payload.get("facts")
+        if not isinstance(facts, list):
+            raise HTTPException(status_code=400, detail="Trường 'facts' phải là danh sách")
+        minutes_svc = MinutesService()
+        try:
+            minutes_svc.update_facts_and_re_render(run_dir, facts)
+            return {
+                "status": "ok",
+                "message": "Đã cập nhật fact và điền lại Word mà không gọi ASR",
+            }
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/api/runs/{job_id}/edit-transcript")
+    def edit_transcript(
+        job_id: str,
+        payload: dict[str, Any],
+    ) -> dict[str, Any]:
+        job = _job_or_404(store, job_id)
+        run_dir = _run_dir(job)
+        segment_index = payload.get("segment_index")
+        new_text = str(payload.get("new_text", "")).strip()
+        if segment_index is None:
+            raise HTTPException(status_code=400, detail="Thiếu segment_index")
+        try:
+            seg_idx = int(segment_index)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=400, detail="segment_index phải là số nguyên"
+            ) from exc
+
+        timeline_path = run_dir / "timeline.json"
+        timeline_data = _read_json(timeline_path)
+        segments = timeline_data.get("segments") or []
+        if not (0 <= seg_idx < len(segments)):
+            raise HTTPException(status_code=404, detail="Không tìm thấy đoạn hội thoại")
+
+        old_text = segments[seg_idx].get("text", "")
+        segments[seg_idx]["text"] = new_text
+        segments[seg_idx]["user_edited"] = True
+        timeline_data["segments"] = segments
+        _write_json(timeline_path, timeline_data)
+
+        # Update exports (json, csv, txt)
+        MultiSourceFusionPipeline._write_exports(run_dir, segments)
+
+        # If template minutes exist, re-extract facts and re-render without calling ASR
+        schema_path = run_dir / "template" / "schema.json"
+        doc_graph_path = run_dir / "template" / "doc_graph.json"
+        normalized_docx = run_dir / "template" / "normalized.docx"
+        completed_docx = run_dir / "exports" / "completed.docx"
+        if schema_path.is_file() and doc_graph_path.is_file() and normalized_docx.is_file():
+            schema = load_schema(schema_path)
+            turns = load_indexed_turns(run_dir)
+            extractor = M2RuleFactExtractor()
+            facts = extractor.extract_facts(
+                schema=schema,
+                turns=turns,
+                meeting_metadata={"meeting_name": job.get("meeting_name", ""), "job_id": job_id},
+                run_id=run_dir.name,
+            )
+            minutes_dir = run_dir / "minutes"
+            _write_json(minutes_dir / "facts.json", [f.model_dump() for f in facts])
+
+            doc_graph = DocGraph.model_validate(
+                json.loads(doc_graph_path.read_text(encoding="utf-8"))
+            )
+            render_completed_document(
+                normalized_docx_path=normalized_docx,
+                output_docx_path=completed_docx,
+                doc_graph=doc_graph,
+                schema=schema,
+                facts=facts,
+            )
+
+        return {
+            "status": "ok",
+            "job_id": job_id,
+            "segment_index": seg_idx,
+            "old_text": old_text,
+            "new_text": new_text,
+        }
+
+    @app.get("/api/runs/{job_id}/minutes/download")
+    def download_minutes(job_id: str, format: str = "docx") -> FileResponse:
+        job = _job_or_404(store, job_id)
+        run_dir = _run_dir(job)
+        if format == "docx":
+            path = _artifact_path(run_dir, "exports/completed.docx")
+            return FileResponse(
+                path,
+                filename=f"bien_ban_{job_id[:8]}.docx",
+                media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            )
+        elif format == "zip":
+            path = _artifact_path(run_dir, "exports/completed_minutes.zip")
+            return FileResponse(
+                path,
+                filename=f"bien_ban_kem_manifest_{job_id[:8]}.zip",
+                media_type="application/zip",
+            )
+        elif format == "manifest":
+            path = _artifact_path(run_dir, "minutes/manifest.json")
+            return FileResponse(
+                path,
+                filename="manifest.json",
+                media_type="application/json",
+            )
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Định dạng tải về không hỗ trợ (chọn docx, zip, hoặc manifest)",
+            )
+
+    @app.get("/api/runs/{job_id}/minutes/preview/{preview_type}")
+    def get_minutes_preview(job_id: str, preview_type: str) -> FileResponse:
+        job = _job_or_404(store, job_id)
+        run_dir = _run_dir(job)
+        if preview_type == "before":
+            path = _artifact_path(run_dir, "template/preview_before.png")
+        elif preview_type == "after":
+            path = _artifact_path(run_dir, "exports/preview_after.png")
+        else:
+            raise HTTPException(
+                status_code=400, detail="preview_type phải là 'before' hoặc 'after'"
+            )
+        return FileResponse(path, media_type="image/png")
 
     @app.get("/health")
     def health() -> dict[str, str]:

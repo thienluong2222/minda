@@ -1,0 +1,436 @@
+"""Fact extraction and evidence grounding for meeting minutes
+(M2 rules and M3 summarization adapter).
+
+Specification: Section 5 (F3) of docs/PLAN_BIEU_MAU_BIEN_BAN_V1.md.
+"""
+
+from __future__ import annotations
+
+import logging
+import re
+from typing import Any
+
+from meeting_pipeline.minutes.evidence_retrieval import (
+    IndexedTurn,
+    TurnSearchIndex,
+    retrieve_evidence_for_field,
+)
+from meeting_pipeline.minutes.schemas import (
+    EvidenceRef,
+    FactStatus,
+    MeetingFact,
+    SemanticFieldType,
+    TemplateSchema,
+)
+
+logger = logging.getLogger(__name__)
+
+DECISION_KEYWORDS = [
+    "thống nhất",
+    "quyết định",
+    "kết luận",
+    "đồng ý",
+    "chốt",
+    "thông qua",
+]
+
+PROPOSAL_DISQUALIFIERS = [
+    "tôi đề xuất",
+    "hay là",
+    "thử xem",
+    "chưa chắc",
+    "đang phân vân",
+]
+
+HOURS_ORDERED: list[tuple[str, int]] = [
+    ("mười hai", 12),
+    ("mười một", 11),
+    ("hai mươi", 20),
+    ("mười chín", 19),
+    ("mười tám", 18),
+    ("mười bảy", 17),
+    ("mười sáu", 16),
+    ("mười lăm", 15),
+    ("mười bốn", 14),
+    ("mười ba", 13),
+    ("mười", 10),
+    ("chín", 9),
+    ("tám", 8),
+    ("bảy", 7),
+    ("sáu", 6),
+    ("năm", 5),
+    ("bốn", 4),
+    ("ba", 3),
+    ("hai", 2),
+    ("một", 1),
+]
+
+MINUTES_MAP: dict[str, int] = {
+    "bốn mươi lăm": 45,
+    "ba mươi": 30,
+    "mười lăm": 15,
+    "rưỡi": 30,
+}
+
+
+def _extract_time_expression(text: str, prefer: str = "start") -> str | None:
+    """Extract standard HH:MM time string from Vietnamese text with start/end preference."""
+    t_lower = text.lower()
+    found: list[tuple[int, str]] = []
+
+    # 1. Digital e.g. 14:30 or 14h30
+    for m in re.finditer(r"(\d{1,2})[:h](\d{2})", t_lower):
+        found.append((m.start(), f"{int(m.group(1)):02d}:{m.group(2)}"))
+
+    # 2. Text hours
+    matched_spans: set[int] = set()
+    for h_name, h_val in HOURS_ORDERED:
+        pattern = rf"\b{h_name}\s*giờ(?:\s*(rưỡi|ba mươi|mười lăm|bốn mươi lăm|\d{{1,2}}))?\b"
+        for m in re.finditer(pattern, t_lower):
+            if any(i in matched_spans for i in range(m.start(), m.end())):
+                continue
+            for i in range(m.start(), m.end()):
+                matched_spans.add(i)
+
+            mins = 0
+            if m.group(1):
+                min_str = m.group(1).strip()
+                if min_str in MINUTES_MAP:
+                    mins = MINUTES_MAP[min_str]
+                elif min_str.isdigit():
+                    mins = int(min_str)
+
+            actual_hour = h_val
+            # If 1-6 o'clock in context, assume afternoon/evening (13:00-18:00)
+            if actual_hour <= 6:
+                actual_hour += 12
+
+            found.append((m.start(), f"{actual_hour:02d}:{mins:02d}"))
+
+    if not found:
+        return None
+
+    found_by_val = sorted([t[1] for t in found])
+    return found_by_val[-1] if prefer == "end" else found_by_val[0]
+
+
+class M2RuleFactExtractor:
+    """Extracts factual values with evidence references using domain heuristics."""
+
+    def extract_facts(
+        self,
+        schema: TemplateSchema,
+        turns: list[IndexedTurn],
+        meeting_metadata: dict[str, Any] | None = None,
+        run_id: str = "run-1",
+    ) -> list[MeetingFact]:
+        """Extract facts for all fields in schema against timeline turns and metadata."""
+        meta = meeting_metadata or {}
+        index = TurnSearchIndex(turns)
+        facts: list[MeetingFact] = []
+
+        # Collect all attendees from turns
+        known_speakers = {
+            t.speaker_label.strip()
+            for t in turns
+            if t.speaker_label
+            and "Chưa rõ" not in t.speaker_label
+            and "Người lạ" not in t.speaker_label
+        }
+        all_speaker_labels = {t.speaker_label.strip() for t in turns if t.speaker_label}
+
+        for field in schema.fields:
+            val: Any = None
+            status = FactStatus.UNKNOWN
+            evidence: list[EvidenceRef] = []
+            reason: str | None = None
+            conf: float | None = None
+
+            st = field.semantic_type
+
+            # Check meeting_metadata overrides first
+            meta_key = field.field_id
+            if meta.get(meta_key):
+                val = meta[meta_key]
+                status = FactStatus.SUPPORTED
+                evidence.append(
+                    EvidenceRef(
+                        run_id=run_id,
+                        turn_id="metadata",
+                        source_id="metadata",
+                        source_kind="meeting_metadata",
+                        text_snippet=str(val),
+                        confidence=1.0,
+                    )
+                )
+                facts.append(
+                    MeetingFact(
+                        field_id=field.field_id,
+                        value=val,
+                        status=status,
+                        evidence_refs=evidence,
+                        confidence=1.0,
+                        reason="Cung cấp trực tiếp từ thông tin cuộc họp (metadata)",
+                    )
+                )
+                continue
+
+            # 1. Organization & Document Number
+            if st in (SemanticFieldType.ORGANIZATION, SemanticFieldType.DOCUMENT_NUMBER):
+                val = None
+                status = FactStatus.UNKNOWN
+                reason = (
+                    "Không tìm thấy trong nội dung âm thanh; cần nhập qua biểu mẫu hoặc metadata"
+                )
+
+            # 2. Start Time & End Time
+            elif st == SemanticFieldType.MEETING_START_TIME:
+                # Search opening turns or time turns
+                for t in turns[:5] + turns:
+                    parsed_time = _extract_time_expression(t.text, prefer="start")
+                    if parsed_time and (
+                        "về" not in t.text or "học" in t.text or "bắt đầu" in t.text
+                    ):
+                        val = f"{parsed_time}"
+                        status = FactStatus.SUPPORTED
+                        evidence.append(
+                            EvidenceRef(
+                                run_id=run_id,
+                                turn_id=t.turn_id,
+                                source_id=t.source_id,
+                                start_sec=t.start_sec,
+                                end_sec=t.end_sec,
+                                clip_path=t.clip_path,
+                                source_kind="transcript",
+                                text_snippet=t.text,
+                                confidence=0.85,
+                            )
+                        )
+                        break
+                if not val:
+                    status = FactStatus.UNKNOWN
+                    reason = "Không có thông tin thời gian bắt đầu trong âm thanh"
+
+            elif st == SemanticFieldType.MEETING_END_TIME:
+                # Search closing turns (last 5 turns)
+                for t in reversed(turns):
+                    if "kết thúc" in t.text or "về" in t.text:
+                        parsed_time = _extract_time_expression(t.text, prefer="end")
+                        if parsed_time:
+                            val = f"{parsed_time}"
+                            status = FactStatus.SUPPORTED
+                            evidence.append(
+                                EvidenceRef(
+                                    run_id=run_id,
+                                    turn_id=t.turn_id,
+                                    source_id=t.source_id,
+                                    start_sec=t.start_sec,
+                                    end_sec=t.end_sec,
+                                    clip_path=t.clip_path,
+                                    source_kind="transcript",
+                                    text_snippet=t.text,
+                                    confidence=0.85,
+                                )
+                            )
+                            break
+                if not val:
+                    status = FactStatus.UNKNOWN
+                    reason = "Không có thông tin thời gian kết thúc trong âm thanh"
+
+            # 3. Location
+            elif st == SemanticFieldType.MEETING_LOCATION:
+                loc_evidence = retrieve_evidence_for_field(
+                    field, index, run_id, ["tại", "phòng", "địa điểm"]
+                )
+                if loc_evidence:
+                    val = loc_evidence[0].text_snippet
+                    status = FactStatus.NEEDS_REVIEW
+                    evidence = loc_evidence
+                    reason = "Địa điểm được trích xuất từ câu thoại, cần rà soát"
+                else:
+                    status = FactStatus.UNKNOWN
+                    reason = "Không tìm thấy thông tin địa điểm trong cuộc họp"
+
+            # 4. Meeting Topic
+            elif st in (SemanticFieldType.MEETING_TOPIC, SemanticFieldType.MEETING_AGENDA_SUMMARY):
+                if meta.get("topic"):
+                    val = meta["topic"]
+                    status = FactStatus.SUPPORTED
+                else:
+                    # Look at opening turns
+                    opening_turns = [t for t in turns[:3] if len(t.text) > 15]
+                    if opening_turns:
+                        first_t = opening_turns[0]
+                        val = first_t.text
+                        status = FactStatus.SUPPORTED
+                        evidence.append(
+                            EvidenceRef(
+                                run_id=run_id,
+                                turn_id=first_t.turn_id,
+                                source_id=first_t.source_id,
+                                start_sec=first_t.start_sec,
+                                end_sec=first_t.end_sec,
+                                clip_path=first_t.clip_path,
+                                source_kind="transcript",
+                                text_snippet=first_t.text,
+                                confidence=0.75,
+                            )
+                        )
+                    else:
+                        status = FactStatus.UNKNOWN
+                        reason = "Không tìm thấy nội dung chủ đề cuộc họp"
+
+            # 5. Attendees & Chairperson
+            elif st == SemanticFieldType.PERSON_NAME:
+                if "chủ" in field.raw_label.lower() or "chủ" in field.field_id:
+                    # Chairperson
+                    if known_speakers:
+                        val = sorted(list(known_speakers))[0]
+                        status = FactStatus.SUPPORTED
+                    elif all_speaker_labels:
+                        val = sorted(list(all_speaker_labels))[0]
+                        status = FactStatus.NEEDS_REVIEW
+                        reason = "Gán từ nhãn người nói ẩn danh, cần duyệt danh tính"
+                    else:
+                        status = FactStatus.UNKNOWN
+                elif "thư ký" in field.raw_label.lower():
+                    # Secretary
+                    if len(known_speakers) >= 2:
+                        val = sorted(list(known_speakers))[1]
+                        status = FactStatus.SUPPORTED
+                    else:
+                        val = None
+                        status = FactStatus.UNKNOWN
+                        reason = "Không có người được phân công thư ký rõ ràng"
+
+            elif st == SemanticFieldType.ATTENDEE_LIST:
+                attendees = list(known_speakers if known_speakers else all_speaker_labels)
+                if attendees:
+                    val = attendees
+                    status = FactStatus.SUPPORTED
+                    # Pick first 2 turns as evidence
+                    for t in turns[:2]:
+                        evidence.append(
+                            EvidenceRef(
+                                run_id=run_id,
+                                turn_id=t.turn_id,
+                                source_id=t.source_id,
+                                start_sec=t.start_sec,
+                                end_sec=t.end_sec,
+                                clip_path=t.clip_path,
+                                source_kind="transcript",
+                                text_snippet=f"Người nói: {t.speaker_label}",
+                                confidence=0.9,
+                            )
+                        )
+                else:
+                    val = None
+                    status = FactStatus.UNKNOWN
+                    reason = "Không xác định được danh sách người tham gia"
+
+            # 6. Discussion Summary
+            elif st == SemanticFieldType.DISCUSSION_SUMMARY:
+                meaningful_turns = [
+                    t for t in turns if len(t.tokens) >= 5 and "a phủ" not in t.text
+                ]
+                if meaningful_turns:
+                    val = "\n".join(f"- {t.speaker_label}: {t.text}" for t in meaningful_turns[:5])
+                    status = FactStatus.SUPPORTED
+                    for t in meaningful_turns[:2]:
+                        evidence.append(
+                            EvidenceRef(
+                                run_id=run_id,
+                                turn_id=t.turn_id,
+                                source_id=t.source_id,
+                                start_sec=t.start_sec,
+                                end_sec=t.end_sec,
+                                clip_path=t.clip_path,
+                                source_kind="transcript",
+                                text_snippet=t.text,
+                                confidence=0.8,
+                            )
+                        )
+                else:
+                    status = FactStatus.UNKNOWN
+                    reason = "Không có đủ nội dung thảo luận"
+
+            # 7. Decisions & Action Items
+            elif st in (SemanticFieldType.DECISION_LIST, SemanticFieldType.ACTION_ITEM):
+                decision_candidates: list[IndexedTurn] = []
+                for t in turns:
+                    t_low = t.text.lower()
+                    if any(kw in t_low for kw in DECISION_KEYWORDS):
+                        # Verify not disqualified as mere proposal
+                        if not any(dq in t_low for dq in PROPOSAL_DISQUALIFIERS):
+                            decision_candidates.append(t)
+
+                if decision_candidates:
+                    val = [t.text for t in decision_candidates[:3]]
+                    status = FactStatus.SUPPORTED
+                    for dt in decision_candidates[:2]:
+                        evidence.append(
+                            EvidenceRef(
+                                run_id=run_id,
+                                turn_id=dt.turn_id,
+                                source_id=dt.source_id,
+                                start_sec=dt.start_sec,
+                                end_sec=dt.end_sec,
+                                clip_path=dt.clip_path,
+                                source_kind="transcript",
+                                text_snippet=dt.text,
+                                confidence=0.85,
+                            )
+                        )
+                else:
+                    val = None
+                    status = FactStatus.UNKNOWN
+                    reason = "Không có quyết nghị rõ ràng được chốt trong cuộc họp"
+
+            # 8. Voting
+            elif "voting" in st.value:
+                val = None
+                status = FactStatus.UNKNOWN
+                reason = "Không diễn ra biểu quyết phiếu trong cuộc họp"
+
+            # 9. Party Specific
+            elif st in (
+                SemanticFieldType.PARTY_DUES,
+                SemanticFieldType.PARTY_MEMBER_STATUS,
+                SemanticFieldType.MORAL_STUDY,
+                SemanticFieldType.RESOLUTION_EVALUATION,
+                SemanticFieldType.LEADERSHIP_FEEDBACK,
+            ):
+                val = None
+                status = FactStatus.UNKNOWN
+                reason = "Không tìm thấy nội dung liên quan trong âm thanh cuộc họp thông thường"
+
+            # 10. Signatures
+            elif st == SemanticFieldType.SIGNATURE:
+                val = "(Đã ký)"
+                status = FactStatus.SUPPORTED
+                reason = "Vị trí ký biên bản"
+
+            # Check if any turn in evidence has needs_review or unconfident ASR
+            if evidence:
+                turn_ids = {e.turn_id for e in evidence}
+                flagged_turns = [
+                    t
+                    for t in turns
+                    if t.turn_id in turn_ids and (t.needs_review or t.asr_status != "transcribed")
+                ]
+                if flagged_turns and status == FactStatus.SUPPORTED:
+                    status = FactStatus.NEEDS_REVIEW
+                    reason = "Đoạn âm thanh đối chiếu có cảnh báo ASR, cần người dùng xác nhận"
+
+            facts.append(
+                MeetingFact(
+                    field_id=field.field_id,
+                    value=val,
+                    status=status,
+                    evidence_refs=evidence,
+                    confidence=conf,
+                    reason=reason,
+                )
+            )
+
+        return facts

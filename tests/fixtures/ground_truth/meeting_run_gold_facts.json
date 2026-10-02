@@ -1,0 +1,56 @@
+{
+  "run_id": "a6e814e4-ea36-4cc9-8992-ba60b9341ea5",
+  "meeting_id": "1",
+  "gold_facts": {
+    "meeting_topic": {
+      "value": "Thảo luận về tài liệu ôn thi và chuẩn bị kỳ thi chuyên ngành",
+      "status": "supported",
+      "evidence_turn_ids": ["seg_0000", "seg_0001"]
+    },
+    "meeting_start_time": {
+      "value": "14 giờ 30 phút",
+      "status": "supported",
+      "evidence_turn_ids": ["seg_0005"]
+    },
+    "meeting_end_time": {
+      "value": "15 giờ 00 phút",
+      "status": "supported",
+      "evidence_turn_ids": ["seg_0005"]
+    },
+    "attendee_list": {
+      "value": ["Thiện"],
+      "status": "supported",
+      "evidence_turn_ids": ["seg_0000", "seg_0001", "seg_0003", "seg_0005"]
+    },
+    "chairperson_name": {
+      "value": "Thiện",
+      "status": "supported",
+      "evidence_turn_ids": ["seg_0000"]
+    },
+    "discussion_summary": {
+      "value": "Thảo luận việc sử dụng tài liệu trong phòng thi, kinh nghiệm chụp ảnh máy cơ và máy số, tự học môn chuyên ngành.",
+      "status": "supported",
+      "evidence_turn_ids": ["seg_0000", "seg_0001", "seg_0003", "seg_0006"]
+    },
+    "decision_list": {
+      "value": ["Thống nhất các thành viên tự học và chuẩn bị trước buổi thi."],
+      "status": "supported",
+      "evidence_turn_ids": ["seg_0006"]
+    },
+    "party_dues": {
+      "value": null,
+      "status": "unknown",
+      "reason": "Không có thông tin đóng đảng phí trong cuộc họp thông thường"
+    },
+    "resolution_evaluation": {
+      "value": null,
+      "status": "unknown",
+      "reason": "Không có thông tin đánh giá nghị quyết chi bộ trong cuộc họp thông thường"
+    },
+    "voting_total": {
+      "value": null,
+      "status": "unknown",
+      "reason": "Không diễn ra biểu quyết phiếu trong cuộc họp"
+    }
+  }
+}

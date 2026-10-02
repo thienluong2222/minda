@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "baseline_date": "2026-10-03T05:37:00Z",
+  "git_commit_sha": "7134f8b",
+  "branch": "codex/vad-speaker-asr-fusion",
+  "environment": {
+    "os": "macOS (darwin)",
+    "python": "3.11.14",
+    "python_docx_version": "1.2.0",
+    "lxml_version": "6.1.3",
+    "converter_tool": "textutil (macOS native)",
+    "render_tool": "qlmanage -t (macOS native)"
+  },
+  "fixtures": {
+    "templates": [
+      {
+        "filename": "mau_bien_ban_hop_chung.doc",
+        "format": "doc",
+        "sha256": "bae8c7f1e9d558571fbc37458beb6e15a6983594cb3d2d3d449879a949c9ac11",
+        "gold_schema": "tests/fixtures/ground_truth/mau_bien_ban_hop_chung_gold.json"
+      },
+      {
+        "filename": "bien_ban_hop_chi_bo.docx",
+        "format": "docx",
+        "sha256": "07e358000cb9810aae96af2f4b8f662dd204a0201081739c4b890d285718993e",
+        "gold_schema": "tests/fixtures/ground_truth/bien_ban_hop_chi_bo_gold.json"
+      },
+      {
+        "filename": "bien_ban_ban_giao_thiet_bi.docx",
+        "format": "docx",
+        "sha256": "c824ec95e358c72e788badc5c675a4ed19d5d4f54c424a4934c8edf965328ca7",
+        "type": "unseen_family"
+      }
+    ],
+    "audio_run": {
+      "meeting_id": "1",
+      "run_id": "a6e814e4-ea36-4cc9-8992-ba60b9341ea5",
+      "path": "data/meetings/1/runs/a6e814e4-ea36-4cc9-8992-ba60b9341ea5",
+      "timeline_schema": "2.0",
+      "gold_facts": "tests/fixtures/ground_truth/meeting_run_gold_facts.json"
+    }
+  },
+  "model_runtimes": {
+    "qwen3_4b_instruct": {
+      "status": "not_run",
+      "reason": "model_weights_not_found_locally",
+      "notes": "M0 rule-based mapper and M2 rule-based fact extractor will be used as production baseline. M1/M3 adapters are implemented with strict JSON schema."
+    }
+  },
+  "gate_f0_status": "PASSED"
+}

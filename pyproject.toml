@@ -30,6 +30,7 @@ dependencies = [
   "pyroomacoustics>=0.10.1",
   "streamlit>=1.64.0",
   "pandas>=3.0.5",
+  "python-docx>=1.2.0",
 ]
 
 [project.optional-dependencies]

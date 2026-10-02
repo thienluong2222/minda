@@ -1,0 +1,29 @@
+{
+  "template_filename": "bien_ban_hop_chi_bo.docx",
+  "template_type": "bien_ban_hop_chi_bo",
+  "expected_anchor_count": 22,
+  "fields": [
+    {"field_id": "dang_uy", "raw_label": "ĐẢNG ỦY", "semantic_type": "organization", "section": "Header", "condition": "none"},
+    {"field_id": "chi_bo", "raw_label": "CHI BỘ", "semantic_type": "organization", "section": "Header", "condition": "none"},
+    {"field_id": "thang_nam_hop", "raw_label": "Tháng... / 20...", "semantic_type": "meeting_month_year", "section": "Header", "condition": "none"},
+    {"field_id": "thoi_gian", "raw_label": "Thời gian:", "semantic_type": "meeting_start_time", "section": "Opening", "condition": "none"},
+    {"field_id": "dia_diem", "raw_label": "Địa điểm:", "semantic_type": "meeting_location", "section": "Opening", "condition": "none"},
+    {"field_id": "thanh_phan", "raw_label": "Thành phần:", "semantic_type": "attendee_list", "section": "Opening", "condition": "none"},
+    {"field_id": "chu_toa", "raw_label": "Chủ tọa:", "semantic_type": "person_name", "section": "Opening", "condition": "none"},
+    {"field_id": "dang_phi", "raw_label": "Đóng đảng phí", "semantic_type": "party_dues", "section": "Opening", "condition": "none"},
+    {"field_id": "thu_ky", "raw_label": "Chi bộ cử thư ký cuộc họp:", "semantic_type": "person_name", "section": "Opening", "condition": "none"},
+    {"field_id": "tinh_hinh_dang_vien", "raw_label": "Thông báo tình hình đảng viên", "semantic_type": "party_member_status", "section": "Opening", "condition": "none"},
+    {"field_id": "chuong_trinh_hop", "raw_label": "Chương trình của cuộc họp", "semantic_type": "meeting_agenda", "section": "Opening", "condition": "none"},
+    {"field_id": "thong_tin_thoi_su", "raw_label": "2.1. Thông tin thời sự", "semantic_type": "news_info", "section": "Content", "condition": "none"},
+    {"field_id": "danh_gia_nghi_quyet", "raw_label": "2.2. Đánh giá tình hình thực hiện Nghị quyết tháng trước", "semantic_type": "resolution_evaluation", "section": "Content", "condition": "none"},
+    {"field_id": "hoc_tap_dao_duc_hcm", "raw_label": "Học tập và làm theo tấm gương đạo đức HCM", "semantic_type": "moral_study", "section": "Content", "condition": "none"},
+    {"field_id": "y_kien_lanh_dao_chi_bo", "raw_label": "Ý kiến về sự lãnh đạo của chi bộ", "semantic_type": "leadership_feedback", "section": "Content", "condition": "none"},
+    {"field_id": "nhiem_vu_thang_toi", "raw_label": "Nhiệm vụ cụ thể tháng tới", "semantic_type": "action_item", "section": "Content", "condition": "none"},
+    {"field_id": "chi_bo_thao_luan", "raw_label": "Chi bộ thảo luận, tham gia đóng góp ý kiến", "semantic_type": "discussion_summary", "section": "Content", "condition": "none"},
+    {"field_id": "ket_luan_bi_thu", "raw_label": "Tóm tắt ý kiến kết luận của Bí thư", "semantic_type": "decision_list", "section": "Closing", "condition": "none"},
+    {"field_id": "bieu_quyet_thong_qua", "raw_label": "Chi bộ biểu quyết thông qua kết luận", "semantic_type": "voting_total", "section": "Closing", "condition": "none"},
+    {"field_id": "thoi_gian_ket_thuc", "raw_label": "Cuộc họp kết thúc lúc", "semantic_type": "meeting_end_time", "section": "Closing", "condition": "none"},
+    {"field_id": "chu_ky_chu_toa", "raw_label": "CHỦ TỌA", "semantic_type": "signature", "section": "Signatures", "condition": "none"},
+    {"field_id": "chu_ky_thu_ky", "raw_label": "THƯ KÝ", "semantic_type": "signature", "section": "Signatures", "condition": "none"}
+  ]
+}

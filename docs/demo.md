@@ -8,6 +8,9 @@
 6. Ở trang kết quả, xem tổng quan và đồng bộ từng nguồn; nghe hoặc tải các file audio trong `aligned/`.
 7. Xem timeline “ai nói gì”, lọc người nói/nguồn/đoạn cần kiểm tra. Mở từng đoạn để đối chiếu transcript, chỉ số chất lượng, clip cùng timestamp của từng nguồn, quyết định nhận diện và nguồn gốc từng từ.
 8. Tải JSON, CSV, TXT hoặc ZIP. Nếu F6 chuyển về F5, trang kết quả hiển thị cảnh báo từ manifest.
+9. Luồng biểu mẫu & biên bản cuộc họp: Tại phần "Biên bản cuộc họp tự động", tải lên mẫu Word bất kỳ (.doc binary hoặc .docx). Hệ thống chuẩn hóa sang DOCX bản sao, trích xuất Candidate Anchors, đề xuất schema và tự động điền facts có bằng chứng từ timeline âm thanh.
+10. Rà soát & truy vết: Xem bảng đối chiếu fact - evidence turn - audio clip; chỉnh sửa giá trị trực tiếp hoặc sửa transcript mà không gọi lại ASR. Tải file `completed.docx` và gói ZIP kèm manifest truy vết provenance.
+11. Visual QA: So sánh trực quan ảnh chụp trước và sau khi điền biên bản ngay trên giao diện web.
 
 Tên chỉ được gán khi phương pháp nhận diện đã chọn khớp hồ sơ đủ ngưỡng và margin. Nếu không,
 speaker giữ trạng thái `unknown` với nhãn vô danh ổn định; tên file không được dùng làm danh tính.
