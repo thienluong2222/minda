@@ -23,7 +23,10 @@ from meeting_pipeline.adapters.audio_io import decode_mono, probe_audio, sha256_
 from meeting_pipeline.adapters.phowhisper_asr import BaseAsrAdapter, PhoWhisperAsrAdapter
 from meeting_pipeline.adapters.pyannote_segmentation import PyannoteSegmentationAdapter
 from meeting_pipeline.application.speakers import SpeakerProfileInput
-from meeting_pipeline.asr.segment_asr import transcribe_segment_sources
+from meeting_pipeline.asr.cache import AsrCache
+from meeting_pipeline.asr.segment_asr import (
+    transcribe_turn_adaptive,
+)
 from meeting_pipeline.audio.synchronization import (
     extract_shared_meeting_segments,
     synchronize_multi_source_audio,
@@ -45,6 +48,10 @@ from meeting_pipeline.fusion.model import LearnedFusionModel
 from meeting_pipeline.fusion.provenance import build_final_timeline_item
 from meeting_pipeline.pipeline.overlap_separation import TwoSpeakerSeparator
 from meeting_pipeline.pipeline.speaker_turns import SpeakerTurn, SpeakerTurnDetector
+from meeting_pipeline.pipeline.stages.safe_merge import (
+    MergedSpeakerTurn,
+    safe_merge_speaker_turns,
+)
 from meeting_pipeline.pipeline.stages.shared_segmentation import run_shared_pyannote_segmentation
 from meeting_pipeline.speaker.clustering import (
     GlobalSpeakerClusterer,
@@ -258,6 +265,10 @@ class MultiSourceFusionPipeline:
         self.separator = separator
         self.speaker_encoder = speaker_encoder
         self.clusterer = clusterer
+        self.asr_cache = AsrCache(
+            cache_dir=self.config.paths.data_dir / "cache" / "asr",
+            enabled=getattr(self.config.asr, "cache_enabled", True),
+        )
 
     def run(
         self,
@@ -440,6 +451,37 @@ class MultiSourceFusionPipeline:
                 )
             )
 
+        merged_turns = safe_merge_speaker_turns(
+            turns=turns,
+            assignments=assignments,
+            max_merge_gap_sec=getattr(self.config.asr, "max_merge_gap_seconds", 0.6),
+            max_core_sec=getattr(self.config.asr, "target_core_seconds", 22.0),
+            enabled=getattr(self.config.asr, "safe_turn_merging", True),
+        )
+        _write_json(
+            run_dir / "merged_speaker_turns.json",
+            {
+                "schema_version": "1.0",
+                "total_turns_before_merge": len(turns),
+                "total_merged_turns": len(merged_turns),
+                "turns": [
+                    {
+                        "turn_id": mt.turn_id,
+                        "start_sec": round(mt.start_sec, 3),
+                        "end_sec": round(mt.end_sec, 3),
+                        "speaker_count": mt.speaker_count,
+                        "sub_turn_ids": mt.sub_turn_ids,
+                        "cluster_id": mt.cluster_id,
+                        "meeting_speaker_id": mt.meeting_speaker_id,
+                        "speaker_label": mt.speaker_label,
+                        "speaker_status": mt.speaker_status,
+                        "needs_review": mt.needs_review,
+                    }
+                    for mt in merged_turns
+                ],
+            },
+        )
+
         learned_model = self._load_learned_model()
         actual_method = requested_method
         run_warnings: list[str] = []
@@ -452,8 +494,8 @@ class MultiSourceFusionPipeline:
         all_decisions: list[dict[str, object]] = []
         skipped_overlap_groups: set[str] = set()
         track_speakers: dict[str, dict[str, object]] = {}
-        previous_turn: SpeakerTurn | None = None
-        for turn in turns:
+        previous_turn: MergedSpeakerTurn | None = None
+        for turn_idx, turn in enumerate(merged_turns):
             if turn.speaker_count == 2:
                 # Keep one reviewable timeline row per overlap interval. Separation,
                 # ASR and speaker identification are intentionally deferred here.
@@ -461,7 +503,8 @@ class MultiSourceFusionPipeline:
                 if group_id in skipped_overlap_groups:
                     continue
                 skipped_overlap_groups.add(group_id)
-                timeline.append(self._skipped_overlap_row(turn, aligned, run_dir))
+                overlap_st = turn.as_speaker_turn()
+                timeline.append(self._skipped_overlap_row(overlap_st, aligned, run_dir))
                 all_hypotheses.append(
                     {
                         "segment_id": turn.turn_id,
@@ -484,6 +527,28 @@ class MultiSourceFusionPipeline:
                 previous_turn = None
                 continue
 
+            prev_b = merged_turns[turn_idx - 1].end_sec if turn_idx > 0 else 0.0
+            next_b = (
+                merged_turns[turn_idx + 1].start_sec
+                if turn_idx + 1 < len(merged_turns)
+                else None
+            )
+
+            hypotheses, routing_meta = transcribe_turn_adaptive(
+                meeting_id=meeting_id,
+                turn_id=turn.turn_id,
+                core_start_sec=turn.start_sec,
+                core_end_sec=turn.end_sec,
+                aligned_signals=aligned,
+                sync_metadata=sync_metadata,
+                asr_adapter=self._get_asr_adapter(),
+                asr_config=self.config.asr,
+                sample_rate=self.sample_rate,
+                prev_boundary_sec=prev_b,
+                next_boundary_sec=next_b,
+                cache=self.asr_cache,
+            )
+
             segment = MeetingSegment(
                 meeting_id=meeting_id,
                 segment_id=turn.turn_id,
@@ -492,14 +557,6 @@ class MultiSourceFusionPipeline:
                 overlap=False,
             )
             turn_warnings = list(turn.warnings)
-            segment_waves = self._slice_segment(aligned, segment)
-            hypotheses = transcribe_segment_sources(
-                meeting_id,
-                segment,
-                segment_waves,
-                self._get_asr_adapter(),
-                sample_rate=self.sample_rate,
-            )
             agreement = self._apply_cross_source_agreement(hypotheses)
             bins = build_confusion_network(hypotheses)
             fused_text, word_decisions = self._fuse(
@@ -532,9 +589,11 @@ class MultiSourceFusionPipeline:
                 excluded.add(str(track_speakers[previous_turn.track_id].get("speaker_id", "")))
 
             if identity_method == "mfcc_knn":
-                primary_wave = segment_waves.get(final_item.primary_source_id)
-                if primary_wave is None:
-                    primary_wave = next(iter(segment_waves.values()))
+                primary_src = final_item.primary_source_id
+                s_idx = int(turn.start_sec * self.sample_rate)
+                e_idx = int(turn.end_sec * self.sample_rate)
+                sig_to_use = aligned.get(primary_src, next(iter(aligned.values())))
+                primary_wave = sig_to_use[s_idx:e_idx]
                 raw_speaker = mfcc_assigner.assign_speaker(primary_wave, excluded)
                 spk_id = str(raw_speaker.get("speaker_id", "unknown"))
                 meeting_spk = (
@@ -549,37 +608,29 @@ class MultiSourceFusionPipeline:
                     "source_weights": _normalized_weights(audio_scores, 1.0),
                 }
             else:
-                turn_assign = assignments.get(turn.turn_id)
-                if turn_assign is not None:
-                    speaker = {
-                        "speaker_id": turn_assign.speaker_id,
-                        "profile_id": turn_assign.speaker_id,
-                        "meeting_speaker_id": turn_assign.meeting_speaker_id,
-                        "speaker_label": turn_assign.speaker_label,
-                        "speaker_status": turn_assign.speaker_status,
-                        "speaker_match_score": turn_assign.match_score,
-                        "speaker_top_candidates": turn_assign.top_candidates,
-                        "identity_decision_reason": turn_assign.decision_reason,
-                        "speaker_evidence": turn_assign.as_dict(),
-                        "warnings": turn_assign.warnings,
-                        "needs_review": turn_assign.needs_review,
-                        "source_weights": _normalized_weights(audio_scores, 1.0),
-                    }
-                else:
-                    speaker = {
-                        "speaker_id": None,
-                        "profile_id": None,
-                        "meeting_speaker_id": None,
-                        "speaker_label": "Chưa xác định",
-                        "speaker_status": "unknown",
-                        "speaker_match_score": None,
-                        "speaker_top_candidates": [],
-                        "identity_decision_reason": "turn_not_assigned",
-                        "speaker_evidence": {},
-                        "warnings": ["unassigned_turn"],
-                        "needs_review": True,
-                        "source_weights": _normalized_weights(audio_scores, 1.0),
-                    }
+                first_sub = assignments.get(turn.sub_turn_ids[0]) if turn.sub_turn_ids else None
+                speaker = {
+                    "speaker_id": first_sub.speaker_id if first_sub else turn.cluster_id,
+                    "profile_id": first_sub.speaker_id if first_sub else None,
+                    "meeting_speaker_id": turn.meeting_speaker_id,
+                    "speaker_label": turn.speaker_label,
+                    "speaker_status": turn.speaker_status,
+                    "speaker_match_score": first_sub.match_score if first_sub else None,
+                    "speaker_top_candidates": first_sub.top_candidates if first_sub else [],
+                    "identity_decision_reason": (
+                        first_sub.decision_reason
+                        if first_sub
+                        else (
+                            "safe_merged_cluster"
+                            if len(turn.sub_turn_ids) > 1
+                            else "global_clustering"
+                        )
+                    ),
+                    "speaker_evidence": turn.source_evidence,
+                    "warnings": turn.warnings,
+                    "needs_review": turn.needs_review,
+                    "source_weights": _normalized_weights(audio_scores, 1.0),
+                }
 
             if turn.track_id in track_speakers and not turn.track_id.startswith("unresolved"):
                 previous_identity = track_speakers[turn.track_id]
@@ -596,12 +647,15 @@ class MultiSourceFusionPipeline:
             )
             timeline_row["speech_region_id"] = turn.speech_region_id
             timeline_row["turn_id"] = turn.turn_id
+            timeline_row["sub_turn_ids"] = turn.sub_turn_ids
             timeline_row["track_id"] = turn.track_id
             timeline_row["overlap_group_id"] = turn.overlap_group_id
             timeline_row["speaker_count"] = turn.speaker_count
+            timeline_row["routing_metadata"] = routing_meta
             provenance = timeline_row["provenance"]
             if isinstance(provenance, dict):
                 provenance["turn_id"] = turn.turn_id
+                provenance["sub_turn_ids"] = turn.sub_turn_ids
                 provenance["speech_region_id"] = turn.speech_region_id
             if turn_warnings:
                 timeline_row["needs_review"] = True
@@ -619,8 +673,10 @@ class MultiSourceFusionPipeline:
                 {
                     "segment_id": segment.segment_id,
                     "turn_id": turn.turn_id,
+                    "sub_turn_ids": turn.sub_turn_ids,
                     "speech_region_id": turn.speech_region_id,
                     "overlap_group_id": turn.overlap_group_id,
+                    "routing_metadata": routing_meta,
                     "sources": {
                         source_id: hypothesis.model_dump()
                         for source_id, hypothesis in hypotheses.items()
@@ -631,6 +687,7 @@ class MultiSourceFusionPipeline:
                 {
                     "segment_id": segment.segment_id,
                     "turn_id": turn.turn_id,
+                    "sub_turn_ids": turn.sub_turn_ids,
                     "speech_region_id": turn.speech_region_id,
                     "overlap_group_id": turn.overlap_group_id,
                     "fusion_method": actual_method,

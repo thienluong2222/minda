@@ -114,6 +114,7 @@ class WordHypothesis(BaseModel):
     start_sec: NonNegativeFloat
     end_sec: PositiveFloat
     asr_confidence: float | None = Field(default=None, ge=0.0, le=1.0)
+    time_status: Literal["exact", "uncertain"] = "exact"
 
 
 class SourceHypothesis(BaseModel):
@@ -126,11 +127,14 @@ class SourceHypothesis(BaseModel):
     words: list[WordHypothesis] = Field(default_factory=list)
     audio_features: dict[str, float] = Field(default_factory=dict)
     asr_features: dict[str, float | None] = Field(default_factory=dict)
-    asr_status: Literal["transcribed", "empty", "failed", "unreliable"] = "transcribed"
+    asr_status: Literal[
+        "transcribed", "empty", "failed", "unreliable", "not_run", "abstained"
+    ] = "transcribed"
     asr_warnings: list[str] = Field(default_factory=list)
     raw_asr_candidates: list[dict[str, Any]] = Field(default_factory=list)
     audio_quality_score: float = Field(default=0.0, ge=0.0, le=1.0)
     transcript_quality_score: float = Field(default=0.0, ge=0.0, le=1.0)
+    routing_reason: str | None = None
 
 
 class WordProvenance(BaseModel):

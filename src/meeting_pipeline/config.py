@@ -79,6 +79,11 @@ class AsrConfig(BaseModel):
     max_consecutive_punctuation: int = Field(default=6, ge=3)
     min_compression_ratio: float = Field(default=0.12, gt=0, le=1)
     timestamp_tolerance_seconds: float = Field(default=0.1, ge=0)
+    routing_mode: Literal["adaptive", "all_source"] = "adaptive"
+    adaptive_delta_threshold: float = Field(default=0.05, ge=0.0, le=1.0)
+    safe_turn_merging: bool = Field(default=True)
+    max_merge_gap_seconds: float = Field(default=0.6, ge=0.0)
+    cache_enabled: bool = Field(default=True)
 
     def __getitem__(self, item: str) -> object:
         return getattr(self, item)
