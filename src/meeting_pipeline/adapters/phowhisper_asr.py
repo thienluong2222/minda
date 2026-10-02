@@ -208,7 +208,9 @@ class PhoWhisperAsrAdapter(BaseAsrAdapter):
             status=(
                 "failed"
                 if failed_all_generations
-                else "empty" if empty_all_generations else "unreliable"
+                else "empty"
+                if empty_all_generations
+                else "unreliable"
             ),
             warnings=list(dict.fromkeys(issues)),
             raw_candidates=raw_candidates,

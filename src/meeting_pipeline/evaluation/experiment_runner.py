@@ -46,6 +46,7 @@ from meeting_pipeline.fusion.baselines import (
     fuse_f3_rover,
     fuse_f4_asr_weighted,
     fuse_f5_rule_weighted,
+    fuse_f5_rule_weighted_corrected,
     fuse_f6_learned,
 )
 from meeting_pipeline.fusion.confusion_network import build_confusion_network
@@ -216,6 +217,7 @@ def run_experiment_pipeline(
         "F3_ROVER": [],
         "F4_ASR_WEIGHTED": [],
         "F5_RULE_WEIGHTED": [],
+        "F5_RULE_WEIGHTED_CORRECTED": [],
         "F6_LEARNED": [],
     }
 
@@ -276,13 +278,14 @@ def run_experiment_pipeline(
         # Build confusion network
         bins = build_confusion_network(source_hyps)
 
-        # Execute all 7 baselines
+        # Execute all 8 baselines
         t0, _ = fuse_f0_fixed(source_hyps)
         t1, _ = fuse_f1_best_segment(source_hyps)
         t2, _ = fuse_f2_oracle_best(source_hyps, reference_text=ref_text)
         t3, _ = fuse_f3_rover(bins)
         t4, _ = fuse_f4_asr_weighted(bins)
         t5, d5 = fuse_f5_rule_weighted(bins)
+        t5_corr, _ = fuse_f5_rule_weighted_corrected(bins, source_hypotheses=source_hyps)
         t6, _ = fuse_f6_learned(bins, learned_model)
 
         baseline_predictions["F0_FIXED"].append(t0)
@@ -291,6 +294,7 @@ def run_experiment_pipeline(
         baseline_predictions["F3_ROVER"].append(t3)
         baseline_predictions["F4_ASR_WEIGHTED"].append(t4)
         baseline_predictions["F5_RULE_WEIGHTED"].append(t5)
+        baseline_predictions["F5_RULE_WEIGHTED_CORRECTED"].append(t5_corr)
         baseline_predictions["F6_LEARNED"].append(t6)
 
         # Build FinalTimelineItem with provenance and evidence clips (using F5 or F6)

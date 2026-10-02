@@ -120,9 +120,7 @@ class PyannoteSegmentationAdapter:
         num_chunks = raw_data.shape[0] if raw_data.ndim >= 1 else 0
         num_frames = raw_data.shape[1] if raw_data.ndim >= 2 else 1
         frame_step = duration / max(1, num_frames)
-        total_duration = (
-            (num_chunks - 1) * step + duration if num_chunks > 0 else 0.0
-        )
+        total_duration = (num_chunks - 1) * step + duration if num_chunks > 0 else 0.0
 
         result = SegmentationResult(
             data=raw_data,

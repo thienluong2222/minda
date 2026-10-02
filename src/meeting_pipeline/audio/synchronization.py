@@ -216,11 +216,7 @@ def extract_shared_meeting_segments(
 
     Supports Option B (pyannote) or Option A (silero) as baseline.
     """
-    if (
-        backend == "pyannote"
-        and pyannote_adapter is not None
-        and aligned_paths is not None
-    ):
+    if backend == "pyannote" and pyannote_adapter is not None and aligned_paths is not None:
         dur_sec = max((len(s) for s in aligned_signals.values()), default=0) / sample_rate
         segments, _ = run_shared_pyannote_segmentation(
             aligned_paths=aligned_paths,

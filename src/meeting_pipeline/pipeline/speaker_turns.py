@@ -70,6 +70,7 @@ class SpeakerTurnDetector:
         if reference_source not in aligned_paths:
             raise ValueError("Reference source is missing for speaker-turn detection")
         num_bins = max(1, int(np.ceil(duration_sec / self.bin_sec)))
+
         def _get_seg(source_id: str, path: Path) -> Any:
             if cached_results and source_id in cached_results:
                 return cached_results[source_id]

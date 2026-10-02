@@ -61,9 +61,7 @@ class ClusterDecision:
             "speaker_status": self.speaker_status,
             "turn_ids": self.turn_ids,
             "total_speech_seconds": round(self.total_speech_seconds, 3),
-            "match_score": (
-                round(self.match_score, 3) if self.match_score is not None else None
-            ),
+            "match_score": (round(self.match_score, 3) if self.match_score is not None else None),
             "match_margin": (
                 round(self.match_margin, 3) if self.match_margin is not None else None
             ),
@@ -308,7 +306,8 @@ class GlobalSpeakerClusterer:
 
         turn_dict = {t.turn_id: t for t in turns}
         unassigned = [
-            t for t in single_speaker_turns
+            t
+            for t in single_speaker_turns
             if t.turn_id not in turn_to_cluster and t.turn_id in turn_embeddings
         ]
 
@@ -358,10 +357,7 @@ class GlobalSpeakerClusterer:
 
             # Match against enrolled profiles
             ranked = sorted(
-                (
-                    (p, float(np.dot(centroid, p.embedding)))
-                    for p in profiles
-                ),
+                ((p, float(np.dot(centroid, p.embedding))) for p in profiles),
                 key=lambda item: item[1],
                 reverse=True,
             )

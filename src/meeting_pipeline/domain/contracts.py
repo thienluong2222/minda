@@ -127,9 +127,9 @@ class SourceHypothesis(BaseModel):
     words: list[WordHypothesis] = Field(default_factory=list)
     audio_features: dict[str, float] = Field(default_factory=dict)
     asr_features: dict[str, float | None] = Field(default_factory=dict)
-    asr_status: Literal[
-        "transcribed", "empty", "failed", "unreliable", "not_run", "abstained"
-    ] = "transcribed"
+    asr_status: Literal["transcribed", "empty", "failed", "unreliable", "not_run", "abstained"] = (
+        "transcribed"
+    )
     asr_warnings: list[str] = Field(default_factory=list)
     raw_asr_candidates: list[dict[str, Any]] = Field(default_factory=list)
     audio_quality_score: float = Field(default=0.0, ge=0.0, le=1.0)

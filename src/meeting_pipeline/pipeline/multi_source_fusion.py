@@ -408,9 +408,7 @@ class MultiSourceFusionPipeline:
                         self.config.identity.get("model_id", "speechbrain/spkrec-ecapa-voxceleb")
                     )
                     encoder_type = (
-                        "wespeaker"
-                        if "wespeaker" in encoder_model_id.lower()
-                        else "ecapa"
+                        "wespeaker" if "wespeaker" in encoder_model_id.lower() else "ecapa"
                     )
                     self.speaker_encoder = create_speaker_encoder(
                         encoder_type=encoder_type,
@@ -444,13 +442,11 @@ class MultiSourceFusionPipeline:
                     fusion_policy=policy,
                 )
 
-            assignments, _cluster_decisions, cluster_summary = (
-                self.clusterer.cluster_and_identify(
-                    turns=turns,
-                    aligned_signals=aligned,
-                    sample_rate=self.sample_rate,
-                    profiles=profiles,
-                )
+            assignments, _cluster_decisions, cluster_summary = self.clusterer.cluster_and_identify(
+                turns=turns,
+                aligned_signals=aligned,
+                sample_rate=self.sample_rate,
+                profiles=profiles,
             )
 
         merged_turns = safe_merge_speaker_turns(
@@ -531,9 +527,7 @@ class MultiSourceFusionPipeline:
 
             prev_b = merged_turns[turn_idx - 1].end_sec if turn_idx > 0 else 0.0
             next_b = (
-                merged_turns[turn_idx + 1].start_sec
-                if turn_idx + 1 < len(merged_turns)
-                else None
+                merged_turns[turn_idx + 1].start_sec if turn_idx + 1 < len(merged_turns) else None
             )
 
             hypotheses, routing_meta = transcribe_turn_adaptive(
@@ -1171,9 +1165,7 @@ class MultiSourceFusionPipeline:
         return {
             "segment_id": item["segment_id"],
             "track_id": str(
-                speaker.get("speaker_id")
-                or speaker.get("meeting_speaker_id")
-                or "unknown"
+                speaker.get("speaker_id") or speaker.get("meeting_speaker_id") or "unknown"
             ),
             "start_sec": item["start_sec"],
             "end_sec": item["end_sec"],

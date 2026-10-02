@@ -48,8 +48,7 @@ def evaluate_sample_quality(
     frame_size = int(0.025 * sample_rate)
     hop_size = int(0.010 * sample_rate)
     frames = [
-        waveform[i : i + frame_size]
-        for i in range(0, len(waveform) - frame_size + 1, hop_size)
+        waveform[i : i + frame_size] for i in range(0, len(waveform) - frame_size + 1, hop_size)
     ]
     if not frames:
         return {

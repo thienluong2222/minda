@@ -96,9 +96,7 @@ def test_normalized_source_weights() -> None:
     q2 = evaluate_source_quality_for_speaker_id(
         "src-2", clean * 0.5, sr, full_signal=full * 0.5, turn_start_sec=1.0
     )
-    q_bad = evaluate_source_quality_for_speaker_id(
-        "src-bad", np.ones(sr, dtype=np.float32), sr
-    )
+    q_bad = evaluate_source_quality_for_speaker_id("src-bad", np.ones(sr, dtype=np.float32), sr)
 
     evals = {"src-1": q1, "src-2": q2, "src-bad": q_bad}
     weights = compute_normalized_source_weights(evals)

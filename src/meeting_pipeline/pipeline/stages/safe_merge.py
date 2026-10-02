@@ -120,9 +120,7 @@ def safe_merge_speaker_turns(
         last = current_group[-1]
         sub_ids = [t.turn_id for t in current_group]
         merged_id = (
-            first.turn_id
-            if len(current_group) == 1
-            else f"merged-{first.turn_id}-{last.turn_id}"
+            first.turn_id if len(current_group) == 1 else f"merged-{first.turn_id}-{last.turn_id}"
         )
 
         # Combine warnings and evidence
@@ -232,11 +230,7 @@ def safe_merge_speaker_turns(
         gap = turn.start_sec - last_turn.end_sec
         new_total_duration = turn.end_sec - current_group[0].start_sec
 
-        if (
-            same_cluster
-            and 0.0 <= gap <= max_merge_gap_sec
-            and new_total_duration <= max_core_sec
-        ):
+        if same_cluster and 0.0 <= gap <= max_merge_gap_sec and new_total_duration <= max_core_sec:
             current_group.append(turn)
         else:
             flush_group()

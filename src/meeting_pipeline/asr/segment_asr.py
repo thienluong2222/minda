@@ -41,8 +41,10 @@ def transcribe_segment_sources(
 ) -> dict[str, SourceHypothesis]:
     """Transcribe a meeting segment across all recording devices (legacy direct interface)."""
     hypotheses: dict[str, SourceHypothesis] = {}
-    asr_config = quality_config or getattr(asr_adapter, "config", None) or AsrConfig(
-        model_id="fake", model_revision="test"
+    asr_config = (
+        quality_config
+        or getattr(asr_adapter, "config", None)
+        or AsrConfig(model_id="fake", model_revision="test")
     )
 
     for dev_id, wave in segment_waveforms.items():
@@ -78,9 +80,7 @@ def transcribe_segment_sources(
                         )
 
             norm_text = (
-                normalize_vietnamese_text(asr_res.text)
-                if asr_status == "transcribed"
-                else ""
+                normalize_vietnamese_text(asr_res.text) if asr_status == "transcribed" else ""
             )
 
             words: list[WordHypothesis] = []
@@ -97,16 +97,12 @@ def transcribe_segment_sources(
                         start_sec=w_start,
                         end_sec=w_end,
                         asr_confidence=(
-                            round(float(tw.confidence), 3)
-                            if tw.confidence is not None
-                            else None
+                            round(float(tw.confidence), 3) if tw.confidence is not None else None
                         ),
                     )
                 )
 
-            measured_confidences = [
-                w.asr_confidence for w in words if w.asr_confidence is not None
-            ]
+            measured_confidences = [w.asr_confidence for w in words if w.asr_confidence is not None]
             if measured_confidences:
                 mean_asr_conf = float(np.mean(measured_confidences))
 
@@ -142,9 +138,7 @@ def transcribe_segment_sources(
             words=words,
             audio_features=audio_feats,
             asr_features={
-                "mean_confidence": (
-                    round(mean_asr_conf, 3) if mean_asr_conf is not None else None
-                ),
+                "mean_confidence": (round(mean_asr_conf, 3) if mean_asr_conf is not None else None),
                 "word_agreement": None,
                 "fusion_confidence_heuristic": 0.5,
             },

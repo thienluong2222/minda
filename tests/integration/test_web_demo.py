@@ -425,15 +425,24 @@ def test_get_meeting_speakers_and_rename_label(tmp_path: Path) -> None:
     assert "Chị Hoa" in result_txt
 
     # 3. Error cases
-    assert client.post(
-        "/api/runs/demo-1/rename-speaker",
-        json={"meeting_speaker_id": "", "new_label": "Test"},
-    ).status_code == 400
-    assert client.post(
-        "/api/runs/demo-1/rename-speaker",
-        json={"meeting_speaker_id": "ms-0001", "new_label": "   "},
-    ).status_code == 400
-    assert client.post(
-        "/api/runs/demo-1/rename-speaker",
-        json={"meeting_speaker_id": "ms-9999", "new_label": "Test"},
-    ).status_code == 404
+    assert (
+        client.post(
+            "/api/runs/demo-1/rename-speaker",
+            json={"meeting_speaker_id": "", "new_label": "Test"},
+        ).status_code
+        == 400
+    )
+    assert (
+        client.post(
+            "/api/runs/demo-1/rename-speaker",
+            json={"meeting_speaker_id": "ms-0001", "new_label": "   "},
+        ).status_code
+        == 400
+    )
+    assert (
+        client.post(
+            "/api/runs/demo-1/rename-speaker",
+            json={"meeting_speaker_id": "ms-9999", "new_label": "Test"},
+        ).status_code
+        == 404
+    )

@@ -125,8 +125,7 @@ def evaluate_source_quality_for_speaker_id(
     frame_sz = int(0.020 * sample_rate)
     hop_sz = int(0.010 * sample_rate)
     frames = [
-        turn_waveform[i : i + frame_sz]
-        for i in range(0, len(turn_waveform) - frame_sz + 1, hop_sz)
+        turn_waveform[i : i + frame_sz] for i in range(0, len(turn_waveform) - frame_sz + 1, hop_sz)
     ]
     if frames:
         f_energies = np.array([float(np.sqrt(np.mean(f**2))) for f in frames])
@@ -276,9 +275,7 @@ def fuse_turn_candidate_scores(
     """Perform P3 quality-gated weighted score fusion across candidates."""
     combined: dict[str, float] = {}
     valid_sources = [
-        sid
-        for sid in candidate_scores_by_source
-        if sid in weights and weights[sid] > 0
+        sid for sid in candidate_scores_by_source if sid in weights and weights[sid] > 0
     ]
     if not valid_sources:
         return {}

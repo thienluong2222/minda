@@ -42,6 +42,10 @@ def generate_baseline_comparison_table(
         "F3_ROVER": ("ROVER cơ bản", "Bầu chọn đa số trên confusion network"),
         "F4_ASR_WEIGHTED": ("ASR Weighted", "Bầu chọn theo word confidence PhoWhisper"),
         "F5_RULE_WEIGHTED": ("Rule Weighted", "Bầu chọn kết hợp acoustic, VAD và ASR"),
+        "F5_RULE_WEIGHTED_CORRECTED": (
+            "Rule Weighted Sửa",
+            "Bầu chọn có bảo vệ nguồn chính, chống ảo giác",
+        ),
         "F6_LEARNED": ("Learned Fusion", "Logistic Regression dự đoán token chuẩn"),
     }
 
@@ -52,6 +56,7 @@ def generate_baseline_comparison_table(
         "F3_ROVER",
         "F4_ASR_WEIGHTED",
         "F5_RULE_WEIGHTED",
+        "F5_RULE_WEIGHTED_CORRECTED",
         "F6_LEARNED",
     ]:
         if b_id not in baseline_metrics:

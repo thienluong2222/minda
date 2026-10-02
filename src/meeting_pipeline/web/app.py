@@ -272,9 +272,7 @@ def _result_context(
                 if row.get("speaker_status") == "anonymous"
             }
         ),
-        "ambiguous_count": sum(
-            1 for row in segments if row.get("speaker_status") == "ambiguous"
-        ),
+        "ambiguous_count": sum(1 for row in segments if row.get("speaker_status") == "ambiguous"),
         "overlap_not_run_count": sum(
             1
             for row in segments
@@ -315,7 +313,8 @@ def _result_context(
         "reference_source_id": coverage.get("reference_source_id"),
         "aligned_files": aligned_files,
         "extra_aligned_files": [
-            path for path in aligned_files
+            path
+            for path in aligned_files
             if path.stem not in {str(row.get("source_id", "")) for row in sources}
         ],
         "speaker_names": {
@@ -497,18 +496,23 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
         history = audit_data.get("history") or []
         labels_map = audit_data.get("labels") or {}
         labels_map[meeting_speaker_id] = clean_label
-        history.append({
-            "meeting_speaker_id": meeting_speaker_id,
-            "old_label": old_label,
-            "new_label": clean_label,
-            "updated_at": _now(),
-        })
-        _write_json(labels_path, {
-            "schema_version": "2.0",
-            "updated_at": _now(),
-            "labels": labels_map,
-            "history": history,
-        })
+        history.append(
+            {
+                "meeting_speaker_id": meeting_speaker_id,
+                "old_label": old_label,
+                "new_label": clean_label,
+                "updated_at": _now(),
+            }
+        )
+        _write_json(
+            labels_path,
+            {
+                "schema_version": "2.0",
+                "updated_at": _now(),
+                "labels": labels_map,
+                "history": history,
+            },
+        )
 
         MultiSourceFusionPipeline._write_exports(run_dir, segments)
 
