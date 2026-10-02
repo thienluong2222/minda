@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "vivos",
+  "source_version": "zenodo-record-7068130",
+  "license_name": "CC-BY-NC-SA-4.0",
+  "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+  "source_budget_bytes": 1500000000,
+  "files": [
+    {
+      "url": "https://zenodo.org/api/records/7068130/files/vivos.tar.gz/content",
+      "relative_path": "vivos/vivos.tar.gz",
+      "expected_bytes": 1474408300,
+      "source_checksum": "md5:72972a8b14050f3f11ea7c3debabd7af",
+      "split": "source_archive"
+    }
+  ]
+}

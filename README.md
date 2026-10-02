@@ -1,0 +1,94 @@
+# Meeting Pipeline
+
+Pipeline offline nhận diện người nói và chép lời cuộc họp tiếng Việt từ nhiều điện thoại,
+triển khai theo `PIPELINE_IMPLEMENTATION_SPEC.md`.
+
+## Trạng thái
+ 
+CLI và web demo dùng backend dung hợp transcript đa nguồn và chạy end-to-end bằng model thật.
+ 
+### VIVOS Synthetic Multi-Device Pipeline
+Hệ thống xử lý cuộc họp tiếng Việt đa nguồn dựa hoàn toàn trên corpus âm thanh VIVOS theo đặc tả `docs/PLAN_VIVOS_SYNTHETIC_PIPELINE.md`.
+- **Milestone 0 (Preflight & Inventory)**: ĐẠT. Kiểm kê môi trường, ffmpeg, VIVOS corpus (65 speakers, 12,420 files, 15.4h audio), model cache ngoại tuyến (PhoWhisper-small, ECAPA-TDNN, Silero VAD). Báo cáo tại `reports/preflight.md`.
+- **Milestone 1 (Foundations, Configs & Contracts)**: ĐẠT. Thiết lập cây thư mục phân tầng, Pydantic contracts (`domain/contracts.py`) cho Utterance, Recipe, Segment, Hypothesis, Timeline, Provenance, cùng hệ thống YAML configs (`configs/data/`, `configs/simulation/`, `configs/models/`, `configs/fusion/`, `configs/experiment/`, `configs/demo.yaml`).
+- **Milestone 2 (VIVOS Manifest, Split & Leakage Audit)**: ĐẠT. Quét 12,420 file VIVOS, chuẩn hóa tiếng Việt NFC, chia speaker-disjoint (32 dev, 14 val, 19 test) và tách riêng enrollment utterances. Lệnh `meeting-pipeline data audit` đạt 100% không vi phạm rò rỉ. Báo cáo tại `reports/data_audit.json` và `reports/data_audit.md`.
+- **Milestone 3 (Synthetic Multi-Device Generator)**: ĐẠT. Xây dựng phòng 3D ShoeBox và RIR bằng `pyroomacoustics`, mô phỏng thiết bị (gain, offset, drift ppm, clipping, dropout), nhiễu chuẩn quy tắc VIVOS (white, pink, brown, hum 50Hz, room tone, VIVOS babble). Lệnh `meeting-pipeline simulate generate` sinh âm thanh đa thiết bị chuẩn 16kHz mono.
+- **Milestone 4 (Multi-Source Synchronization & VAD)**: ĐẠT. Tự động chọn nguồn tham chiếu chất lượng cao, căn chỉnh coarse offset bằng tương quan vỏ năng lượng (envelope correlation) và bù drift. Fused Silero VAD tạo timeline hoạt động thống nhất với Frame F1 > 0.90 trên smoke/moderate.
+- **Milestone 5 (Speaker Identification & Segment ASR)**: ĐẠT. Trích xuất prototype người nói (ECAPA-TDNN), nhận diện danh tính đa nguồn (4 baseline: fixed, best-quality, unweighted mean, quality-weighted). PhoWhisper trích xuất text, word timestamps, confidence và các đặc trưng âm học không rò rỉ (RMS, SNR ước lượng, clipping, dropout).
+- **Milestone 6 (Transcript Fusion F0-F6 & Provenance)**: ĐẠT. Căn chỉnh từ qua dynamic programming, confusion network hỗ trợ insertion/deletion/substitution. Hoàn thiện 7 baseline F0–F6 (Fixed, Best-Segment, Oracle-Best, ROVER, ASR-Weighted, Rule-Weighted, Learned-Logistic). Truy vết nguồn gốc từ (WordProvenance) và trích xuất audio evidence clip cho từng thiết bị.
+
+## Cài đặt
+
+Yêu cầu macOS arm64, Python 3.11, `uv`, FFmpeg/ffprobe và đủ dung lượng cho model/dữ liệu.
+
+```bash
+uv sync --locked --all-extras
+uv run meeting-pipeline doctor
+```
+
+Chấp nhận điều khoản của `pyannote/segmentation-3.0` bằng tài khoản Hugging Face của bạn,
+sau đó chỉ đặt token trong environment:
+
+```bash
+export HF_TOKEN='<read token>'
+uv run meeting-pipeline models prepare --config configs/default.yaml
+```
+
+Không đặt token trong YAML, SQLite, manifest hoặc log. `models prepare` tải weights vào
+`data/model_cache`; lệnh `doctor` không tải mạng.
+
+## Chạy local
+
+Mở web demo trên máy local:
+
+```bash
+uv run meeting-pipeline serve --host 127.0.0.1 --port 8000
+```
+
+Truy cập `http://127.0.0.1:8000`. Có thể đăng ký tên và một hoặc nhiều mẫu giọng riêng bằng
+ECAPA, sau đó chọn những người tham gia khi tạo cuộc họp và tải 1-8 bản ghi. Backend đồng bộ
+các nguồn, tạo VAD timeline chung, chạy PhoWhisper cho từng `segment x source`, căn chỉnh từ và
+dung hợp transcript bằng F1/F3/F4/F5/F6. Kết quả hiển thị transcript từng nguồn, trọng số,
+word provenance, audio đã đồng bộ và evidence clip cùng timestamp của mọi thiết bị. Web chạy job
+nền đơn luồng và cho tải JSON/CSV/TXT/ZIP.
+
+Vùng được phát hiện có hai người nói đồng thời hiện được giữ thành một dòng timeline cần
+kiểm tra, kèm clip gốc của từng nguồn. Demo tạm bỏ qua tách giọng, nhận diện người nói
+và ASR cho vùng này; văn bản để trống thay vì đoán một người đang nói gì.
+
+Hoặc chạy trực tiếp bằng CLI:
+
+```bash
+uv run meeting-pipeline run-files \
+  --meeting-name demo \
+  --fusion-method F5_RULE_WEIGHTED \
+  recording-1.aac recording-2.aac
+```
+
+Kết quả nằm trong `data/meetings/demo/runs/<run-id>/`. Người khớp hồ sơ đủ ngưỡng được hiện tên;
+người chưa đăng ký hoặc chưa đủ bằng chứng được giữ `unknown` nhưng mang nhãn ổn định
+`Speaker 1`, `Speaker 2`,… Dữ liệu sinh ra ở `data/`; audio gốc trong `dataset/voices/` được giữ
+nguyên.
+
+## Dữ liệu
+
+Kiểm tra kế hoạch trước khi tải:
+
+```bash
+uv run meeting-pipeline data plan --config configs/evaluation.yaml
+```
+
+Ngân sách mạng mặc định: VIVOS 1,5 GB, LibriWASN 1 GB, VoxVietnam 1 GB, tổng 3,5 GB
+(GB thập phân). Đây không phải dung lượng đĩa cuối cùng. VoxVietnam cần quyền truy cập riêng.
+Downloader không được tải archive LibriWASN 4–5 GB rồi xóa bớt để đạt ngân sách.
+
+## Kiểm tra
+
+```bash
+uv run pytest tests/unit tests/integration
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src/meeting_pipeline
+```
+
+Model smoke, browser Playwright và dataset tests là các bước riêng, không tự tải trong test nhanh.

@@ -1,0 +1,98 @@
+schema_version: "1.0"
+mode: development
+paths:
+  data_dir: data
+  database_path: data/app.sqlite
+  model_cache_dir: data/model_cache
+audio:
+  analysis_sample_rate: 16000
+  separator_sample_rate: 8000
+  max_sources: 8
+  max_profiles: 8
+  max_duration_seconds: 1200
+  max_upload_bytes: 1000000000
+  preserve_originals: true
+sync:
+  envelope_rate_hz: 100
+  max_offset_seconds: 120
+  fine_window_seconds: 8
+  long_recording_step_seconds: 30
+  minimum_common_speech_seconds: 3
+  allow_drift: true
+  minimum_drift_inliers: 3
+segmentation:
+  vad_threshold: 0.5
+  minimum_speech_ms: 250
+  minimum_silence_ms: 200
+  merge_gap_ms: 400
+  speech_pad_ms: 250
+  context_seconds: 10
+  step_seconds: 2.5
+  max_local_speakers: 3
+  max_simultaneous_speakers: 2
+separation:
+  model_id: speechbrain/sepformer-whamr
+  model_revision: 9950fd8055b38679d2af5bef2366b5dba600ec66
+  chunk_seconds: 8
+  context_seconds: 1
+  overlap_seconds: 1
+identity:
+  model_id: speechbrain/spkrec-ecapa-voxceleb
+  model_revision: 0f99f2d0ebe89ac095bcc5903c4dd8f72b367286
+  method: prototype_cosine
+  identity_threshold: 0.25
+  identity_margin: 0.05
+  anonymous_cluster_threshold: 0.1
+  calibration_artifact: null
+  quality_weights: [0.4, 0.4, 0.2]
+  temperature: 0.25
+  candidate_match_floor: 0.0
+  mfcc:
+    n_mfcc: 20
+    window_sec: 1.5
+    step_sec: 0.5
+  knn:
+    n_neighbors: 5
+    metric: cosine
+    weights: distance
+asr:
+  model_id: vinai/PhoWhisper-medium
+  model_revision: 55a7e3eb6c906de891f8f06a107754427dd3be79
+  model_variants:
+    small:
+      model_id: vinai/PhoWhisper-small
+      model_revision: a86b604c346caf7148c37512eafe783a16420adb
+    medium:
+      model_id: vinai/PhoWhisper-medium
+      model_revision: 55a7e3eb6c906de891f8f06a107754427dd3be79
+  language: vi
+  max_new_tokens_per_second: 10
+  min_new_tokens: 32
+  max_new_tokens: 224
+  max_decode_attempts: 2
+  max_words_per_second: 8
+  max_consecutive_token_repeats: 5
+  max_consecutive_ngram_repeats: 4
+  max_consecutive_punctuation: 6
+  min_compression_ratio: 0.12
+  timestamp_tolerance_seconds: 0.1
+  target_core_seconds: 22
+  max_chunk_seconds: 25
+  chunk_context_seconds: 0.75
+  boundary_search_seconds: 2
+  sentence_pause_seconds: 0.8
+  max_sentence_seconds: 15
+  evidence_pad_seconds: 0.2
+models:
+  vad_id: silero_vad
+  segmentation_id: pyannote/segmentation-3.0
+  segmentation_revision: e66f3d3b9eb0873085418a7b813d3b369bf160bb
+datasets:
+  total_download_budget_bytes: 3500000000
+  vivos_download_budget_bytes: 1500000000
+  libriwasn_download_budget_bytes: 1000000000
+  voxvietnam_download_budget_bytes: 1000000000
+worker:
+  max_parallel_ml_jobs: 1
+  heartbeat_seconds: 10
+  stale_lease_seconds: 60

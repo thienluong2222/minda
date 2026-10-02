@@ -1,0 +1,29 @@
+# Profile mô phỏng nhanh: smoke (2 cuộc x 2-3 phút, 3 người, 3 thiết bị)
+profile_name: "smoke"
+description: "Mô phỏng nhanh khói lửa để kiểm tra toàn bộ pipeline end-to-end"
+
+# Kích thước phòng (mét: x, y, z)
+room_dimensions: [5.0, 4.0, 2.8]
+rt60_range: [0.20, 0.35]
+
+# Số người và thiết bị
+num_speakers: 3
+num_devices: 3
+
+# Khoảng nghỉ giữa các lượt nói (giây) - không trùng lặp (overlap=false)
+turn_pause_range: [0.6, 1.2]
+min_meeting_duration_sec: 120.0
+max_meeting_duration_sec: 180.0
+
+# Âm học và nhiễu
+snr_db_range: [15.0, 25.0]
+noise_types: ["white", "pink", "room_tone"]
+allow_vivos_babble: false
+
+# Đồng bộ và trôi đồng hồ (ppm = parts per million)
+offset_sec_range: [-0.15, 0.15]
+drift_ppm_range: [-20.0, 20.0]
+
+# Tỷ lệ clipping và suy hao
+clipping_ratio_range: [0.0, 0.0]
+dropout_count_range: [0, 0]

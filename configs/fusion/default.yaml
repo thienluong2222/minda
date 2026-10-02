@@ -1,0 +1,52 @@
+# Cấu hình dung hợp transcript đa nguồn (Transcript Fusion F0-F6)
+
+# Danh sách baseline bắt buộc
+baselines:
+  - "F0_FIXED"
+  - "F1_BEST_SEGMENT"
+  - "F2_ORACLE_BEST"
+  - "F3_ROVER"
+  - "F4_ASR_WEIGHTED"
+  - "F5_RULE_WEIGHTED"
+  - "F6_LEARNED"
+
+# Trọng số tính audio_quality_score [0, 1] từ đặc trưng âm học
+audio_quality:
+  weights:
+    snr_est: 0.35
+    vad_confidence: 0.25
+    clipping_penalty: 0.15
+    dropout_penalty: 0.15
+    residual_penalty: 0.10
+  epsilon: 1e-4
+  speaker_weight_temperature: 1.5
+
+# Trọng số tính transcript_quality_score [0, 1]
+transcript_quality:
+  weights:
+    audio_quality: 0.40
+    asr_confidence: 0.35
+    word_agreement: 0.25
+
+# Căn chỉnh token & confusion network
+alignment:
+  match_score: 2.0
+  mismatch_penalty: -1.0
+  gap_open_penalty: -1.5
+  gap_extend_penalty: -0.5
+  epsilon_token: "<eps>"
+
+# Học máy F6_LEARNED (Logistic Regression trên tập development)
+learned_fusion:
+  model_type: "logistic_regression"
+  c_regularization: 1.0
+  penalty: "l2"
+  class_weight: "balanced"
+  calibration: "isotonic"
+  feature_names:
+    - "audio_quality_score"
+    - "asr_confidence"
+    - "no_speech_prob"
+    - "agreement_ratio"
+    - "token_len"
+    - "duration_sec"

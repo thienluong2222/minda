@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-09-24T04:28:00+07:00",
+  "datasets": {
+    "vivos-development": {
+      "name": "VIVOS Vietnamese Speech Dataset (Train Split)",
+      "path": "data/external/vivos/extracted/vivos/train/waves",
+      "speaker_count": 46,
+      "total_utterances": 11660,
+      "sample_rate": 16000,
+      "role": "development_and_calibration"
+    },
+    "vivos-test": {
+      "name": "VIVOS Vietnamese Speech Dataset (Test Split)",
+      "path": "data/external/vivos/extracted/vivos/test/waves",
+      "speaker_count": 19,
+      "total_utterances": 760,
+      "sample_rate": 16000,
+      "role": "final_clean_test"
+    },
+    "voxvietnam-public-test": {
+      "name": "VoxVietnam Public Test Subset (31 Speakers)",
+      "index_path": "data/external/voxvietnam/subset-index.json",
+      "shards_directory": "data/external/voxvietnam",
+      "speaker_count": 31,
+      "utterances_per_speaker": 10,
+      "support_pool_size": 5,
+      "query_pool_size": 5,
+      "sample_rate": 16000,
+      "role": "domain_generalization_test"
+    }
+  }
+}

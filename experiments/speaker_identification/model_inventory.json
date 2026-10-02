@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-09-24T04:28:00+07:00",
+  "models": {
+    "E0": {
+      "encoder_id": "E0",
+      "name": "MFCC-120",
+      "model_id": "internal/mfcc-120",
+      "resolved_revision": "internal-v1",
+      "framework": "librosa",
+      "license": "ISC",
+      "expected_or_reported_bytes": 0,
+      "actual_downloaded_bytes": 0,
+      "sample_rate": 16000,
+      "embedding_dimension": 120,
+      "status": "ready"
+    },
+    "E1": {
+      "encoder_id": "E1",
+      "name": "ECAPA-TDNN",
+      "model_id": "speechbrain/spkrec-ecapa-voxceleb",
+      "resolved_revision": "0f99f2d0ebe89ac095bcc5903c4dd8f72b367286",
+      "framework": "speechbrain",
+      "license": "Apache-2.0",
+      "expected_or_reported_bytes": 83300000,
+      "actual_downloaded_bytes": 89133761,
+      "sample_rate": 16000,
+      "embedding_dimension": 192,
+      "status": "cached"
+    },
+    "E2": {
+      "encoder_id": "E2",
+      "name": "X-vector TDNN",
+      "model_id": "speechbrain/spkrec-xvect-voxceleb",
+      "resolved_revision": "56895a2df401be4150a159f3a1c653f00051d477",
+      "framework": "speechbrain",
+      "license": "Apache-2.0",
+      "expected_or_reported_bytes": 17800000,
+      "actual_downloaded_bytes": 32988000,
+      "sample_rate": 16000,
+      "embedding_dimension": 512,
+      "status": "cached"
+    },
+    "E3": {
+      "encoder_id": "E3",
+      "name": "WeSpeaker ResNet34-LM",
+      "model_id": "pyannote/wespeaker-voxceleb-resnet34-LM",
+      "resolved_revision": "837717ddb9ff5507820346191109dc79c958d614",
+      "framework": "pyannote.audio",
+      "license": "Apache-2.0",
+      "expected_or_reported_bytes": 26600000,
+      "actual_downloaded_bytes": 26650477,
+      "sample_rate": 16000,
+      "embedding_dimension": 256,
+      "status": "cached"
+    },
+    "E4": {
+      "encoder_id": "E4",
+      "name": "WavLM Base Plus SV",
+      "model_id": "microsoft/wavlm-base-plus-sv",
+      "resolved_revision": "feb593a6c23c1cc3d9510425c29b0a14d2b07b1e",
+      "framework": "transformers",
+      "license": "MIT",
+      "expected_or_reported_bytes": 378000000,
+      "actual_downloaded_bytes": 404611134,
+      "sample_rate": 16000,
+      "embedding_dimension": 512,
+      "status": "cached"
+    },
+    "E5": {
+      "encoder_id": "E5",
+      "name": "TitaNet-Large",
+      "model_id": "nvidia/speakerverification_en_titanet_large",
+      "resolved_revision": "b2f6f19e48f86f75ce7c86a655aa9fa2e414c22b",
+      "framework": "nemo",
+      "license": "CC-BY-4.0",
+      "expected_or_reported_bytes": 102000000,
+      "actual_downloaded_bytes": null,
+      "sample_rate": 16000,
+      "embedding_dimension": 192,
+      "status": "optional_probe"
+    }
+  }
+}

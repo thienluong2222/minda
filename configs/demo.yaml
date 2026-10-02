@@ -1,0 +1,18 @@
+# Cấu hình cho ứng dụng Streamlit demo M8
+server:
+  port: 8501
+  address: "localhost"
+
+default_sample_meeting_id: "meeting_smoke_001"
+recipe_path: "data/recipes/smoke/meeting_smoke_001.json"
+audio_dir: "data/generated/smoke/meeting_smoke_001"
+timeline_artifact: "artifacts/smoke/meeting_smoke_001/final_timeline.json"
+clips_dir: "artifacts/smoke/meeting_smoke_001/evidence_clips"
+
+# Cho phép người dùng nghe/so sánh các baseline F0-F6
+available_baselines:
+  - "F0_FIXED"
+  - "F1_BEST_SEGMENT"
+  - "F3_ROVER"
+  - "F5_RULE_WEIGHTED"
+  - "F6_LEARNED"

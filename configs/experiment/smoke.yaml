@@ -1,0 +1,22 @@
+# Cấu hình thử nghiệm nhanh: smoke experiment
+experiment_name: "smoke_experiment"
+seed: 42
+
+data_config: "configs/data/vivos.yaml"
+simulation_profile: "configs/simulation/smoke.yaml"
+model_config: "configs/models/default.yaml"
+fusion_config: "configs/fusion/default.yaml"
+
+# Số cuộc họp sinh ra trong smoke run
+meetings_per_split:
+  development: 1
+  validation: 1
+  test: 1
+
+enrollment_durations_sec: [5.0, 15.0, 30.0]
+
+output_dirs:
+  recipes: "data/recipes/smoke"
+  generated_audio: "data/generated/smoke"
+  artifacts: "artifacts/smoke"
+  reports: "reports/smoke"

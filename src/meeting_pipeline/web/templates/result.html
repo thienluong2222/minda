@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-heading result-heading">
+  <div><p class="eyebrow">KẾT QUẢ CUỘC HỌP</p><h1>{{ job.meeting_name }}</h1>
+    <p>Đã xử lý · {{ segments|length }} đoạn tiếng nói · {{ source_count }} nguồn âm thanh</p></div>
+  <a class="button" href="/api/runs/{{ job_id }}/export?format=zip">Tải toàn bộ ZIP</a>
+</div>
+<section class="stats" aria-label="Tổng quan">
+  <div><strong>{{ duration|clock }}</strong><span>Thời lượng</span></div>
+  <div><strong>{{ source_count }}</strong><span>Nguồn ghi âm</span></div>
+  <div><strong>{{ segments|length }}</strong><span>Đoạn tiếng nói</span></div>
+  <div><strong>{{ identified_count }}</strong><span>Người đã nhận diện</span></div>
+  <div><strong>{{ unknown_count }}</strong><span>Người chưa rõ danh tính</span></div>
+</section>
+<section class="card method-summary">
+  <div><span class="eyebrow">PHƯƠNG PHÁP ĐÃ CHẠY</span><h2>{{ fusion_used or "Chưa có dữ liệu" }}</h2>
+    <p>{{ fusion_description }}</p></div>
+  <div class="method-meta"><p>Yêu cầu: <strong>{{ fusion_requested or "Chưa có dữ liệu" }}</strong></p>
+    <p>Nhận diện: <strong>{{ "MFCC + KNN" if identity_method == "mfcc_knn" else "ECAPA + cosine" if identity_method == "prototype_cosine" else "Chưa có dữ liệu" }}</strong></p></div>
+  {% if fusion_fallback %}<p class="notice">Phương pháp yêu cầu {{ fusion_requested }} đã chuyển sang {{ fusion_used }}. {{ manifest.warnings|join(" · ") }}</p>{% endif %}
+  {% if not fusion_used %}<p class="notice">Run cũ không lưu phương pháp fusion đã dùng.</p>{% endif %}
+</section>
+<nav class="page-nav" aria-label="Nội dung kết quả"><a href="#timeline">Timeline</a><a href="#sources-section">Nguồn âm thanh</a><a href="#downloads">Tải kết quả</a></nav>
+
+<section class="card timeline-section" id="timeline">
+  <div class="section-heading"><div><p class="eyebrow">AI NÓI GÌ</p><h2>Timeline cuộc họp</h2>
+    <p>Transcript cuối có thể dùng bằng chứng từ nhiều nguồn. Nguồn đại diện chỉ là clip mặc định để nghe. Confidence chưa được hiệu chuẩn thành xác suất đúng.</p></div></div>
+  <div class="filters">
+    <label for="search">Tìm trong transcript/người nói/nguồn</label>
+    <input id="search" type="search" placeholder="Nhập từ cần tìm">
+    <label for="speaker-filter">Người nói</label>
+    <select id="speaker-filter"><option value="">Tất cả</option>
+      {% for speaker in segments|map(attribute="speaker_label")|unique|list %}
+      {% if speaker %}<option value="{{ speaker }}">{{ speaker }}</option>{% endif %}{% endfor %}
+    </select>
+    <label class="check-line"><input id="review-only" type="checkbox"> Cần kiểm tra</label>
+  </div>
+  {% if segments %}
+  <div class="timeline-list">
+    {% for segment in segments %}
+    {% set source_id = segment.selected_source_id or (segment.provenance.primary_source_id if segment.provenance is defined else none) %}
+    {% set clip = artifact_url(segment.evidence_clip_artifact_id or segment.processed_clip_artifact_id) %}
+    <article class="segment" data-speaker="{{ segment.speaker_label or 'Chưa rõ' }}" data-search="{{ segment.text }} {{ segment.speaker_label }} {{ source_names.get(source_id, source_id) }}" data-review="{{ 'true' if segment.needs_review else 'false' }}">
+      <div class="segment-top">
+        <span class="time">{{ segment.start_sec|clock }} – {{ segment.end_sec|clock }}</span>
+        <span class="speaker">{{ segment.speaker_label or "Chưa rõ" }}</span>
+        {% if segment.overlap_group_id %}<span class="review-tag">Nói chồng</span>{% endif %}
+        {% if segment.needs_review %}<span class="review-tag">Cần kiểm tra</span>{% endif %}
+      </div>
+      {% if segment.asr_status == "not_run" and segment.speaker_count == 2 %}
+      <p class="transcript">Đoạn nói chồng tạm thời chưa được chép lời. Hãy nghe âm thanh gốc để kiểm tra.</p>
+      {% else %}
+      <p class="transcript">{{ segment.text or ("ASR chưa tin cậy; hãy nghe clip để kiểm tra" if segment.asr_status == "unreliable" else "Không nhận dạng được lời nói") }}</p>
+      {% endif %}
+      <div class="segment-foot">
+        <span>Điểm hỗ trợ transcript: <strong>{{ segment.transcript_confidence|number(3) if segment.transcript_confidence is not none else "Chưa hiệu chuẩn" }}</strong></span>
+        <span>Nguồn đại diện: <strong>{{ source_names.get(source_id, source_id or "Chưa có dữ liệu") }}</strong></span>
+        {% if clip %}<audio controls preload="none" aria-label="Clip đại diện đoạn {{ loop.index }}" src="{{ clip }}"></audio>{% else %}<span class="hint">Không có clip đại diện</span>{% endif %}
+      </div>
+      <details class="segment-details"><summary>Giải thích đoạn này</summary>
+        {% if segment.asr_status == "not_run" and segment.speaker_count == 2 %}
+        <div class="detail-block">
+          <h3>Âm thanh gốc từng nguồn</h3>
+          <p class="hint">Vùng này được đánh dấu nói chồng. Pipeline chưa tách giọng, nhận diện người nói hoặc chép lời cho vùng này.</p>
+          {% for original_path in segment.original_clip_artifact_ids %}
+          {% set original_url = artifact_url(original_path) %}
+          {% if original_url %}<p>Nguồn {{ loop.index }} <audio controls preload="none" aria-label="Âm thanh gốc nguồn {{ loop.index }} của đoạn nói chồng" src="{{ original_url }}"></audio></p>{% endif %}
+          {% endfor %}
+        </div>
+        {% elif schema_version == "2.0" and segment.source_evidence %}
+        <div class="detail-block">
+          <h3>Dung hợp transcript · {{ segment.fusion_method or fusion_used or "Chưa có dữ liệu" }}</h3>
+          <p class="hint">{{ fusion_description }}</p>
+          <p class="hint">“Trọng số chất lượng transcript ở cấp đoạn” là điểm đầu vào tổng hợp của từng nguồn; không phải tỷ lệ số từ được lấy từ nguồn đó.</p>
+          <div class="scroll-table"><table>
+            <thead><tr><th>Nguồn & clip cùng mốc</th><th>Transcript riêng</th><th>Chất lượng âm thanh</th><th>Chất lượng transcript</th><th>ASR confidence TB</th><th>Đồng thuận từ</th><th>Trọng số chất lượng transcript ở cấp đoạn</th><th>Trọng số nguồn nhận diện</th></tr></thead>
+            <tbody>{% for evidence in segment.source_evidence %}
+              {% set scores = evidence.candidate_scores or {} %}
+              {% set features = evidence.raw_quality_features or {} %}
+              {% set evidence_audio = artifact_url(evidence.evidence_clip_artifact_id) %}
+              <tr>
+                <td><strong>{{ evidence.source_id }}</strong><small>{{ source_names.get(evidence.source_id, "") }}</small>
+                  {% if evidence_audio %}<audio controls preload="none" aria-label="Clip {{ evidence.source_id }} đoạn {{ loop.index }}" src="{{ evidence_audio }}"></audio>{% else %}<span class="hint">Chưa có clip</span>{% endif %}
+                </td>
+                <td>{{ scores.transcript if scores.transcript else "Chưa có dữ liệu" }}</td>
+                <td>{{ scores.audio_quality_score|number(3) }}</td>
+                <td>{{ scores.transcript_quality_score|number(3) }}</td>
+                <td>{{ scores.asr_confidence|number(3) if scores.asr_confidence is not none else "Không có xác suất từ mô hình" }}</td>
+                <td>{{ scores.word_agreement|number(3) if scores.word_agreement is not none else "N/A" }}</td>
+                <td>{{ evidence.selection_weight|number(3) }}</td>
+                <td>{{ evidence.identity_weight|number(3) }}</td>
+              </tr>
+              <tr class="feature-row"><td colspan="8">
+                <strong>Đặc trưng {{ evidence.source_id }}:</strong>
+                SNR {{ features.snr_est|number(1, " dB") }} ·
+                RMS {{ features.rms|number(4) }} ·
+                clipping {{ features.clipping_ratio|percent }} ·
+                dropout {{ features.dropout_ratio|percent }} ·
+                VAD {{ features.vad_confidence|number(3) }} ·
+                spectral flatness {{ features.spectral_flatness|number(3) }} ·
+                zero crossing {{ features.zero_crossing_rate|number(3) }}
+              </td></tr>
+            {% endfor %}</tbody>
+          </table></div>
+        </div>
+        {% else %}<p class="notice">Run schema {{ schema_version }} chưa lưu transcript và điểm chất lượng riêng cho từng nguồn.</p>{% endif %}
+        <div class="detail-block">
+          <h3>Nhận diện người nói</h3>
+          <p>Trạng thái: <strong>{{ "Đã khớp hồ sơ" if segment.speaker_status == "identified" else "Chưa rõ danh tính" }}</strong> · Nhãn: <strong>{{ segment.speaker_label or "Chưa có dữ liệu" }}</strong></p>
+          <p>{{ identity_description }} Điểm dưới đây chưa được hiệu chuẩn thành xác suất đúng.</p>
+          <div class="metric-grid">
+            <span>Điểm {{ "KNN" if identity_method == "mfcc_knn" else "cosine/cluster" }}: <strong>{{ segment.speaker_match_score|number(3) }}</strong></span>
+            <span>Ngưỡng: <strong>{{ manifest.identity_threshold|number(3) }}</strong></span>
+            <span>Margin: <strong>{{ manifest.identity_margin|number(3) }}</strong></span>
+          </div>
+          {% if segment.speaker_top_candidates %}<p>Ứng viên gần nhất:
+            {% for candidate in segment.speaker_top_candidates %}<span class="candidate">{{ speaker_names.get(candidate.speaker_id, candidate.speaker_id) }} ({{ candidate.cosine_score|number(3) }})</span>{% endfor %}
+          </p>{% else %}<p class="hint">Chưa có ứng viên hồ sơ.</p>{% endif %}
+          <p class="hint">Lý do backend: {{ segment.identity_decision_reason or "Chưa có dữ liệu" }}</p>
+          <p class="hint">Trọng số nguồn nhận diện nằm ở cột riêng với trọng số chất lượng transcript phía trên.</p>
+        </div>
+        <details class="word-details"><summary>Theo từng từ</summary>
+          {% set words = segment.provenance.word_provenance if segment.provenance is defined else [] %}
+          {% if words %}<div class="scroll-table"><table><thead><tr><th>Từ cuối</th><th>Confidence</th><th>Nguồn ủng hộ</th><th>Nguồn đại diện</th><th>Điểm nguồn</th></tr></thead>
+            <tbody>{% for word in words %}<tr><td>{{ word.output_word }}</td><td>{{ word.confidence|number(3) }}</td>
+              <td>{{ word.supporting_sources|join(", ") or "Chưa có dữ liệu" }}</td>
+              <td>{{ word.representative_source_id or "Chưa có dữ liệu" }}</td>
+              <td>{% if word.source_scores %}{% for source, score in word.source_scores.items() %}{{ source }}: {{ score|number(3) }}{% if not loop.last %}; {% endif %}{% endfor %}{% else %}Chưa có dữ liệu{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+          {% else %}<p class="hint">Run này chưa lưu nguồn gốc theo từng từ.</p>{% endif %}
+          <p class="hint">Điểm nguồn trong bảng là điểm chất lượng transcript của nguồn ủng hộ; không phải điểm phiếu ở vị trí từ.</p>
+        </details>
+      </details>
+    </article>
+    {% endfor %}
+  </div>
+  <p id="filter-empty" class="empty" hidden>Không có đoạn nào khớp bộ lọc.</p>
+  {% else %}<p class="empty">Không phát hiện đoạn tiếng nói nào.</p>{% endif %}
+</section>
+
+<section class="card" id="sources-section">
+  <div class="section-heading"><div><p class="eyebrow">ĐỐI CHIẾU</p><h2>Nguồn âm thanh đã đồng bộ</h2><p>Các file aligned nằm trên cùng trục thời gian để nghe so sánh.</p></div></div>
+  <div class="scroll-table"><table class="sources-table"><thead><tr><th>Nguồn</th><th>File gốc</th><th>Thời lượng</th><th>Vai trò</th><th>Offset</th><th>Drift</th><th>Residual ước lượng</th><th>Nghe & tải</th></tr></thead><tbody>
+    {% for source in sources %}
+    {% set aligned_path = "aligned/" ~ source.source_id ~ ".wav" %}
+    {% set aligned_url = artifact_url(aligned_path) %}
+    {% set sync = source.synchronization or {} %}
+    <tr><td data-label="Nguồn"><strong>{{ source.source_id }}</strong></td><td data-label="File gốc">{{ source.original_name }}</td>
+      <td data-label="Thời lượng">{{ source.duration_sec|number(2, " giây") }}</td>
+      <td data-label="Vai trò">{{ "Tham chiếu" if source.source_id == reference_source_id else "Nguồn bổ sung" }}</td>
+      <td data-label="Offset">{{ sync.offset_sec|number(3, " giây") }}</td><td data-label="Drift">{{ sync.drift_ppm|number(1, " ppm") }}</td>
+      <td data-label="Residual">{{ sync.residual_ms|number(1, " ms") }}</td>
+      <td data-label="Âm thanh">{% if aligned_url %}<audio controls preload="none" aria-label="Nguồn aligned {{ source.source_id }}" src="{{ aligned_url }}"></audio><a href="{{ aligned_url }}" download>Tải WAV</a>{% else %}Chưa có dữ liệu{% endif %}</td></tr>
+    {% endfor %}
+  </tbody></table></div>
+  {% if not sources and aligned_files %}<p class="notice">Run cũ thiếu coverage chi tiết. Có {{ aligned_files|length }} file aligned để tải.</p>{% endif %}
+  {% if extra_aligned_files %}<div class="aligned-extra"><h3>File aligned khác</h3>
+    {% for file in extra_aligned_files %}{% set url = artifact_url("aligned/" ~ file.name) %}{% if url %}<div class="aligned-legacy">{{ file.name }} <audio controls src="{{ url }}"></audio> <a href="{{ url }}" download>Tải WAV</a></div>{% endif %}{% endfor %}</div>
+  {% endif %}
+</section>
+<section class="card" id="downloads"><div class="section-heading"><div><p class="eyebrow">BÀN GIAO</p><h2>Tải kết quả</h2></div></div>
+  <div class="download-list">
+    {% for format in ["json", "csv", "txt", "zip"] %}
+    <a href="/api/runs/{{ job_id }}/export?format={{ format }}">{{ format|upper }} <span>Tải xuống</span></a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

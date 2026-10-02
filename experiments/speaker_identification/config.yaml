@@ -1,0 +1,80 @@
+schema_version: "1.0"
+run_id: "sid-benchmark-20260924"
+seed: 20260924
+few_shot_k: [1, 3, 5]
+episodes: 30
+known_speakers_per_episode: 5
+unknown_speakers_per_episode: 5
+queries_per_known_speaker: 5
+queries_per_unknown_speaker: 5
+sample_rate: 16000
+device: "cpu"
+
+paths:
+  data_dir: "data"
+  model_cache_dir: "data/model_cache"
+  evaluation_cache_dir: "data/evaluation_cache/speaker_embeddings"
+  reports_dir: "reports/speaker_identification"
+  vivos_train_dir: "data/external/vivos/extracted/vivos/train/waves"
+  vivos_test_dir: "data/external/vivos/extracted/vivos/test/waves"
+  voxvietnam_index_path: "data/external/voxvietnam/subset-index.json"
+  voxvietnam_dir: "data/external/voxvietnam"
+
+encoders:
+  E0:
+    id: "E0"
+    name: "MFCC-120"
+    model_id: "internal/mfcc-120"
+    model_revision: "internal-v1"
+    dimension: 120
+    framework: "librosa"
+  E1:
+    id: "E1"
+    name: "ECAPA-TDNN"
+    model_id: "speechbrain/spkrec-ecapa-voxceleb"
+    model_revision: "0f99f2d0ebe89ac095bcc5903c4dd8f72b367286"
+    dimension: 192
+    framework: "speechbrain"
+  E2:
+    id: "E2"
+    name: "X-vector TDNN"
+    model_id: "speechbrain/spkrec-xvect-voxceleb"
+    model_revision: "56895a2df401be4150a159f3a1c653f00051d477"
+    dimension: 512
+    framework: "speechbrain"
+  E3:
+    id: "E3"
+    name: "WeSpeaker ResNet34-LM"
+    model_id: "pyannote/wespeaker-voxceleb-resnet34-LM"
+    model_revision: "837717ddb9ff5507820346191109dc79c958d614"
+    dimension: 256
+    framework: "pyannote.audio"
+  E4:
+    id: "E4"
+    name: "WavLM Base Plus SV"
+    model_id: "microsoft/wavlm-base-plus-sv"
+    model_revision: "feb593a6c23c1cc3d9510425c29b0a14d2b07b1e"
+    dimension: 512
+    framework: "transformers"
+  E5:
+    id: "E5"
+    name: "TitaNet-Large"
+    model_id: "nvidia/speakerverification_en_titanet_large"
+    model_revision: "b2f6f19e48f86f75ce7c86a655aa9fa2e414c22b"
+    dimension: 192
+    framework: "nemo"
+    optional: true
+
+classifiers:
+  - "cosine_prototype"
+  - "cosine_knn"
+  - "linear_svm"
+
+knn_params:
+  metric: "cosine"
+  weights: "distance"
+  candidate_neighbors: [1, 3, 5]
+
+svm_params:
+  candidate_c: [0.1, 1.0, 10.0]
+  loss: "squared_hinge"

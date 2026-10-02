@@ -1,0 +1,23 @@
+# Profile mô phỏng: stress (phòng vang, SNR thấp hơn, drift lớn, clipping/suy hao ở vài nguồn)
+profile_name: "stress"
+description: "Mô phỏng điều kiện bất lợi, phòng họp vang, một số thiết bị ở góc xa hoặc mic bị rè nhẹ"
+
+room_dimensions: [8.0, 6.0, 3.5]
+rt60_range: [0.50, 0.80]
+
+num_speakers: 4
+num_devices: 4
+
+turn_pause_range: [0.6, 1.2]
+min_meeting_duration_sec: 300.0
+max_meeting_duration_sec: 600.0
+
+snr_db_range: [6.0, 14.0]
+noise_types: ["white", "pink", "brown", "hum_50hz", "room_tone"]
+allow_vivos_babble: true
+
+offset_sec_range: [-0.60, 0.60]
+drift_ppm_range: [-80.0, 80.0]
+
+clipping_ratio_range: [0.01, 0.05]
+dropout_count_range: [0, 2]

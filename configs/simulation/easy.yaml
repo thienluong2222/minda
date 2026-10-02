@@ -1,0 +1,23 @@
+# Profile mô phỏng: easy (SNR cao, ít vang, offset nhỏ, không drift lớn)
+profile_name: "easy"
+description: "Mô phỏng điều kiện phòng thu lý tưởng hoặc phòng họp nhỏ cách âm tốt"
+
+room_dimensions: [4.5, 3.5, 2.6]
+rt60_range: [0.15, 0.25]
+
+num_speakers: 3
+num_devices: 3
+
+turn_pause_range: [0.6, 1.2]
+min_meeting_duration_sec: 300.0
+max_meeting_duration_sec: 450.0
+
+snr_db_range: [20.0, 30.0]
+noise_types: ["room_tone", "pink"]
+allow_vivos_babble: false
+
+offset_sec_range: [-0.05, 0.05]
+drift_ppm_range: [-5.0, 5.0]
+
+clipping_ratio_range: [0.0, 0.0]
+dropout_count_range: [0, 0]

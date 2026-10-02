@@ -1,0 +1,64 @@
+{
+  "description": "Easy diagnostic: two real VIVOS utterances mixed at known gains, no room reverberation/noise/drift. Not representative meeting benchmark. Utterance windows include source silence.",
+  "duration_sec": 5.875,
+  "reference": [
+    {
+      "id": "VIVOSDEV08_090",
+      "duration_sec": 2.375,
+      "reference": "VÌ KHÔNG CÓ TIỀN ĐÓNG HỌC PHÍ",
+      "hypothesis": "vì không có tiền đóng học phí.",
+      "cer": 0.0,
+      "space_token_error_rate": 0.0,
+      "elapsed_sec": 1.5069410828873515,
+      "start_sec": 0.5,
+      "end_sec": 2.875
+    },
+    {
+      "id": "VIVOSDEV09_142",
+      "duration_sec": 3.875,
+      "reference": "VỀ CHUYỆN ĐANG THEO DÕI BỌN GIÁN ĐIỆP NƯỚC NGOÀI",
+      "hypothesis": "về chuyện đang theo dõi bọn gián điệp nước ngoài.",
+      "cer": 0.0,
+      "space_token_error_rate": 0.0,
+      "elapsed_sec": 0.7929112501442432,
+      "start_sec": 1.5,
+      "end_sec": 5.375
+    }
+  ],
+  "elapsed_sec": 4.147123624803498,
+  "run_dir": "/private/tmp/meeting-demo-review/synthetic_data/meetings/controlled-two-speaker-overlap/runs/e8b8e4b6-a433-4c53-8f5f-cad94de0b162",
+  "segments": [
+    {
+      "start": 0.8500000000000001,
+      "end": 1.9000000000000001,
+      "text": "vì không có tiền.",
+      "overlap": false,
+      "source": "source-1",
+      "track": "track-1-1"
+    },
+    {
+      "start": 1.9000000000000001,
+      "end": 2.6,
+      "text": "n.",
+      "overlap": true,
+      "source": "source-1",
+      "track": "track-2-1"
+    },
+    {
+      "start": 1.9000000000000001,
+      "end": 2.6,
+      "text": "đã học tiếng.",
+      "overlap": true,
+      "source": "source-1",
+      "track": "track-2-2"
+    },
+    {
+      "start": 2.6,
+      "end": 4.3500000000000005,
+      "text": "theo dõi bọn gián điệp nước ngoài.",
+      "overlap": false,
+      "source": "source-1",
+      "track": "track-3-1"
+    }
+  ]
+}

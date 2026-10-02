@@ -1,0 +1,23 @@
+# Profile mô phỏng: moderate (thực tế, mỗi speaker có 1-2 device gần, SNR vừa, có offset và drift)
+profile_name: "moderate"
+description: "Mô phỏng phòng họp vừa, người tham gia đặt điện thoại/laptop tại các vị trí khác nhau trên bàn"
+
+room_dimensions: [6.0, 4.5, 3.0]
+rt60_range: [0.30, 0.50]
+
+num_speakers: 4
+num_devices: 4
+
+turn_pause_range: [0.6, 1.2]
+min_meeting_duration_sec: 300.0
+max_meeting_duration_sec: 600.0
+
+snr_db_range: [12.0, 22.0]
+noise_types: ["white", "pink", "brown", "hum_50hz", "room_tone"]
+allow_vivos_babble: true
+
+offset_sec_range: [-0.30, 0.30]
+drift_ppm_range: [-35.0, 35.0]
+
+clipping_ratio_range: [0.0, 0.02]
+dropout_count_range: [0, 1]

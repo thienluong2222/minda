@@ -1,0 +1,26 @@
+# Cấu hình thử nghiệm đầy đủ: full experiment (Development 180 min, Val 60 min, Test 60 min)
+experiment_name: "full_experiment"
+seed: 42
+
+data_config: "configs/data/vivos.yaml"
+simulation_profiles:
+  - "configs/simulation/easy.yaml"
+  - "configs/simulation/moderate.yaml"
+  - "configs/simulation/stress.yaml"
+
+model_config: "configs/models/default.yaml"
+fusion_config: "configs/fusion/default.yaml"
+
+# Quy mô mục tiêu (cuộc họp dài ~6-8 phút/cuộc)
+target_minutes_per_split:
+  development: 180.0
+  validation: 60.0
+  test: 60.0
+
+enrollment_durations_sec: [5.0, 15.0, 30.0]
+
+output_dirs:
+  recipes: "data/recipes/full"
+  generated_audio: "data/generated/full"
+  artifacts: "artifacts/full"
+  reports: "reports/full"

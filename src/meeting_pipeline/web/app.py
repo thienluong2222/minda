@@ -1,0 +1,402 @@
+"""Local FastAPI demo for meeting transcription and source evidence."""
+
+from __future__ import annotations
+
+import json
+import re
+import shutil
+import threading
+import uuid
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Annotated, Any
+from urllib.parse import quote
+
+import soundfile as sf
+from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, UploadFile, status
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+from meeting_pipeline.adapters.audio_io import probe_audio
+from meeting_pipeline.application.speakers import SpeakerRegistry
+from meeting_pipeline.config import PipelineConfig, load_config
+from meeting_pipeline.pipeline.multi_source_fusion import MultiSourceFusionPipeline
+
+Job = dict[str, Any]
+WEB_DIR = Path(__file__).resolve().parent
+TEMPLATES = Environment(
+    loader=FileSystemLoader(WEB_DIR / "templates"),
+    autoescape=select_autoescape(["html"]),
+)
+FUSION_METHODS = {
+    "F1_BEST_SEGMENT": "Chọn toàn bộ transcript từ nguồn có điểm chất lượng transcript cao nhất.",
+    "F3_ROVER": "Căn hàng từ rồi bỏ phiếu đều giữa các nguồn; hòa phiếu ưu tiên bỏ từ.",
+    "F4_ASR_WEIGHTED": "Căn hàng từ rồi cộng điểm theo confidence ASR của từng token.",
+    "F5_RULE_WEIGHTED": "Căn hàng từ rồi cộng điểm chất lượng transcript nhân confidence token.",
+    "F6_LEARNED": "Căn hàng từ rồi dùng mô hình đã huấn luyện để chấm token; có thể chuyển về F5.",
+}
+IDENTITY_METHODS = {
+    "prototype_cosine": "ECAPA: so cosine embedding với hồ sơ, xét ngưỡng và margin.",
+    "mfcc_knn": "MFCC + KNN: so đặc trưng giọng với mẫu đăng ký, xét khoảng cách và margin.",
+}
+
+
+def _now() -> str:
+    return datetime.now(UTC).isoformat()
+
+
+def _write_json(path: Path, payload: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    temporary.replace(path)
+
+
+def _read_json(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        return {}
+    value = json.loads(path.read_text(encoding="utf-8"))
+    return value if isinstance(value, dict) else {}
+
+
+def _number(value: object, digits: int = 2, unit: str = "") -> str:
+    if value is None or isinstance(value, bool):
+        return "Chưa có dữ liệu"
+    try:
+        return f"{float(str(value)):.{digits}f}{unit}"
+    except (TypeError, ValueError):
+        return "Chưa có dữ liệu"
+
+
+def _percent(value: object) -> str:
+    if value is None or isinstance(value, bool):
+        return "Chưa có dữ liệu"
+    try:
+        return f"{float(str(value)) * 100:.1f}%"
+    except (TypeError, ValueError):
+        return "Chưa có dữ liệu"
+
+
+def _clock(value: object) -> str:
+    try:
+        seconds = max(0.0, float(str(value)))
+    except (TypeError, ValueError):
+        return "—"
+    minutes, rest = divmod(seconds, 60)
+    return f"{int(minutes):02d}:{rest:05.2f}"
+
+
+TEMPLATES.filters.update(number=_number, percent=_percent, clock=_clock)
+
+
+def _render(name: str, **context: object) -> HTMLResponse:
+    return HTMLResponse(TEMPLATES.get_template(name).render(**context))
+
+
+class DemoJobs:
+    """Persist one local job per JSON file; inference runs outside request handling."""
+
+    def __init__(self, config: PipelineConfig) -> None:
+        self.config = config
+        self.root = config.paths.data_dir / "demo_jobs"
+        self.upload_root = config.paths.data_dir / "demo_uploads"
+        self.speakers = SpeakerRegistry(config)
+        self.pipeline_lock = threading.Lock()
+        for path in self.root.glob("*.json"):
+            job = _read_json(path)
+            if job.get("status") in {"queued", "running"}:
+                job.update(
+                    status="failed",
+                    completed_at=_now(),
+                    error="Máy chủ đã khởi động lại khi đang xử lý. Hãy tạo lượt chạy mới.",
+                )
+                self.write(job)
+
+    def path(self, job_id: str) -> Path:
+        if re.fullmatch(r"[A-Za-z0-9_-]{1,100}", job_id) is None:
+            raise KeyError(job_id)
+        return self.root / f"{job_id}.json"
+
+    def read(self, job_id: str) -> Job:
+        path = self.path(job_id)
+        if not path.is_file():
+            raise KeyError(job_id)
+        return _read_json(path)
+
+    def write(self, job: Job) -> None:
+        _write_json(self.path(str(job["job_id"])), job)
+
+    def list(self) -> list[Job]:
+        jobs = [_read_json(path) for path in self.root.glob("*.json")]
+        return sorted(jobs, key=lambda item: str(item.get("created_at", "")), reverse=True)
+
+    def execute(self, job_id: str) -> None:
+        with self.pipeline_lock:
+            job = self.read(job_id)
+            job.update(status="running", started_at=_now(), error=None)
+            self.write(job)
+            try:
+                profiles = self.speakers.load(
+                    [str(value) for value in job.get("participant_ids", [])]
+                )
+                run_config = self.config.model_copy(deep=True)
+                run_config.identity["method"] = str(job["identity_method"])
+                run_dir = MultiSourceFusionPipeline(run_config).run(
+                    str(job["meeting_name"]),
+                    [Path(value) for value in job["source_paths"]],
+                    profiles,
+                    fusion_method=str(job["fusion_method"]),
+                )
+            except Exception as exc:
+                job.update(status="failed", completed_at=_now(), error=str(exc))
+                self.write(job)
+                return
+            job.update(status="succeeded", completed_at=_now(), run_dir=str(run_dir.resolve()))
+            self.write(job)
+
+
+def _job_or_404(store: DemoJobs, job_id: str) -> Job:
+    try:
+        return store.read(job_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Không tìm thấy lượt chạy") from exc
+
+
+def _run_dir(job: Job) -> Path:
+    if job.get("status") != "succeeded" or not job.get("run_dir"):
+        raise HTTPException(status_code=409, detail="Lượt chạy chưa hoàn tất")
+    return Path(str(job["run_dir"]))
+
+
+def _artifact_path(run_dir: Path, relative_path: str) -> Path:
+    root = run_dir.resolve()
+    candidate = (root / relative_path).resolve()
+    if not candidate.is_relative_to(root) or not candidate.is_file():
+        raise HTTPException(status_code=404, detail="Không tìm thấy tệp kết quả")
+    return candidate
+
+
+async def _save_uploads(uploads: list[UploadFile], destination: Path, max_bytes: int) -> list[Path]:
+    destination.mkdir(parents=True, exist_ok=False)
+    saved: list[Path] = []
+    try:
+        for index, upload in enumerate(uploads, start=1):
+            filename = Path(upload.filename or f"source-{index}").name
+            target = destination / f"{index:02d}-{filename}"
+            size = 0
+            with target.open("wb") as handle:
+                while chunk := await upload.read(1024 * 1024):
+                    size += len(chunk)
+                    if size > max_bytes:
+                        raise HTTPException(status_code=413, detail=f"Tệp quá lớn: {filename}")
+                    handle.write(chunk)
+            await upload.close()
+            if size == 0:
+                raise HTTPException(status_code=400, detail=f"Tệp rỗng: {filename}")
+            try:
+                probe_audio(target)
+            except Exception as exc:
+                raise HTTPException(
+                    status_code=400, detail=f"Không đọc được âm thanh: {filename}"
+                ) from exc
+            saved.append(target.resolve())
+    except Exception:
+        shutil.rmtree(destination, ignore_errors=True)
+        raise
+    return saved
+
+
+def _result_context(
+    job_id: str, job: Job, run_dir: Path, speakers: SpeakerRegistry
+) -> dict[str, object]:
+    timeline_data = _read_json(run_dir / "timeline.json")
+    coverage = _read_json(run_dir / "coverage.json")
+    manifest = _read_json(run_dir / "manifest.json")
+    segments = timeline_data.get("segments") or []
+    sources = coverage.get("sources") or []
+    names = {str(row.get("source_id", "")): str(row.get("original_name", "")) for row in sources}
+    method_used = manifest.get("fusion_method_used")
+    method_requested = manifest.get("fusion_method_requested") or job.get("fusion_method")
+    identity_method = manifest.get("identity_method_used") or job.get("identity_method")
+    source_count = len(sources) or len(job.get("source_names") or [])
+    aligned_files = sorted((run_dir / "aligned").glob("*.wav"))
+    duration = max(
+        [float(row.get("duration_sec") or row.get("end_sec") or 0) for row in sources]
+        + [float(row.get("end_sec") or 0) for row in segments],
+        default=0.0,
+    )
+    if aligned_files:
+        duration = max(duration, *(sf.info(path).duration for path in aligned_files))
+
+    def artifact_url(relative_path: object) -> str | None:
+        if not isinstance(relative_path, str) or not relative_path:
+            return None
+        try:
+            _artifact_path(run_dir, relative_path)
+        except HTTPException:
+            return None
+        return f"/api/runs/{job_id}/files/{quote(relative_path, safe='/')}"
+
+    return {
+        "job": job,
+        "job_id": job_id,
+        "segments": segments,
+        "sources": sources,
+        "source_names": names,
+        "manifest": manifest,
+        "coverage": coverage,
+        "schema_version": timeline_data.get("schema_version", "1.0"),
+        "fusion_requested": method_requested,
+        "fusion_used": method_used,
+        "fusion_description": FUSION_METHODS.get(str(method_used), "Chưa có dữ liệu"),
+        "fusion_fallback": bool(
+            method_requested and method_used and method_requested != method_used
+        ),
+        "identity_method": identity_method,
+        "identity_description": IDENTITY_METHODS.get(str(identity_method), "Chưa có dữ liệu"),
+        "source_count": source_count,
+        "duration": duration,
+        "identified_count": len(
+            {str(row.get("speaker_id")) for row in segments if row.get("speaker_id")}
+        ),
+        "unknown_count": len(
+            {
+                str(row.get("track_id") or row.get("speaker_label") or "unknown")
+                for row in segments
+                if row.get("speaker_status") != "identified"
+            }
+        ),
+        "reference_source_id": coverage.get("reference_source_id"),
+        "aligned_files": aligned_files,
+        "extra_aligned_files": [
+            path for path in aligned_files
+            if path.stem not in {str(row.get("source_id", "")) for row in sources}
+        ],
+        "speaker_names": {
+            str(profile.get("speaker_id")): str(profile.get("display_name"))
+            for profile in speakers.list_profiles()
+        },
+        "artifact_url": artifact_url,
+    }
+
+
+def create_app(config: PipelineConfig | None = None) -> FastAPI:
+    """Create the demo application; model weights load only for jobs."""
+    config = config or load_config(Path("configs/default.yaml"))
+    store = DemoJobs(config)
+    app = FastAPI(title="Demo nhận diện người nói và dung hợp transcript")
+    app.state.demo_jobs = store
+    app.mount("/static", StaticFiles(directory=WEB_DIR / "static"), name="static")
+
+    @app.get("/", response_class=HTMLResponse)
+    def index() -> HTMLResponse:
+        return _render(
+            "index.html",
+            title="Tạo cuộc họp",
+            speakers=store.speakers.list_profiles(),
+            jobs=store.list(),
+            max_sources=config.audio.max_sources,
+            fusion_methods=FUSION_METHODS,
+            identity_methods=IDENTITY_METHODS,
+        )
+
+    @app.post("/api/speakers")
+    async def enroll_speaker(
+        display_name: Annotated[str, Form(min_length=1, max_length=200)],
+        samples: Annotated[list[UploadFile], File()],
+    ) -> dict[str, object]:
+        if not display_name.strip():
+            raise HTTPException(status_code=400, detail="Hãy nhập tên người tham gia")
+        if not 1 <= len(samples) <= 8:
+            raise HTTPException(status_code=400, detail="Cần 1 đến 8 mẫu giọng")
+        destination = config.paths.data_dir / "speaker_uploads" / str(uuid.uuid4())
+        paths = await _save_uploads(samples, destination, config.audio.max_upload_bytes)
+        try:
+            return store.speakers.enroll(display_name, paths)
+        except (ValueError, RuntimeError) as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/api/runs", status_code=status.HTTP_202_ACCEPTED)
+    async def create_run(
+        background: BackgroundTasks,
+        meeting_name: Annotated[str, Form(min_length=1, max_length=200)],
+        sources: Annotated[list[UploadFile], File()],
+        participant_ids: Annotated[list[str] | None, Form()] = None,
+        identity_method: Annotated[str, Form()] = "prototype_cosine",
+        fusion_method: Annotated[str, Form()] = "F5_RULE_WEIGHTED",
+    ) -> JSONResponse:
+        if not meeting_name.strip():
+            raise HTTPException(status_code=400, detail="Hãy nhập tên cuộc họp")
+        if not 1 <= len(sources) <= config.audio.max_sources:
+            raise HTTPException(status_code=400, detail="Cần 1 đến 8 tệp âm thanh")
+        if identity_method not in IDENTITY_METHODS or fusion_method not in FUSION_METHODS:
+            raise HTTPException(status_code=400, detail="Phương pháp được chọn không hợp lệ")
+        selected_profiles = participant_ids or []
+        known_profiles = {
+            str(profile.get("speaker_id")) for profile in store.speakers.list_profiles()
+        }
+        if any(profile_id not in known_profiles for profile_id in selected_profiles):
+            raise HTTPException(status_code=400, detail="Có hồ sơ người tham gia không tồn tại")
+        job_id = str(uuid.uuid4())
+        paths = await _save_uploads(
+            sources, store.upload_root / job_id, config.audio.max_upload_bytes
+        )
+        job: Job = {
+            "job_id": job_id,
+            "meeting_name": meeting_name.strip(),
+            "status": "queued",
+            "source_paths": [str(path) for path in paths],
+            "source_names": [path.name for path in paths],
+            "participant_ids": selected_profiles,
+            "identity_method": identity_method,
+            "fusion_method": fusion_method,
+            "created_at": _now(),
+            "started_at": None,
+            "completed_at": None,
+            "run_dir": None,
+            "error": None,
+        }
+        store.write(job)
+        background.add_task(store.execute, job_id)
+        return JSONResponse({"job_id": job_id, "status": "queued"}, status_code=202)
+
+    @app.get("/api/runs/{job_id}")
+    def run_status(job_id: str) -> Job:
+        job = _job_or_404(store, job_id)
+        return {key: value for key, value in job.items() if key != "source_paths"}
+
+    @app.get("/runs/{job_id}", response_class=HTMLResponse)
+    def run_page(job_id: str) -> HTMLResponse:
+        job = _job_or_404(store, job_id)
+        if job.get("status") != "succeeded":
+            return _render("state.html", title=str(job.get("meeting_name", "")), job=job)
+        run_dir = _run_dir(job)
+        return _render(
+            "result.html",
+            title=str(job.get("meeting_name", "")),
+            **_result_context(job_id, job, run_dir, store.speakers),
+        )
+
+    @app.get("/api/runs/{job_id}/timeline")
+    def timeline(job_id: str) -> FileResponse:
+        path = _artifact_path(_run_dir(_job_or_404(store, job_id)), "timeline.json")
+        return FileResponse(path)
+
+    @app.get("/api/runs/{job_id}/export")
+    def export(job_id: str, format: str = "zip") -> FileResponse:
+        if format not in {"json", "csv", "txt", "zip"}:
+            raise HTTPException(status_code=400, detail="Định dạng tải xuống không hợp lệ")
+        path = _artifact_path(_run_dir(_job_or_404(store, job_id)), f"exports/result.{format}")
+        return FileResponse(path, filename=path.name)
+
+    @app.get("/api/runs/{job_id}/files/{relative_path:path}")
+    def artifact(job_id: str, relative_path: str) -> FileResponse:
+        path = _artifact_path(_run_dir(_job_or_404(store, job_id)), relative_path)
+        return FileResponse(path)
+
+    @app.get("/health")
+    def health() -> dict[str, str]:
+        return {"status": "ok"}
+
+    return app

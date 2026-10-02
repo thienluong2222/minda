@@ -1,0 +1,34 @@
+{
+  "job_id": "b7df4e9a-db6a-46dd-8386-08bc9c7aa9a4",
+  "status": "succeeded",
+  "elapsed_sec": 26.816681,
+  "rows": 27,
+  "overlap_rows": 10,
+  "same_text_rows_as_existing": 27,
+  "coverage": {
+    "sample_rate": 16000,
+    "sources": [
+      {
+        "source_id": "source-1",
+        "original_name": "01-Nguyen_2.aac",
+        "start_sec": 0.0,
+        "end_sec": 75.456,
+        "offset_sec": 0.0,
+        "scale": 1.0,
+        "alignment_status": "reference",
+        "peak_ratio": null
+      },
+      {
+        "source_id": "source-2",
+        "original_name": "02-Thien_2.aac",
+        "start_sec": 1.51,
+        "end_sec": 75.442375,
+        "offset_sec": 1.51,
+        "scale": 1.0,
+        "alignment_status": "drift_unresolved",
+        "peak_ratio": 1.126070919436983
+      }
+    ]
+  },
+  "settings": "same default config, CPU threads fixed to 4 in isolated review server; weights already cached"
+}

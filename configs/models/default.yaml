@@ -1,0 +1,24 @@
+# Cấu hình các mô hình pretrained ngoại tuyến (pinned revisions)
+
+asr:
+  model_id: "vinai/PhoWhisper-medium"
+  revision: "55a7e3eb6c906de891f8f06a107754427dd3be79"
+  cache_dir: "data/model_cache/models--vinai--PhoWhisper-medium/snapshots/55a7e3eb6c906de891f8f06a107754427dd3be79"
+  language: "vi"
+  task: "transcribe"
+  return_timestamps: true
+
+speaker_encoder:
+  model_id: "speechbrain/spkrec-ecapa-voxceleb"
+  revision: "0f99f2d0ebe89ac095bcc5903c4dd8f72b367286"
+  cache_dir: "data/model_cache/models--speechbrain--spkrec-ecapa-voxceleb/snapshots/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286"
+  embedding_dim: 192
+
+vad:
+  backend: "silero"
+  threshold: 0.5
+  min_speech_sec: 0.25
+  min_silence_sec: 0.30
+  merge_gap_sec: 0.25
+  padding_sec: 0.15
+  max_segment_sec: 15.0

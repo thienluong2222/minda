@@ -1,0 +1,10 @@
+{
+  "clip": "clips/processed/segment-9-track-1.wav",
+  "raw_peak": 11.7130765914917,
+  "raw_over_fullscale_fraction": 0.692875,
+  "stored_peak": 1.0,
+  "stored_near_fullscale_fraction": 0.6930625,
+  "max_raw_stored_error": 10.7130765914917,
+  "asr_raw": "má này không vầy đâu ạ.",
+  "asr_stored": "mã này nó."
+}

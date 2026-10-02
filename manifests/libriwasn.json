@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "libriwasn",
+  "source_version": "zenodo-record-10952434",
+  "license_name": "CC-BY-4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "source_budget_bytes": 1000000000,
+  "archive": {
+    "url": "https://zenodo.org/api/records/10952434/files/LibriWASN_200_OV20.zip/content",
+    "expected_bytes": 4747801245,
+    "source_checksum": "md5:1a8ba4ab2d74300fbe8fdb1de31d3379"
+  },
+  "selection_reason": "Two independent OV20 sessions; three phone channels plus Soundcard reference and VAD labels per session.",
+  "entries": [
+    "LibriWASN/200/OV20/overlap_ratio_20.0_sil0.1_1.0_session4_actual20.0/vad/speaker.csv",
+    "LibriWASN/200/OV20/overlap_ratio_20.0_sil0.1_1.0_session4_actual20.0/record/Pixel7_ntlab_asn_ID_0.wav",
+    "LibriWASN/200/OV20/overlap_ratio_20.0_sil0.1_1.0_session4_actual20.0/record/Pixel6a_ntlab_asn_ID_0.wav",
+    "LibriWASN/200/OV20/overlap_ratio_20.0_sil0.1_1.0_session4_actual20.0/record/Nexus_ntlab_asn_ID_0.wav",
+    "LibriWASN/200/OV20/overlap_ratio_20.0_sil0.1_1.0_session4_actual20.0/record/Soundcard_ntlab_ID_0.wav",
+    "LibriWASN/200/OV20/overlap_ratio_20.0_sil0.1_1.0_session5_actual19.6/vad/speaker.csv",
+    "LibriWASN/200/OV20/overlap_ratio_20.0_sil0.1_1.0_session5_actual19.6/record/Pixel7_ntlab_asn_ID_0.wav",
+    "LibriWASN/200/OV20/overlap_ratio_20.0_sil0.1_1.0_session5_actual19.6/record/Pixel6a_ntlab_asn_ID_0.wav",
+    "LibriWASN/200/OV20/overlap_ratio_20.0_sil0.1_1.0_session5_actual19.6/record/Nexus_ntlab_asn_ID_0.wav",
+    "LibriWASN/200/OV20/overlap_ratio_20.0_sil0.1_1.0_session5_actual19.6/record/Soundcard_ntlab_ID_0.wav"
+  ]
+}

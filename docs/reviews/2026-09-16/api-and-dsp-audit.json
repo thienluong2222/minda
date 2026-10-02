@@ -1,0 +1,227 @@
+{
+  "exports": [
+    {
+      "job": "existing-real-test-2",
+      "format": "json",
+      "status": 200,
+      "bytes": 75361
+    },
+    {
+      "job": "existing-real-test-2",
+      "format": "csv",
+      "status": 200,
+      "bytes": 2691
+    },
+    {
+      "job": "existing-real-test-2",
+      "format": "txt",
+      "status": 200,
+      "bytes": 1916
+    },
+    {
+      "job": "existing-real-test-2",
+      "format": "zip",
+      "status": 200,
+      "bytes": 17280533
+    },
+    {
+      "job": "existing-real-test-1",
+      "format": "json",
+      "status": 200,
+      "bytes": 70244
+    },
+    {
+      "job": "existing-real-test-1",
+      "format": "csv",
+      "status": 200,
+      "bytes": 1868
+    },
+    {
+      "job": "existing-real-test-1",
+      "format": "txt",
+      "status": 200,
+      "bytes": 1170
+    },
+    {
+      "job": "existing-real-test-1",
+      "format": "zip",
+      "status": 200,
+      "bytes": 10761007
+    }
+  ],
+  "inputs": [
+    {
+      "case": "empty_file",
+      "status": 400,
+      "response": {
+        "detail": "File rỗng: empty.wav"
+      }
+    },
+    {
+      "case": "invalid_audio",
+      "status": 202,
+      "response": {
+        "job_id": "46b32457-e5a1-4473-a848-36a21d5b697a",
+        "status": "queued"
+      },
+      "job": {
+        "job_id": "46b32457-e5a1-4473-a848-36a21d5b697a",
+        "meeting_name": "invalid",
+        "status": "failed",
+        "source_names": [
+          "01-not-audio.wav"
+        ],
+        "created_at": "2026-09-16T01:28:21.733563+00:00",
+        "started_at": "2026-09-16T01:28:21.733953+00:00",
+        "completed_at": "2026-09-16T01:28:21.844906+00:00",
+        "run_dir": null,
+        "error": "Cannot probe audio: 01-not-audio.wav"
+      }
+    },
+    {
+      "case": "too_many_sources",
+      "status": 400,
+      "response": {
+        "detail": "Số file nguồn không hợp lệ"
+      }
+    },
+    {
+      "case": "whitespace_name",
+      "status": 202,
+      "stored_name": ""
+    },
+    {
+      "case": "oversized",
+      "status": 413
+    }
+  ],
+  "checks": [
+    {
+      "name": "audio_range",
+      "job": "existing-real-test-2",
+      "status": 206,
+      "content_range": "bytes 0-99/43244",
+      "bytes": 100
+    },
+    {
+      "name": "audio_range",
+      "job": "existing-real-test-1",
+      "status": 206,
+      "content_range": "bytes 0-99/65644",
+      "bytes": 100
+    },
+    {
+      "name": "leftover_uploads",
+      "files": [
+        "demo_uploads/e0cd53a0-c7a0-4c70-8f38-fd4b6da87ddd/01-x.wav",
+        "demo_uploads/8d2b8452-ac20-46c3-9750-05d36bd585c1/01-large.wav",
+        "demo_uploads/46b32457-e5a1-4473-a848-36a21d5b697a/01-not-audio.wav",
+        "demo_uploads/07da4041-bb75-4024-afbb-351edf5e884d/01-empty.wav"
+      ]
+    },
+    {
+      "name": "restart_recovery",
+      "status_after_recreate": "running"
+    },
+    {
+      "name": "different_amplitude_same_quality",
+      "features": [
+        [
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "known_start_offset",
+      "expected": 0.4,
+      "actual": 0.4
+    },
+    {
+      "name": "known_start_offset",
+      "expected": 2,
+      "actual": 2.0
+    },
+    {
+      "name": "known_start_offset",
+      "expected": 5,
+      "actual": 5.0
+    },
+    {
+      "name": "unrelated_signals",
+      "seed": 0,
+      "accepted": false,
+      "error": "Correlation peak is ambiguous"
+    },
+    {
+      "name": "unrelated_signals",
+      "seed": 1,
+      "accepted": true,
+      "offset": -0.2,
+      "peak_ratio": 1.0702589952970794
+    },
+    {
+      "name": "unrelated_signals",
+      "seed": 2,
+      "accepted": true,
+      "offset": -2.9,
+      "peak_ratio": 1.6317612856409418
+    },
+    {
+      "name": "unrelated_signals",
+      "seed": 3,
+      "accepted": true,
+      "offset": -0.2,
+      "peak_ratio": 1.1154292112158215
+    },
+    {
+      "name": "unrelated_signals",
+      "seed": 4,
+      "accepted": true,
+      "offset": -0.4,
+      "peak_ratio": 1.1843337486022179
+    },
+    {
+      "name": "unrelated_signals",
+      "seed": 5,
+      "accepted": false,
+      "error": "Correlation peak is ambiguous"
+    },
+    {
+      "name": "unrelated_signals",
+      "seed": 6,
+      "accepted": true,
+      "offset": -0.6,
+      "peak_ratio": 1.266693121615338
+    },
+    {
+      "name": "unrelated_signals",
+      "seed": 7,
+      "accepted": true,
+      "offset": -1.3,
+      "peak_ratio": 1.1688590031517574
+    },
+    {
+      "name": "unrelated_signals",
+      "seed": 8,
+      "accepted": false,
+      "error": "Correlation peak is ambiguous"
+    },
+    {
+      "name": "unrelated_signals",
+      "seed": 9,
+      "accepted": false,
+      "error": "Correlation peak is ambiguous"
+    },
+    {
+      "name": "continuous_speech_across_coverage_boundary",
+      "error": "No eligible source for detected speech region"
+    }
+  ]
+}
