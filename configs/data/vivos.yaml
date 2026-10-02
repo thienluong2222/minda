@@ -1,0 +1,23 @@
+# Cấu hình corpus VIVOS và phân chia tập dữ liệu
+vivos_root: "data/external/vivos/extracted/vivos"
+manifest_output_path: "data/manifests/vivos.jsonl"
+splits_output_path: "data/manifests/vivos_splits.json"
+catalog_output_path: "data/manifests/enrollment_catalog.json"
+
+# Phân chia speaker-disjoint (46 train, 19 test speakers trong VIVOS gốc)
+# Development (train subset), Validation (train subset), Test (test split gốc)
+development_speaker_count: 32
+validation_speaker_count: 14
+test_speaker_count: 19
+
+# Cấu hình enrollment utterances giữ riêng (không lọt vào nội dung cuộc họp)
+# Đảm bảo có đủ thời lượng cho các mốc enrollment 5s, 15s, 30s
+min_enrollment_utterances: 8
+min_enrollment_duration_sec: 35.0
+
+# Chuẩn hóa âm thanh
+target_sample_rate: 16000
+target_channels: 1
+
+# Ngẫu nhiên hóa có tính tái lập
+seed: 42

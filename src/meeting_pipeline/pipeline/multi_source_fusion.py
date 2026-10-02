@@ -21,6 +21,7 @@ import soundfile as sf
 
 from meeting_pipeline.adapters.audio_io import decode_mono, probe_audio, sha256_file
 from meeting_pipeline.adapters.phowhisper_asr import BaseAsrAdapter, PhoWhisperAsrAdapter
+from meeting_pipeline.adapters.pyannote_segmentation import PyannoteSegmentationAdapter
 from meeting_pipeline.application.speakers import SpeakerProfileInput
 from meeting_pipeline.asr.segment_asr import transcribe_segment_sources
 from meeting_pipeline.audio.synchronization import (
@@ -44,6 +45,7 @@ from meeting_pipeline.fusion.model import LearnedFusionModel
 from meeting_pipeline.fusion.provenance import build_final_timeline_item
 from meeting_pipeline.pipeline.overlap_separation import TwoSpeakerSeparator
 from meeting_pipeline.pipeline.speaker_turns import SpeakerTurn, SpeakerTurnDetector
+from meeting_pipeline.pipeline.stages.shared_segmentation import run_shared_pyannote_segmentation
 from meeting_pipeline.speaker.encoder import ECAPAEncoder
 
 FloatArray = np.ndarray[Any, np.dtype[np.float32]]
@@ -270,6 +272,15 @@ class MultiSourceFusionPipeline:
         for source_id, signal in aligned.items():
             sf.write(run_dir / "aligned" / f"{source_id}.wav", signal, self.sample_rate)
 
+        _write_json(
+            run_dir / "sync_metadata.json",
+            {
+                "schema_version": "1.0",
+                "reference_source_id": reference_source,
+                "sources": sync_metadata,
+            },
+        )
+
         vad_config = VadConfig(
             threshold=self.config.segmentation.vad_threshold,
             min_speech_sec=self.config.segmentation.minimum_speech_ms / 1000.0,
@@ -277,16 +288,6 @@ class MultiSourceFusionPipeline:
             merge_gap_sec=self.config.segmentation.merge_gap_ms / 1000.0,
             padding_sec=self.config.segmentation.speech_pad_ms / 1000.0,
             max_segment_sec=min(15.0, self.config.asr.max_chunk_seconds),
-        )
-        segments = self.segment_extractor(aligned, vad_config, meeting_id, self.sample_rate)
-        _write_json(
-            run_dir / "activity_regions.json",
-            {
-                "schema_version": "2.0",
-                "backend": "multi_source_transcript_fusion",
-                "reference_source_id": reference_source,
-                "segments": [segment.model_dump() for segment in segments],
-            },
         )
 
         checkpoint = (
@@ -300,11 +301,57 @@ class MultiSourceFusionPipeline:
             self.turn_detector = SpeakerTurnDetector(
                 checkpoint, self.config.segmentation.step_seconds
             )
+
+        adapter = getattr(self.turn_detector, "adapter", None)
         aligned_paths = {
             source_id: run_dir / "aligned" / f"{source_id}.wav" for source_id in aligned
         }
         duration_sec = max(len(signal) for signal in aligned.values()) / self.sample_rate
-        turns = self.turn_detector.detect(aligned_paths, segments, reference_source, duration_sec)
+
+        cached_seg = None
+        # Option B: Run shared pyannote segmentation once per source if default extractor
+        if self.segment_extractor is extract_shared_meeting_segments and isinstance(
+            adapter, PyannoteSegmentationAdapter
+        ):
+            segments, cached_seg = run_shared_pyannote_segmentation(
+                aligned_paths=aligned_paths,
+                adapter=adapter,
+                meeting_duration_sec=duration_sec,
+                vad_config=vad_config,
+                meeting_id=meeting_id,
+                sync_metadata=sync_metadata,
+                run_dir=run_dir,
+            )
+            vad_backend = "pyannote_shared"
+        else:
+            segments = self.segment_extractor(aligned, vad_config, meeting_id, self.sample_rate)
+            vad_backend = "multi_source_transcript_fusion"
+
+        _write_json(
+            run_dir / "activity_regions.json",
+            {
+                "schema_version": "2.0",
+                "backend": vad_backend,
+                "reference_source_id": reference_source,
+                "segments": [segment.model_dump() for segment in segments],
+            },
+        )
+
+        try:
+            turns = self.turn_detector.detect(
+                aligned_paths,
+                segments,
+                reference_source,
+                duration_sec,
+                cached_results=cached_seg,
+            )
+        except TypeError:
+            turns = self.turn_detector.detect(
+                aligned_paths,
+                segments,
+                reference_source,
+                duration_sec,
+            )
         _write_json(
             run_dir / "speaker_turns.json",
             {

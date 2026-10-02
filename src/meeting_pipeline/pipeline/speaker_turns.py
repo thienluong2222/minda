@@ -63,14 +63,23 @@ class SpeakerTurnDetector:
         segments: list[MeetingSegment],
         reference_source: str,
         duration_sec: float,
+        cached_results: dict[str, Any] | None = None,
     ) -> list[SpeakerTurn]:
         if not segments:
             return []
         if reference_source not in aligned_paths:
             raise ValueError("Reference source is missing for speaker-turn detection")
         num_bins = max(1, int(np.ceil(duration_sec / self.bin_sec)))
+        def _get_seg(source_id: str, path: Path) -> Any:
+            if cached_results and source_id in cached_results:
+                return cached_results[source_id]
+            try:
+                return self.adapter.segment_file(path, source_id=source_id)
+            except TypeError:
+                return self.adapter.segment_file(path)
+
         tracks_by_source = {
-            source_id: self._decode(self.adapter.segment_file(path), num_bins)
+            source_id: self._decode(_get_seg(source_id, path), num_bins)
             for source_id, path in aligned_paths.items()
         }
         reference = tracks_by_source[reference_source]
@@ -206,9 +215,11 @@ class SpeakerTurnDetector:
                         next_track += 1
                 local_to_global = new_mapping
             for frame_index, frame in enumerate(local):
-                time_sec = chunk_start + (frame_index + 0.5) * frame_step
-                bin_index = int(time_sec / self.bin_sec)
-                if not 0 <= bin_index < num_bins:
+                t_start = chunk_start + frame_index * frame_step
+                t_end = chunk_start + (frame_index + 1) * frame_step
+                start_bin = max(0, int(t_start / self.bin_sec))
+                end_bin = min(num_bins, max(start_bin + 1, int(np.ceil(t_end / self.bin_sec))))
+                if start_bin >= num_bins or end_bin <= 0:
                     continue
                 for local_id, value in enumerate(frame):
                     global_id = local_to_global[local_id]
@@ -218,8 +229,9 @@ class SpeakerTurnDetector:
                         grow = global_id + 1 - stitched.shape[1]
                         stitched = np.pad(stitched, ((0, 0), (0, grow)))
                         votes = np.pad(votes, ((0, 0), (0, grow)))
-                    stitched[bin_index, global_id] += value
-                    votes[bin_index, global_id] += 1
+                    for b in range(start_bin, end_bin):
+                        stitched[b, global_id] += value
+                        votes[b, global_id] += 1
             previous = local
             previous_start = chunk_start
         return np.divide(stitched, votes, out=np.zeros_like(stitched), where=votes > 0) >= 0.5
