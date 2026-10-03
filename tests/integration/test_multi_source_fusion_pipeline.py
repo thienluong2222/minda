@@ -357,3 +357,11 @@ def test_configured_p3_reaches_artifact_and_timeline(tmp_path: Path, monkeypatch
     assert decision["source_evidence"][0]["candidate_cosine_scores"]["alice"] == 1.0
     assert timeline["speaker_status"] == "ambiguous"
     assert timeline["needs_review"] is True
+    assert timeline["source_evidence"][0]["identity_weight"] > 0
+    assert timeline["source_evidence"][0]["speaker_candidate_cosine_scores"]["alice"] == 1.0
+    manifest = json.loads((run / "manifest.json").read_text())
+    assert manifest["speaker_fusion_policy"] == "P3_WEIGHTED_SCORE_FUSION"
+    assert manifest["speaker_calibration_status"] == "unvalidated"
+    assert manifest["speaker_quality_formula_version"] == "speaker_q_v3"
+    assert manifest["speaker_thresholds"]["cluster_distance"] == 0.4
+    assert manifest["models"]["vad"] == "multi_source_transcript_fusion"

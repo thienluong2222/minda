@@ -53,7 +53,7 @@ class SourceQualityResult:
     supporting_source: bool | None = None
     support_duration_sec: float | None = None
     embedding_status: str = "not_run"
-    quality_formula_version: str = "speaker_q_v2"
+    quality_formula_version: str = "speaker_q_v3"
     candidate_cosine_scores: dict[str, float] = field(default_factory=dict)
 
     def as_dict(self) -> dict[str, Any]:
@@ -110,6 +110,7 @@ def evaluate_source_quality_for_speaker_id(
     coverage_fraction: float | None = None,
     residual_gate_ms: float = 20.0,
     purity_gate: float = 0.8,
+    ablate_quality_feature: str | None = None,
 ) -> SourceQualityResult:
     """Measure speech coverage, clipping, dropout, and local SNR proxy for speaker ID."""
     dur = float(len(turn_waveform)) / sample_rate if sample_rate > 0 else 0.0
@@ -137,7 +138,7 @@ def evaluate_source_quality_for_speaker_id(
         missing_reason = "missing_source_activity"
     elif support_duration_sec < 0.2:
         missing_reason = "no_source_speech_support"
-    elif purity < purity_gate:
+    elif purity < purity_gate and ablate_quality_feature != "purity":
         missing_reason = "multiple_local_speakers"
     if missing_reason is not None:
         return SourceQualityResult(
@@ -229,18 +230,21 @@ def evaluate_source_quality_for_speaker_id(
     raw["local_snr_proxy_db"] = snr_proxy_db
 
     assert vad_coverage is not None and purity is not None
-    speech_sec = dur * max(0.0, min(1.0, vad_coverage))
+    # The clip has already been selected from speech-active frames. Multiplying
+    # by whole-turn coverage again would double-discount short supported clips.
+    assert support_duration_sec is not None
+    speech_sec = min(dur, support_duration_sec)
     raw["speech_seconds"] = speech_sec
 
     # Gating criteria for speaker identification eligibility
     exclusion_reason: str | None = None
     if dur < 0.25 or speech_sec < 0.20:
         exclusion_reason = "insufficient_speech"
-    elif clipping_ratio > 0.08:
+    elif clipping_ratio > 0.08 and ablate_quality_feature != "clipping":
         exclusion_reason = "excessive_clipping"
-    elif dropout_ratio > 0.25:
+    elif dropout_ratio > 0.25 and ablate_quality_feature != "dropout":
         exclusion_reason = "signal_dropout"
-    elif snr_proxy_db < 2.0:
+    elif snr_proxy_db < 2.0 and ablate_quality_feature != "snr":
         exclusion_reason = "poor_snr"
     elif speech_rms < 1e-4:
         exclusion_reason = "inaudible_signal"
@@ -253,11 +257,22 @@ def evaluate_source_quality_for_speaker_id(
         snr_factor = float(np.clip((snr_proxy_db - 2.0) / 20.0, 0.05, 1.0))
         # Duration factor: 0.2s -> 0.2, 1.5s+ -> 1.0
         dur_factor = float(np.clip(speech_sec / 1.5, 0.2, 1.0))
-        clean_factor = float(np.clip(1.0 - (clipping_ratio * 5.0 + dropout_ratio * 2.0), 0.1, 1.0))
+        effective_clipping = 0.0 if ablate_quality_feature == "clipping" else clipping_ratio
+        effective_dropout = 0.0 if ablate_quality_feature == "dropout" else dropout_ratio
+        clean_factor = float(
+            np.clip(1.0 - (effective_clipping * 5.0 + effective_dropout * 2.0), 0.1, 1.0)
+        )
         purity_factor = float(np.clip(purity, 0.5, 1.0))
-
+        factors = {
+            "snr": (0.40, snr_factor),
+            "duration": (0.30, dur_factor),
+            "clean": (0.20, clean_factor),
+            "purity": (0.10, purity_factor),
+        }
+        factors.pop(ablate_quality_feature or "", None)
         quality_score = float(
-            0.40 * snr_factor + 0.30 * dur_factor + 0.20 * clean_factor + 0.10 * purity_factor
+            sum(weight * value for weight, value in factors.values())
+            / sum(weight for weight, _ in factors.values())
         )
     else:
         quality_score = 0.0

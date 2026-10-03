@@ -370,6 +370,7 @@ class MultiSourceFusionPipeline:
                 reference_source,
                 duration_sec,
                 cached_results=cached_seg,
+                sync_metadata=sync_metadata,
             )
         except TypeError:
             turns = self.turn_detector.detect(
@@ -381,7 +382,7 @@ class MultiSourceFusionPipeline:
         _write_json(
             run_dir / "speaker_turns.json",
             {
-                "schema_version": "1.0",
+                "schema_version": "2.0",
                 "model": f"pyannote/segmentation-3.0@{self.config.models['segmentation_revision']}",
                 "turns": [turn.as_dict() for turn in turns],
             },
@@ -440,6 +441,21 @@ class MultiSourceFusionPipeline:
                     enrolled_match_threshold=enrolled_thresh,
                     enrolled_margin=enrolled_margin,
                     fusion_policy=policy,
+                    sync_residual_gate_ms=float(
+                        str(self.config.identity.get("speaker_sync_residual_gate_ms", 20.0))
+                    ),
+                    local_purity_gate=float(
+                        str(self.config.identity.get("speaker_local_purity_gate", 0.8))
+                    ),
+                    disagreement_min_weight=float(
+                        str(self.config.identity.get("speaker_disagreement_min_weight", 0.25))
+                    ),
+                    dominant_source_weight=float(
+                        str(self.config.identity.get("speaker_dominant_source_weight", 0.70))
+                    ),
+                    dominant_source_gap=float(
+                        str(self.config.identity.get("speaker_dominant_source_gap", 0.35))
+                    ),
                 )
 
             assignments, _cluster_decisions, cluster_summary = self.clusterer.cluster_and_identify(
@@ -626,7 +642,10 @@ class MultiSourceFusionPipeline:
                     "speaker_evidence": turn.source_evidence,
                     "warnings": turn.warnings,
                     "needs_review": turn.needs_review,
-                    "source_weights": _normalized_weights(audio_scores, 1.0),
+                    "source_weights": {
+                        str(row["source_id"]): float(row["identity_weight"])
+                        for row in turn.source_evidence
+                    },
                 }
 
             if turn.track_id in track_speakers and not turn.track_id.startswith("unresolved"):
@@ -694,11 +713,11 @@ class MultiSourceFusionPipeline:
             )
             previous_turn = turn
 
-        _write_json(run_dir / "speaker_clusters.json", cluster_summary)
+        _write_json(run_dir / "speaker_clusters.json", {"schema_version": "2.0", **cluster_summary})
         _write_json(
             run_dir / "speaker_decisions.json",
             {
-                "schema_version": "1.0",
+                "schema_version": "2.0",
                 "turns": [a.as_dict() for a in assignments.values()],
             },
         )
@@ -717,6 +736,7 @@ class MultiSourceFusionPipeline:
             actual_method,
             run_warnings,
             profiles,
+            vad_backend,
         )
         return run_dir
 
@@ -1114,18 +1134,23 @@ class MultiSourceFusionPipeline:
 
         speaker_ev_by_source: dict[str, dict[str, Any]] = {}
         raw_spk_ev = speaker.get("speaker_evidence", {})
-        if isinstance(raw_spk_ev, dict):
-            src_ev_list = raw_spk_ev.get("source_evidence", [])
-            if isinstance(src_ev_list, list):
-                for entry in src_ev_list:
-                    if isinstance(entry, dict) and "source_id" in entry:
-                        speaker_ev_by_source[str(entry["source_id"])] = entry
+        src_ev_list = (
+            raw_spk_ev
+            if isinstance(raw_spk_ev, list)
+            else raw_spk_ev.get("source_evidence", [])
+            if isinstance(raw_spk_ev, dict)
+            else []
+        )
+        if isinstance(src_ev_list, list):
+            for entry in src_ev_list:
+                if isinstance(entry, dict) and "source_id" in entry:
+                    speaker_ev_by_source[str(entry["source_id"])] = entry
 
         source_evidence = []
         for source_id, hypothesis in hypotheses.items():
             spk_ev = speaker_ev_by_source.get(source_id, {})
             spk_weight = spk_ev.get("identity_weight", identity_weights.get(source_id, 0.0))
-            spk_eligible = spk_ev.get("is_eligible", True)
+            spk_eligible = spk_ev.get("is_eligible")
             spk_exclusion = spk_ev.get("exclusion_reason")
 
             source_evidence.append(
@@ -1139,6 +1164,11 @@ class MultiSourceFusionPipeline:
                     "identity_weight": spk_weight,
                     "identity_eligible": spk_eligible,
                     "identity_exclusion_reason": spk_exclusion,
+                    "speaker_speech_coverage": spk_ev.get("speech_coverage"),
+                    "speaker_local_purity": spk_ev.get("local_speaker_purity"),
+                    "speaker_sync_status": spk_ev.get("sync_status"),
+                    "speaker_valid_coverage_interval": spk_ev.get("valid_coverage_interval"),
+                    "speaker_candidate_cosine_scores": spk_ev.get("candidate_cosine_scores", {}),
                     "selection_weight": fusion_weights.get(source_id, 0.0),
                     "raw_quality_features": {
                         **hypothesis.audio_features,
@@ -1226,7 +1256,7 @@ class MultiSourceFusionPipeline:
         run_id: str,
         timeline: list[dict[str, object]],
         source_rows: list[dict[str, object]],
-        sync_metadata: dict[str, dict[str, float]],
+        sync_metadata: dict[str, dict[str, Any]],
         reference_source: str,
         hypotheses: list[dict[str, object]],
         decisions: list[dict[str, object]],
@@ -1234,6 +1264,7 @@ class MultiSourceFusionPipeline:
         actual_method: str,
         warnings: list[str],
         profiles: list[SpeakerProfileInput],
+        vad_backend: str,
     ) -> None:
         coverage_sources = []
         for row in source_rows:
@@ -1266,6 +1297,40 @@ class MultiSourceFusionPipeline:
                 "anonymous_cluster_threshold": self.config.identity.get(
                     "anonymous_cluster_threshold"
                 ),
+                "speaker_fusion_policy": (
+                    self.clusterer.fusion_policy.value
+                    if self.clusterer is not None
+                    and str(self.config.identity.get("method", "prototype_cosine")) != "mfcc_knn"
+                    else None
+                ),
+                "speaker_quality_formula_version": "speaker_q_v3",
+                "speaker_calibration_status": "unvalidated",
+                "speaker_thresholds": {
+                    "cluster_distance": self.clusterer.cluster_threshold
+                    if self.clusterer
+                    else None,
+                    "assign_similarity": self.clusterer.assign_threshold
+                    if self.clusterer
+                    else None,
+                    "assign_margin": self.clusterer.assign_margin if self.clusterer else None,
+                    "profile_score": self.clusterer.enrolled_match_threshold
+                    if self.clusterer
+                    else None,
+                    "profile_margin": self.clusterer.enrolled_margin if self.clusterer else None,
+                    "sync_residual_ms": (
+                        self.clusterer.sync_residual_gate_ms if self.clusterer else None
+                    ),
+                    "local_purity": self.clusterer.local_purity_gate if self.clusterer else None,
+                    "disagreement_min_weight": (
+                        self.clusterer.disagreement_min_weight if self.clusterer else None
+                    ),
+                    "dominant_source_weight": (
+                        self.clusterer.dominant_source_weight if self.clusterer else None
+                    ),
+                    "dominant_source_gap": (
+                        self.clusterer.dominant_source_gap if self.clusterer else None
+                    ),
+                },
                 "warnings": warnings,
                 "speaker_profiles": [profile.speaker_id for profile in profiles],
                 "models": {
@@ -1281,7 +1346,7 @@ class MultiSourceFusionPipeline:
                         f"{self.config.identity['model_id']}@"
                         f"{self.config.identity['model_revision']}"
                     ),
-                    "vad": "silero_vad",
+                    "vad": vad_backend,
                     "speaker_turns": (
                         f"pyannote/segmentation-3.0@{self.config.models['segmentation_revision']}"
                     ),

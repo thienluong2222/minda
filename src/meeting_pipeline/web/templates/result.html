@@ -19,6 +19,7 @@
     <p>{{ fusion_description }}</p></div>
   <div class="method-meta"><p>Yêu cầu: <strong>{{ fusion_requested or "Chưa có dữ liệu" }}</strong></p>
     <p>Nhận diện: <strong>{{ "MFCC + KNN" if identity_method == "mfcc_knn" else "ECAPA + cosine" if identity_method == "prototype_cosine" else "Chưa có dữ liệu" }}</strong></p></div>
+  {% if manifest.speaker_fusion_policy %}<p class="hint">Dung hợp chứng cứ người nói: {{ manifest.speaker_fusion_policy }} · Hiệu chỉnh ngưỡng: {{ manifest.speaker_calibration_status or "Chưa có dữ liệu" }}. Điểm cosine và trọng số không phải xác suất.</p>{% endif %}
   {% if fusion_fallback %}<p class="notice">Phương pháp yêu cầu {{ fusion_requested }} đã chuyển sang {{ fusion_used }}. {{ manifest.warnings|join(" · ") }}</p>{% endif %}
   {% if not fusion_used %}<p class="notice">Run cũ không lưu phương pháp fusion đã dùng.</p>{% endif %}
 </section>
@@ -133,6 +134,20 @@
           </p>{% else %}<p class="hint">Chưa có ứng viên hồ sơ.</p>{% endif %}
           <p class="hint">Lý do backend: {{ segment.identity_decision_reason or "Chưa có dữ liệu" }}</p>
           <p class="hint">Trọng số nguồn nhận diện nằm ở cột riêng với trọng số chất lượng transcript phía trên.</p>
+          {% if segment.source_evidence %}<details><summary>Chứng cứ nhận diện theo nguồn</summary>
+            <div class="scroll-table"><table><thead><tr><th>Nguồn</th><th>Đồng bộ</th><th>Phủ tiếng nói</th><th>Độ thuần một giọng</th><th>Đủ điều kiện</th><th>Lý do loại</th><th>Trọng số nhận diện</th><th>Cosine theo hồ sơ (P3)</th></tr></thead><tbody>
+              {% for evidence in segment.source_evidence %}<tr>
+                <td>{{ evidence.source_id }}</td>
+                <td>{{ evidence.speaker_sync_status or "Chưa có dữ liệu" }}</td>
+                <td>{{ evidence.speaker_speech_coverage|percent }}</td>
+                <td>{{ evidence.speaker_local_purity|percent }}</td>
+                <td>{{ "Có" if evidence.identity_eligible == true else "Không" if evidence.identity_eligible == false else "Chưa có dữ liệu" }}</td>
+                <td>{{ evidence.identity_exclusion_reason or "—" }}</td>
+                <td>{{ evidence.identity_weight|number(3) }}</td>
+                <td>{% if evidence.speaker_candidate_cosine_scores %}{% for candidate, score in evidence.speaker_candidate_cosine_scores.items() %}{{ speaker_names.get(candidate, candidate) }}: {{ score|number(3) }}{% if not loop.last %}; {% endif %}{% endfor %}{% else %}Chưa có dữ liệu{% endif %}</td>
+              </tr>{% endfor %}
+            </tbody></table></div>
+          </details>{% endif %}
         </div>
         <details class="word-details"><summary>Theo từng từ</summary>
           {% set words = segment.provenance.word_provenance if segment.provenance is defined else [] %}

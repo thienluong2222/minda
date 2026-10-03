@@ -208,6 +208,12 @@ class GlobalSpeakerClusterer:
         enrolled_margin: float = 0.08,
         min_seed_duration_sec: float = 0.8,
         fusion_policy: SpeakerFusionPolicy = SpeakerFusionPolicy.P2_EMBEDDING_FUSION,
+        ablate_quality_feature: str | None = None,
+        sync_residual_gate_ms: float = 20.0,
+        local_purity_gate: float = 0.8,
+        disagreement_min_weight: float = 0.25,
+        dominant_source_weight: float = 0.70,
+        dominant_source_gap: float = 0.35,
     ) -> None:
         self.encoder = encoder
         self.cluster_threshold = cluster_threshold
@@ -217,6 +223,12 @@ class GlobalSpeakerClusterer:
         self.enrolled_margin = enrolled_margin
         self.min_seed_duration_sec = min_seed_duration_sec
         self.fusion_policy = fusion_policy
+        self.ablate_quality_feature = ablate_quality_feature
+        self.sync_residual_gate_ms = sync_residual_gate_ms
+        self.local_purity_gate = local_purity_gate
+        self.disagreement_min_weight = disagreement_min_weight
+        self.dominant_source_weight = dominant_source_weight
+        self.dominant_source_gap = dominant_source_gap
 
     def _extract_turn_embedding(
         self,
@@ -282,6 +294,9 @@ class GlobalSpeakerClusterer:
                 local_sync_residual_ms=sync.get("local_residual_ms", sync.get("residual_ms")),
                 support_duration_sec=activity.get("support_duration_sec"),
                 coverage_fraction=coverage_fraction,
+                ablate_quality_feature=self.ablate_quality_feature,
+                residual_gate_ms=self.sync_residual_gate_ms,
+                purity_gate=self.local_purity_gate,
             )
             evaluations[source_id] = q_res
 
@@ -498,7 +513,8 @@ class GlobalSpeakerClusterer:
                         if sid in weights
                     }
                     strong = sorted(
-                        ((sid, weights[sid]) for sid in source_scores if weights[sid] >= 0.25),
+                        ((sid, weights[sid]) for sid in source_scores
+                         if weights[sid] >= self.disagreement_min_weight),
                         key=lambda item: item[1],
                         reverse=True,
                     )
@@ -514,7 +530,8 @@ class GlobalSpeakerClusterer:
                             self.enrolled_margin,
                         )
                         if first_top and second_top and first_top != second_top:
-                            if strong[0][1] >= 0.7 and strong[0][1] - strong[1][1] >= 0.35:
+                            if (strong[0][1] >= self.dominant_source_weight
+                                and strong[0][1] - strong[1][1] >= self.dominant_source_gap):
                                 source_scores = {strong[0][0]: source_scores[strong[0][0]]}
                                 weights = {strong[0][0]: 1.0}
                                 policy_notes.append(f"dominant_source_top1:{strong[0][0]}")
@@ -701,6 +718,10 @@ class GlobalSpeakerClusterer:
                 )
 
         cluster_summary = {
+            "schema_version": "2.0",
+            "speaker_fusion_policy": self.fusion_policy.value,
+            "quality_formula_version": "speaker_q_v3",
+            "calibration_status": "unvalidated",
             "total_clusters": len(cluster_decisions),
             "identified_count": sum(
                 1 for cd in cluster_decisions if cd.speaker_status == "identified"

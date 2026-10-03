@@ -115,3 +115,26 @@ def test_per_source_activity_is_measured_not_defaulted() -> None:
     assert overlap.source_activity["other"]["local_speaker_purity"] == 0.0
     before = next(turn for turn in turns if turn.end_sec == 0.5)
     assert before.source_activity["other"]["speech_coverage"] == 0.0
+
+
+def test_alignment_failed_source_cannot_create_turn() -> None:
+    silent = np.zeros((1, 40, 3), dtype=np.float32)
+    loud = silent.copy()
+    loud[0, :, 0] = 1.0
+
+    class PerSourceAdapter:
+        def segment_file(self, path: Path, source_id: str = "") -> SimpleNamespace:
+            del path
+            return SimpleNamespace(
+                data=silent if source_id == "ref" else loud,
+                sliding_window=_Window(2.0, 1.0),
+            )
+
+    detector = SpeakerTurnDetector(Path("unused"), 1.0, PerSourceAdapter())
+    turns = detector.detect(
+        {"ref": Path("ref"), "failed": Path("failed")},
+        _segment(2.0), "ref", 2.0,
+        sync_metadata={"ref": {"status": "reference"},
+                       "failed": {"status": "alignment_failed"}},
+    )
+    assert turns == []

@@ -545,8 +545,20 @@ def run_full_ablation_benchmarks() -> dict[str, Any]:
         },
     ]
 
+    # These A0-A7 rows are a fixture inventory, not measured comparisons. The
+    # previous fixed RTF and qualitative ratings were mistakenly presented as results.
+    for row in ablation_matrix:
+        row["rtf_relative"] = None
+        row["speaker_stability"] = "Chưa đo trên audio thật"
+        row["hallucination_protection"] = "Chưa đo trên audio thật"
+        if row["id"] in {"A3", "A4", "A5", "A6", "A7"}:
+            row["speaker_id_mode"] = "Mock fixture; không đo P3"
+    ablation_matrix[-1]["name"] = "Fixture đầy đủ (không phải runtime default)"
+
     report = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "evidence_type": "mock_fixture_not_quality_or_speed_evidence",
+        "runtime_speaker_policy": "P2_EMBEDDING_FUSION",
         "ablation_matrix": ablation_matrix,
         "shared_segmentation_benchmark": vad_res,
         "speaker_clustering_benchmark": spk_res,
@@ -560,13 +572,13 @@ def run_full_ablation_benchmarks() -> dict[str, Any]:
 
     # Generate Markdown Report
     md_lines = [
-        "# BÁO CÁO KẾT QUẢ ĐÁNH GIÁ MA TRẬN ABLATION & HIỆU NĂNG PIPELINE (WP7)",
+        "# Kiểm tra logic bằng fixture mock (không phải báo cáo chất lượng hoặc tốc độ)",
+        "",
+        "**Cảnh báo:** ASR/encoder dùng mock và các hàng A0-A7 không chạy trên cùng audio thật. "
+        "Không dùng báo cáo này để kết luận P3, RTF hay độ chính xác. Runtime hiện mặc định P2.",
         "",
         f"**Thời gian thực hiện:** {report['timestamp']}",
-        (
-            "**Mục tiêu:** Kiểm chứng tuần tự từng cải tiến kiến trúc "
-            "từ A0 đến A7 theo đúng kế hoạch triển khai."
-        ),
+        "**Mục tiêu:** Kiểm tra logic trên fixture mock; không xếp hạng cấu hình runtime.",
         "",
         "## 1. Ma trận Ablation (A0 - A7)",
         "",
@@ -582,7 +594,7 @@ def run_full_ablation_benchmarks() -> dict[str, Any]:
             f"{row['speaker_id_mode']} | {row['asr_mode']} | "
         )
         line_part2 = (
-            f"{row['fusion_mode']} | **{row['rtf_relative']:.2f}x** | "
+            f"{row['fusion_mode']} | Chưa đo | "
             f"{row['speaker_stability']} | {row['hallucination_protection']} |"
         )
         md_lines.append(line_part1 + line_part2)
@@ -592,12 +604,12 @@ def run_full_ablation_benchmarks() -> dict[str, Any]:
     md_lines.extend(
         [
             "",
-            "## 2. Kết quả Đo lường Độc lập Từng Tầng",
+            "## 2. Kiểm tra từng tầng bằng fixture mock",
             "",
             "### 2.1. Tầng VAD & Phân đoạn (Option B vs Legacy)",
             f"- **Thời gian chạy Option B:** `{vad_res['shared_vad_time_sec']}s`",
             f"- **Thời gian ước tính theo Legacy:** `{vad_res['legacy_vad_time_sec']}s`",
-            f"- **Tỉ lệ tăng tốc (Speedup):** `{vad_res['speedup_ratio']}x`",
+            "- **Tỉ lệ tăng tốc runtime:** Chưa đo (legacy ở đây chỉ nhân đôi thời gian mock).",
             (
                 f"- **Vùng VAD phát hiện:** `{vad_res['vad_regions_found']}`, "
                 f"**Speaker turns:** `{vad_res['speaker_turns_found']}`"
@@ -606,8 +618,8 @@ def run_full_ablation_benchmarks() -> dict[str, Any]:
             "### 2.2. Tầng Nhận diện Danh tính & Gom cụm Toàn cục (Global Speaker Clustering)",
             f"- **Hỗ trợ 0 hồ sơ đăng ký:** `{zero_enr_str}`",
             (
-                f"- **Độ ổn định chuỗi nhãn Người lạ:** "
-                f"`{'Ổn định 100%' if spk_res['is_stable'] else 'Bị nhảy nhãn'}`"
+                f"- **Chuỗi nhãn trên fixture mock:** "
+                f"`{'không đổi' if spk_res['is_stable'] else 'thay đổi'}`"
             ),
             (
                 f"- **Nhãn Người lạ A:** `{spk_res['speaker_a_stable_label']}`, "
@@ -625,7 +637,7 @@ def run_full_ablation_benchmarks() -> dict[str, Any]:
                 f"- **Số nguồn bị loại bỏ trước ASR:** "
                 f"`{asr_res['saved_calls']}` ({asr_res['abstained_sources']})"
             ),
-            f"- **Tỉ lệ giảm tải số lượng cuộc gọi ASR:** **{asr_res['reduction_percentage']}**",
+            f"- **Giảm lượt gọi mock ASR trên fixture:** {asr_res['reduction_percentage']}",
             "",
             "### 2.4. Tầng Dung hợp Transcript (Baselines vs F5 Sửa)",
             "| Phương pháp | Transcript đầu ra | CER Proxy | Lọc được từ ảo giác? |",
@@ -641,25 +653,10 @@ def run_full_ablation_benchmarks() -> dict[str, Any]:
     md_lines.extend(
         [
             "",
-            "## 3. Kết luận & Cấu hình Mặc định Được Chọn",
-            "- **Cấu hình mặc định chọn cho Runtime:** **A7 (Toàn hệ thống)**.",
-            "- **Lý do lựa chọn:**",
-            (
-                "  1. **Hiệu năng:** Giảm hơn 60% thời gian xử lý tổng thể nhờ chia sẻ pyannote "
-                "1 lần (Option B) và Adaptive ASR routing loại bỏ các kênh nhiễu/dropout."
-            ),
-            (
-                "  2. **Độ ổn định danh tính:** `GlobalSpeakerClusterer` gán mã `ms-0001`, "
-                "`ms-0002`... và nhãn 'Người lạ 1', 'Người lạ 2' nhất quán xuyên suốt cuộc họp."
-            ),
-            (
-                "  3. **Chống ảo giác:** `F5_RULE_WEIGHTED_CORRECTED` bảo vệ nguồn chính "
-                "(best source) không bị chèn thêm các từ ảo giác ngắn từ các mic phụ."
-            ),
-            (
-                "  4. **An toàn dữ liệu:** Bảo lưu 100% vùng nói chồng `not_run`, giữ clip gốc đối "
-                "chiếu và cho phép đổi nhãn hiển thị tức thời qua API."
-            ),
+            "## 3. Giới hạn",
+            "- Các phép đo speaker-only bằng encoder thật được thực hiện riêng trong "
+            "`scripts/evaluate_speaker_multisource.py`.",
+            "- Không có kết luận chất lượng hoặc tốc độ end-to-end từ fixture này.",
         ]
     )
 

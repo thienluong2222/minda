@@ -236,6 +236,20 @@ def test_invalid_source_evidence_never_gets_weight() -> None:
     assert missing.local_snr_proxy_db is None
 
 
+def test_active_crop_speech_is_not_discounted_twice() -> None:
+    sr = 16000
+    time = np.arange(round(sr * 0.3), dtype=np.float32) / sr
+    clip = (0.3 * np.sin(2 * np.pi * 220 * time)).astype(np.float32)
+    full = np.pad(clip, (sr, sr))
+    result = evaluate_source_quality_for_speaker_id(
+        "short_support", clip, sr, full_signal=full,
+        turn_start_sec=1.0, turn_end_sec=1.3,
+        **{**MEASURED, "vad_coverage": 0.2, "support_duration_sec": 0.4},
+    )
+    assert result.speech_seconds == 0.3
+    assert result.is_eligible
+
+
 def test_all_sources_invalid_does_not_encode_or_create_unknown() -> None:
     encoder = ControlledEncoder()
     clusterer = GlobalSpeakerClusterer(encoder, min_seed_duration_sec=0.5)
@@ -275,7 +289,7 @@ def test_all_sources_invalid_does_not_encode_or_create_unknown() -> None:
     assert all(row["identity_weight"] == 0.0 for row in assignments["t"].source_evidence)
 
 
-def test_p3_real_path_preserves_conflicting_source_scores() -> None:
+def test_p3_real_path_preserves_conflicting_source_scores(monkeypatch) -> None:
     sr = 16000
     a = np.zeros(sr * 3, dtype=np.float32)
     b = np.zeros(sr * 3, dtype=np.float32)
@@ -326,6 +340,33 @@ def test_p3_real_path_preserves_conflicting_source_scores() -> None:
     assert evidence["a"]["candidate_cosine_scores"]["alice"] == 1.0
     assert evidence["b"]["candidate_cosine_scores"]["bob"] == 1.0
 
+    # The same turn is the only observation, even though two phones recorded it.
+    agreement, _, _ = clusterer.cluster_and_identify(
+        [turn], {"a": a, "b": a * 0.8}, sr, profiles, sync_metadata=sync
+    )
+    assert agreement["t"].speaker_id == "alice"
+    assert "source_disagreement" not in agreement["t"].decision_reason
+
+    import meeting_pipeline.speaker.clustering as clustering_module
+
+    original = clustering_module.evaluate_source_quality_for_speaker_id
+
+    def weighted_quality(**kwargs):
+        result = original(**kwargs)
+        if result.is_eligible:
+            result.identity_quality_score = 0.9 if kwargs["source_id"] == "a" else 0.35
+        return result
+
+    monkeypatch.setattr(
+        clustering_module, "evaluate_source_quality_for_speaker_id", weighted_quality
+    )
+    dominant, _, _ = clusterer.cluster_and_identify(
+        [turn], {"a": a, "b": b}, sr, profiles, sync_metadata=sync
+    )
+    assert dominant["t"].speaker_id == "alice"
+    assert "dominant_source_top1:a" in dominant["t"].decision_reason
+    monkeypatch.setattr(clustering_module, "evaluate_source_quality_for_speaker_id", original)
+
     # An excluded phone cannot vote, and P3 then makes the sole valid comparison.
     sync["b"]["status"] = "alignment_failed"
     accepted, _, _ = clusterer.cluster_and_identify(
@@ -342,3 +383,7 @@ def test_p3_real_path_preserves_conflicting_source_scores() -> None:
         [turn], {"a": a, "b": b}, sr, [], sync_metadata=sync
     )
     assert unknown["t"].speaker_status == "unknown"
+    partial, _, _ = clusterer.cluster_and_identify(
+        [turn], {"a": a, "b": b}, sr, profiles[:1], sync_metadata=sync
+    )
+    assert partial["t"].speaker_id == "alice"

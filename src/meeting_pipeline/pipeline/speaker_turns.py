@@ -66,6 +66,7 @@ class SpeakerTurnDetector:
         reference_source: str,
         duration_sec: float,
         cached_results: dict[str, Any] | None = None,
+        sync_metadata: dict[str, dict[str, Any]] | None = None,
     ) -> list[SpeakerTurn]:
         if not segments:
             return []
@@ -81,9 +82,13 @@ class SpeakerTurnDetector:
             except TypeError:
                 return self.adapter.segment_file(path)
 
+        active_paths = {
+            source_id: path for source_id, path in aligned_paths.items()
+            if (sync_metadata or {}).get(source_id, {}).get("status") != "alignment_failed"
+        }
         tracks_by_source = {
             source_id: self._decode(_get_seg(source_id, path), num_bins)
-            for source_id, path in aligned_paths.items()
+            for source_id, path in active_paths.items()
         }
         reference = tracks_by_source[reference_source]
         turns: list[SpeakerTurn] = []

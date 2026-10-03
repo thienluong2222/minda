@@ -43,6 +43,15 @@ identity:
   identity_threshold: 0.25
   identity_margin: 0.05
   anonymous_cluster_threshold: 0.1
+  cluster_threshold: 0.40
+  assign_threshold: 0.35
+  assign_margin: 0.05
+  fusion_policy: P2_EMBEDDING_FUSION
+  speaker_sync_residual_gate_ms: 20.0
+  speaker_local_purity_gate: 0.8
+  speaker_disagreement_min_weight: 0.25
+  speaker_dominant_source_weight: 0.70
+  speaker_dominant_source_gap: 0.35
   calibration_artifact: null
   quality_weights: [0.4, 0.4, 0.2]
   temperature: 0.25

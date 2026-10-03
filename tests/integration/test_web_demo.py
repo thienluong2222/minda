@@ -92,6 +92,10 @@ def _fixture_run(tmp_path: Path, version: str) -> Path:
                     "source_id": "source-1",
                     "selection_weight": 0.25,
                     "identity_weight": 0.7,
+                    "speaker_sync_status": "reference",
+                    "speaker_speech_coverage": 0.92,
+                    "speaker_local_purity": 0.88,
+                    "speaker_candidate_cosine_scores": {"profile-1": 0.76},
                     "candidate_scores": {
                         "transcript": "xin chào",
                         "audio_quality_score": 0.62,
@@ -148,6 +152,8 @@ def _fixture_run(tmp_path: Path, version: str) -> Path:
                 {
                     "fusion_method_requested": "F6_LEARNED",
                     "fusion_method_used": "F5_RULE_WEIGHTED",
+                    "speaker_fusion_policy": "P3_WEIGHTED_SCORE_FUSION",
+                    "speaker_calibration_status": "unvalidated",
                     "identity_method_used": "mfcc_knn",
                     "identity_threshold": 0.25,
                     "identity_margin": 0.05,
@@ -298,6 +304,10 @@ def test_schema_2_result_evidence_audio_and_export(tmp_path: Path) -> None:
         "8.5 ms",
         "Speaker 1",
         "profile-1",
+        "Chứng cứ nhận diện theo nguồn",
+        "92.0%",
+        "88.0%",
+        "0.760",
     ):
         assert text in page.text
     assert "máy &lt;script&gt;1&lt;/script&gt;.wav" in page.text
