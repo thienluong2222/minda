@@ -12,7 +12,6 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import numpy as np
-from sklearn.cluster import AgglomerativeClustering  # type: ignore[import-untyped]
 
 from meeting_pipeline.application.speakers import SpeakerProfileInput
 from meeting_pipeline.pipeline.speaker_turns import SpeakerTurn
@@ -29,6 +28,73 @@ from meeting_pipeline.speaker.source_quality import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _cannot_link(left: SpeakerTurn, right: SpeakerTurn) -> bool:
+    """Local tracks imply different voices only where both are active concurrently."""
+    overlap = min(left.end_sec, right.end_sec) - max(left.start_sec, right.start_sec)
+    return (
+        overlap >= 0.05
+        and left.speaker_count == right.speaker_count == 1
+        and left.track_id != right.track_id
+        and not left.track_id.startswith("unresolved")
+        and not right.track_id.startswith("unresolved")
+        and left.speech_region_id == right.speech_region_id
+    )
+
+
+def _constrained_groups(
+    turns: list[SpeakerTurn], embeddings: dict[str, np.ndarray], max_distance: float
+) -> list[list[str]]:
+    """Average-link clustering with a hard pairwise cannot-link at every merge."""
+    groups = [[turn.turn_id] for turn in turns]
+    lookup = {turn.turn_id: turn for turn in turns}
+    while len(groups) > 1:
+        best: tuple[float, int, int] | None = None
+        for i, left in enumerate(groups):
+            for j in range(i + 1, len(groups)):
+                right = groups[j]
+                if any(_cannot_link(lookup[a], lookup[b]) for a in left for b in right):
+                    continue
+                distance = float(np.mean([
+                    1.0 - float(np.dot(embeddings[a], embeddings[b]))
+                    for a in left for b in right
+                ]))
+                if distance <= max_distance and (best is None or distance < best[0]):
+                    best = (distance, i, j)
+        if best is None:
+            break
+        _, i, j = best
+        groups[i].extend(groups[j])
+        del groups[j]
+    return groups
+
+
+def _merge_sparse_seed_groups(
+    groups: list[list[str]], turns: dict[str, SpeakerTurn], embeddings: dict[str, np.ndarray],
+    similarity_threshold: float, margin_threshold: float,
+) -> list[list[str]]:
+    """Attach small seed islands to a multi-turn anchor only with distinctive evidence."""
+    anchors = [group for group in groups if len(group) >= 3]
+    sparse = [group for group in groups if len(group) < 3]
+    for group in sparse:
+        vector = np.mean(np.stack([embeddings[tid] for tid in group]), axis=0)
+        vector /= max(float(np.linalg.norm(vector)), 1e-8)
+        ranked: list[tuple[float, int]] = []
+        for index, anchor in enumerate(anchors):
+            if any(_cannot_link(turns[a], turns[b]) for a in group for b in anchor):
+                continue
+            centroid = np.mean(np.stack([embeddings[tid] for tid in anchor]), axis=0)
+            centroid /= max(float(np.linalg.norm(centroid)), 1e-8)
+            ranked.append((float(np.dot(vector, centroid)), index))
+        ranked.sort(reverse=True)
+        if ranked and ranked[0][0] >= similarity_threshold and (
+            len(ranked) == 1 or ranked[0][0] - ranked[1][0] >= margin_threshold
+        ):
+            anchors[ranked[0][1]].extend(group)
+        else:
+            anchors.append(group)
+    return anchors
 
 
 @dataclass(slots=True)
@@ -249,34 +315,11 @@ class GlobalSpeakerClusterer:
         if len(seed_turns) == 1:
             clusters = [[seed_turns[0].turn_id]]
         elif len(seed_turns) > 1:
-            seed_embs = np.stack([turn_embeddings[t.turn_id] for t in seed_turns])
-            # Cosine distance matrix D = 1 - (A @ A.T)
-            cos_sim = np.clip(seed_embs @ seed_embs.T, -1.0, 1.0)
-            dist_matrix = np.clip(1.0 - cos_sim, 0.0, 2.0)
-
-            # Apply cannot-link constraints (turns with distinct track_id in adjacent overlap)
-            for i, t_i in enumerate(seed_turns):
-                for j, t_j in enumerate(seed_turns):
-                    if (
-                        i != j
-                        and t_i.speech_region_id == t_j.speech_region_id
-                        and t_i.track_id != t_j.track_id
-                    ):
-                        dist_matrix[i, j] = 999.0
-                        dist_matrix[j, i] = 999.0
-
-            clustering = AgglomerativeClustering(
-                n_clusters=None,
-                distance_threshold=self.cluster_threshold,
-                metric="precomputed",
-                linkage="average",
+            clusters = _constrained_groups(seed_turns, turn_embeddings, self.cluster_threshold)
+            clusters = _merge_sparse_seed_groups(
+                clusters, {turn.turn_id: turn for turn in seed_turns}, turn_embeddings,
+                self.assign_threshold, self.assign_margin,
             )
-            labels = clustering.fit_predict(dist_matrix)
-
-            cluster_map: dict[int, list[str]] = {}
-            for idx, label in enumerate(labels):
-                cluster_map.setdefault(label, []).append(seed_turns[idx].turn_id)
-            clusters = list(cluster_map.values())
         else:
             # Fallback when all turns are short (< min_seed_duration_sec)
             for t in single_speaker_turns:
@@ -321,7 +364,12 @@ class GlobalSpeakerClusterer:
                 turn_to_cluster[turn.turn_id] = len(cluster_centroids) - 1
                 continue
 
-            sims = [float(np.dot(emb, c)) for c in cluster_centroids]
+            sims = [
+                float(np.dot(emb, c)) if not any(
+                    _cannot_link(turn, turn_dict[tid]) for tid in cluster_turn_ids[i]
+                ) else -1.0
+                for i, c in enumerate(cluster_centroids)
+            ]
             best_idx = int(np.argmax(sims))
             best_sim = sims[best_idx]
             runner_up = sorted(sims, reverse=True)[1] if len(sims) > 1 else -1.0

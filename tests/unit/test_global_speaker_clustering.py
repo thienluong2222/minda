@@ -15,7 +15,12 @@ from meeting_pipeline.application.speakers import (
 )
 from meeting_pipeline.config import load_config
 from meeting_pipeline.pipeline.speaker_turns import SpeakerTurn
-from meeting_pipeline.speaker.clustering import GlobalSpeakerClusterer
+from meeting_pipeline.speaker.clustering import (
+    GlobalSpeakerClusterer,
+    _cannot_link,
+    _constrained_groups,
+    _merge_sparse_seed_groups,
+)
 
 
 class DummyEncoder:
@@ -62,6 +67,38 @@ def _make_turn(
         track_id=track_id,
         speaker_count=speaker_count,
     )
+
+
+def test_cannot_link_requires_concurrent_local_activity() -> None:
+    a = _make_turn("a", 0.0, 1.0, track_id="local-1")
+    b = _make_turn("b", 1.0, 2.0, track_id="local-2")
+    concurrent = _make_turn("c", 0.5, 1.5, track_id="local-2")
+    assert not _cannot_link(a, b)
+    assert _cannot_link(a, concurrent)
+    embeddings = {
+        "a": np.array([1.0, 0.0], dtype=np.float32),
+        "b": np.array([1.0, 0.0], dtype=np.float32),
+        "c": np.array([1.0, 0.0], dtype=np.float32),
+    }
+    groups = _constrained_groups([a, b, concurrent], embeddings, 0.4)
+    assert any(set(group) == {"a", "b"} for group in groups)
+    assert any(set(group) == {"c"} for group in groups)
+
+
+def test_sparse_seed_requires_distinctive_multi_turn_anchor() -> None:
+    turns = [_make_turn(str(i), float(i), float(i + 1)) for i in range(8)]
+    vectors = {
+        str(i): np.array([1.0, 0.0], dtype=np.float32) if i < 4 else
+        np.array([0.0, 1.0], dtype=np.float32)
+        for i in range(8)
+    }
+    groups = _merge_sparse_seed_groups(
+        [["0", "1", "2"], ["3"], ["4", "5", "6"], ["7"]],
+        {turn.turn_id: turn for turn in turns}, vectors, 0.35, 0.05,
+    )
+    assert {frozenset(group) for group in groups} == {
+        frozenset({"0", "1", "2", "3"}), frozenset({"4", "5", "6", "7"})
+    }
 
 
 def test_clustering_zero_enrolled_profiles() -> None:
