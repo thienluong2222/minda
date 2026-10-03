@@ -16,16 +16,27 @@ from meeting_pipeline.speaker.source_quality import (
     fuse_turn_speaker_embeddings,
 )
 
+MEASURED = {
+    "sync_status": "reference",
+    "vad_coverage": 1.0,
+    "purity": 1.0,
+    "valid_coverage_interval": [0.0, 4.0],
+    "local_sync_residual_ms": 0.0,
+    "support_duration_sec": 1.0,
+}
+
 
 class ControlledEncoder:
     """Mock encoder returning unit vectors mapped to speaker tag."""
 
     def __init__(self, dimension: int = 192) -> None:
         self.embedding_dimension = dimension
+        self.calls = 0
 
     def encode(
         self, waveform: np.ndarray[Any, np.dtype[np.float32]]
     ) -> np.ndarray[Any, np.dtype[np.float32]]:
+        self.calls += 1
         vec = np.zeros(self.embedding_dimension, dtype=np.float32)
         mean_v = float(np.mean(waveform))
         if mean_v > 0.3:
@@ -51,6 +62,7 @@ def test_source_quality_clean_vs_noisy_and_clipping() -> None:
         full_signal=full_clean,
         turn_start_sec=1.0,
         turn_end_sec=2.0,
+        **MEASURED,
     )
     assert res_clean.is_eligible
     assert res_clean.exclusion_reason is None
@@ -63,6 +75,7 @@ def test_source_quality_clean_vs_noisy_and_clipping() -> None:
         source_id="clipped_mic",
         turn_waveform=clipped_wave,
         sample_rate=sr,
+        **MEASURED,
     )
     assert not res_clip.is_eligible
     assert res_clip.exclusion_reason == "excessive_clipping"
@@ -73,6 +86,7 @@ def test_source_quality_clean_vs_noisy_and_clipping() -> None:
         source_id="silent_mic",
         turn_waveform=silent_wave,
         sample_rate=sr,
+        **MEASURED,
     )
     assert not res_silent.is_eligible
     assert res_silent.exclusion_reason in (
@@ -91,12 +105,14 @@ def test_normalized_source_weights() -> None:
     full = np.pad(clean, (sr, sr))
 
     q1 = evaluate_source_quality_for_speaker_id(
-        "src-1", clean, sr, full_signal=full, turn_start_sec=1.0
+        "src-1", clean, sr, full_signal=full, turn_start_sec=1.0, **MEASURED
     )
     q2 = evaluate_source_quality_for_speaker_id(
-        "src-2", clean * 0.5, sr, full_signal=full * 0.5, turn_start_sec=1.0
+        "src-2", clean * 0.5, sr, full_signal=full * 0.5, turn_start_sec=1.0, **MEASURED
     )
-    q_bad = evaluate_source_quality_for_speaker_id("src-bad", np.ones(sr, dtype=np.float32), sr)
+    q_bad = evaluate_source_quality_for_speaker_id(
+        "src-bad", np.ones(sr, dtype=np.float32), sr, **MEASURED
+    )
 
     evals = {"src-1": q1, "src-2": q2, "src-bad": q_bad}
     weights = compute_normalized_source_weights(evals)
@@ -159,6 +175,15 @@ def test_global_clusterer_with_quality_gating() -> None:
         speech_region_id="reg-1",
         track_id="tr-1",
         speaker_count=1,
+        source_activity={
+            sid: {
+                "speech_coverage": 1.0,
+                "local_speaker_purity": 1.0,
+                "support_duration_sec": 1.5,
+                "speech_intervals": [[1.0, 2.5]],
+            }
+            for sid in aligned
+        },
     )
 
     assignments, _decisions, _summary = clusterer.cluster_and_identify(
@@ -166,6 +191,14 @@ def test_global_clusterer_with_quality_gating() -> None:
         aligned_signals=aligned,
         sample_rate=sr,
         profiles=[],
+        sync_metadata={
+            sid: {
+                "status": "reference" if sid == "phone_clean" else "aligned",
+                "residual_ms": 0.0,
+                "valid_coverage_interval": [0.0, 4.0],
+            }
+            for sid in aligned
+        },
     )
 
     assign = assignments["turn-1"]
@@ -175,3 +208,67 @@ def test_global_clusterer_with_quality_gating() -> None:
     assert ev_by_src["phone_clipped"]["is_eligible"] is False
     assert ev_by_src["phone_clipped"]["exclusion_reason"] == "excessive_clipping"
     assert ev_by_src["phone_clean"]["identity_weight"] == 1.0
+
+
+def test_invalid_source_evidence_never_gets_weight() -> None:
+    signal = np.full(16000, 0.5, dtype=np.float32)
+    cases = [
+        ({"sync_status": "alignment_failed"}, "alignment_failed"),
+        (
+            {"sync_status": "drift_unresolved", "local_sync_residual_ms": None},
+            "drift_unresolved_without_local_evidence",
+        ),
+        ({"coverage_fraction": 0.2}, "outside_valid_coverage"),
+        ({"support_duration_sec": 0.0, "vad_coverage": 0.0}, "no_source_speech_support"),
+        ({"purity": 0.5}, "multiple_local_speakers"),
+    ]
+    for overrides, reason in cases:
+        result = evaluate_source_quality_for_speaker_id(
+            "loud_but_invalid", signal, 16000, **{**MEASURED, **overrides}
+        )
+        assert result.exclusion_reason == reason
+        assert result.identity_weight == 0.0
+        assert compute_normalized_source_weights({"bad": result}) == {}
+    missing = evaluate_source_quality_for_speaker_id("unmeasured", signal, 16000)
+    assert missing.speech_coverage is None
+    assert missing.local_speaker_purity is None
+    assert missing.local_snr_proxy_db is None
+
+
+def test_all_sources_invalid_does_not_encode_or_create_unknown() -> None:
+    encoder = ControlledEncoder()
+    clusterer = GlobalSpeakerClusterer(encoder, min_seed_duration_sec=0.5)
+    turn = SpeakerTurn(
+        turn_id="t",
+        speech_region_id="r",
+        start_sec=0.0,
+        end_sec=1.0,
+        track_id="local-1",
+        speaker_count=1,
+        source_activity={
+            sid: {
+                "speech_coverage": 1.0,
+                "local_speaker_purity": 1.0,
+                "support_duration_sec": 1.0,
+                "speech_intervals": [[0.0, 1.0]],
+            }
+            for sid in ("failed", "short")
+        },
+    )
+    assignments, _, summary = clusterer.cluster_and_identify(
+        [turn],
+        {
+            "failed": np.full(16000, 0.5, dtype=np.float32),
+            "short": np.full(16000, 0.5, dtype=np.float32),
+        },
+        16000,
+        [],
+        sync_metadata={
+            "failed": {"status": "alignment_failed", "valid_coverage_interval": [0.0, 1.0]},
+            "short": {"status": "aligned", "valid_coverage_interval": [0.0, 0.1]},
+        },
+    )
+    assert encoder.calls == 0
+    assert summary["total_clusters"] == 0
+    assert assignments["t"].speaker_status == "ambiguous"
+    assert all(row["identity_weight"] == 0.0 for row in assignments["t"].source_evidence)

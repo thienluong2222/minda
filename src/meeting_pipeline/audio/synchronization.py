@@ -145,7 +145,8 @@ def synchronize_multi_source_audio(
                 "offset_sec": 0.0,
                 "drift_ppm": 0.0,
                 "residual_ms": 0.0,
-                "status": "aligned",
+                "status": "reference",
+                "valid_coverage_interval": [0.0, len(sig) / sample_rate],
             }
             max_len = max(max_len, len(sig))
             continue
@@ -183,12 +184,21 @@ def synchronize_multi_source_audio(
         if abs(drift_ppm) > 0.01:
             shifted = apply_clock_drift(shifted, -drift_ppm)
 
+        # Record real samples before equal-length tail padding; a shifted leading
+        # zero region is also outside coverage. Drift resampling scales both.
+        leading_sec = max(0.0, offset_sec)
+        if abs(drift_ppm) > 0.01:
+            leading_sec *= len(shifted) / max(
+                len(apply_start_offset(sig, offset_sec, sample_rate)), 1
+            )
+
         aligned_signals[src_id] = shifted
         sync_metadata[src_id] = {
             "offset_sec": offset_sec,
             "drift_ppm": drift_ppm,
             "residual_ms": residual_ms,
             "status": status,
+            "valid_coverage_interval": [leading_sec, len(shifted) / sample_rate],
         }
         max_len = max(max_len, len(shifted))
 
@@ -243,7 +253,10 @@ def extract_shared_meeting_segments(
         valid_sources.append(src_id)
         dur_sec = len(sig) / sample_rate
         meeting_duration_sec = max(meeting_duration_sec, dur_sec)
-        source_coverages[src_id] = (0.0, dur_sec)
+        coverage = (sync_metadata or {}).get(src_id, {}).get("valid_coverage_interval")
+        source_coverages[src_id] = (
+            (float(coverage[0]), float(coverage[1])) if coverage else (0.0, dur_sec)
+        )
 
         tensor_audio = torch.from_numpy(sig).float()
 

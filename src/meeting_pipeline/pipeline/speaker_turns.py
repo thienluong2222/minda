@@ -28,6 +28,7 @@ class SpeakerTurn:
     speaker_count: int
     overlap_group_id: str | None = None
     supporting_source_ids: list[str] = field(default_factory=list)
+    source_activity: dict[str, dict[str, Any]] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
 
     def as_dict(self) -> dict[str, object]:
@@ -40,6 +41,7 @@ class SpeakerTurn:
             "speaker_count": self.speaker_count,
             "overlap_group_id": self.overlap_group_id,
             "supporting_source_ids": self.supporting_source_ids,
+            "source_activity": self.source_activity,
             "warnings": self.warnings,
         }
 
@@ -124,6 +126,10 @@ class SpeakerTurnDetector:
                         {sid for group in supporters[run_start:index] for sid in group}
                     )
                     for label in labels:
+                        activity = {
+                            sid: source_activity_for_turn(matrix, start, end, self.bin_sec)
+                            for sid, matrix in tracks_by_source.items()
+                        }
                         turns.append(
                             SpeakerTurn(
                                 turn_id=f"turn_{len(turns):04d}",
@@ -134,6 +140,7 @@ class SpeakerTurnDetector:
                                 speaker_count=len(labels),
                                 overlap_group_id=group_id,
                                 supporting_source_ids=support,
+                                source_activity=activity,
                                 warnings=(
                                     ["speaker_track_unresolved"]
                                     if label.startswith("unresolved")
@@ -249,3 +256,40 @@ def _smooth_states(states: list[tuple[str, ...]], minimum_bins: int) -> list[tup
             result[i:j] = [result[i - 1]] * (j - i)
         i = j
     return result
+
+
+def source_activity_for_turn(
+    matrix: np.ndarray, start_sec: float, end_sec: float, bin_sec: float
+) -> dict[str, Any]:
+    """Measure per-source active speech, local multi-speaker occupancy and intervals."""
+    first = max(0, int(np.floor(start_sec / bin_sec)))
+    last = min(len(matrix), int(np.ceil(end_sec / bin_sec)))
+    counts = np.count_nonzero(matrix[first:last], axis=1)
+    active = counts > 0
+    support_sec = float(np.count_nonzero(active) * bin_sec)
+    duration = max(end_sec - start_sec, 1e-8)
+    intervals: list[list[float]] = []
+    begin: int | None = None
+    for offset, is_active in enumerate([*active, False]):
+        if is_active and begin is None:
+            begin = offset
+        elif not is_active and begin is not None:
+            intervals.append(
+                [
+                    round(max(start_sec, (first + begin) * bin_sec), 3),
+                    round(min(end_sec, (first + offset) * bin_sec), 3),
+                ]
+            )
+            begin = None
+    return {
+        "speech_seconds": round(support_sec, 3),
+        "speech_coverage": round(min(1.0, support_sec / duration), 3),
+        "local_speaker_purity": (
+            round(float(np.count_nonzero(counts == 1) / np.count_nonzero(active)), 3)
+            if np.any(active)
+            else None
+        ),
+        "supporting_source": support_sec >= 0.2,
+        "support_duration_sec": round(support_sec, 3),
+        "speech_intervals": intervals,
+    }

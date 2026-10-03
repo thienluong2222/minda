@@ -208,7 +208,10 @@ def run_shared_pyannote_segmentation(
             adapter.save_npz(npz_path, seg_res)
 
         # Aligned audio coverage
-        source_coverages[source_id] = (0.0, meeting_duration_sec)
+        coverage = (sync_metadata or {}).get(source_id, {}).get("valid_coverage_interval")
+        source_coverages[source_id] = (
+            (float(coverage[0]), float(coverage[1])) if coverage else (0.0, meeting_duration_sec)
+        )
 
         # Compute activity curve from pyannote multi-label predictions
         curve = compute_pyannote_activity_curve(

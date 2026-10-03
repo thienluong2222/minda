@@ -92,3 +92,26 @@ def test_segmentation_silence_inside_vad_does_not_create_a_speaker() -> None:
     assert all(not turn.track_id.startswith("unresolved") for turn in turns)
     assert turns[0].end_sec <= 1.3
     assert turns[1].start_sec >= 1.7
+
+
+def test_per_source_activity_is_measured_not_defaulted() -> None:
+    reference = np.zeros((1, 40, 3), dtype=np.float32)
+    reference[0, :, 0] = 1
+    other = np.zeros((1, 40, 3), dtype=np.float32)
+    other[0, 10:30, 0] = 1
+    other[0, 10:30, 1] = 1
+
+    class PerSourceAdapter:
+        def segment_file(self, path: Path, source_id: str = "") -> SimpleNamespace:
+            del path
+            data = reference if source_id == "ref" else other
+            return SimpleNamespace(data=data, sliding_window=_Window(2.0, 1.0))
+
+    detector = SpeakerTurnDetector(Path("unused"), 1.0, PerSourceAdapter())
+    turns = detector.detect({"ref": Path("ref"), "other": Path("other")}, _segment(2.0), "ref", 2.0)
+    overlap = next(turn for turn in turns if turn.start_sec == 0.5)
+    assert overlap.source_activity["ref"]["speech_coverage"] == 1.0
+    assert overlap.source_activity["other"]["speech_coverage"] == 1.0
+    assert overlap.source_activity["other"]["local_speaker_purity"] == 0.0
+    before = next(turn for turn in turns if turn.end_sec == 0.5)
+    assert before.source_activity["other"]["speech_coverage"] == 0.0

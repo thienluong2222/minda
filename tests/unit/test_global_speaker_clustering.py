@@ -66,6 +66,14 @@ def _make_turn(
         speech_region_id=speech_region_id,
         track_id=track_id,
         speaker_count=speaker_count,
+        source_activity={
+            "mic-1": {
+                "speech_coverage": 1.0,
+                "local_speaker_purity": 1.0,
+                "support_duration_sec": end_sec - start_sec,
+                "speech_intervals": [[start_sec, end_sec]],
+            }
+        },
     )
 
 
@@ -88,16 +96,21 @@ def test_cannot_link_requires_concurrent_local_activity() -> None:
 def test_sparse_seed_requires_distinctive_multi_turn_anchor() -> None:
     turns = [_make_turn(str(i), float(i), float(i + 1)) for i in range(8)]
     vectors = {
-        str(i): np.array([1.0, 0.0], dtype=np.float32) if i < 4 else
-        np.array([0.0, 1.0], dtype=np.float32)
+        str(i): np.array([1.0, 0.0], dtype=np.float32)
+        if i < 4
+        else np.array([0.0, 1.0], dtype=np.float32)
         for i in range(8)
     }
     groups = _merge_sparse_seed_groups(
         [["0", "1", "2"], ["3"], ["4", "5", "6"], ["7"]],
-        {turn.turn_id: turn for turn in turns}, vectors, 0.35, 0.05,
+        {turn.turn_id: turn for turn in turns},
+        vectors,
+        0.35,
+        0.05,
     )
     assert {frozenset(group) for group in groups} == {
-        frozenset({"0", "1", "2", "3"}), frozenset({"4", "5", "6", "7"})
+        frozenset({"0", "1", "2", "3"}),
+        frozenset({"4", "5", "6", "7"}),
     }
 
 
@@ -133,6 +146,13 @@ def test_clustering_zero_enrolled_profiles() -> None:
         aligned_signals=aligned,
         sample_rate=sr,
         profiles=[],
+        sync_metadata={
+            "mic-1": {
+                "status": "reference",
+                "residual_ms": 0.0,
+                "valid_coverage_interval": [0.0, 8.0],
+            }
+        },
     )
 
     assert summary["total_clusters"] == 2
@@ -187,6 +207,13 @@ def test_clustering_partial_enrollment() -> None:
         aligned_signals=aligned,
         sample_rate=sr,
         profiles=[profile_a],
+        sync_metadata={
+            "mic-1": {
+                "status": "reference",
+                "residual_ms": 0.0,
+                "valid_coverage_interval": [0.0, 4.0],
+            }
+        },
     )
 
     assert summary["identified_count"] == 1

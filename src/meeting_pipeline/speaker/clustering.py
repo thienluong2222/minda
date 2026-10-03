@@ -56,10 +56,15 @@ def _constrained_groups(
                 right = groups[j]
                 if any(_cannot_link(lookup[a], lookup[b]) for a in left for b in right):
                     continue
-                distance = float(np.mean([
-                    1.0 - float(np.dot(embeddings[a], embeddings[b]))
-                    for a in left for b in right
-                ]))
+                distance = float(
+                    np.mean(
+                        [
+                            1.0 - float(np.dot(embeddings[a], embeddings[b]))
+                            for a in left
+                            for b in right
+                        ]
+                    )
+                )
                 if distance <= max_distance and (best is None or distance < best[0]):
                     best = (distance, i, j)
         if best is None:
@@ -71,8 +76,11 @@ def _constrained_groups(
 
 
 def _merge_sparse_seed_groups(
-    groups: list[list[str]], turns: dict[str, SpeakerTurn], embeddings: dict[str, np.ndarray],
-    similarity_threshold: float, margin_threshold: float,
+    groups: list[list[str]],
+    turns: dict[str, SpeakerTurn],
+    embeddings: dict[str, np.ndarray],
+    similarity_threshold: float,
+    margin_threshold: float,
 ) -> list[list[str]]:
     """Attach small seed islands to a multi-turn anchor only with distinctive evidence."""
     anchors = [group for group in groups if len(group) >= 3]
@@ -88,8 +96,10 @@ def _merge_sparse_seed_groups(
             centroid /= max(float(np.linalg.norm(centroid)), 1e-8)
             ranked.append((float(np.dot(vector, centroid)), index))
         ranked.sort(reverse=True)
-        if ranked and ranked[0][0] >= similarity_threshold and (
-            len(ranked) == 1 or ranked[0][0] - ranked[1][0] >= margin_threshold
+        if (
+            ranked
+            and ranked[0][0] >= similarity_threshold
+            and (len(ranked) == 1 or ranked[0][0] - ranked[1][0] >= margin_threshold)
         ):
             anchors[ranked[0][1]].extend(group)
         else:
@@ -202,6 +212,7 @@ class GlobalSpeakerClusterer:
         turn: SpeakerTurn,
         aligned_signals: dict[str, np.ndarray],
         sample_rate: int,
+        sync_metadata: dict[str, dict[str, Any]] | None = None,
     ) -> tuple[np.ndarray | None, list[dict[str, Any]]]:
         """Extract multi-source quality-weighted embedding and source evidence for a turn."""
         if turn.speaker_count != 1:
@@ -217,26 +228,48 @@ class GlobalSpeakerClusterer:
             start_s = turn.start_sec + edge_crop
             end_s = turn.end_sec - edge_crop
 
-        s_sample = max(0, int(start_s * sample_rate))
-        e_sample = int(end_s * sample_rate)
-
         evaluations: dict[str, Any] = {}
         source_embs: dict[str, np.ndarray] = {}
 
         for source_id, signal in aligned_signals.items():
-            if len(signal) < e_sample or e_sample <= s_sample:
-                continue
-            clip = signal[s_sample:e_sample]
-            if len(clip) == 0:
-                continue
+            sync = (sync_metadata or {}).get(source_id, {})
+            activity = turn.source_activity.get(source_id, {})
+            coverage = sync.get("valid_coverage_interval")
+            covered_start = max(start_s, float(coverage[0])) if coverage else start_s
+            covered_end = min(end_s, float(coverage[1])) if coverage else end_s
+            coverage_fraction = max(0.0, covered_end - covered_start) / max(end_s - start_s, 1e-8)
+            intervals = activity.get("speech_intervals") or []
+            valid_intervals = [
+                (max(covered_start, float(row[0])), min(covered_end, float(row[1])))
+                for row in intervals
+            ]
+            valid_intervals = [(a, b) for a, b in valid_intervals if b > a]
+            if valid_intervals:
+                crop_start, crop_end = max(valid_intervals, key=lambda pair: pair[1] - pair[0])
+                crop_start += min(0.05, (crop_end - crop_start) / 10)
+                crop_end -= min(0.05, (crop_end - crop_start) / 10)
+            else:
+                crop_start, crop_end = covered_start, covered_start
+            clip = signal[
+                max(0, int(crop_start * sample_rate)) : min(
+                    len(signal), int(crop_end * sample_rate)
+                )
+            ]
 
             q_res = evaluate_source_quality_for_speaker_id(
                 source_id=source_id,
                 turn_waveform=clip,
                 sample_rate=sample_rate,
                 full_signal=signal,
-                turn_start_sec=start_s,
-                turn_end_sec=end_s,
+                turn_start_sec=crop_start,
+                turn_end_sec=crop_end,
+                sync_status=sync.get("status"),
+                vad_coverage=activity.get("speech_coverage"),
+                purity=activity.get("local_speaker_purity"),
+                valid_coverage_interval=coverage,
+                local_sync_residual_ms=sync.get("local_residual_ms", sync.get("residual_ms")),
+                support_duration_sec=activity.get("support_duration_sec"),
+                coverage_fraction=coverage_fraction,
             )
             evaluations[source_id] = q_res
 
@@ -251,9 +284,11 @@ class GlobalSpeakerClusterer:
             try:
                 emb = self.encoder.encode(padded)
                 source_embs[source_id] = emb
+                q_res.embedding_status = "encoded"
             except Exception as exc:
                 q_res.is_eligible = False
                 q_res.exclusion_reason = f"encoding_failed: {exc}"
+                q_res.embedding_status = "failed"
                 logger.debug(
                     "Failed to encode turn %s source %s: %s",
                     turn.turn_id,
@@ -262,24 +297,33 @@ class GlobalSpeakerClusterer:
                 )
 
         weights = compute_normalized_source_weights(evaluations)
+        if self.fusion_policy == SpeakerFusionPolicy.P0_FIXED_REFERENCE:
+            selected = next(
+                (
+                    sid
+                    for sid in source_embs
+                    if (sync_metadata or {}).get(sid, {}).get("status") == "reference"
+                ),
+                None,
+            )
+            weights = {selected: 1.0} if selected else {}
+        elif self.fusion_policy == SpeakerFusionPolicy.P1_TOP1_QUALITY and source_embs:
+            best = max(source_embs, key=lambda sid: evaluations[sid].identity_quality_score)
+            weights = {best: 1.0}
         for sid, w in weights.items():
-            if sid in evaluations:
-                evaluations[sid].identity_weight = w
+            evaluations[sid].identity_weight = w
 
         source_evidence_list = [evaluations[sid].as_dict() for sid in evaluations]
 
-        if not source_embs:
+        if not source_embs or not weights:
             return None, source_evidence_list
 
         if self.fusion_policy == SpeakerFusionPolicy.P0_FIXED_REFERENCE:
-            ref_id = next(iter(source_embs))
+            ref_id = next(iter(weights))
             return source_embs[ref_id], source_evidence_list
 
         if self.fusion_policy == SpeakerFusionPolicy.P1_TOP1_QUALITY:
-            best_sid = max(
-                source_embs,
-                key=lambda sid: evaluations[sid].identity_quality_score,
-            )
+            best_sid = next(iter(weights))
             return source_embs[best_sid], source_evidence_list
 
         fused = fuse_turn_speaker_embeddings(source_embs, weights)
@@ -291,6 +335,7 @@ class GlobalSpeakerClusterer:
         aligned_signals: dict[str, np.ndarray],
         sample_rate: int,
         profiles: list[SpeakerProfileInput],
+        sync_metadata: dict[str, dict[str, Any]] | None = None,
     ) -> tuple[dict[str, TurnAssignment], list[ClusterDecision], dict[str, Any]]:
         """Run two-pass clustering and matching across full meeting turns."""
         single_speaker_turns = [t for t in turns if t.speaker_count == 1]
@@ -298,7 +343,9 @@ class GlobalSpeakerClusterer:
         turn_evidences: dict[str, list[dict[str, Any]]] = {}
 
         for turn in single_speaker_turns:
-            emb, evidence = self._extract_turn_embedding(turn, aligned_signals, sample_rate)
+            emb, evidence = self._extract_turn_embedding(
+                turn, aligned_signals, sample_rate, sync_metadata
+            )
             turn_evidences[turn.turn_id] = evidence
             if emb is not None:
                 turn_embeddings[turn.turn_id] = emb
@@ -317,8 +364,11 @@ class GlobalSpeakerClusterer:
         elif len(seed_turns) > 1:
             clusters = _constrained_groups(seed_turns, turn_embeddings, self.cluster_threshold)
             clusters = _merge_sparse_seed_groups(
-                clusters, {turn.turn_id: turn for turn in seed_turns}, turn_embeddings,
-                self.assign_threshold, self.assign_margin,
+                clusters,
+                {turn.turn_id: turn for turn in seed_turns},
+                turn_embeddings,
+                self.assign_threshold,
+                self.assign_margin,
             )
         else:
             # Fallback when all turns are short (< min_seed_duration_sec)
@@ -365,9 +415,9 @@ class GlobalSpeakerClusterer:
                 continue
 
             sims = [
-                float(np.dot(emb, c)) if not any(
-                    _cannot_link(turn, turn_dict[tid]) for tid in cluster_turn_ids[i]
-                ) else -1.0
+                float(np.dot(emb, c))
+                if not any(_cannot_link(turn, turn_dict[tid]) for tid in cluster_turn_ids[i])
+                else -1.0
                 for i, c in enumerate(cluster_centroids)
             ]
             best_idx = int(np.argmax(sims))

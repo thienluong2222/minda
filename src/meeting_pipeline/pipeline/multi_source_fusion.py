@@ -447,6 +447,7 @@ class MultiSourceFusionPipeline:
                 aligned_signals=aligned,
                 sample_rate=self.sample_rate,
                 profiles=profiles,
+                sync_metadata=sync_metadata,
             )
 
         merged_turns = safe_merge_speaker_turns(

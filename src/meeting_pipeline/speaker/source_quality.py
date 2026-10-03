@@ -36,33 +36,59 @@ class SourceQualityResult:
 
     source_id: str
     duration_sec: float
-    speech_seconds: float
-    speech_coverage: float
-    local_snr_proxy_db: float
-    clipping_ratio: float
-    dropout_ratio: float
-    local_speaker_purity: float
+    speech_seconds: float | None
+    speech_coverage: float | None
+    local_snr_proxy_db: float | None
+    clipping_ratio: float | None
+    dropout_ratio: float | None
+    local_speaker_purity: float | None
     is_eligible: bool
     exclusion_reason: str | None = None
     identity_quality_score: float = 0.0
     identity_weight: float = 0.0
     raw_features: dict[str, Any] = field(default_factory=dict)
+    valid_coverage_interval: list[float] | None = None
+    sync_status: str | None = None
+    local_sync_residual_ms: float | None = None
+    supporting_source: bool | None = None
+    support_duration_sec: float | None = None
+    embedding_status: str = "not_run"
+    quality_formula_version: str = "speaker_q_v2"
 
     def as_dict(self) -> dict[str, Any]:
         return {
             "source_id": self.source_id,
             "duration_sec": round(self.duration_sec, 3),
-            "speech_seconds": round(self.speech_seconds, 3),
-            "speech_coverage": round(self.speech_coverage, 3),
-            "local_snr_proxy_db": round(self.local_snr_proxy_db, 2),
-            "clipping_ratio": round(self.clipping_ratio, 4),
-            "dropout_ratio": round(self.dropout_ratio, 4),
-            "local_speaker_purity": round(self.local_speaker_purity, 3),
+            "speech_seconds": round(self.speech_seconds, 3)
+            if self.speech_seconds is not None
+            else None,
+            "speech_coverage": round(self.speech_coverage, 3)
+            if self.speech_coverage is not None
+            else None,
+            "local_snr_proxy_db": round(self.local_snr_proxy_db, 2)
+            if self.local_snr_proxy_db is not None
+            else None,
+            "clipping_ratio": round(self.clipping_ratio, 4)
+            if self.clipping_ratio is not None
+            else None,
+            "dropout_ratio": round(self.dropout_ratio, 4)
+            if self.dropout_ratio is not None
+            else None,
+            "local_speaker_purity": round(self.local_speaker_purity, 3)
+            if self.local_speaker_purity is not None
+            else None,
             "is_eligible": self.is_eligible,
             "exclusion_reason": self.exclusion_reason,
             "identity_quality_score": round(self.identity_quality_score, 4),
             "identity_weight": round(self.identity_weight, 4),
             "raw_features": self.raw_features,
+            "valid_coverage_interval": self.valid_coverage_interval,
+            "sync_status": self.sync_status,
+            "local_sync_residual_ms": self.local_sync_residual_ms,
+            "supporting_source": self.supporting_source,
+            "support_duration_sec": self.support_duration_sec,
+            "embedding_status": self.embedding_status,
+            "quality_formula_version": self.quality_formula_version,
         }
 
 
@@ -73,9 +99,15 @@ def evaluate_source_quality_for_speaker_id(
     full_signal: np.ndarray | None = None,
     turn_start_sec: float = 0.0,
     turn_end_sec: float = 0.0,
-    sync_status: str = "synchronized",
-    vad_coverage: float = 1.0,
-    purity: float = 1.0,
+    sync_status: str | None = None,
+    vad_coverage: float | None = None,
+    purity: float | None = None,
+    valid_coverage_interval: list[float] | None = None,
+    local_sync_residual_ms: float | None = None,
+    support_duration_sec: float | None = None,
+    coverage_fraction: float | None = None,
+    residual_gate_ms: float = 20.0,
+    purity_gate: float = 0.8,
 ) -> SourceQualityResult:
     """Measure speech coverage, clipping, dropout, and local SNR proxy for speaker ID."""
     dur = float(len(turn_waveform)) / sample_rate if sample_rate > 0 else 0.0
@@ -84,37 +116,68 @@ def evaluate_source_quality_for_speaker_id(
         "sample_count": len(turn_waveform),
     }
 
+    missing_reason: str | None = None
+    if valid_coverage_interval is None:
+        missing_reason = "missing_valid_coverage"
+    elif coverage_fraction is not None and coverage_fraction < 0.8:
+        missing_reason = "outside_valid_coverage"
+    elif sync_status is None:
+        missing_reason = "missing_sync_status"
+    elif sync_status == "alignment_failed":
+        missing_reason = "alignment_failed"
+    elif sync_status == "drift_unresolved" and (
+        local_sync_residual_ms is None or local_sync_residual_ms > residual_gate_ms
+    ):
+        missing_reason = "drift_unresolved_without_local_evidence"
+    elif local_sync_residual_ms is not None and local_sync_residual_ms > residual_gate_ms:
+        missing_reason = "excessive_sync_residual"
+    elif vad_coverage is None or purity is None or support_duration_sec is None:
+        missing_reason = "missing_source_activity"
+    elif support_duration_sec < 0.2:
+        missing_reason = "no_source_speech_support"
+    elif purity < purity_gate:
+        missing_reason = "multiple_local_speakers"
+    if missing_reason is not None:
+        return SourceQualityResult(
+            source_id=source_id,
+            duration_sec=dur,
+            speech_seconds=support_duration_sec,
+            speech_coverage=vad_coverage,
+            local_snr_proxy_db=None,
+            clipping_ratio=None,
+            dropout_ratio=None,
+            local_speaker_purity=purity,
+            is_eligible=False,
+            exclusion_reason=missing_reason,
+            raw_features=raw,
+            valid_coverage_interval=valid_coverage_interval,
+            sync_status=sync_status,
+            local_sync_residual_ms=local_sync_residual_ms,
+            supporting_source=(
+                support_duration_sec >= 0.2 if support_duration_sec is not None else None
+            ),
+            support_duration_sec=support_duration_sec,
+        )
+
     if dur < 0.05 or len(turn_waveform) == 0:
         return SourceQualityResult(
             source_id=source_id,
             duration_sec=dur,
             speech_seconds=0.0,
             speech_coverage=0.0,
-            local_snr_proxy_db=-20.0,
-            clipping_ratio=0.0,
-            dropout_ratio=1.0,
+            local_snr_proxy_db=None,
+            clipping_ratio=None,
+            dropout_ratio=None,
             local_speaker_purity=purity,
             is_eligible=False,
             exclusion_reason="insufficient_audio",
             identity_quality_score=0.0,
             raw_features=raw,
-        )
-
-    # 1. Sync validation check
-    if sync_status == "alignment_failed":
-        return SourceQualityResult(
-            source_id=source_id,
-            duration_sec=dur,
-            speech_seconds=0.0,
-            speech_coverage=0.0,
-            local_snr_proxy_db=-20.0,
-            clipping_ratio=0.0,
-            dropout_ratio=0.0,
-            local_speaker_purity=purity,
-            is_eligible=False,
-            exclusion_reason="alignment_failed",
-            identity_quality_score=0.0,
-            raw_features=raw,
+            valid_coverage_interval=valid_coverage_interval,
+            sync_status=sync_status,
+            local_sync_residual_ms=local_sync_residual_ms,
+            supporting_source=True,
+            support_duration_sec=support_duration_sec,
         )
 
     # 2. Clipping detection: samples exceeding 0.99
@@ -163,6 +226,7 @@ def evaluate_source_quality_for_speaker_id(
     snr_proxy_db = float(20.0 * np.log10(max(speech_rms, 1e-6) / max(bg_rms, 1e-6)))
     raw["local_snr_proxy_db"] = snr_proxy_db
 
+    assert vad_coverage is not None and purity is not None
     speech_sec = dur * max(0.0, min(1.0, vad_coverage))
     raw["speech_seconds"] = speech_sec
 
@@ -210,6 +274,11 @@ def evaluate_source_quality_for_speaker_id(
         identity_quality_score=quality_score,
         identity_weight=0.0,  # Computed across sources in session
         raw_features=raw,
+        valid_coverage_interval=valid_coverage_interval,
+        sync_status=sync_status,
+        local_sync_residual_ms=local_sync_residual_ms,
+        supporting_source=True,
+        support_duration_sec=support_duration_sec,
     )
 
 
@@ -224,10 +293,6 @@ def compute_normalized_source_weights(
         if res.is_eligible and res.identity_quality_score > 0
     }
     if not eligible:
-        # Fallback: if all failed, pick the best among inaudible/poor_snr if any
-        if evaluations:
-            best_sid = max(evaluations, key=lambda sid: evaluations[sid].identity_quality_score)
-            return {best_sid: 1.0}
         return {}
 
     scores = np.array([res.identity_quality_score for res in eligible.values()], dtype=np.float32)
