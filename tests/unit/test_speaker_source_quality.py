@@ -6,6 +6,7 @@ from typing import Any
 
 import numpy as np
 
+from meeting_pipeline.application.speakers import SpeakerProfileInput
 from meeting_pipeline.pipeline.speaker_turns import SpeakerTurn
 from meeting_pipeline.speaker.clustering import GlobalSpeakerClusterer
 from meeting_pipeline.speaker.source_quality import (
@@ -272,3 +273,72 @@ def test_all_sources_invalid_does_not_encode_or_create_unknown() -> None:
     assert summary["total_clusters"] == 0
     assert assignments["t"].speaker_status == "ambiguous"
     assert all(row["identity_weight"] == 0.0 for row in assignments["t"].source_evidence)
+
+
+def test_p3_real_path_preserves_conflicting_source_scores() -> None:
+    sr = 16000
+    a = np.zeros(sr * 3, dtype=np.float32)
+    b = np.zeros(sr * 3, dtype=np.float32)
+    a[sr : 2 * sr] = 0.6
+    b[sr : 2 * sr] = 0.2
+    turn = SpeakerTurn(
+        turn_id="t",
+        speech_region_id="r",
+        start_sec=1.0,
+        end_sec=2.0,
+        track_id="local-1",
+        speaker_count=1,
+        source_activity={
+            sid: {
+                "speech_coverage": 1.0,
+                "local_speaker_purity": 1.0,
+                "support_duration_sec": 1.0,
+                "speech_intervals": [[1.0, 2.0]],
+            }
+            for sid in ("a", "b")
+        },
+    )
+    sync = {
+        sid: {
+            "status": "reference" if sid == "a" else "aligned",
+            "residual_ms": 0.0,
+            "valid_coverage_interval": [0.0, 3.0],
+        }
+        for sid in ("a", "b")
+    }
+    profiles = [
+        SpeakerProfileInput("alice", "Alice", np.eye(192, dtype=np.float32)[0]),
+        SpeakerProfileInput("bob", "Bob", np.eye(192, dtype=np.float32)[1]),
+    ]
+    clusterer = GlobalSpeakerClusterer(
+        ControlledEncoder(),
+        fusion_policy=SpeakerFusionPolicy.P3_WEIGHTED_SCORE_FUSION,
+        min_seed_duration_sec=0.5,
+    )
+    result, clusters, _ = clusterer.cluster_and_identify(
+        [turn], {"a": a, "b": b}, sr, profiles, sync_metadata=sync
+    )
+    assert result["t"].speaker_status == "ambiguous"
+    assert result["t"].needs_review
+    assert "source_disagreement" in result["t"].decision_reason
+    assert result["t"].meeting_speaker_id == clusters[0].meeting_speaker_id
+    evidence = {row["source_id"]: row for row in result["t"].source_evidence}
+    assert evidence["a"]["candidate_cosine_scores"]["alice"] == 1.0
+    assert evidence["b"]["candidate_cosine_scores"]["bob"] == 1.0
+
+    # An excluded phone cannot vote, and P3 then makes the sole valid comparison.
+    sync["b"]["status"] = "alignment_failed"
+    accepted, _, _ = clusterer.cluster_and_identify(
+        [turn], {"a": a, "b": b}, sr, profiles, sync_metadata=sync
+    )
+    assert accepted["t"].speaker_id == "alice"
+    assert (
+        next(row for row in accepted["t"].source_evidence if row["source_id"] == "b")[
+            "identity_weight"
+        ]
+        == 0.0
+    )
+    unknown, _, _ = clusterer.cluster_and_identify(
+        [turn], {"a": a, "b": b}, sr, [], sync_metadata=sync
+    )
+    assert unknown["t"].speaker_status == "unknown"

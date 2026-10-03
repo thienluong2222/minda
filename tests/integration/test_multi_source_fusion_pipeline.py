@@ -7,6 +7,7 @@ import numpy as np
 import soundfile as sf
 
 from meeting_pipeline.adapters.phowhisper_asr import AsrResult, FakeAsrAdapter
+from meeting_pipeline.application.speakers import SpeakerProfileInput
 from meeting_pipeline.config import load_config
 from meeting_pipeline.domain.contracts import MeetingSegment, VadConfig
 from meeting_pipeline.domain.transcription import TimedWord
@@ -267,3 +268,92 @@ def test_bad_reference_asr_cannot_win_fixed_source_fusion(tmp_path: Path) -> Non
     assert evidence["source-1"]["selection_weight"] == 0
     assert evidence["source-2"]["candidate_scores"]["word_agreement"] is None
     assert evidence["source-2"]["candidate_scores"]["asr_confidence"] is None
+
+
+def test_configured_p3_reaches_artifact_and_timeline(tmp_path: Path, monkeypatch) -> None:
+    import meeting_pipeline.pipeline.multi_source_fusion as pipeline_module
+
+    class Encoder:
+        def encode(self, waveform):
+            vector = np.zeros(192, dtype=np.float32)
+            vector[0 if float(np.mean(waveform)) > 0.3 else 1] = 1.0
+            return vector
+
+    class Detector:
+        def detect(self, aligned_paths, segments, reference_source, duration_sec):
+            del aligned_paths, reference_source, duration_sec
+            return [
+                SpeakerTurn(
+                    turn_id="turn_0000",
+                    speech_region_id=segments[0].segment_id,
+                    start_sec=1.0,
+                    end_sec=2.0,
+                    track_id="local-1",
+                    speaker_count=1,
+                    source_activity={
+                        sid: {
+                            "speech_coverage": 1.0,
+                            "local_speaker_purity": 1.0,
+                            "support_duration_sec": 1.0,
+                            "speech_intervals": [[1.0, 2.0]],
+                        }
+                        for sid in ("source-1", "source-2")
+                    },
+                )
+            ]
+
+    sample_rate = 16000
+    time = np.arange(sample_rate, dtype=np.float32) / sample_rate
+    signal_a = np.zeros(sample_rate * 3, dtype=np.float32)
+    signal_b = np.zeros(sample_rate * 3, dtype=np.float32)
+    signal_a[sample_rate : 2 * sample_rate] = 0.6 + 0.01 * np.sin(2 * np.pi * 220 * time)
+    signal_b[sample_rate : 2 * sample_rate] = 0.2 + 0.01 * np.sin(2 * np.pi * 220 * time)
+    paths = [tmp_path / "a.wav", tmp_path / "b.wav"]
+    sf.write(paths[0], signal_a, sample_rate)
+    sf.write(paths[1], signal_b, sample_rate)
+
+    def fake_sync(decoded, sample_rate):
+        del sample_rate
+        return (
+            decoded,
+            {
+                sid: {
+                    "status": "reference" if sid == "source-1" else "aligned",
+                    "offset_sec": 0.0,
+                    "drift_ppm": 0.0,
+                    "residual_ms": 0.0,
+                    "valid_coverage_interval": [0.0, 3.0],
+                }
+                for sid in decoded
+            },
+            "source-1",
+        )
+
+    def one_segment(signals, vad_config, meeting_id, sample_rate):
+        del signals, vad_config, sample_rate
+        return [
+            MeetingSegment(meeting_id=meeting_id, segment_id="seg_0000", start_sec=1.0, end_sec=2.0)
+        ]
+
+    monkeypatch.setattr(pipeline_module, "synchronize_multi_source_audio", fake_sync)
+    monkeypatch.setattr(pipeline_module, "create_speaker_encoder", lambda **kwargs: Encoder())
+    config = load_config(Path("configs/default.yaml"))
+    config.paths.data_dir = tmp_path / "data"
+    config.identity["fusion_policy"] = "P3_WEIGHTED_SCORE_FUSION"
+    profiles = [
+        SpeakerProfileInput("alice", "Alice", np.eye(192, dtype=np.float32)[0]),
+        SpeakerProfileInput("bob", "Bob", np.eye(192, dtype=np.float32)[1]),
+    ]
+    run = MultiSourceFusionPipeline(
+        config,
+        asr_adapter=FakeAsrAdapter(results=[_asr_result("xin chào")] * 2),
+        segment_extractor=one_segment,
+        turn_detector=Detector(),
+    ).run("P3 path", paths, speaker_profiles=profiles)
+    decision = json.loads((run / "speaker_decisions.json").read_text())["turns"][0]
+    timeline = json.loads((run / "timeline.json").read_text())["segments"][0]
+    assert decision["speaker_status"] == "ambiguous"
+    assert "source_disagreement" in decision["decision_reason"]
+    assert decision["source_evidence"][0]["candidate_cosine_scores"]["alice"] == 1.0
+    assert timeline["speaker_status"] == "ambiguous"
+    assert timeline["needs_review"] is True

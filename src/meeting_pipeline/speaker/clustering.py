@@ -24,6 +24,7 @@ from meeting_pipeline.speaker.source_quality import (
     SpeakerFusionPolicy,
     compute_normalized_source_weights,
     evaluate_source_quality_for_speaker_id,
+    fuse_turn_candidate_scores,
     fuse_turn_speaker_embeddings,
 )
 
@@ -105,6 +106,16 @@ def _merge_sparse_seed_groups(
         else:
             anchors.append(group)
     return anchors
+
+
+def _confident_top(scores: dict[str, float], threshold: float, margin: float) -> str | None:
+    ranked = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+    if not ranked:
+        return None
+    runner_up = ranked[1][1] if len(ranked) > 1 else -1.0
+    if ranked[0][1] >= threshold and ranked[0][1] - runner_up >= margin:
+        return ranked[0][0]
+    return None
 
 
 @dataclass(slots=True)
@@ -213,10 +224,11 @@ class GlobalSpeakerClusterer:
         aligned_signals: dict[str, np.ndarray],
         sample_rate: int,
         sync_metadata: dict[str, dict[str, Any]] | None = None,
-    ) -> tuple[np.ndarray | None, list[dict[str, Any]]]:
+        profiles: list[SpeakerProfileInput] | None = None,
+    ) -> tuple[np.ndarray | None, list[dict[str, Any]], dict[str, np.ndarray]]:
         """Extract multi-source quality-weighted embedding and source evidence for a turn."""
         if turn.speaker_count != 1:
-            return None, []
+            return None, [], {}
 
         # Interior crop 0.05s at boundaries to avoid edge bleed
         edge_crop = 0.05
@@ -313,21 +325,28 @@ class GlobalSpeakerClusterer:
         for sid, w in weights.items():
             evaluations[sid].identity_weight = w
 
+        if profiles and self.fusion_policy == SpeakerFusionPolicy.P3_WEIGHTED_SCORE_FUSION:
+            for sid in weights:
+                evaluations[sid].candidate_cosine_scores = {
+                    profile.speaker_id: round(float(np.dot(source_embs[sid], profile.embedding)), 4)
+                    for profile in profiles
+                }
+
         source_evidence_list = [evaluations[sid].as_dict() for sid in evaluations]
 
         if not source_embs or not weights:
-            return None, source_evidence_list
+            return None, source_evidence_list, source_embs
 
         if self.fusion_policy == SpeakerFusionPolicy.P0_FIXED_REFERENCE:
             ref_id = next(iter(weights))
-            return source_embs[ref_id], source_evidence_list
+            return source_embs[ref_id], source_evidence_list, source_embs
 
         if self.fusion_policy == SpeakerFusionPolicy.P1_TOP1_QUALITY:
             best_sid = next(iter(weights))
-            return source_embs[best_sid], source_evidence_list
+            return source_embs[best_sid], source_evidence_list, source_embs
 
         fused = fuse_turn_speaker_embeddings(source_embs, weights)
-        return fused, source_evidence_list
+        return fused, source_evidence_list, source_embs
 
     def cluster_and_identify(
         self,
@@ -341,12 +360,14 @@ class GlobalSpeakerClusterer:
         single_speaker_turns = [t for t in turns if t.speaker_count == 1]
         turn_embeddings: dict[str, np.ndarray] = {}
         turn_evidences: dict[str, list[dict[str, Any]]] = {}
+        turn_source_embeddings: dict[str, dict[str, np.ndarray]] = {}
 
         for turn in single_speaker_turns:
-            emb, evidence = self._extract_turn_embedding(
-                turn, aligned_signals, sample_rate, sync_metadata
+            emb, evidence, source_embeddings = self._extract_turn_embedding(
+                turn, aligned_signals, sample_rate, sync_metadata, profiles
             )
             turn_evidences[turn.turn_id] = evidence
+            turn_source_embeddings[turn.turn_id] = source_embeddings
             if emb is not None:
                 turn_embeddings[turn.turn_id] = emb
 
@@ -454,11 +475,78 @@ class GlobalSpeakerClusterer:
             )
 
             # Match against enrolled profiles
-            ranked = sorted(
-                ((p, float(np.dot(centroid, p.embedding))) for p in profiles),
-                key=lambda item: item[1],
-                reverse=True,
-            )
+            conflict = False
+            policy_notes: list[str] = []
+            if self.fusion_policy == SpeakerFusionPolicy.P3_WEIGHTED_SCORE_FUSION and profiles:
+                totals = {profile.speaker_id: 0.0 for profile in profiles}
+                turn_weight_total = 0.0
+                for tid in c_turns:
+                    evidence_by_source = {
+                        str(row["source_id"]): row for row in turn_evidences.get(tid, [])
+                    }
+                    weights = {
+                        sid: float(row["identity_weight"])
+                        for sid, row in evidence_by_source.items()
+                        if float(row["identity_weight"]) > 0
+                    }
+                    source_scores = {
+                        sid: {
+                            profile.speaker_id: float(np.dot(vector, profile.embedding))
+                            for profile in profiles
+                        }
+                        for sid, vector in turn_source_embeddings.get(tid, {}).items()
+                        if sid in weights
+                    }
+                    strong = sorted(
+                        ((sid, weights[sid]) for sid in source_scores if weights[sid] >= 0.25),
+                        key=lambda item: item[1],
+                        reverse=True,
+                    )
+                    if len(strong) >= 2:
+                        first_top = _confident_top(
+                            source_scores[strong[0][0]],
+                            self.enrolled_match_threshold,
+                            self.enrolled_margin,
+                        )
+                        second_top = _confident_top(
+                            source_scores[strong[1][0]],
+                            self.enrolled_match_threshold,
+                            self.enrolled_margin,
+                        )
+                        if first_top and second_top and first_top != second_top:
+                            if strong[0][1] >= 0.7 and strong[0][1] - strong[1][1] >= 0.35:
+                                source_scores = {strong[0][0]: source_scores[strong[0][0]]}
+                                weights = {strong[0][0]: 1.0}
+                                policy_notes.append(f"dominant_source_top1:{strong[0][0]}")
+                            else:
+                                conflict = True
+                                policy_notes.append(f"source_disagreement:{tid}")
+                    per_turn = fuse_turn_candidate_scores(source_scores, weights)
+                    if per_turn:
+                        turn_weight = min(3.0, turn_dict[tid].end_sec - turn_dict[tid].start_sec)
+                        for profile_id, score in per_turn.items():
+                            totals[profile_id] += score * turn_weight
+                        turn_weight_total += turn_weight
+                score_by_id = {
+                    profile_id: total / turn_weight_total
+                    for profile_id, total in totals.items()
+                    if turn_weight_total > 0
+                }
+                ranked = sorted(
+                    (
+                        (p, score_by_id[p.speaker_id])
+                        for p in profiles
+                        if p.speaker_id in score_by_id
+                    ),
+                    key=lambda item: item[1],
+                    reverse=True,
+                )
+            else:
+                ranked = sorted(
+                    ((p, float(np.dot(centroid, p.embedding))) for p in profiles),
+                    key=lambda item: item[1],
+                    reverse=True,
+                )
             candidates = [
                 {
                     "speaker_id": p.speaker_id,
@@ -472,13 +560,36 @@ class GlobalSpeakerClusterer:
             runner_up = ranked[1][1] if len(ranked) > 1 else -1.0
             match_margin = (match_score - runner_up) if match_score is not None else None
 
-            if (
+            if conflict:
+                decision = ClusterDecision(
+                    cluster_id=f"c-{c_idx + 1:04d}",
+                    meeting_speaker_id="",
+                    speaker_id=None,
+                    speaker_label="Chưa xác định",
+                    speaker_status="ambiguous",
+                    turn_ids=c_turns,
+                    total_speech_seconds=total_sec,
+                    centroid=centroid,
+                    top_candidates=candidates,
+                    match_score=match_score,
+                    match_margin=match_margin,
+                    decision_reason=";".join(policy_notes),
+                    first_seen_sec=first_seen,
+                    supporting_sources=sources,
+                    warnings=["source_disagreement"],
+                )
+            elif (
                 match_score is not None
                 and match_margin is not None
                 and match_score >= self.enrolled_match_threshold
                 and match_margin >= self.enrolled_margin
             ):
                 matched_profile = ranked[0][0]
+                policy_label = (
+                    "P3_score_fusion"
+                    if self.fusion_policy == SpeakerFusionPolicy.P3_WEIGHTED_SCORE_FUSION
+                    else "enrolled_match"
+                )
                 decision = ClusterDecision(
                     cluster_id=f"c-{c_idx + 1:04d}",
                     meeting_speaker_id="",  # will assign below
@@ -492,9 +603,10 @@ class GlobalSpeakerClusterer:
                     match_score=match_score,
                     match_margin=match_margin,
                     decision_reason=(
-                        f"enrolled_match: score={match_score:.3f} "
+                        f"{policy_label}: score={match_score:.3f} "
                         f">= {self.enrolled_match_threshold:.2f}, "
-                        f"margin={match_margin:.3f} >= {self.enrolled_margin:.2f}"
+                        f"margin={match_margin:.3f} >= {self.enrolled_margin:.2f}; "
+                        f"{';'.join(policy_notes)}"
                     ),
                     first_seen_sec=first_seen,
                     supporting_sources=sources,
@@ -585,7 +697,7 @@ class GlobalSpeakerClusterer:
                     decision_reason=cd.decision_reason,
                     source_evidence=turn_evidences.get(tid, []),
                     warnings=list(cd.warnings),
-                    needs_review=False,
+                    needs_review=cd.speaker_status == "ambiguous",
                 )
 
         cluster_summary = {
@@ -595,6 +707,9 @@ class GlobalSpeakerClusterer:
             ),
             "unknown_count": len(unknown_clusters),
             "ambiguous_turns_count": len(ambiguous_turns),
+            "ambiguous_cluster_turns_count": sum(
+                len(cd.turn_ids) for cd in cluster_decisions if cd.speaker_status == "ambiguous"
+            ),
             "clusters": [cd.as_dict() for cd in cluster_decisions],
         }
 

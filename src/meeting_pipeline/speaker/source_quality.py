@@ -54,6 +54,7 @@ class SourceQualityResult:
     support_duration_sec: float | None = None
     embedding_status: str = "not_run"
     quality_formula_version: str = "speaker_q_v2"
+    candidate_cosine_scores: dict[str, float] = field(default_factory=dict)
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -89,6 +90,7 @@ class SourceQualityResult:
             "support_duration_sec": self.support_duration_sec,
             "embedding_status": self.embedding_status,
             "quality_formula_version": self.quality_formula_version,
+            "candidate_cosine_scores": self.candidate_cosine_scores,
         }
 
 
