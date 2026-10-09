@@ -45,21 +45,18 @@ def _format_value_for_doc(val: Any) -> str:
     return str(val).strip()
 
 
-def _replace_text_in_paragraph(paragraph: Paragraph, placeholder: str, replacement: str) -> bool:
+def _replace_text_in_paragraph(
+    paragraph: Paragraph, placeholder: str, replacement: str, start_offset: int | None = None
+) -> bool:
     """Replace placeholder text within a paragraph while preserving run formatting."""
     full_text = paragraph.text
     if placeholder not in full_text:
         return False
-
-    # Case 1: Simple single run match
-    for run in paragraph.runs:
-        if placeholder in run.text:
-            run.text = run.text.replace(placeholder, replacement, 1)
-            return True
-
     # Replace only the intersecting span; preserve labels and their run formatting.
-    start = full_text.index(placeholder)
+    start = full_text.index(placeholder) if start_offset is None else start_offset
     end = start + len(placeholder)
+    if full_text[start:end] != placeholder:
+        return False
     offset = 0
     inserted = False
     for run in paragraph.runs:
@@ -159,7 +156,9 @@ def render_completed_document(
     for p_idx, p in enumerate(doc.paragraphs):
         p_elem = f"p[{p_idx}]"
         matching_anchors = anchors_by_elem.get(p_elem, [])
-        for anchor in matching_anchors:
+        # Right-to-left offsets stay valid when earlier slots are unknown and
+        # repeated placeholders have identical text or prefix each other.
+        for anchor in sorted(matching_anchors, key=lambda a: a.start_offset, reverse=True):
             field = fields_by_anchor.get(anchor.anchor_id)
             if not field:
                 continue
@@ -177,7 +176,9 @@ def render_completed_document(
                         field.field_id == general_content_field_id,
                     )
                 else:
-                    _replace_text_in_paragraph(p, anchor.placeholder_text, formatted_val)
+                    _replace_text_in_paragraph(
+                        p, anchor.placeholder_text, formatted_val, anchor.start_offset
+                    )
             elif anchor.placeholder_type == PlaceholderType.TEXT_PLACEHOLDER:
                 # Append formatted text to the paragraph
                 p.add_run(("" if p.text.endswith(" ") else " ") + formatted_val)
@@ -192,7 +193,7 @@ def render_completed_document(
                 cell_elem = f"table[{t_idx}]/row[{r_idx}]/cell[{c_idx}]"
                 matching_anchors = anchors_by_elem.get(cell_elem, [])
 
-                for anchor in matching_anchors:
+                for anchor in sorted(matching_anchors, key=lambda a: a.start_offset, reverse=True):
                     field = fields_by_anchor.get(anchor.anchor_id)
                     if not field:
                         continue
@@ -210,11 +211,12 @@ def render_completed_document(
                         PlaceholderType.DOTTED_LINE,
                         PlaceholderType.UNDERLINE,
                     ):
-                        for cp in cell.paragraphs:
-                            if anchor.placeholder_text in cp.text:
-                                _replace_text_in_paragraph(
-                                    cp, anchor.placeholder_text, formatted_val
-                                )
+                        paragraph_match = re.search(r"/p\[(\d+)\]", anchor.element_path)
+                        if paragraph_match:
+                            cp = cell.paragraphs[int(paragraph_match.group(1))]
+                            _replace_text_in_paragraph(
+                                cp, anchor.placeholder_text, formatted_val, anchor.start_offset
+                            )
 
     # Preserve every untouched package part byte-for-byte, including styles,
     # headers, footers, fields, controls, relationships and document metadata.

@@ -17,7 +17,7 @@ from meeting_pipeline.minutes.model_runtime import ModelRuntimeError, ModelSessi
 from meeting_pipeline.minutes.renderer import render_completed_document
 from meeting_pipeline.minutes.schema_mapper import M0RuleSchemaMapper
 from meeting_pipeline.minutes.schemas import FactStatus, MeetingFact
-from meeting_pipeline.minutes.structured_fields import vietnamese_number
+from meeting_pipeline.minutes.structured_fields import structured_facts, vietnamese_number
 from meeting_pipeline.minutes.text_engine import (
     MinutesOptions,
     TextEngine,
@@ -71,7 +71,10 @@ def test_correct_transcript_is_not_forced_to_change() -> None:
     assert not correction_risks("Lan kiểm tra phân quyền.", "Lan kiểm tra phân quyền.")
 
 
-@pytest.mark.parametrize("failure", ["changed_number", "missing_number", "missing_id"])
+@pytest.mark.parametrize(
+    "failure",
+    ["changed_number", "missing_number", "changed_owner", "added_completion", "missing_id"],
+)
 def test_writer_keeps_source_when_numbers_change_or_coverage_is_incomplete(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str
 ) -> None:
@@ -104,6 +107,10 @@ def test_writer_keeps_source_when_numbers_change_or_coverage_is_incomplete(
         items[0]["text"] = "Huy nhập 200 tài liệu."
     elif failure == "missing_number":
         items[0]["text"] = "Huy nhập tài liệu."
+    elif failure == "changed_owner":
+        items[0]["text"] = "Lan nhập 20 tài liệu."
+    elif failure == "added_completion":
+        items[0]["text"] = "Huy đã nhập 20 tài liệu."
     else:
         items.pop()
     monkeypatch.setattr(
@@ -198,6 +205,69 @@ def test_renderer_preserves_all_opaque_parts_and_fixed_labels(tmp_path: Path) ->
         for part in a.namelist():
             if part != "word/document.xml":
                 assert a.read(part) == b.read(part), part
+
+
+def test_renderer_fills_exact_repeated_slot_with_unknown_slots_before_it(tmp_path: Path) -> None:
+    template = tmp_path / "repeated.docx"
+    document = docx.Document()
+    document.add_paragraph("Kết thúc lúc ..... giờ ..... ngày ..... tháng ..... năm .....")
+    cell = document.add_table(rows=1, cols=1).cell(0, 0)
+    cell.paragraphs[0].text = "Ngày ....."
+    cell.add_paragraph("Ngày .....")
+    document.save(template)
+    graph = parse_template_document(template)
+    schema = M0RuleSchemaMapper().propose_schema(graph)
+    fields = {f.anchor_id: f for f in schema.fields}
+    anchors = graph.blocks[0].candidate_anchors
+    facts = [
+        MeetingFact(field_id=fields[a.anchor_id].field_id, value=value, status=FactStatus.SUPPORTED)
+        for a, value in zip(anchors[2:], ["3", "10", "2026"], strict=True)
+    ]
+    last = next(a for a in graph.all_anchors if "/cell[0]/p[1]/" in a.element_path)
+    facts.append(
+        MeetingFact(
+            field_id=fields[last.anchor_id].field_id, value="12", status=FactStatus.SUPPORTED
+        )
+    )
+    output = tmp_path / "completed.docx"
+    render_completed_document(template, output, graph, schema, facts)
+    completed = docx.Document(output)
+    assert completed.paragraphs[0].text == "Kết thúc lúc ..... giờ ..... ngày 3 tháng 10 năm 2026"
+    assert completed.tables[0].cell(0, 0).text == "Ngày .....\nNgày 12"
+
+
+def test_metadata_does_not_infer_end_date_and_bounds_unpunctuated_location(tmp_path: Path) -> None:
+    template = tmp_path / "metadata.docx"
+    document = docx.Document()
+    document.add_paragraph("Hôm nay vào lúc ..... giờ ..... ngày ..... tháng ..... năm .....")
+    document.add_paragraph("Tại ........................................")
+    document.add_paragraph(
+        "Cuộc họp kết thúc vào lúc ..... giờ ..... ngày ..... tháng ..... năm ....."
+    )
+    document.save(template)
+    graph = parse_template_document(template)
+    schema = M0RuleSchemaMapper().propose_schema(graph)
+    turn = IndexedTurn(
+        turn_id="start",
+        speaker_label="Lan",
+        speaker_id="lan",
+        start_sec=0,
+        end_sec=8,
+        text="Tôi bắt đầu cuộc họp lúc chín giờ ngày ba tháng mười năm hai nghìn không trăm "
+        "hai mươi sáu tại phòng bê hai không một đây là cuộc họp của nhóm dự án về việc thử nghiệm",
+        tokens=[],
+        source_id="s1",
+        clip_path=None,
+        asr_status="transcribed",
+        needs_review=False,
+        confidence=None,
+    )
+    facts = {f.field_id: f for f in structured_facts(schema, graph, [turn], "test")}
+    fields = {f.anchor_id: f for f in schema.fields}
+    location_anchor = graph.blocks[1].candidate_anchors[0]
+    assert facts[fields[location_anchor.anchor_id].field_id].value == "phòng B201"
+    for anchor in graph.blocks[2].candidate_anchors:
+        assert facts[fields[anchor.anchor_id].field_id].value is None
 
 
 def test_transaction_rolls_back_failed_model_generation(

@@ -98,6 +98,8 @@ def structured_facts(
                 date(y, m, d)
                 for key, value in (("day", d), ("month", m), ("year", y)):
                     values.setdefault(key, (str(value), turn))
+                    if "kết thúc" in text:
+                        values.setdefault("end_" + key, (str(value), turn))
             except ValueError:
                 pass
         time_match = re.search(rf"lúc\s+({PHRASE})\s+giờ(?:\s+({PHRASE})\s+phút)?", text)
@@ -116,14 +118,18 @@ def structured_facts(
                 values.setdefault(kind + "_minute", (f"{minute:02d}", turn))
         location = re.search(r"\btại\s+([^.!?]+)", turn.text, re.IGNORECASE)
         if location:
-            room = location.group(1).strip()
-            number = re.search(rf"\b([A-Z])\s+({PHRASE})$", room, re.IGNORECASE)
+            room = re.split(
+                r"\b(?:đây là|cuộc họp|về việc)\b",
+                location.group(1),
+                maxsplit=1,
+                flags=re.IGNORECASE,
+            )[0].strip(" ,;:")
+            number = re.search(rf"\b([A-Z]|bê|xê|đê)\s+({PHRASE})$", room, re.IGNORECASE)
             if number:
-                room = (
-                    room[: number.start()]
-                    + number.group(1).upper()
-                    + str(vietnamese_number(number.group(2)))
+                letter = {"bê": "B", "xê": "C", "đê": "D"}.get(
+                    number.group(1).casefold(), number.group(1).upper()
                 )
+                room = room[: number.start()] + letter + str(vietnamese_number(number.group(2)))
             values.setdefault("location", (room, turn))
         topic = re.search(r"\bvề việc\s+([^.!?]+)", turn.text, re.IGNORECASE)
         if topic:
@@ -138,6 +144,10 @@ def structured_facts(
                 values[kind] = str(vietnamese_number(vote_match.group(1))), turn
         if re.search(r"không có phiếu không tán thành", text):
             values["vote_no"] = "0", turn
+    if "end_hour" in values and "cùng ngày" in values["end_hour"][1].text.casefold():
+        for key in ("day", "month", "year"):
+            if key in values:
+                values.setdefault("end_" + key, values[key])
     if all(k in values for k in ("vote_total", "vote_yes", "vote_no")):
         total, yes, no = (int(values[k][0]) for k in ("vote_total", "vote_yes", "vote_no"))
         if total > 0 and yes + no == total:
@@ -163,11 +173,11 @@ def structured_facts(
         clock = "end" if "kết thúc" in line else "start" if "hôm nay" in line else None
         if clock:
             if "ngày" in label:
-                scalar_key = "day"
+                scalar_key = "end_day" if clock == "end" else "day"
             elif "tháng" in label:
-                scalar_key = "month"
+                scalar_key = "end_month" if clock == "end" else "month"
             elif label == "năm":
-                scalar_key = "year"
+                scalar_key = "end_year" if clock == "end" else "year"
             elif label == "giờ":
                 scalar_key = clock + "_minute"
             elif "lúc" in label:

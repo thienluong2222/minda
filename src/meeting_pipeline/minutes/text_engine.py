@@ -520,11 +520,27 @@ class TextEngine:
                         candidate = str(item["text"])
                         protected = re.findall(
                             r"\b(?:không|chưa|nếu|đề xuất|đề nghị|có thể|dự kiến|"
-                            r"xin biểu quyết|rút)\b", source.casefold()
+                            r"xin biểu quyết|rút)\b",
+                            source.casefold(),
                         )
                         lost = [word for word in protected if word not in candidate.casefold()]
+                        changed_name = any(
+                            re.search(rf"\b{re.escape(unit.speaker)}\b", source, re.IGNORECASE)
+                            and not re.search(
+                                rf"\b{re.escape(unit.speaker)}\b", candidate, re.IGNORECASE
+                            )
+                            for unit in units
+                            if unit.speaker
+                            and not unit.speaker.casefold().startswith(("chưa", "người", "speaker"))
+                        )
+                        added_completion = bool(
+                            re.search(r"\bđã\b", candidate.casefold())
+                            and not re.search(r"\bđã\b", source.casefold())
+                        )
                         if (
                             lost
+                            or changed_name
+                            or added_completion
                             or _number_values(candidate) != _number_values(source)
                             or (
                                 "cam kết" in candidate.casefold()
@@ -533,7 +549,7 @@ class TextEngine:
                         ):
                             self.warnings.append(
                                 f"Giữ ý gốc {item['unit_ids'][0]}: "
-                                "biên tập thay đổi số liệu hoặc mức chắc chắn/phủ định."
+                                "biên tập thay đổi số liệu, chủ thể hoặc trạng thái phát biểu."
                             )
                             candidate = source
                         # Honorifics/gender are unnecessary for these narrative slots.
