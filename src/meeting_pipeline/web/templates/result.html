@@ -258,8 +258,44 @@
         <button type="submit" class="button" id="btn-upload-template">Xử lý biểu mẫu</button>
         <span id="upload-status" class="hint"></span>
       </div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
+        <label>Loại biên bản
+          <select id="minutes-mode" name="minutes_mode">
+            <option value="detailed" {% if minutes_configuration.get('mode') != 'general' %}selected{% endif %}>Chi tiết — giữ đề mục mẫu</option>
+            <option value="general" {% if minutes_configuration.get('mode') == 'general' %}selected{% endif %}>Tổng quát — chia nội dung thành chủ đề</option>
+          </select>
+        </label>
+        <label><input type="checkbox" id="minutes-use-model" {% if minutes_configuration.get('use_model') %}checked{% endif %}> Dùng LLM để hiểu và biên tập</label>
+        <label><input type="checkbox" id="minutes-correct" {% if minutes_configuration.get('correct_transcript', true) %}checked{% endif %}> Sửa lỗi transcript có căn cứ</label>
+        <label><input type="checkbox" id="minutes-fcm" {% if minutes_configuration.get('use_fcm', true) %}checked{% endif %}> Gom chủ đề tự động</label>
+      </div>
+      {% if has_minutes %}
+      <label>Vùng nội dung cho biên bản tổng quát
+        <select id="minutes-content-field">
+          <option value="">Tự xác định khi mẫu có một vùng nội dung</option>
+          {% for field in minutes_schema.fields if field.semantic_type in ['discussion_summary', 'meeting_agenda'] %}
+          <option value="{{ field.field_id }}">{{ field.raw_label }} ({{ field.field_id }})</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="button" class="button" id="btn-regenerate-minutes">Tạo lại từ transcript hiện có</button>
+      {% endif %}
+      <p class="hint">Bản gốc được giữ để đối chiếu. Nội dung do LLM viết cần được kiểm tra trước khi sử dụng.</p>
     </form>
   </div>
+  {% if minutes_model_report %}
+  <div class="notice">
+    <strong>Đã xử lý {{ minutes_model_report.unit_count }} đơn vị ý nghĩa.</strong>
+    {% if minutes_model_report.stale_since_transcript_edit %}
+    <p>Transcript đã thay đổi. Hãy tạo lại biên bản để cập nhật nội dung.</p>
+    {% endif %}
+    {% if minutes_model_report.excluded_turns %}<p>{{ minutes_model_report.excluded_turns|length }} lượt chưa có transcript hợp lệ; nội dung có thể thiếu.</p>{% endif %}
+    {% for warning in minutes_model_report.warnings %}<p>{{ warning }}</p>{% endfor %}
+    <a href="/api/runs/{{ job_id }}/files/minutes/corrections.json">Đối chiếu sửa transcript</a> ·
+    <a href="/api/runs/{{ job_id }}/files/minutes/topics.json">Chủ đề và căn cứ</a> ·
+    <a href="/api/runs/{{ job_id }}/files/minutes/model_report.json">Báo cáo xử lý</a>
+  </div>
+  {% endif %}
 
   {% if has_minutes %}
   <div class="minutes-stats" style="display: flex; gap: 1rem; margin: 1.5rem 0; flex-wrap: wrap;">

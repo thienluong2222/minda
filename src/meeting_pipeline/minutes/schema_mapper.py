@@ -285,7 +285,7 @@ class M1Qwen3SchemaMapper:
                 if self.model_name in models:
                     return self.model_name
                 for m in models:
-                    if "qwen" in m.lower():
+                    if isinstance(m, str) and "qwen" in m.lower():
                         return m
         except Exception:
             return None

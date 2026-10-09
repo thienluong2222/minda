@@ -8,11 +8,16 @@ Specification: Section 5 (F4) of docs/PLAN_BIEU_MAU_BIEN_BAN_V1.md.
 from __future__ import annotations
 
 import logging
+import re
 import shutil
+import zipfile
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
 import docx
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 from docx.text.paragraph import Paragraph
 
 from meeting_pipeline.minutes.converter import compute_file_sha256
@@ -52,19 +57,70 @@ def _replace_text_in_paragraph(paragraph: Paragraph, placeholder: str, replaceme
             run.text = run.text.replace(placeholder, replacement, 1)
             return True
 
-    # Case 2: Placeholder spans across multiple runs
-    # Replace across runs preserving style of the first matching run
-    new_full_text = full_text.replace(placeholder, replacement, 1)
-    if paragraph.runs:
-        # Keep formatting of first run, clear others
-        first_run = paragraph.runs[0]
-        first_run.text = new_full_text
-        for r in paragraph.runs[1:]:
-            r.text = ""
-        return True
-
-    paragraph.text = new_full_text
+    # Replace only the intersecting span; preserve labels and their run formatting.
+    start = full_text.index(placeholder)
+    end = start + len(placeholder)
+    offset = 0
+    inserted = False
+    for run in paragraph.runs:
+        text = run.text
+        run_end = offset + len(text)
+        if offset < end and run_end > start:
+            left = max(0, start - offset)
+            right = min(len(text), end - offset)
+            run.text = text[:left] + (replacement if not inserted else "") + text[right:]
+            inserted = True
+        offset = run_end
+    if not inserted:
+        return False
     return True
+
+
+def _fill_multiline(
+    paragraph: Paragraph, placeholder: str, value: str, native_headings: bool
+) -> None:
+    """Create editable paragraphs inside the allowed slot, cloning template styles."""
+    lines = [line.strip() for line in value.splitlines() if line.strip()]
+    if not lines:
+        _replace_text_in_paragraph(paragraph, placeholder, "")
+        return
+    prefix = paragraph.text.replace(placeholder, "", 1).strip()
+    rpr = (
+        deepcopy(paragraph.runs[0]._r.rPr)
+        if paragraph.runs and paragraph.runs[0]._r.rPr is not None
+        else None
+    )
+    ppr = deepcopy(paragraph._p.pPr) if paragraph._p.pPr is not None else None
+    if prefix:
+        _replace_text_in_paragraph(paragraph, placeholder, "")
+        previous = paragraph
+    else:
+        _replace_text_in_paragraph(paragraph, placeholder, lines.pop(0))
+        previous = paragraph
+        if native_headings and re.match(r"^\d+\.\s", paragraph.text):
+            for run in paragraph.runs:
+                run.bold = True
+            paragraph.paragraph_format.keep_with_next = True
+            outline = OxmlElement("w:outlineLvl")
+            outline.set(qn("w:val"), "2")
+            paragraph._p.get_or_add_pPr().append(outline)
+    for line in lines:
+        element = OxmlElement("w:p")
+        if ppr is not None:
+            element.append(deepcopy(ppr))
+        previous._p.addnext(element)
+        current = Paragraph(element, paragraph._parent)
+        run = current.add_run(line)
+        if rpr is not None:
+            run._r.insert(0, deepcopy(rpr))
+        if native_headings and re.match(r"^\d+\.\s", line):
+            run.bold = True
+            current.paragraph_format.keep_with_next = True
+            # Native outline entry without replacing the template's named styles.
+            outline = OxmlElement("w:outlineLvl")
+            outline.set(qn("w:val"), "2")
+            current._p.get_or_add_pPr().append(outline)
+        previous = current
 
 
 def render_completed_document(
@@ -73,6 +129,7 @@ def render_completed_document(
     doc_graph: DocGraph,
     schema: TemplateSchema,
     facts: list[MeetingFact],
+    general_content_field_id: str | None = None,
 ) -> tuple[Path, str]:
     """Fill validated facts into a copy of the normalized template DOCX."""
     if not normalized_docx_path.is_file():
@@ -111,17 +168,19 @@ def render_completed_document(
                 continue
 
             formatted_val = _format_value_for_doc(fact.value)
-            if not formatted_val:
-                continue
-
             if anchor.placeholder_type in (PlaceholderType.DOTTED_LINE, PlaceholderType.UNDERLINE):
-                _replace_text_in_paragraph(p, anchor.placeholder_text, formatted_val)
+                if "\n" in formatted_val and anchor.is_multiline:
+                    _fill_multiline(
+                        p,
+                        anchor.placeholder_text,
+                        formatted_val,
+                        field.field_id == general_content_field_id,
+                    )
+                else:
+                    _replace_text_in_paragraph(p, anchor.placeholder_text, formatted_val)
             elif anchor.placeholder_type == PlaceholderType.TEXT_PLACEHOLDER:
                 # Append formatted text to the paragraph
-                if not p.text.endswith(" "):
-                    p.text = f"{p.text} {formatted_val}"
-                else:
-                    p.text = f"{p.text}{formatted_val}"
+                p.add_run(("" if p.text.endswith(" ") else " ") + formatted_val)
             elif anchor.placeholder_type == PlaceholderType.SIGNATURE_BLOCK:
                 # Add signature confirmation underneath
                 pass
@@ -157,7 +216,20 @@ def render_completed_document(
                                     cp, anchor.placeholder_text, formatted_val
                                 )
 
-    doc.save(str(output_docx_path))
+    # Preserve every untouched package part byte-for-byte, including styles,
+    # headers, footers, fields, controls, relationships and document metadata.
+    from lxml import etree
+
+    body_xml = etree.tostring(doc.element, xml_declaration=True, encoding="UTF-8", standalone=True)
+    with zipfile.ZipFile(normalized_docx_path) as original:
+        with zipfile.ZipFile(output_docx_path, "w") as completed:
+            for info in original.infolist():
+                completed.writestr(
+                    info,
+                    body_xml
+                    if info.filename == "word/document.xml"
+                    else original.read(info.filename),
+                )
     completed_sha = compute_file_sha256(output_docx_path)
     logger.info(
         "Saved completed Word document: %s (SHA-256: %s)", output_docx_path, completed_sha[:12]

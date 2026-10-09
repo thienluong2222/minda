@@ -74,11 +74,34 @@ def test_run_page_renders_without_template(web_client: tuple[TestClient, str, Pa
     assert "Cuộc họp Ban Giám đốc Demo" in resp.text
     assert "Biên bản cuộc họp tự động" in resp.text
     assert "Tải lên mẫu biểu Word" in resp.text
+    assert "minutes-mode" in resp.text
+    assert "minutes-use-model" in resp.text
+
+
+def test_minutes_model_status_does_not_load_weights(
+    web_client: tuple[TestClient, str, Path],
+) -> None:
+    client, _, _ = web_client
+    response = client.get("/api/minutes/models")
+    assert response.status_code == 200
+    assert response.json()["model_id"].endswith("Qwen3-4B-Instruct-2507-4bit")
+
+
+def test_regenerate_requires_template_and_valid_options(
+    web_client: tuple[TestClient, str, Path],
+) -> None:
+    client, job_id, _ = web_client
+    response = client.post(
+        f"/api/runs/{job_id}/minutes/regenerate", json={"mode": "general", "use_model": True}
+    )
+    assert response.status_code == 422
+    response = client.post(f"/api/runs/{job_id}/minutes/regenerate", json={"mode": "invalid"})
+    assert response.status_code == 422
 
 
 def test_upload_template_and_download_minutes(web_client: tuple[TestClient, str, Path]) -> None:
     """Test uploading a Word template (.doc), extracting minutes, and downloading DOCX."""
-    client, job_id, run_dir = web_client
+    client, job_id, _run_dir = web_client
     template_path = TEMPLATES_DIR / "mau_bien_ban_hop_chung.doc"
     assert template_path.is_file()
 

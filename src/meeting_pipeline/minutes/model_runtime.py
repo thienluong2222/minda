@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import json
 import os
@@ -67,11 +68,19 @@ class ModelSession:
         self.calls: list[dict[str, Any]] = []
         self.process: subprocess.Popen[str] | None = None
         self._log: Any = None
+        self._file_lock: Any = None
 
     def __enter__(self) -> ModelSession:
         if not MODEL_LOCK.acquire(blocking=False):
             raise ModelRuntimeError("LLM đang xử lý một biên bản khác. Hãy thử lại sau.")
         try:
+            lock_path = ROOT / self.settings.cache_dir / "inference.lock"
+            lock_path.parent.mkdir(parents=True, exist_ok=True)
+            self._file_lock = lock_path.open("a")
+            try:
+                fcntl.flock(self._file_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError as exc:
+                raise ModelRuntimeError("LLM đang được một tiến trình khác sử dụng.") from exc
             if not (ROOT / self.settings.runtime_python).is_file():
                 raise ModelRuntimeError("Chưa cài runtime. Xem docs/LLM_FCM_MINUTES.md.")
             for embedding in (False, True):
@@ -218,6 +227,8 @@ class ModelSession:
                     pipe.close()
         if self._log is not None:
             self._log.close()
+        if self._file_lock is not None:
+            self._file_lock.close()
         MODEL_LOCK.release()
 
 

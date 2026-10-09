@@ -17,6 +17,7 @@ from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, UploadF
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from starlette.concurrency import run_in_threadpool
 
 from meeting_pipeline.adapters.audio_io import probe_audio
 from meeting_pipeline.application.speakers import SpeakerRegistry
@@ -24,10 +25,12 @@ from meeting_pipeline.config import PipelineConfig, load_config
 from meeting_pipeline.domain.speaker_identity import person_identity_key
 from meeting_pipeline.minutes.evidence_retrieval import load_indexed_turns
 from meeting_pipeline.minutes.fact_extractor import M2RuleFactExtractor
+from meeting_pipeline.minutes.model_runtime import ModelRuntimeError, model_status
 from meeting_pipeline.minutes.renderer import render_completed_document
 from meeting_pipeline.minutes.schema_mapper import load_schema
 from meeting_pipeline.minutes.schemas import DocGraph
 from meeting_pipeline.minutes.service import MinutesService
+from meeting_pipeline.minutes.text_engine import MinutesOptions
 from meeting_pipeline.pipeline.multi_source_fusion import MultiSourceFusionPipeline
 
 Job = dict[str, Any]
@@ -425,6 +428,8 @@ def _result_context(
         "preview_after_url": artifact_url("exports/preview_after.png"),
         "has_completed_docx": (run_dir / "exports" / "completed.docx").is_file(),
         "has_completed_zip": (run_dir / "exports" / "completed_minutes.zip").is_file(),
+        "minutes_model_report": _read_json(run_dir / "minutes/model_report.json"),
+        "minutes_configuration": _read_json(run_dir / "minutes/configuration.json"),
         "doc_graph_summary": {
             "template_id": _read_json(run_dir / "template" / "doc_graph.json").get(
                 "template_id", ""
@@ -656,6 +661,10 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
         job_id: str,
         template: Annotated[UploadFile, File()],
         use_model: Annotated[bool, Form()] = False,
+        minutes_mode: Annotated[str, Form()] = "detailed",
+        use_fcm: Annotated[bool, Form()] = True,
+        correct_transcript: Annotated[bool, Form()] = True,
+        content_field_id: Annotated[str | None, Form()] = None,
     ) -> JSONResponse:
         job = _job_or_404(store, job_id)
         run_dir = _run_dir(job)
@@ -667,18 +676,47 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
         }
         minutes_svc = MinutesService()
         try:
-            result = minutes_svc.process_template_for_run(
+            options = MinutesOptions.model_validate(
+                {
+                    "mode": minutes_mode,
+                    "use_model": use_model,
+                    "use_fcm": use_fcm,
+                    "correct_transcript": correct_transcript,
+                    "content_field_id": content_field_id or None,
+                }
+            )
+            result = await run_in_threadpool(
+                minutes_svc.process_template_for_run,
                 template_file_path=saved_path,
                 run_dir=run_dir,
                 meeting_metadata=meeting_meta,
                 use_model=use_model,
+                options=options,
             )
             return JSONResponse(result)
+        except ModelRuntimeError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
         except Exception as exc:
             raise HTTPException(status_code=500, detail=f"Lỗi xử lý biểu mẫu Word: {exc}") from exc
         finally:
             if saved_path.is_file():
                 shutil.rmtree(temp_dest.parent, ignore_errors=True)
+
+    @app.get("/api/minutes/models")
+    def get_minutes_models() -> dict[str, Any]:
+        return model_status()
+
+    @app.post("/api/runs/{job_id}/minutes/regenerate")
+    async def regenerate_minutes(job_id: str, options: MinutesOptions) -> dict[str, Any]:
+        run_dir = _run_dir(_job_or_404(store, job_id))
+        try:
+            return await run_in_threadpool(MinutesService().regenerate, run_dir, options)
+        except ModelRuntimeError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except (ValueError, FileNotFoundError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.get("/api/runs/{job_id}/minutes")
     def get_run_minutes(job_id: str) -> dict[str, Any]:
@@ -705,6 +743,9 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
             else None,
             "has_preview_before": (run_dir / "template" / "preview_before.png").is_file(),
             "has_preview_after": (run_dir / "exports" / "preview_after.png").is_file(),
+            "model_report": _read_json(run_dir / "minutes/model_report.json"),
+            "configuration": _read_json(run_dir / "minutes/configuration.json"),
+            "topics": _read_json(run_dir / "minutes/topics.json"),
         }
 
     @app.post("/api/runs/{job_id}/template/schema")
@@ -780,7 +821,12 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
         doc_graph_path = run_dir / "template" / "doc_graph.json"
         normalized_docx = run_dir / "template" / "normalized.docx"
         completed_docx = run_dir / "exports" / "completed.docx"
-        if schema_path.is_file() and doc_graph_path.is_file() and normalized_docx.is_file():
+        configuration = _read_json(run_dir / "minutes/configuration.json")
+        if configuration.get("use_model"):
+            report = _read_json(run_dir / "minutes/model_report.json")
+            report["stale_since_transcript_edit"] = True
+            _write_json(run_dir / "minutes/model_report.json", report)
+        elif schema_path.is_file() and doc_graph_path.is_file() and normalized_docx.is_file():
             schema = load_schema(schema_path)
             turns = load_indexed_turns(run_dir)
             extractor = M2RuleFactExtractor()

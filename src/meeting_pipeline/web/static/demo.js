@@ -126,6 +126,14 @@
       }
       const formData = new FormData();
       formData.append("template", file);
+      const minutesOptions = getMinutesOptions();
+      formData.append("use_model", String(minutesOptions.use_model));
+      formData.append("minutes_mode", minutesOptions.mode);
+      formData.append("use_fcm", String(minutesOptions.use_fcm));
+      formData.append("correct_transcript", String(minutesOptions.correct_transcript));
+      if (minutesOptions.content_field_id) {
+        formData.append("content_field_id", minutesOptions.content_field_id);
+      }
       try {
         const res = await fetch(`/api/runs/${jobId}/template`, {
           method: "POST",
@@ -145,6 +153,36 @@
       }
     });
   }
+
+  function getMinutesOptions() {
+    return {
+      mode: document.getElementById("minutes-mode")?.value || "detailed",
+      use_model: document.getElementById("minutes-use-model")?.checked || false,
+      use_fcm: document.getElementById("minutes-fcm")?.checked ?? true,
+      correct_transcript: document.getElementById("minutes-correct")?.checked ?? true,
+      content_field_id: document.getElementById("minutes-content-field")?.value || null,
+    };
+  }
+
+  const regenerateBtn = document.getElementById("btn-regenerate-minutes");
+  regenerateBtn?.addEventListener("click", async () => {
+    const jobId = window.location.pathname.split("/").pop();
+    const statusSpan = document.getElementById("upload-status");
+    regenerateBtn.disabled = true;
+    statusSpan.textContent = "Đang tạo biên bản từ transcript đã có…";
+    try {
+      const res = await fetch(`/api/runs/${jobId}/minutes/regenerate`, {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(getMinutesOptions()),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Không tạo được biên bản");
+      window.location.reload();
+    } catch (err) {
+      statusSpan.textContent = "Lỗi: " + err.message;
+      regenerateBtn.disabled = false;
+    }
+  });
 
   // Handle saving edited facts
   const saveFactsBtn = document.getElementById("btn-save-facts");
