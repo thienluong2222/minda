@@ -70,6 +70,14 @@ người chưa đăng ký hoặc chưa đủ bằng chứng được giữ `unkn
 `Speaker 1`, `Speaker 2`,… Dữ liệu sinh ra ở `data/`; audio gốc trong `dataset/voices/` được giữ
 nguyên.
 
+## Biên bản Word với LLM và Fuzzy C-Means
+
+Demo hỗ trợ Qwen3-4B 4-bit qua MLX, embedding multilingual-e5-small và FCM.
+Có chế độ chi tiết giữ đề mục mẫu, tổng quát sinh chủ đề trong vùng nội dung,
+và tạo lại DOCX từ transcript hiện có. Xem
+[hướng dẫn cài đặt, sử dụng và giới hạn](docs/LLM_FCM_MINUTES.md).
+PDF/scan và fine-tuning chưa thuộc đợt tích hợp này.
+
 ## Dữ liệu
 
 Kiểm tra kế hoạch trước khi tải:

@@ -1,8 +1,13 @@
 # Plan thảo luận: LLM nhẹ và biên bản từ DOCX, PDF, ảnh scan
 
 **Ngày lưu:** 09/10/2026, theo múi giờ Việt Nam.  
-**Trạng thái:** lưu yêu cầu và phương pháp đã thảo luận; chưa triển khai tính năng mới, chưa fine-tune hoặc đánh giá model.  
+**Trạng thái lúc lưu 09/10:** lưu yêu cầu và phương pháp đã thảo luận; chưa triển khai tính năng mới, chưa fine-tune hoặc đánh giá model.
+
 **Thứ tự công việc đã thống nhất:** lưu plan này → tiếp tục thảo luận cải tiến/tối ưu pipeline hiện có → sau đó mới cập nhật tính năng LLM và biên bản mới.
+
+**Cập nhật 10/10/2026:** người dùng đã yêu cầu triển khai LLM từ cache Hugging Face,
+FCM và kiểm thử bằng dữ liệu hiện có, đồng thời yêu cầu commit. Trạng thái triển khai
+ở mục 16; các mục trước ghi lại thảo luận tại thời điểm lưu.
 
 ## 1. Mục đích và cách tra cứu
 
@@ -287,3 +292,26 @@ Các nguồn hỗ trợ phương pháp; không chứng minh chất lượng riê
 ## 15. Context ngắn để tiếp tục
 
 > Dự án cần nhận mẫu DOCX/PDF/ảnh scan và xuất DOCX chỉnh sửa được. Biên bản chi tiết giữ nguyên đề mục; biên bản tổng quát chỉ sinh mục con trong vùng nội dung, giữ đủ ý công việc và quyết định, bỏ từ đệm/lời lặp. LLM nhẹ dùng để hiểu ngữ cảnh, sửa ASR tối thiểu và biên tập văn nói thành văn viết, có evidence và bảo toàn ý. Qwen3-4B-Instruct-2507 và Fuzzy C-Means là ứng viên chưa được đánh giá/chốt. Người dùng làm một mình, chưa có tập cặp transcript–biên bản người kiểm sửa; có FPT TTS pilot làm seed tổng hợp. Trước khi cập nhật tính năng mới, tiếp tục thảo luận cải tiến/tối ưu pipeline hiện có. Đọc plan này và kiểm tra mã/config/artifact hiện hành trước khi kết luận hoặc triển khai.
+
+## 16. Triển khai theo chỉ đạo mới ngày 10/10/2026
+
+- Tạm dừng chỉnh VAD; lưu các sửa âm thanh/người nói trước đó bằng commit riêng.
+- Triển khai model gốc Qwen3-4B-Instruct-2507 bản MLX 4-bit trên Mac M4,
+  tải snapshot Hugging Face một lần vào cache; inference offline bằng worker riêng.
+- Thêm multilingual-e5-small và FCM. Cấu hình phát triển hiện tại `m=1.3`,
+  tối đa 4 cụm, có kiểm tra chất lượng và fallback một cụm. Chưa chứng minh
+  FCM tốt hơn các phương pháp khác trên tập độc lập.
+- Tích hợp hai chế độ Word và tạo lại từ transcript hiện có vào demo.
+  Giữ đề mục mẫu, metadata và căn cứ; nội dung LLM là bản nháp cần rà soát.
+- Dùng transcript tham chiếu và run ASR có sẵn của FPT TTS pilot để thử 8 ca.
+  Không sinh corpus mới, không fine-tune. PDF/scan/OCR vẫn chưa triển khai.
+- Hướng dẫn và cấu hình:
+  [LLM_FCM_MINUTES.md](LLM_FCM_MINUTES.md).
+- Kết quả, lỗi quan sát được và giới hạn:
+  [LLM_FCM_EVALUATION_2026-10-10.md](reports/LLM_FCM_EVALUATION_2026-10-10.md).
+- Nhánh triển khai: `codex/llm-fcm-minutes`; tra lịch sử Git để lấy HEAD mới nhất.
+
+Context tiếp tục: ưu tiên đánh giá chất lượng sửa ASR/giữ ý và phân cụm trên
+thêm cuộc họp, nhiều mẫu, có tập giữ riêng; chỉ bàn fine-tune khi có nhãn và lỗi
+lặp lại. Yêu cầu cuối vẫn gồm DOCX, PDF, scan và đầu ra DOCX chỉnh sửa được;
+không coi việc hoàn thành prototype Word là đã hoàn thành OCR.
