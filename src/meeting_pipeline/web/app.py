@@ -21,6 +21,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from meeting_pipeline.adapters.audio_io import probe_audio
 from meeting_pipeline.application.speakers import SpeakerRegistry
 from meeting_pipeline.config import PipelineConfig, load_config
+from meeting_pipeline.domain.speaker_identity import person_identity_key
 from meeting_pipeline.minutes.evidence_retrieval import load_indexed_turns
 from meeting_pipeline.minutes.fact_extractor import M2RuleFactExtractor
 from meeting_pipeline.minutes.renderer import render_completed_document
@@ -65,6 +66,43 @@ def _read_json(path: Path) -> dict[str, Any]:
         return {}
     value = json.loads(path.read_text(encoding="utf-8"))
     return value if isinstance(value, dict) else {}
+
+
+def _row_person_key(row: dict[str, Any]) -> tuple[str, str] | None:
+    return person_identity_key(
+        str(row.get("speaker_label") or ""),
+        row.get("speaker_id"),
+        row.get("meeting_speaker_id"),
+        str(row.get("speaker_status") or ""),
+        int(row.get("speaker_count") or 1),
+        row.get("overlap_group_id"),
+    )
+
+
+def _meeting_speakers(segments: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    groups: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for row in segments:
+        key = _row_person_key(row)
+        if key is not None and row.get("meeting_speaker_id"):
+            groups.setdefault(key, []).append(row)
+    return [
+        {
+            "meeting_speaker_id": group[0]["meeting_speaker_id"],
+            "meeting_speaker_ids": list(dict.fromkeys(r["meeting_speaker_id"] for r in group)),
+            "speaker_label": group[-1].get("speaker_label"),
+            "speaker_status": group[-1].get("speaker_status") or "unknown",
+            "speaker_id": group[-1].get("speaker_id"),
+            "turn_count": len(group),
+            "total_speech_sec": round(
+                sum(
+                    max(0.0, float(r.get("end_sec") or 0) - float(r.get("start_sec") or 0))
+                    for r in group
+                ),
+                2,
+            ),
+        }
+        for group in groups.values()
+    ]
 
 
 def _number(value: object, digits: int = 2, unit: str = "") -> str:
@@ -337,7 +375,13 @@ def _result_context(
                 if row.get("speaker_status") == "anonymous"
             }
         ),
-        "ambiguous_count": sum(1 for row in segments if row.get("speaker_status") == "ambiguous"),
+        "ambiguous_count": sum(
+            1
+            for row in segments
+            if row.get("speaker_status") == "ambiguous"
+            and not row.get("overlap_group_id")
+            and int(row.get("speaker_count") or 1) == 1
+        ),
         "overlap_not_run_count": sum(
             1
             for row in segments
@@ -345,36 +389,12 @@ def _result_context(
         ),
         "unknown_count": len(
             {
-                str(row.get("track_id") or row.get("speaker_label") or "unknown")
+                _row_person_key(row)
                 for row in segments
-                if row.get("speaker_status") != "identified"
+                if row.get("speaker_status") != "identified" and _row_person_key(row) is not None
             }
         ),
-        "meeting_speakers": [
-            {
-                "meeting_speaker_id": m_id,
-                "speaker_label": group[0].get("speaker_label") or "Chưa rõ",
-                "speaker_status": group[0].get("speaker_status") or "unknown",
-                "speaker_id": group[0].get("speaker_id"),
-                "turn_count": len(group),
-                "total_speech_sec": round(
-                    sum(
-                        max(0.0, float(r.get("end_sec") or 0.0) - float(r.get("start_sec") or 0.0))
-                        for r in group
-                    ),
-                    2,
-                ),
-            }
-            for m_id, group in (
-                (
-                    m_id,
-                    [r for r in segments if r.get("meeting_speaker_id") == m_id],
-                )
-                for m_id in dict.fromkeys(
-                    r.get("meeting_speaker_id") for r in segments if r.get("meeting_speaker_id")
-                )
-            )
-        ],
+        "meeting_speakers": _meeting_speakers(segments),
         "reference_source_id": coverage.get("reference_source_id"),
         "aligned_files": aligned_files,
         "extra_aligned_files": [
@@ -524,28 +544,7 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
         run_dir = _run_dir(job)
         timeline_data = _read_json(run_dir / "timeline.json")
         segments = timeline_data.get("segments") or []
-        meeting_speakers_map: dict[str, dict[str, Any]] = {}
-        for row in segments:
-            m_id = row.get("meeting_speaker_id")
-            if not m_id:
-                continue
-            if m_id not in meeting_speakers_map:
-                meeting_speakers_map[m_id] = {
-                    "meeting_speaker_id": m_id,
-                    "speaker_label": row.get("speaker_label") or "Chưa rõ",
-                    "speaker_status": row.get("speaker_status") or "unknown",
-                    "speaker_id": row.get("speaker_id"),
-                    "turn_count": 0,
-                    "total_speech_sec": 0.0,
-                }
-            entry = meeting_speakers_map[m_id]
-            entry["turn_count"] += 1
-            s_sec = float(row.get("start_sec") or 0.0)
-            e_sec = float(row.get("end_sec") or 0.0)
-            entry["total_speech_sec"] = round(
-                entry["total_speech_sec"] + max(0.0, e_sec - s_sec), 2
-            )
-        return list(meeting_speakers_map.values())
+        return _meeting_speakers(segments)
 
     @app.post("/api/runs/{job_id}/rename-speaker")
     def rename_speaker(
@@ -570,10 +569,22 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
         if not segments:
             raise HTTPException(status_code=404, detail="Không tìm thấy timeline")
 
+        target = next(
+            (r for r in segments if r.get("meeting_speaker_id") == meeting_speaker_id), None
+        )
+        target_key = _row_person_key(target) if target else None
+        related_ids = {
+            r.get("meeting_speaker_id")
+            for r in segments
+            if r.get("meeting_speaker_id")
+            and target_key is not None
+            and _row_person_key(r) == target_key
+        }
+
         matched = False
         old_label = ""
         for seg in segments:
-            if seg.get("meeting_speaker_id") == meeting_speaker_id:
+            if seg.get("meeting_speaker_id") in related_ids:
                 if not old_label:
                     old_label = str(seg.get("speaker_label", ""))
                 seg["speaker_label"] = clean_label
@@ -591,10 +602,13 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
         audit_data = _read_json(labels_path)
         history = audit_data.get("history") or []
         labels_map = audit_data.get("labels") or {}
-        labels_map[meeting_speaker_id] = clean_label
+        for related_id in related_ids:
+            if related_id:
+                labels_map[related_id] = clean_label
         history.append(
             {
                 "meeting_speaker_id": meeting_speaker_id,
+                "meeting_speaker_ids": sorted(str(i) for i in related_ids if i),
                 "old_label": old_label,
                 "new_label": clean_label,
                 "updated_at": _now(),
@@ -661,9 +675,7 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
             )
             return JSONResponse(result)
         except Exception as exc:
-            raise HTTPException(
-                status_code=500, detail=f"Lỗi xử lý biểu mẫu Word: {exc}"
-            ) from exc
+            raise HTTPException(status_code=500, detail=f"Lỗi xử lý biểu mẫu Word: {exc}") from exc
         finally:
             if saved_path.is_file():
                 shutil.rmtree(temp_dest.parent, ignore_errors=True)
@@ -746,9 +758,7 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
         try:
             seg_idx = int(segment_index)
         except ValueError as exc:
-            raise HTTPException(
-                status_code=400, detail="segment_index phải là số nguyên"
-            ) from exc
+            raise HTTPException(status_code=400, detail="segment_index phải là số nguyên") from exc
 
         timeline_path = run_dir / "timeline.json"
         timeline_data = _read_json(timeline_path)

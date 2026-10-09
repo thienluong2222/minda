@@ -55,9 +55,13 @@ class SpeakerTurnDetector:
         step_seconds: float,
         adapter: PyannoteSegmentationAdapter | None = None,
         bin_sec: float = 0.05,
+        bridge_gap_sec: float = 0.4,
+        speech_pad_sec: float = 0.0,
     ) -> None:
         self.adapter = adapter or PyannoteSegmentationAdapter(checkpoint, step_seconds)
         self.bin_sec = bin_sec
+        self.bridge_gap_sec = bridge_gap_sec
+        self.speech_pad_sec = speech_pad_sec
 
     def detect(
         self,
@@ -83,7 +87,8 @@ class SpeakerTurnDetector:
                 return self.adapter.segment_file(path)
 
         active_paths = {
-            source_id: path for source_id, path in aligned_paths.items()
+            source_id: path
+            for source_id, path in aligned_paths.items()
             if (sync_metadata or {}).get(source_id, {}).get("status") != "alignment_failed"
         }
         tracks_by_source = {
@@ -114,16 +119,41 @@ class SpeakerTurnDetector:
                 states.append(tuple(active))
                 supporters.append([sid for sid, count in source_count.items() if count > 0])
 
-            # Reject one-frame flips without shifting a sustained speaker boundary.
-            states = _smooth_states(states, minimum_bins=max(2, round(0.25 / self.bin_sec)))
+            # Smooth only dropouts; a brief resolved speaker or overlap may be real.
+            states = _bridge_single_speaker_gaps(
+                states,
+                maximum_bins=round(self.bridge_gap_sec / self.bin_sec),
+            )
+            runs: list[tuple[int, int, tuple[str, ...]]] = []
             run_start = 0
             for index in range(1, len(states) + 1):
                 if index < len(states) and states[index] == states[run_start]:
                     continue
+                if states[run_start]:
+                    runs.append((run_start, index, states[run_start]))
+                run_start = index
+            for run_index, (run_start, index, labels) in enumerate(runs):
                 start = max(segment.start_sec, (first + run_start) * self.bin_sec)
                 end = min(segment.end_sec, (first + index) * self.bin_sec)
-                if end - start >= 0.15 and states[run_start]:
-                    labels = states[run_start]
+                if end - start >= 0.15:
+                    # Pad only into silence, sharing any gap with its neighbour.
+                    # Never pad across a real speaker change or an overlap interval.
+                    left_limit = segment.start_sec
+                    if run_index:
+                        previous_end = min(
+                            segment.end_sec,
+                            (first + runs[run_index - 1][1]) * self.bin_sec,
+                        )
+                        left_limit = (previous_end + start) / 2
+                    right_limit = segment.end_sec
+                    if run_index + 1 < len(runs):
+                        next_start = max(
+                            segment.start_sec,
+                            (first + runs[run_index + 1][0]) * self.bin_sec,
+                        )
+                        right_limit = (end + next_start) / 2
+                    start = max(left_limit, start - self.speech_pad_sec)
+                    end = min(right_limit, end + self.speech_pad_sec)
                     group_id = (
                         f"{segment.segment_id}-overlap-{run_start}" if len(labels) == 2 else None
                     )
@@ -153,7 +183,6 @@ class SpeakerTurnDetector:
                                 ),
                             )
                         )
-                run_start = index
         return turns
 
     def _decode(self, scores: Any, num_bins: int) -> np.ndarray[Any, np.dtype[np.bool_]]:
@@ -168,7 +197,9 @@ class SpeakerTurnDetector:
         # The first/last 1.25 seconds of an overlapping chunk are less reliable.
         frame_step = chunk_duration / max(1, data.shape[1])
         stitched = np.zeros((num_bins, data.shape[2]), dtype=np.float32)
-        votes = np.zeros((num_bins, data.shape[2]), dtype=np.float32)
+        votes = np.zeros(num_bins, dtype=np.float32)
+        speech_votes = np.zeros(num_bins, dtype=np.float32)
+        overlap_votes = np.zeros(num_bins, dtype=np.float32)
         previous: np.ndarray[Any, np.dtype[np.float32]] | None = None
         previous_start = 0.0
         next_track = 0
@@ -234,6 +265,17 @@ class SpeakerTurnDetector:
                 end_bin = min(num_bins, max(start_bin + 1, int(np.ceil(t_end / self.bin_sec))))
                 if start_bin >= num_bins or end_bin <= 0:
                     continue
+                # Every window votes on activity/count, including absent tracks.
+                # Independent per-track denominators can fabricate overlap when
+                # two windows use different global IDs for the same speaker.
+                relative_time = (frame_index + 0.5) * frame_step
+                weight = max(
+                    0.1, min(1.0, relative_time / 1.25, (chunk_duration - relative_time) / 1.25)
+                )
+                count = int(np.count_nonzero(frame))
+                votes[start_bin:end_bin] += weight
+                speech_votes[start_bin:end_bin] += weight * (count > 0)
+                overlap_votes[start_bin:end_bin] += weight * (count >= 2)
                 for local_id, value in enumerate(frame):
                     global_id = local_to_global[local_id]
                     if global_id < 0:
@@ -241,24 +283,50 @@ class SpeakerTurnDetector:
                     if global_id >= stitched.shape[1]:
                         grow = global_id + 1 - stitched.shape[1]
                         stitched = np.pad(stitched, ((0, 0), (0, grow)))
-                        votes = np.pad(votes, ((0, 0), (0, grow)))
-                    for b in range(start_bin, end_bin):
-                        stitched[b, global_id] += value
-                        votes[b, global_id] += 1
+                    stitched[start_bin:end_bin, global_id] += value * weight
             previous = local
             previous_start = chunk_start
-        return np.divide(stitched, votes, out=np.zeros_like(stitched), where=votes > 0) >= 0.5
+        speech = np.divide(speech_votes, votes, out=np.zeros_like(votes), where=votes > 0) >= 0.5
+        overlap = np.divide(overlap_votes, votes, out=np.zeros_like(votes), where=votes > 0) >= 0.5
+        decoded = np.zeros_like(stitched, dtype=np.bool_)
+        for bin_index in np.flatnonzero(speech):
+            # Speaker count comes from simultaneous local evidence, never from
+            # the number of competing global IDs across different windows.
+            count = 2 if overlap[bin_index] else 1
+            ranked = np.argsort(-stitched[bin_index], kind="stable")[:count]
+            decoded[bin_index, ranked] = stitched[bin_index, ranked] > 0
+        return decoded
 
 
-def _smooth_states(states: list[tuple[str, ...]], minimum_bins: int) -> list[tuple[str, ...]]:
+def _bridge_single_speaker_gaps(
+    states: list[tuple[str, ...]],
+    maximum_bins: int,
+) -> list[tuple[str, ...]]:
+    """Bridge brief dropouts only between the exact same resolved single track.
+
+    A different resolved track or any overlap remains a hard boundary. This does
+    not discard short utterances or assign an identity to an isolated unknown turn.
+    """
     result = states.copy()
     i = 0
-    while i < len(result):
+    while i < len(states):
+        state = states[i]
+        if state and not (len(state) == 1 and state[0].startswith("unresolved-")):
+            i += 1
+            continue
         j = i + 1
-        while j < len(result) and result[j] == result[i]:
+        while j < len(states) and (
+            not states[j] or (len(states[j]) == 1 and states[j][0].startswith("unresolved-"))
+        ):
             j += 1
-        if j - i < minimum_bins and i > 0 and j < len(result) and result[i - 1] == result[j]:
-            result[i:j] = [result[i - 1]] * (j - i)
+        if i > 0 and j < len(states) and j - i <= maximum_bins:
+            neighbour = states[i - 1]
+            if (
+                len(neighbour) == 1
+                and not neighbour[0].startswith("unresolved-")
+                and neighbour == states[j]
+            ):
+                result[i:j] = [neighbour] * (j - i)
         i = j
     return result
 

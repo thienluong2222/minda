@@ -15,6 +15,62 @@ from meeting_pipeline.pipeline.multi_source_fusion import MultiSourceFusionPipel
 from meeting_pipeline.pipeline.speaker_turns import SpeakerTurn
 
 
+def test_long_speech_region_is_chunked_after_turn_detection_with_context(tmp_path: Path) -> None:
+    sample_rate = 16000
+    time = np.arange(sample_rate * 36, dtype=np.float32) / sample_rate
+    signal = (
+        0.1 * np.sin(2 * np.pi * 220 * time)
+        + 0.02 * np.random.default_rng(42).normal(size=time.size)
+    ).astype(np.float32)
+    paths = [tmp_path / "a.wav", tmp_path / "b.wav"]
+    sf.write(paths[0], signal, sample_rate)
+    sf.write(paths[1], signal * 0.8, sample_rate)
+    config = load_config(Path("configs/default.yaml"))
+    config.paths.data_dir = tmp_path / "data"
+    config.identity["method"] = "mfcc_knn"
+    config.asr.routing_mode = "all_source"
+    config.asr.cache_enabled = False
+
+    def long_segment(signals, vad_config, meeting_id, sr):
+        assert vad_config.max_segment_sec == config.audio.max_duration_seconds
+        assert len(signals) == 2 and sr == sample_rate
+        return [
+            MeetingSegment(
+                meeting_id=meeting_id, segment_id="seg_0000", start_sec=0.1, end_sec=35.9
+            )
+        ]
+
+    class RecordingAsr(FakeAsrAdapter):
+        def __init__(self):
+            super().__init__()
+            self.clip_durations = []
+
+        def transcribe(self, waveform, sample_rate=16000):
+            self.clip_durations.append(len(waveform) / sample_rate)
+            return super().transcribe(waveform, sample_rate)
+
+    asr = RecordingAsr()
+    run_dir = MultiSourceFusionPipeline(
+        config,
+        asr_adapter=asr,
+        segment_extractor=long_segment,
+        turn_detector=_OneTurnDetector(),
+    ).run("Long speech", paths)
+    raw = json.loads((run_dir / "speaker_turns.json").read_text())["turns"]
+    timeline = json.loads((run_dir / "timeline.json").read_text())["segments"]
+    assert len(raw) == 1
+    assert len(timeline) == 2
+    assert len({row["asr_chunk_group_id"] for row in timeline}) == 1
+    assert len({row["meeting_speaker_id"] for row in timeline}) == 1
+    assert timeline[0]["end_sec"] == timeline[1]["start_sec"]
+    assert all(10 <= row["end_sec"] - row["start_sec"] <= 23.5 for row in timeline)
+    assert all(d <= 25.0001 for d in asr.clip_durations)
+    # Each source gets two clips: artificial internal cuts have both-side context.
+    core_durations = [row["end_sec"] - row["start_sec"] for row in timeline]
+    assert len(asr.clip_durations) == 4
+    assert all(d > core_durations[index // 2] + 0.7 for index, d in enumerate(asr.clip_durations))
+
+
 class _OneTurnDetector:
     def detect(self, aligned_paths, segments, reference_source, duration_sec):
         del aligned_paths, reference_source, duration_sec

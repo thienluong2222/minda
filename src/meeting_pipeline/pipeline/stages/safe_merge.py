@@ -7,10 +7,15 @@ Ensures no cross-speaker contamination while reducing ASR calls on short sub-tur
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
+import numpy as np
+
+from meeting_pipeline.config import AsrConfig
+from meeting_pipeline.domain.transcription import SpeechRegion
 from meeting_pipeline.pipeline.speaker_turns import SpeakerTurn
+from meeting_pipeline.pipeline.stages.chunking import plan_region_chunks
 from meeting_pipeline.speaker.clustering import TurnAssignment
 
 logger = logging.getLogger(__name__)
@@ -35,6 +40,7 @@ class MergedSpeakerTurn:
     needs_review: bool = False
     source_evidence: list[dict[str, Any]] = field(default_factory=list)
     overlap_group_id: str | None = None
+    asr_chunk_group_id: str | None = None
 
     @property
     def duration_sec(self) -> float:
@@ -239,3 +245,75 @@ def safe_merge_speaker_turns(
 
     flush_group()
     return merged
+
+
+def split_merged_turns_for_asr(
+    turns: list[MergedSpeakerTurn],
+    asr_config: AsrConfig,
+    audio: np.ndarray,
+    sample_rate: int,
+) -> list[MergedSpeakerTurn]:
+    """Limit ASR clips after identity assignment, keeping context across internal cuts."""
+    result: list[MergedSpeakerTurn] = []
+    for turn in turns:
+        if turn.speaker_count != 1:
+            result.append(turn)
+            continue
+        chunks = plan_region_chunks(
+            SpeechRegion(
+                region_id=turn.turn_id,
+                start_sec=turn.start_sec,
+                end_sec=turn.end_sec,
+                supporting_source_ids=[],
+                source_intervals={},
+            ),
+            asr_config,
+            len(audio) / sample_rate,
+            audio_samples=audio,
+            sample_rate=sample_rate,
+        )
+        if len(chunks) == 1:
+            result.append(turn)
+            continue
+        for index, chunk in enumerate(chunks):
+            result.append(
+                replace(
+                    turn,
+                    turn_id=f"{turn.turn_id}-asr-{index:03d}",
+                    start_sec=chunk.core_interval.start_sec,
+                    end_sec=chunk.core_interval.end_sec,
+                    asr_chunk_group_id=turn.turn_id,
+                )
+            )
+    return result
+
+
+def asr_context_boundaries(
+    turns: list[MergedSpeakerTurn],
+    index: int,
+) -> tuple[float | None, float | None]:
+    """Keep real speaker boundaries hard while allowing context inside one ASR group."""
+    turn = turns[index]
+    previous = turns[index - 1] if index else None
+    following = turns[index + 1] if index + 1 < len(turns) else None
+
+    def same_group(other: MergedSpeakerTurn | None) -> bool:
+        return bool(
+            other is not None
+            and turn.asr_chunk_group_id
+            and turn.asr_chunk_group_id == other.asr_chunk_group_id
+        )
+
+    # Across internal cuts, still cap context at the outer speaker/overlap bounds.
+    left_index = index
+    while left_index > 0 and same_group(turns[left_index - 1]):
+        left_index -= 1
+    right_index = index
+    while right_index + 1 < len(turns) and same_group(turns[right_index + 1]):
+        right_index += 1
+    left = turns[left_index - 1].end_sec if left_index else 0.0
+    right = turns[right_index + 1].start_sec if right_index + 1 < len(turns) else None
+    return (
+        left if same_group(previous) else (previous.end_sec if previous else 0.0),
+        right if same_group(following) else (following.start_sec if following else None),
+    )

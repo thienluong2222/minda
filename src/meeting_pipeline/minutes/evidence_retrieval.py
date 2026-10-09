@@ -39,6 +39,10 @@ class IndexedTurn:
     asr_status: str
     needs_review: bool
     confidence: float | None
+    meeting_speaker_id: str | None = None
+    speaker_status: str = ""
+    speaker_count: int = 1
+    overlap_group_id: str | None = None
 
 
 class TurnSearchIndex:
@@ -143,7 +147,7 @@ def load_indexed_turns(run_dir: Path) -> list[IndexedTurn]:
             IndexedTurn(
                 turn_id=turn_id,
                 speaker_label=str(s.get("speaker_label") or "Chưa rõ"),
-                speaker_id=s.get("speaker_id") or s.get("meeting_speaker_id"),
+                speaker_id=s.get("speaker_id"),
                 start_sec=float(s.get("start_sec") or 0.0),
                 end_sec=float(s.get("end_sec") or 0.0),
                 text=text,
@@ -153,6 +157,10 @@ def load_indexed_turns(run_dir: Path) -> list[IndexedTurn]:
                 asr_status=str(s.get("asr_status") or "transcribed"),
                 needs_review=bool(s.get("needs_review")),
                 confidence=conf,
+                meeting_speaker_id=s.get("meeting_speaker_id"),
+                speaker_status=str(s.get("speaker_status") or ""),
+                speaker_count=int(s.get("speaker_count") or 1),
+                overlap_group_id=s.get("overlap_group_id"),
             )
         )
 

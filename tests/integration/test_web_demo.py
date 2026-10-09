@@ -456,3 +456,70 @@ def test_get_meeting_speakers_and_rename_label(tmp_path: Path) -> None:
         ).status_code
         == 404
     )
+
+
+def test_person_list_deduplicates_identity_and_keeps_states_separate(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+    run = _fixture_run(tmp_path, "2.0")
+    timeline_path = run / "timeline.json"
+    timeline = json.loads(timeline_path.read_text(encoding="utf-8"))
+    base = timeline["segments"][0]
+    timeline["segments"] = [
+        dict(
+            base,
+            meeting_speaker_id="ms-1",
+            speaker_id="profile-1",
+            speaker_label="Minh",
+            speaker_status="identified",
+            speaker_count=1,
+        ),
+        dict(
+            base,
+            meeting_speaker_id="ms-4",
+            speaker_id="profile-1",
+            speaker_label="Anh Minh",
+            speaker_status="identified",
+            speaker_count=1,
+        ),
+        dict(
+            base,
+            meeting_speaker_id="unresolved",
+            speaker_id=None,
+            speaker_label="Chưa xác định",
+            speaker_status="ambiguous",
+            speaker_count=1,
+        ),
+        dict(
+            base,
+            meeting_speaker_id=None,
+            speaker_id=None,
+            speaker_label="Nói chồng",
+            speaker_status="ambiguous",
+            speaker_count=2,
+            overlap_group_id="ov-1",
+        ),
+    ]
+    timeline_path.write_text(json.dumps(timeline), encoding="utf-8")
+    _job(client, run)
+    people = client.get("/api/runs/demo-1/speakers").json()
+    assert len(people) == 1
+    assert people[0]["meeting_speaker_ids"] == ["ms-1", "ms-4"]
+    assert people[0]["turn_count"] == 2
+    page = client.get("/runs/demo-1").text
+    assert "Nói chồng — có nhiều người nói cùng lúc" in page
+    assert "Chưa xác định — chưa gán được danh tính" in page
+    response = client.post(
+        "/api/runs/demo-1/rename-speaker",
+        json={
+            "meeting_speaker_id": "ms-1",
+            "new_label": "Anh Minh mới",
+        },
+    )
+    assert response.status_code == 200
+    updated = json.loads(timeline_path.read_text())["segments"]
+    assert [row["speaker_label"] for row in updated] == [
+        "Anh Minh mới",
+        "Anh Minh mới",
+        "Chưa xác định",
+        "Nói chồng",
+    ]

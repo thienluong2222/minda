@@ -51,7 +51,9 @@ from meeting_pipeline.pipeline.overlap_separation import TwoSpeakerSeparator
 from meeting_pipeline.pipeline.speaker_turns import SpeakerTurn, SpeakerTurnDetector
 from meeting_pipeline.pipeline.stages.safe_merge import (
     MergedSpeakerTurn,
+    asr_context_boundaries,
     safe_merge_speaker_turns,
+    split_merged_turns_for_asr,
 )
 from meeting_pipeline.pipeline.stages.shared_segmentation import run_shared_pyannote_segmentation
 from meeting_pipeline.speaker.clustering import (
@@ -313,7 +315,9 @@ class MultiSourceFusionPipeline:
             min_silence_sec=self.config.segmentation.minimum_silence_ms / 1000.0,
             merge_gap_sec=self.config.segmentation.merge_gap_ms / 1000.0,
             padding_sec=self.config.segmentation.speech_pad_ms / 1000.0,
-            max_segment_sec=min(15.0, self.config.asr.max_chunk_seconds),
+            # Activity regions are not ASR clips. Split long turns after identity
+            # assignment, where context can be retained without mixing speakers.
+            max_segment_sec=float(self.config.audio.max_duration_seconds),
         )
 
         checkpoint = (
@@ -325,7 +329,10 @@ class MultiSourceFusionPipeline:
         )
         if self.turn_detector is None:
             self.turn_detector = SpeakerTurnDetector(
-                checkpoint, self.config.segmentation.step_seconds
+                checkpoint,
+                self.config.segmentation.step_seconds,
+                bridge_gap_sec=self.config.segmentation.turn_gap_bridge_ms / 1000.0,
+                speech_pad_sec=self.config.segmentation.speech_pad_ms / 1000.0,
             )
 
         adapter = getattr(self.turn_detector, "adapter", None)
@@ -473,6 +480,12 @@ class MultiSourceFusionPipeline:
             max_core_sec=getattr(self.config.asr, "target_core_seconds", 22.0),
             enabled=getattr(self.config.asr, "safe_turn_merging", True),
         )
+        merged_turns = split_merged_turns_for_asr(
+            merged_turns,
+            self.config.asr,
+            aligned[reference_source],
+            self.sample_rate,
+        )
         _write_json(
             run_dir / "merged_speaker_turns.json",
             {
@@ -491,6 +504,7 @@ class MultiSourceFusionPipeline:
                         "speaker_label": mt.speaker_label,
                         "speaker_status": mt.speaker_status,
                         "needs_review": mt.needs_review,
+                        "asr_chunk_group_id": mt.asr_chunk_group_id,
                     }
                     for mt in merged_turns
                 ],
@@ -542,10 +556,7 @@ class MultiSourceFusionPipeline:
                 previous_turn = None
                 continue
 
-            prev_b = merged_turns[turn_idx - 1].end_sec if turn_idx > 0 else 0.0
-            next_b = (
-                merged_turns[turn_idx + 1].start_sec if turn_idx + 1 < len(merged_turns) else None
-            )
+            prev_b, next_b = asr_context_boundaries(merged_turns, turn_idx)
 
             hypotheses, routing_meta = transcribe_turn_adaptive(
                 meeting_id=meeting_id,
@@ -560,6 +571,11 @@ class MultiSourceFusionPipeline:
                 prev_boundary_sec=prev_b,
                 next_boundary_sec=next_b,
                 cache=self.asr_cache,
+                core_end_inclusive=not (
+                    turn.asr_chunk_group_id
+                    and turn_idx + 1 < len(merged_turns)
+                    and merged_turns[turn_idx + 1].asr_chunk_group_id == turn.asr_chunk_group_id
+                ),
             )
 
             segment = MeetingSegment(
@@ -667,6 +683,7 @@ class MultiSourceFusionPipeline:
             timeline_row["track_id"] = turn.track_id
             timeline_row["overlap_group_id"] = turn.overlap_group_id
             timeline_row["speaker_count"] = turn.speaker_count
+            timeline_row["asr_chunk_group_id"] = turn.asr_chunk_group_id
             timeline_row["routing_metadata"] = routing_meta
             provenance = timeline_row["provenance"]
             if isinstance(provenance, dict):

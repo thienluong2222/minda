@@ -106,6 +106,39 @@ def test_safe_turn_merging_same_cluster() -> None:
     assert merged[1].cluster_id == "c-0002"
 
 
+def test_word_at_internal_cut_is_owned_by_exactly_one_core() -> None:
+    config = AsrConfig(model_id="test", model_revision="test", routing_mode="all_source")
+    aligned = {"mic": np.ones(64000, dtype=np.float32) * 0.1}
+    first = MockAsrAdapter(
+        default_result=AsrResult(
+            text="ranh",
+            words=[TimedWord(text="ranh", start_sec=1.9, end_sec=2.1)],
+            status="transcribed",
+        )
+    )
+    second = MockAsrAdapter(
+        default_result=AsrResult(
+            text="ranh",
+            words=[TimedWord(text="ranh", start_sec=0.65, end_sec=0.85)],
+            status="transcribed",
+        )
+    )
+    left, _ = transcribe_turn_adaptive(
+        "m",
+        "left",
+        0,
+        2,
+        aligned,
+        {},
+        first,
+        config,
+        core_end_inclusive=False,
+    )
+    right, _ = transcribe_turn_adaptive("m", "right", 2, 4, aligned, {}, second, config)
+    assert left["mic"].words == []
+    assert len(right["mic"].words) == 1
+
+
 def test_safe_turn_merging_prevent_across_overlap_or_gap() -> None:
     """Never merge across overlap turns, large gaps (>0.6s) or max core length (>22s)."""
     turns = [

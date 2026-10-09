@@ -165,6 +165,7 @@ def transcribe_turn_adaptive(
     prev_boundary_sec: float | None = None,
     next_boundary_sec: float | None = None,
     cache: AsrCache | None = None,
+    core_end_inclusive: bool = True,
 ) -> tuple[dict[str, SourceHypothesis], dict[str, Any]]:
     """Transcribe a speech turn with context windowing, adaptive routing and midpoint filtering."""
     context_sec = float(asr_config.chunk_context_seconds)
@@ -275,7 +276,12 @@ def transcribe_turn_adaptive(
                 midpoint = (abs_start + abs_end) / 2.0
 
                 # Midpoint invariant check
-                if (core_start_sec - 1e-4) <= midpoint <= (core_end_sec + 1e-4):
+                before_end = (
+                    midpoint <= core_end_sec + 1e-4
+                    if core_end_inclusive
+                    else midpoint < core_end_sec
+                )
+                if (core_start_sec - 1e-4) <= midpoint and before_end:
                     # Flag boundary words or words with degenerate timing as uncertain
                     is_near_boundary = (
                         abs(abs_start - core_start_sec) < 0.05

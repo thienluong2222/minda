@@ -66,6 +66,7 @@ def plan_region_chunks(
     target_core_sec = float(asr_config.target_core_seconds)
     context_sec = float(asr_config.chunk_context_seconds)
     search_radius_sec = float(asr_config.boundary_search_seconds)
+    max_core_sec = max_chunk_sec - 2 * context_sec
 
     # 1. Determine core intervals
     core_boundaries: list[float] = [region.start_sec]
@@ -73,13 +74,19 @@ def plan_region_chunks(
 
     while True:
         remaining_duration = region.end_sec - current_start
-        if remaining_duration <= max_chunk_sec + 1e-6:
+        if remaining_duration <= max_core_sec + 1e-6:
             # The remainder fits in one chunk
             core_boundaries.append(region.end_sec)
             break
 
         # Long region: find split point near current_start + target_core_sec
-        nominal_split = current_start + target_core_sec
+        # Balance the last pair rather than leaving a tiny tail after a fixed cut.
+        next_core_sec = (
+            min(target_core_sec, remaining_duration / 2)
+            if remaining_duration <= 2 * target_core_sec
+            else target_core_sec
+        )
+        nominal_split = current_start + next_core_sec
 
         if audio_samples is not None and audio_samples.size > 0:
             split_point = find_optimal_boundary(
@@ -91,6 +98,7 @@ def plan_region_chunks(
             )
             # Ensure split_point makes forward progress and doesn't exceed bounds
             split_point = max(current_start + 1.0, min(region.end_sec - 1.0, split_point))
+            split_point = min(current_start + max_core_sec, split_point)
         else:
             split_point = round(nominal_split, 4)
 

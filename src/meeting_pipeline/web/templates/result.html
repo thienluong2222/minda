@@ -122,7 +122,7 @@
         {% else %}<p class="notice">Run schema {{ schema_version }} chưa lưu transcript và điểm chất lượng riêng cho từng nguồn.</p>{% endif %}
         <div class="detail-block">
           <h3>Nhận diện người nói</h3>
-          <p>Trạng thái: <strong>{{ "Đã khớp hồ sơ" if segment.speaker_status == "identified" else "Chưa rõ danh tính" }}</strong> · Nhãn: <strong>{{ segment.speaker_label or "Chưa có dữ liệu" }}</strong></p>
+          <p>Trạng thái: <strong>{% if segment.overlap_group_id or segment.speaker_count == 2 %}Nói chồng — có nhiều người nói cùng lúc{% elif segment.speaker_status == "identified" %}Đã khớp hồ sơ{% elif segment.speaker_status == "ambiguous" %}Chưa xác định — chưa gán được danh tính{% else %}Chưa rõ danh tính{% endif %}</strong> · Nhãn: <strong>{{ segment.speaker_label or "Chưa có dữ liệu" }}</strong></p>
           <p>{{ identity_description }} Điểm dưới đây chưa được hiệu chuẩn thành xác suất đúng.</p>
           <div class="metric-grid">
             <span>Điểm {{ "KNN" if identity_method == "mfcc_knn" else "cosine/cluster" }}: <strong>{{ segment.speaker_match_score|number(3) }}</strong></span>

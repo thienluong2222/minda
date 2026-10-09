@@ -41,6 +41,7 @@ class SegmentationConfig(BaseModel):
     minimum_silence_ms: int = Field(200, ge=0)
     merge_gap_ms: int = Field(400, ge=0)
     speech_pad_ms: int = Field(250, ge=0)
+    turn_gap_bridge_ms: int = Field(400, ge=0)
     context_seconds: float = Field(10.0, gt=0)
     step_seconds: float = Field(2.5, gt=0)
     max_local_speakers: int = Field(3, ge=1)

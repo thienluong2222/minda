@@ -26,6 +26,7 @@ segmentation:
   minimum_silence_ms: 200
   merge_gap_ms: 400
   speech_pad_ms: 250
+  turn_gap_bridge_ms: 400
   context_seconds: 10
   step_seconds: 2.5
   max_local_speakers: 3

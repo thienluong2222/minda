@@ -13,6 +13,7 @@ import time
 import urllib.request
 from typing import Any
 
+from meeting_pipeline.domain.speaker_identity import normalize_speaker_label, person_identity_key
 from meeting_pipeline.minutes.evidence_retrieval import (
     IndexedTurn,
     TurnSearchIndex,
@@ -27,6 +28,101 @@ from meeting_pipeline.minutes.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _person_turn_groups(turns: list[IndexedTurn]) -> list[list[IndexedTurn]]:
+    groups: dict[tuple[str, str], list[IndexedTurn]] = {}
+    for turn in sorted(turns, key=lambda t: (t.start_sec, t.end_sec)):
+        key = person_identity_key(
+            turn.speaker_label,
+            turn.speaker_id,
+            turn.meeting_speaker_id,
+            turn.speaker_status,
+            turn.speaker_count,
+            turn.overlap_group_id,
+        )
+        if key is not None:
+            groups.setdefault(key, []).append(turn)
+    return list(groups.values())
+
+
+def _person_evidence(turn: IndexedTurn, run_id: str) -> EvidenceRef:
+    return EvidenceRef(
+        run_id=run_id,
+        turn_id=turn.turn_id,
+        source_id=turn.source_id,
+        start_sec=turn.start_sec,
+        end_sec=turn.end_sec,
+        clip_path=turn.clip_path,
+        source_kind="transcript",
+        text_snippet=turn.text or f"Người nói: {turn.speaker_label}",
+        confidence=None,
+    )
+
+
+def _explicit_role(
+    turns: list[IndexedTurn],
+    groups: list[list[IndexedTurn]],
+    role: str,
+    run_id: str,
+) -> tuple[str | None, FactStatus, list[EvidenceRef], str | None]:
+    """Require an explicit role statement rather than alphabetical speaker order."""
+    candidates: dict[tuple[str, str], tuple[str, list[EvidenceRef]]] = {}
+    for turn in turns:
+        if turn.speaker_count != 1 or turn.overlap_group_id or turn.asr_status != "transcribed":
+            continue
+        text = normalize_speaker_label(turn.text).casefold()
+        if any(word in text for word in ("đề xuất", "đề nghị", "chưa chốt", "chưa phân công")):
+            continue
+        if re.search(rf"\b(?:không|chưa)\b[^.!?;]{{0,60}}\b(?:{role})\b", text):
+            continue
+        for group in groups:
+            representative = group[-1]
+            name = normalize_speaker_label(representative.speaker_label)
+            if representative.speaker_status == "anonymous" or name.casefold().startswith(
+                ("người lạ", "speaker ")
+            ):
+                continue
+            names = {normalize_speaker_label(t.speaker_label).casefold() for t in group}
+            mentioned = any(
+                re.search(rf"\b{re.escape(alias)}\s+(?:(?:là|làm)\s+)?(?:{role})\b", text)
+                or re.search(
+                    rf"\b(?:{role})\s*(?::|là|do)?\s*(?:(?:anh|chị|ông|bà)\s+)?"
+                    rf"{re.escape(alias)}\b",
+                    text,
+                )
+                for alias in names
+            )
+            key = person_identity_key(
+                representative.speaker_label,
+                representative.speaker_id,
+                representative.meeting_speaker_id,
+                representative.speaker_status,
+            )
+            own_key = person_identity_key(
+                turn.speaker_label,
+                turn.speaker_id,
+                turn.meeting_speaker_id,
+                turn.speaker_status,
+                turn.speaker_count,
+                turn.overlap_group_id,
+            )
+            self_role = key == own_key and re.search(
+                rf"\btôi\s+(?:(?:là|làm)\s+)?(?:{role})\b",
+                text,
+            )
+            if key is not None and (mentioned or self_role):
+                if key not in candidates:
+                    candidates[key] = name, []
+                candidates[key][1].append(_person_evidence(turn, run_id))
+    if len(candidates) == 1:
+        name, evidence = next(iter(candidates.values()))
+        return name, FactStatus.SUPPORTED, evidence, "Vai trò được nêu rõ trong transcript"
+    if candidates:
+        evidence = [ref for _, refs in candidates.values() for ref in refs]
+        return None, FactStatus.CONFLICTING, evidence, "Có nhiều người được gán cùng vai trò"
+    return None, FactStatus.UNKNOWN, [], "Không có thông tin phân công vai trò rõ ràng"
+
 
 DECISION_KEYWORDS = [
     "thống nhất",
@@ -132,15 +228,7 @@ class M2RuleFactExtractor:
         index = TurnSearchIndex(turns)
         facts: list[MeetingFact] = []
 
-        # Collect all attendees from turns
-        known_speakers = {
-            t.speaker_label.strip()
-            for t in turns
-            if t.speaker_label
-            and "Chưa rõ" not in t.speaker_label
-            and "Người lạ" not in t.speaker_label
-        }
-        all_speaker_labels = {t.speaker_label.strip() for t in turns if t.speaker_label}
+        person_groups = _person_turn_groups(turns)
 
         for field in schema.fields:
             val: Any = None
@@ -286,46 +374,31 @@ class M2RuleFactExtractor:
             # 5. Attendees & Chairperson
             elif st == SemanticFieldType.PERSON_NAME:
                 if "chủ" in field.raw_label.lower() or "chủ" in field.field_id:
-                    # Chairperson
-                    if known_speakers:
-                        val = sorted(list(known_speakers))[0]
-                        status = FactStatus.SUPPORTED
-                    elif all_speaker_labels:
-                        val = sorted(list(all_speaker_labels))[0]
-                        status = FactStatus.NEEDS_REVIEW
-                        reason = "Gán từ nhãn người nói ẩn danh, cần duyệt danh tính"
-                    else:
-                        status = FactStatus.UNKNOWN
+                    val, status, evidence, reason = _explicit_role(
+                        turns,
+                        person_groups,
+                        "chủ trì|chủ tọa",
+                        run_id,
+                    )
                 elif "thư ký" in field.raw_label.lower():
-                    # Secretary
-                    if len(known_speakers) >= 2:
-                        val = sorted(list(known_speakers))[1]
-                        status = FactStatus.SUPPORTED
-                    else:
-                        val = None
-                        status = FactStatus.UNKNOWN
-                        reason = "Không có người được phân công thư ký rõ ràng"
+                    val, status, evidence, reason = _explicit_role(
+                        turns,
+                        person_groups,
+                        "thư ký|người ghi biên bản",
+                        run_id,
+                    )
 
             elif st == SemanticFieldType.ATTENDEE_LIST:
-                attendees = list(known_speakers if known_speakers else all_speaker_labels)
-                if attendees:
-                    val = attendees
-                    status = FactStatus.SUPPORTED
-                    # Pick first 2 turns as evidence
-                    for t in turns[:2]:
-                        evidence.append(
-                            EvidenceRef(
-                                run_id=run_id,
-                                turn_id=t.turn_id,
-                                source_id=t.source_id,
-                                start_sec=t.start_sec,
-                                end_sec=t.end_sec,
-                                clip_path=t.clip_path,
-                                source_kind="transcript",
-                                text_snippet=f"Người nói: {t.speaker_label}",
-                                confidence=0.9,
-                            )
-                        )
+                if person_groups:
+                    val = [
+                        normalize_speaker_label(group[-1].speaker_label) for group in person_groups
+                    ]
+                    evidence = [_person_evidence(group[-1], run_id) for group in person_groups]
+                    status = FactStatus.NEEDS_REVIEW
+                    reason = (
+                        "Danh sách người đã phát biểu, đã gộp theo danh tính; "
+                        "cần xác nhận danh tính và người tham dự không phát biểu"
+                    )
                 else:
                     val = None
                     status = FactStatus.UNKNOWN
@@ -469,7 +542,7 @@ class M3Qwen3FactExtractor:
                     return self.model_name
                 # Partial match for any qwen2.5 or qwen model
                 for m in models:
-                    if "qwen" in m.lower():
+                    if isinstance(m, str) and "qwen" in m.lower():
                         return m
         except Exception:
             return None
