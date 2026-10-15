@@ -61,7 +61,8 @@ def filter_boundary_words(
             continue
         if (
             not all(math.isfinite(value) for value in (start, end))
-            or end <= start
+            or end < start
+            or end <= 0
             or start < clip[0] - 1e-4
             or end > clip[1] + 1e-4
             or start < previous_start - 1e-4
@@ -77,6 +78,15 @@ def filter_boundary_words(
         internal_context = (midpoint < core[0] and internal_start) or (
             midpoint >= core[1] and internal_end
         )
+        if end == start:
+            if owned:
+                record.update(
+                    decision="kept", reason="degenerate_timestamp_in_core", owner_turn_id=turn_id
+                )
+                words.append(_word(record))
+            else:
+                record["reason"] = "invalid_timestamp"
+            continue
         if owned:
             record.update(decision="kept", reason="midpoint_in_core", owner_turn_id=turn_id)
         elif internal_context:
@@ -131,6 +141,10 @@ def refresh_boundary_hypothesis(hypothesis: SourceHypothesis) -> None:
         warnings.append("asr_invalid_word_timestamp")
     if any(r.get("matched_turn_ids") for r in hypothesis.word_boundary_audit):
         warnings.append("asr_boundary_words_reconciled")
+    if any(
+        r.get("reason") == "degenerate_timestamp_in_core" for r in hypothesis.word_boundary_audit
+    ):
+        warnings.append("asr_word_time_uncertain")
     hypothesis.asr_warnings = list(dict.fromkeys(warnings))
 
 
@@ -151,6 +165,8 @@ def _same_emission(a: _Occurrence, b: _Occurrence) -> bool:
     a_start, a_end = a.record["absolute_interval"]
     b_start, b_end = b.record["absolute_interval"]
     shortest = min(a_end - a_start, b_end - b_start)
+    if shortest <= 0:
+        return False
     overlap = min(a_end, b_end) - max(a_start, b_start)
     # Require actual shared time and close centers, not just equal neighbouring text.
     return bool(
@@ -272,7 +288,7 @@ def _assign_occurrence(
         core = chunks[occurrence.chunk][1]["core_interval"]
         clip = chunks[occurrence.chunk][1]["clip_interval"]
         return (
-            max(0.0, min(end, core[1]) - max(start, core[0])) / (end - start),
+            max(0.0, min(end, core[1]) - max(start, core[0])) / max(end - start, 1e-4),
             min(start - clip[0], clip[1] - end),
         )
 

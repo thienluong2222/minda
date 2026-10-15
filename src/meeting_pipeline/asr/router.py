@@ -239,6 +239,7 @@ class AdaptiveAsrRouter:
         quality_warnings = set(top1_hypothesis.asr_warnings) - {
             "asr_boundary_words_recovered",
             "asr_boundary_words_reconciled",
+            "asr_word_time_uncertain",
         }
         if quality_warnings:
             return True, "top1_has_warnings"

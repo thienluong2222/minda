@@ -57,12 +57,14 @@ def test_context_only_and_invalid_timestamps_are_not_restored() -> None:
         ]
     )
     words, audit = filter_boundary_words(result, turn_id="t", core=(0.75, 2), clip=(0, 3))
-    assert [word.word for word in words] == ["giữ"]
+    assert [word.word for word in words] == ["giữ", "suybiến"]
+    assert words[-1].start_sec == words[-1].end_sec == 1.2
+    assert words[-1].time_status == "uncertain"
     assert [record["reason"] for record in audit] == [
         "outside_core_context",
         "outside_core_context",
         "midpoint_in_core",
-        "invalid_timestamp",
+        "degenerate_timestamp_in_core",
         "invalid_timestamp",
     ]
 
@@ -73,6 +75,15 @@ def test_rejected_candidate_never_supplies_recovered_words() -> None:
     words, audit = filter_boundary_words(result, turn_id="t", core=(1, 2), clip=(0, 3))
     assert not words
     assert audit[0]["reason"] == "rejected_asr_candidate"
+
+
+def test_zero_duration_word_outside_core_is_not_moved_or_expanded() -> None:
+    words, audit = filter_boundary_words(
+        _result([("ngoài", 0.5, 0.5)]), turn_id="t", core=(1, 2), clip=(0, 3)
+    )
+    assert not words
+    assert audit[0]["absolute_interval"] == [0.5, 0.5]
+    assert audit[0]["decision"] == "dropped"
 
 
 def _chunk(index: int, tokens: list[tuple[str, float, float]]) -> DecodedChunk:

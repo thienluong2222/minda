@@ -167,7 +167,7 @@
           {% if evidence.asr_context_clip_artifact_id %}
           <audio controls preload="none" src="{{ artifact_url(evidence.asr_context_clip_artifact_id) }}" aria-label="Ngữ cảnh từ ở biên {{ evidence.source_id }}"></audio>
           {% endif %}
-          {% set boundary_labels = {"outer_boundary_intersection": "Giữ từ giao với biên", "same_audio_in_adjacent_clip": "Gộp bản trùng ở hai clip", "internal_boundary_reassigned": "Giữ và gán lại đoạn", "outside_core_context": "Chỉ thuộc ngữ cảnh", "owner_source_unavailable": "Chưa xác định được đoạn sở hữu", "invalid_timestamp": "Thời gian từ không hợp lệ", "rejected_asr_candidate": "ASR không đủ tin cậy", "empty_word": "Không có chữ", "internal_context": "Đang đối chiếu ngữ cảnh"} %}
+          {% set boundary_labels = {"outer_boundary_intersection": "Giữ từ giao với biên", "same_audio_in_adjacent_clip": "Gộp bản trùng ở hai clip", "internal_boundary_reassigned": "Giữ và gán lại đoạn", "outside_core_context": "Chỉ thuộc ngữ cảnh", "owner_source_unavailable": "Chưa xác định được đoạn sở hữu", "invalid_timestamp": "Thời gian từ không hợp lệ", "degenerate_timestamp_in_core": "Giữ chữ, thời gian chưa chắc chắn", "rejected_asr_candidate": "ASR không đủ tin cậy", "empty_word": "Không có chữ", "internal_context": "Đang đối chiếu ngữ cảnh"} %}
           <div class="scroll-table"><table><thead><tr><th>Từ ASR</th><th>Thời gian gốc</th><th>Xử lý</th><th>Đoạn sở hữu</th></tr></thead><tbody>
             {% for word in boundary_words %}<tr>
               <td>{{ word.original_text }}</td>
