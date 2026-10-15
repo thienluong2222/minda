@@ -91,7 +91,8 @@ Timeline → đơn vị ý nghĩa có ID, người nói và mốc thời gian
          → chuẩn hóa metadata có căn cứ
          → chi tiết: điền trường sẵn
            tổng quát: E5 → FCM → biên tập từng đơn vị
-         → kiểm tra ID, số, phủ định/điều kiện → render DOCX
+         → kiểm tra ID, số, phủ định/điều kiện → điền DOCX
+         → chuẩn hóa thể thức đã chọn → kiểm tra và xem trước các trang
 ```
 
 - Lượt không có transcript hợp lệ được liệt kê; LLM không đoán phần âm thanh mất.
@@ -108,9 +109,11 @@ Timeline → đơn vị ý nghĩa có ID, người nói và mốc thời gian
   có thể giữ một cụm. Membership là độ thuộc cụm, không phải xác suất đúng.
 - Chỉ một nhóm chủ đề chính sở hữu mỗi đơn vị, giữ thứ tự thời gian bên trong
   nhóm. Nhóm được xếp theo lần xuất hiện đầu tiên.
-- Renderer chỉ sửa `word/document.xml`; các phần khác của DOCX được chép nguyên
-  byte. Đề mục sẵn và câu cố định vẫn giữ nguyên; đoạn nội dung mới là paragraph
-  Word chỉnh sửa được. Header/footer chưa có bộ điền mới trong đợt này.
+- Bước điền nội dung chỉ sửa `word/document.xml`. Từ cập nhật 15/10/2026,
+  bước định dạng tiếp theo chuẩn hóa styles, lề, phần đầu, khối ký và số trang
+  theo Nghị định 30 hoặc Hướng dẫn 05. Giữ câu chữ, thứ tự đề mục nội dung
+  và bản mẫu gốc; bố cục và số trang có thể thay đổi. Các phần ZIP không liên
+  quan được giữ lại. Xem [thể thức DOCX](DOCX_FORMAT_STANDARDS.md).
 - Lỗi sinh biên bản khôi phục lại bộ template/minutes/export cũ.
 
 ## Artifact và khả năng truy vết

@@ -285,10 +285,38 @@
             <option value="general" {% if minutes_configuration.get('mode') == 'general' %}selected{% endif %}>Tổng quát — chia nội dung thành chủ đề</option>
           </select>
         </label>
+        <label>Thể thức trình bày
+          <select id="minutes-format-standard" name="format_standard">
+            <option value="nd30_2020" {% if minutes_configuration.get('format_standard') != 'hd05_2026' %}selected{% endif %}>Hành chính — Nghị định 30/2020/NĐ-CP</option>
+            <option value="hd05_2026" {% if minutes_configuration.get('format_standard') == 'hd05_2026' %}selected{% endif %}>Văn bản Đảng — Hướng dẫn 05-HD/VPTW (2026)</option>
+          </select>
+        </label>
+        <label><input type="checkbox" id="minutes-two-sided" {% if minutes_configuration.get('two_sided') %}checked{% endif %}> In hai mặt (thể thức Đảng)</label>
         <label><input type="checkbox" id="minutes-use-model" {% if minutes_configuration.get('use_model') %}checked{% endif %}> Dùng LLM để hiểu và biên tập</label>
         <label><input type="checkbox" id="minutes-correct" {% if minutes_configuration.get('correct_transcript', true) %}checked{% endif %}> Sửa lỗi transcript có căn cứ</label>
         <label><input type="checkbox" id="minutes-fcm" {% if minutes_configuration.get('use_fcm', true) %}checked{% endif %}> Gom chủ đề tự động</label>
       </div>
+      {% set dm = minutes_configuration.get('document_metadata', {}) %}
+      <details style="margin-top:1rem;">
+        <summary>Bổ sung thông tin thể thức và người ký</summary>
+        <p class="hint">Để trống để sử dụng thông tin trong mẫu. Số văn bản lấy từ sổ văn thư. Ngày ban hành được nhập riêng với ngày họp.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0.75rem;">
+          {% for key, label in [('parent_organization', 'Cơ quan cấp trên trực tiếp'), ('organization', 'Cơ quan ban hành'), ('organization_abbreviation', 'Tên viết tắt cơ quan'), ('document_number', 'Số văn bản (ví dụ 01 hoặc số/ký hiệu đầy đủ)'), ('issue_place', 'Địa danh ban hành'), ('chairperson', 'Họ tên người chủ trì'), ('secretary', 'Họ tên người ghi biên bản')] %}
+          <label>{{ label }}<input type="text" data-document-metadata="{{ key }}" value="{{ dm.get(key, '') }}" maxlength="300"></label>
+          {% endfor %}
+          <label>Ngày ban hành<input type="date" data-document-metadata="issue_date" value="{{ dm.get('issue_date') or '' }}"></label>
+          <label>Nơi nhận (mỗi nơi một dòng)<textarea data-document-metadata="recipients" rows="3" maxlength="2000">{{ dm.get('recipients', '') }}</textarea></label>
+          <label class="party-format-option">Hình thức ký biên bản Đảng
+            <select data-document-metadata="party_signature">
+              {% for val, label in [('review', 'Cần xác định thẩm quyền ký'), ('direct', 'Chủ trì ký trực tiếp'), ('confirmation', 'Có xác nhận chữ ký người chủ trì')] %}
+              <option value="{{ val }}" {% if dm.get('party_signature', 'review') == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label class="party-format-option">Quyền hạn và chức vụ người xác nhận<textarea data-document-metadata="confirmer_position" rows="2" maxlength="300">{{ dm.get('confirmer_position', '') }}</textarea></label>
+          <label class="party-format-option">Họ tên người xác nhận<input type="text" data-document-metadata="confirmer_name" value="{{ dm.get('confirmer_name', '') }}" maxlength="200"></label>
+        </div>
+      </details>
       {% if has_minutes %}
       <label>Vùng nội dung cho biên bản tổng quát
         <select id="minutes-content-field">
@@ -299,10 +327,26 @@
         </select>
       </label>
       <button type="button" class="button" id="btn-regenerate-minutes">Tạo lại từ transcript hiện có</button>
+      <button type="button" class="button" id="btn-format-minutes">Áp dụng thể thức cho nội dung đã điền</button>
       {% endif %}
       <p class="hint">Bản gốc được giữ để đối chiếu. Nội dung do LLM viết cần được kiểm tra trước khi sử dụng.</p>
     </form>
   </div>
+  {% if minutes_formatting_report %}
+  <div class="notice" id="minutes-formatting-report">
+    <strong>Thể thức: {{ minutes_formatting_report.standard_label }}</strong>
+    <p>Đã kiểm tra cấu trúc DOCX. Cần xem lại các trang và hoàn thiện thông tin trước khi phát hành.</p>
+    {% for item in minutes_formatting_report.review_items %}<p>{{ item.message }}</p>{% endfor %}
+    <a href="/api/runs/{{ job_id }}/files/minutes/formatting_report.json">Báo cáo kiểm tra thể thức</a>
+    {% if minutes_formatting_report.preview_pages %}
+    <details><summary>Xem toàn bộ {{ minutes_formatting_report.preview_pages|length }} trang</summary>
+      {% for page in minutes_formatting_report.preview_pages %}
+      <figure><img src="{{ artifact_url(page) }}" alt="Trang {{ loop.index }} của biên bản" loading="lazy" style="max-width:100%;border:1px solid #ddd;"><figcaption>Trang {{ loop.index }}</figcaption></figure>
+      {% endfor %}
+    </details>
+    {% else %}<p class="hint">Chưa có ảnh xem trước toàn bộ trang; hãy mở DOCX để kiểm tra bố cục.</p>{% endif %}
+  </div>
+  {% endif %}
   {% if minutes_model_report %}
   <div class="notice">
     <strong>Đã xử lý {{ minutes_model_report.unit_count }} đơn vị ý nghĩa.</strong>

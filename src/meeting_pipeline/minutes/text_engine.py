@@ -11,6 +11,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 from meeting_pipeline.minutes.evidence_retrieval import IndexedTurn, _tokenize
+from meeting_pipeline.minutes.format_profiles import DocumentMetadata, FormatStandard
 from meeting_pipeline.minutes.model_runtime import ModelRuntimeError, ModelSession
 from meeting_pipeline.minutes.schemas import (
     DocGraph,
@@ -33,6 +34,9 @@ class MinutesOptions(BaseModel):
     use_fcm: bool = True
     clusters: int | None = Field(default=None, ge=1, le=12)
     content_field_id: str | None = None
+    format_standard: FormatStandard = "nd30_2020"
+    document_metadata: DocumentMetadata = Field(default_factory=DocumentMetadata)
+    two_sided: bool = False
 
 
 class MeaningUnit(BaseModel):

@@ -9,9 +9,12 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import re
 import shutil
 import subprocess
+import tempfile
 import time
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -41,6 +44,8 @@ class ConvertedTemplate:
     normalized_docx_sha256: str
     original_format: str  # "doc" or "docx"
     convert_duration_sec: float
+    conversion_engine: str = "copy"
+    conversion_warnings: tuple[str, ...] = ()
 
 
 def compute_file_sha256(path: Path) -> str:
@@ -82,45 +87,51 @@ def detect_word_format(path: Path) -> str:
     )
 
 
-def convert_doc_to_docx(src_doc: Path, dst_docx: Path) -> None:
+def convert_doc_to_docx(src_doc: Path, dst_docx: Path) -> str:
     """Convert .doc binary to .docx on a copy using macOS textutil or LibreOffice."""
     dst_docx.parent.mkdir(parents=True, exist_ok=True)
 
-    # 1. Try macOS native textutil (built into all macOS installations)
+    # Prefer a Word-aware converter for tables, headers, fields and page setup.
+    soffice_path = shutil.which("soffice") or shutil.which("libreoffice")
+    if soffice_path:
+        try:
+            with tempfile.TemporaryDirectory(prefix="minutes-convert-") as temp:
+                profile = (Path(temp) / "profile").as_uri()
+                res = subprocess.run(
+                    [
+                        soffice_path,
+                        "--headless",
+                        f"-env:UserInstallation={profile}",
+                        "--convert-to",
+                        "docx",
+                        "--outdir",
+                        temp,
+                        str(src_doc.resolve()),
+                    ],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    timeout=60,
+                )
+                generated = Path(temp) / f"{src_doc.stem}.docx"
+                if res.returncode == 0 and generated.is_file():
+                    docx.Document(str(generated))
+                    shutil.copy2(generated, dst_docx)
+                    return "libreoffice"
+        except Exception as exc:
+            logger.warning("LibreOffice conversion attempt failed: %s", exc)
+
+    # macOS fallback; its layout limitations are surfaced in the export report.
     try:
         cmd = ["textutil", "-convert", "docx", "-output", str(dst_docx), str(src_doc)]
-        res = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        res = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=60)
         if res.returncode == 0 and dst_docx.is_file() and dst_docx.stat().st_size > 0:
             # Verify valid docx
             docx.Document(str(dst_docx))
             logger.info("Successfully converted .doc to .docx using textutil: %s", dst_docx)
-            return
+            return "textutil"
     except Exception as exc:
         logger.warning("textutil conversion attempt failed: %s", exc)
-
-    # 2. Try LibreOffice / soffice if available
-    soffice_path = shutil.which("soffice") or shutil.which("libreoffice")
-    if soffice_path:
-        try:
-            cmd = [
-                soffice_path,
-                "--headless",
-                "--convert-to",
-                "docx",
-                "--outdir",
-                str(dst_docx.parent),
-                str(src_doc),
-            ]
-            res = subprocess.run(cmd, capture_output=True, text=True, check=False)
-            gen_path = dst_docx.parent / f"{src_doc.stem}.docx"
-            if gen_path.is_file() and gen_path != dst_docx:
-                gen_path.replace(dst_docx)
-            if dst_docx.is_file():
-                docx.Document(str(dst_docx))
-                logger.info("Successfully converted .doc to .docx using soffice: %s", dst_docx)
-                return
-        except Exception as exc:
-            logger.warning("soffice conversion attempt failed: %s", exc)
 
     raise DocumentConversionError(
         f"Không thể chuyển đổi tệp .doc binary '{src_doc.name}' sang .docx. "
@@ -140,6 +151,8 @@ def normalize_template(
 
     output_dir.mkdir(parents=True, exist_ok=True)
     dst_docx = output_dir / f"{filename_prefix}.docx"
+    engine = "copy"
+    warnings: list[str] = []
 
     if fmt == "docx":
         # Copy original docx to working copy
@@ -152,7 +165,37 @@ def normalize_template(
                 f"Tệp .docx '{template_path.name}' bị lỗi cấu trúc: {exc}"
             ) from exc
     elif fmt == "doc":
-        convert_doc_to_docx(template_path, dst_docx)
+        engine = convert_doc_to_docx(template_path, dst_docx)
+        if engine == "textutil":
+            warnings.append(
+                "DOC được chuyển bằng textutil; cần đối chiếu bảng, đầu/cuối trang "
+                "và đối tượng nhúng với bản gốc."
+            )
+        if shutil.which("textutil"):
+            try:
+                source = subprocess.run(
+                    ["textutil", "-convert", "txt", "-stdout", str(template_path)],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    timeout=30,
+                )
+                destination = docx.Document(str(dst_docx))
+                text = " ".join(destination.element.body.xpath(".//w:t/text()"))
+                missing = Counter(re.findall(r"\w+", source.stdout.casefold())) - Counter(
+                    re.findall(r"\w+", text.casefold())
+                )
+                if source.returncode or not source.stdout.strip():
+                    warnings.append("Chưa đối chiếu được văn bản nguồn DOC; cần kiểm tra bản gốc.")
+                elif missing:
+                    warnings.append(
+                        f"Có {sum(missing.values())} từ nguồn chưa khớp sau chuyển DOC; "
+                        "cần đối chiếu bản gốc và bản xem trước."
+                    )
+            except (OSError, subprocess.TimeoutExpired):
+                warnings.append("Chưa đối chiếu được văn bản nguồn DOC; cần kiểm tra bản gốc.")
+        else:
+            warnings.append("Chưa có bộ đọc DOC độc lập để đối chiếu nội dung sau chuyển đổi.")
     else:
         raise UnsupportedFormatError(f"Định dạng '{fmt}' không được hỗ trợ.")
 
@@ -166,4 +209,6 @@ def normalize_template(
         normalized_docx_sha256=norm_sha,
         original_format=fmt,
         convert_duration_sec=dur,
+        conversion_engine=engine,
+        conversion_warnings=tuple(warnings),
     )

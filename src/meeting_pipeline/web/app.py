@@ -430,6 +430,7 @@ def _result_context(
         "has_completed_zip": (run_dir / "exports" / "completed_minutes.zip").is_file(),
         "minutes_model_report": _read_json(run_dir / "minutes/model_report.json"),
         "minutes_configuration": _read_json(run_dir / "minutes/configuration.json"),
+        "minutes_formatting_report": _read_json(run_dir / "minutes/formatting_report.json"),
         "doc_graph_summary": {
             "template_id": _read_json(run_dir / "template" / "doc_graph.json").get(
                 "template_id", ""
@@ -665,6 +666,9 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
         use_fcm: Annotated[bool, Form()] = True,
         correct_transcript: Annotated[bool, Form()] = True,
         content_field_id: Annotated[str | None, Form()] = None,
+        format_standard: Annotated[str, Form()] = "nd30_2020",
+        two_sided: Annotated[bool, Form()] = False,
+        document_metadata: Annotated[str, Form()] = "{}",
     ) -> JSONResponse:
         job = _job_or_404(store, job_id)
         run_dir = _run_dir(job)
@@ -683,6 +687,9 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
                     "use_fcm": use_fcm,
                     "correct_transcript": correct_transcript,
                     "content_field_id": content_field_id or None,
+                    "format_standard": format_standard,
+                    "two_sided": two_sided,
+                    "document_metadata": json.loads(document_metadata),
                 }
             )
             result = await run_in_threadpool(
@@ -745,8 +752,20 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
             "has_preview_after": (run_dir / "exports" / "preview_after.png").is_file(),
             "model_report": _read_json(run_dir / "minutes/model_report.json"),
             "configuration": _read_json(run_dir / "minutes/configuration.json"),
+            "formatting_report": _read_json(run_dir / "minutes/formatting_report.json"),
             "topics": _read_json(run_dir / "minutes/topics.json"),
         }
+
+    @app.post("/api/runs/{job_id}/minutes/format")
+    async def format_existing_minutes(job_id: str, options: MinutesOptions) -> dict[str, str]:
+        run_dir = _run_dir(_job_or_404(store, job_id))
+        try:
+            await run_in_threadpool(MinutesService().reformat_existing, run_dir, options)
+            return {"status": "ok", "message": "Đã áp dụng thể thức cho nội dung đã điền."}
+        except ModelRuntimeError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except (ValueError, FileNotFoundError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.post("/api/runs/{job_id}/template/schema")
     def update_run_schema(

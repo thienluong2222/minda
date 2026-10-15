@@ -76,6 +76,8 @@ def test_run_page_renders_without_template(web_client: tuple[TestClient, str, Pa
     assert "Tải lên mẫu biểu Word" in resp.text
     assert "minutes-mode" in resp.text
     assert "minutes-use-model" in resp.text
+    assert "minutes-format-standard" in resp.text
+    assert "hd05_2026" in resp.text
 
 
 def test_minutes_model_status_does_not_load_weights(
@@ -192,3 +194,51 @@ def test_edit_facts_and_transcript_without_asr(web_client: tuple[TestClient, str
     timeline_data = json.loads((run_dir / "timeline.json").read_text(encoding="utf-8"))
     assert timeline_data["segments"][0]["text"] == "Phát biểu khai mạc đã được biên tập lại."
     assert timeline_data["segments"][0]["user_edited"] is True
+
+
+def test_format_selection_persists_through_api_without_inference(
+    web_client: tuple[TestClient, str, Path],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import meeting_pipeline.minutes.service as service
+
+    client, job_id, run_dir = web_client
+    with (TEMPLATES_DIR / "bien_ban_hop_chi_bo.docx").open("rb") as template:
+        response = client.post(
+            f"/api/runs/{job_id}/template",
+            files={"template": ("meeting.docx", template)},
+            data={
+                "format_standard": "hd05_2026",
+                "two_sided": "true",
+                "document_metadata": json.dumps(
+                    {"organization": "CHI BỘ A", "issue_date": "2026-10-15"}
+                ),
+            },
+        )
+    assert response.status_code == 200, response.text
+    current = client.get(f"/api/runs/{job_id}/minutes").json()
+    assert current["configuration"]["format_standard"] == "hd05_2026"
+    assert current["formatting_report"]["two_sided"] is True
+    facts = current["facts"]
+    monkeypatch.setattr(service, "run_text_models", lambda *a, **k: pytest.fail("Unexpected LLM"))
+    response = client.post(
+        f"/api/runs/{job_id}/minutes/format", json={"format_standard": "nd30_2020"}
+    )
+    assert response.status_code == 200, response.text
+    current = client.get(f"/api/runs/{job_id}/minutes").json()
+    assert current["configuration"]["format_standard"] == "nd30_2020"
+    assert current["facts"] == facts
+    page = client.get(f"/runs/{job_id}")
+    assert page.status_code == 200
+    assert 'value="nd30_2020" selected' in page.text
+    assert "minutes-formatting-report" in page.text
+    assert (run_dir / "minutes/formatting_report.json").is_file()
+    invalid = client.post(f"/api/runs/{job_id}/minutes/format", json={"format_standard": "other"})
+    assert invalid.status_code == 422
+    with (TEMPLATES_DIR / "bien_ban_hop_chi_bo.docx").open("rb") as template:
+        invalid = client.post(
+            f"/api/runs/{job_id}/template",
+            files={"template": ("meeting.docx", template)},
+            data={"document_metadata": "{invalid json"},
+        )
+    assert invalid.status_code == 422

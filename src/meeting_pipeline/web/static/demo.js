@@ -129,6 +129,9 @@
       const minutesOptions = getMinutesOptions();
       formData.append("use_model", String(minutesOptions.use_model));
       formData.append("minutes_mode", minutesOptions.mode);
+      formData.append("format_standard", minutesOptions.format_standard);
+      formData.append("two_sided", String(minutesOptions.two_sided));
+      formData.append("document_metadata", JSON.stringify(minutesOptions.document_metadata));
       formData.append("use_fcm", String(minutesOptions.use_fcm));
       formData.append("correct_transcript", String(minutesOptions.correct_transcript));
       if (minutesOptions.content_field_id) {
@@ -155,14 +158,33 @@
   }
 
   function getMinutesOptions() {
+    const metadata = {};
+    document.querySelectorAll("[data-document-metadata]").forEach((input) => {
+      metadata[input.dataset.documentMetadata] = input.type === "date" ? (input.value || null) : input.value.trim();
+    });
     return {
       mode: document.getElementById("minutes-mode")?.value || "detailed",
       use_model: document.getElementById("minutes-use-model")?.checked || false,
       use_fcm: document.getElementById("minutes-fcm")?.checked ?? true,
       correct_transcript: document.getElementById("minutes-correct")?.checked ?? true,
       content_field_id: document.getElementById("minutes-content-field")?.value || null,
+      format_standard: document.getElementById("minutes-format-standard")?.value || "nd30_2020",
+      two_sided: document.getElementById("minutes-two-sided")?.checked || false,
+      document_metadata: metadata,
     };
   }
+
+  function updateFormatControls() {
+    const party = document.getElementById("minutes-format-standard")?.value === "hd05_2026";
+    const duplex = document.getElementById("minutes-two-sided");
+    if (duplex) {
+      duplex.disabled = !party;
+      if (!party) duplex.checked = false;
+    }
+    document.querySelectorAll(".party-format-option").forEach((el) => { el.hidden = !party; });
+  }
+  document.getElementById("minutes-format-standard")?.addEventListener("change", updateFormatControls);
+  updateFormatControls();
 
   const regenerateBtn = document.getElementById("btn-regenerate-minutes");
   regenerateBtn?.addEventListener("click", async () => {
@@ -181,6 +203,26 @@
     } catch (err) {
       statusSpan.textContent = "Lỗi: " + err.message;
       regenerateBtn.disabled = false;
+    }
+  });
+
+  const formatMinutesBtn = document.getElementById("btn-format-minutes");
+  formatMinutesBtn?.addEventListener("click", async () => {
+    const jobId = window.location.pathname.split("/").pop();
+    const statusSpan = document.getElementById("upload-status");
+    formatMinutesBtn.disabled = true;
+    statusSpan.textContent = "Đang áp dụng thể thức cho nội dung đã điền…";
+    try {
+      const res = await fetch(`/api/runs/${jobId}/minutes/format`, {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(getMinutesOptions()),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Không áp dụng được thể thức");
+      window.location.reload();
+    } catch (err) {
+      statusSpan.textContent = "Lỗi: " + err.message;
+      formatMinutesBtn.disabled = false;
     }
   });
 

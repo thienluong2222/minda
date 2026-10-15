@@ -150,7 +150,7 @@ def run_text_models(
                     )
                 )
         report = {
-            "options": options.model_dump(),
+            "options": options.model_dump(mode="json"),
             "model_id": session.settings.model_id,
             "model_revision": session.settings.model_revision,
             "embedding_id": session.settings.embedding_id,
@@ -187,7 +187,7 @@ def run_text_models(
         ],
         "topics.json": topics,
         "model_report.json": report,
-        "configuration.json": options.model_dump(),
+        "configuration.json": options.model_dump(mode="json"),
     }
     for name, data in payloads.items():
         (minutes_dir / name).write_text(

@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -17,6 +18,56 @@ logger = logging.getLogger(__name__)
 
 class VisualRenderError(Exception):
     """Raised when rendering a document to an image preview fails."""
+
+
+def render_document_pages(doc_path: Path, output_dir: Path) -> list[Path]:
+    """Render every page with LibreOffice/Poppler, using an isolated LO profile.
+
+    Optional local tools; callers report absence instead of claiming visual QA.
+    PDF and PNG files are previews, not the editable export.
+    """
+    soffice = shutil.which("soffice") or shutil.which("libreoffice")
+    pdftoppm = shutil.which("pdftoppm")
+    if not soffice or not pdftoppm:
+        raise VisualRenderError("Xem trước toàn bộ trang cần LibreOffice và Poppler trên PATH.")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="minutes-lo-") as temp:
+        pdf_dir = Path(temp) / "pdf"
+        pdf_dir.mkdir()
+        profile = (Path(temp) / "profile").as_uri()
+        converted = subprocess.run(
+            [
+                soffice,
+                "--headless",
+                f"-env:UserInstallation={profile}",
+                "--convert-to",
+                "pdf",
+                "--outdir",
+                str(pdf_dir),
+                str(doc_path.resolve()),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=90,
+            check=False,
+        )
+        pdf = pdf_dir / f"{doc_path.stem}.pdf"
+        if converted.returncode or not pdf.is_file():
+            raise VisualRenderError("Không thể tạo bản xem trước PDF bằng LibreOffice.")
+        # Remove stale pages only after the new conversion succeeds.
+        for old in output_dir.glob("page-*.png"):
+            old.unlink()
+        rendered = subprocess.run(
+            [pdftoppm, "-scale-to", "1400", "-png", str(pdf), str(output_dir / "page")],
+            capture_output=True,
+            text=True,
+            timeout=90,
+            check=False,
+        )
+        pages = sorted(output_dir.glob("page-*.png"), key=lambda p: int(p.stem.split("-")[-1]))
+        if rendered.returncode or not pages:
+            raise VisualRenderError("Không thể tạo ảnh xem trước từng trang bằng Poppler.")
+        return pages
 
 
 def render_document_to_image(

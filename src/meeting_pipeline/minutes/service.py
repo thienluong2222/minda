@@ -16,8 +16,9 @@ import zipfile
 from pathlib import Path
 from typing import Any
 
-from meeting_pipeline.minutes.converter import normalize_template
+from meeting_pipeline.minutes.converter import compute_file_sha256, normalize_template
 from meeting_pipeline.minutes.doc_parser import parse_template_document
+from meeting_pipeline.minutes.document_formatting import format_minutes_document
 from meeting_pipeline.minutes.evidence_retrieval import load_indexed_turns
 from meeting_pipeline.minutes.fact_extractor import M2RuleFactExtractor
 from meeting_pipeline.minutes.manifest import generate_minutes_manifest, save_minutes_manifest
@@ -37,7 +38,7 @@ from meeting_pipeline.minutes.schemas import (
     TemplateField,
 )
 from meeting_pipeline.minutes.text_engine import MinutesOptions
-from meeting_pipeline.minutes.visual_qa import render_document_to_image
+from meeting_pipeline.minutes.visual_qa import render_document_pages, render_document_to_image
 
 logger = logging.getLogger(__name__)
 GENERATION_LOCK = threading.Lock()
@@ -49,6 +50,56 @@ def _write_json(path: Path, data: Any) -> None:
     temp = path.with_suffix(path.suffix + ".tmp")
     temp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     temp.replace(path)
+
+
+def _format_export(
+    run_dir: Path, options: MinutesOptions, conversion: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    path = run_dir / "exports/completed.docx"
+    people: dict[str, str] = {}
+    facts_path = run_dir / "minutes/facts.json"
+    facts = json.loads(facts_path.read_text()) if facts_path.is_file() else []
+    for role, prefix in (("chair", "chairperson_name"), ("secretary", "secretary_name")):
+        values = {
+            f["value"]
+            for f in facts
+            if f["field_id"].startswith(prefix)
+            and f["status"] == "supported"
+            and isinstance(f.get("value"), str)
+            and f["value"].strip()
+        }
+        if len(values) == 1:
+            people[role] = values.pop()
+    report = format_minutes_document(
+        path,
+        options.format_standard,
+        options.document_metadata,
+        options.two_sided,
+        grounded_people=people,
+    )
+    previous_path = run_dir / "minutes/formatting_report.json"
+    previous = json.loads(previous_path.read_text()) if previous_path.is_file() else {}
+    report["conversion"] = conversion if conversion is not None else previous.get("conversion", {})
+    for warning in report["conversion"].get("warnings", []):
+        report["review_items"].append({"code": "doc_conversion", "message": warning})
+        report["status"] = "needs_review"
+    report["preview_pages"] = []
+    try:
+        pages = render_document_pages(path, run_dir / "exports/minutes_preview")
+        report["preview_pages"] = [str(p.relative_to(run_dir)) for p in pages]
+        report["preview_scope"] = "all_pages"
+        shutil.copy2(pages[0], run_dir / "exports/preview_after.png")
+    except Exception as exc:
+        report["preview_scope"] = "unavailable"
+        report["preview_error"] = str(exc)
+        logger.warning("Full-page minutes preview unavailable: %s", exc)
+        try:
+            render_document_to_image(path, run_dir / "exports", "preview_after.png")
+            report["preview_scope"] = "thumbnail_only"
+        except Exception:
+            (run_dir / "exports/preview_after.png").unlink(missing_ok=True)
+    _write_json(run_dir / "minutes/formatting_report.json", report)
+    return report
 
 
 class MinutesService:
@@ -76,6 +127,7 @@ class MinutesService:
                     "exports/completed.docx",
                     "exports/completed_minutes.zip",
                     "exports/preview_after.png",
+                    "exports/minutes_preview",
                 ]
                 for name in names:
                     src, dst = run_dir / name, backup / name
@@ -124,6 +176,8 @@ class MinutesService:
         """Execute full minutes pipeline from uploaded template to completed.docx and manifest."""
         t_start = time.perf_counter()
         options = options or MinutesOptions(use_model=use_model)
+        if options.two_sided and options.format_standard != "hd05_2026":
+            raise ValueError("Lề in hai mặt hiện áp dụng cho thể thức Đảng theo Hướng dẫn 05.")
         if options.use_model:
             availability = model_status()
             if not all(
@@ -209,7 +263,7 @@ class MinutesService:
             save_schema(proposed_schema, template_dir / "schema.json")
             save_schema(proposed_schema, template_dir / "schema_proposal.json")
         else:
-            _write_json(minutes_dir / "configuration.json", options.model_dump())
+            _write_json(minutes_dir / "configuration.json", options.model_dump(mode="json"))
             for name in (
                 "model_report.json",
                 "corrections.json",
@@ -242,12 +296,21 @@ class MinutesService:
             facts=facts,
             general_content_field_id=model_report.get("body_field_id"),
         )
+        formatting_report = _format_export(
+            run_dir,
+            options,
+            {
+                "input_format": converted.original_format,
+                "engine": converted.conversion_engine,
+                "warnings": list(converted.conversion_warnings),
+            },
+        )
+        completed_sha = compute_file_sha256(completed_docx_path)
         metrics.render_sec = round(time.perf_counter() - t0, 4)
 
         # 7. Render before/after visual QA previews
         try:
             render_document_to_image(orig_copy, template_dir, "preview_before.png")
-            render_document_to_image(completed_docx_path, exports_dir, "preview_after.png")
         except Exception as exc:
             logger.warning("Visual QA image render failed: %s", exc)
 
@@ -272,6 +335,8 @@ class MinutesService:
                 "m3_status": m3_status,
                 "llm": str(model_report.get("model_id", "not_run")),
                 "mode": options.mode,
+                "format_standard": options.format_standard,
+                "format_profile_version": formatting_report["profile_version"],
                 "topic_clustering": "fuzzy_c_means"
                 if options.use_model and options.mode == "general" and options.use_fcm
                 else "not_run",
@@ -289,6 +354,7 @@ class MinutesService:
             zf.write(minutes_dir / "timings.json", "timings.json")
             for name in (
                 "configuration.json",
+                "formatting_report.json",
                 "corrections.json",
                 "corrected_transcript.json",
                 "topics.json",
@@ -310,6 +376,7 @@ class MinutesService:
             "zip_export": str(zip_path),
             "metrics": timings_dict,
             "model_report": model_report,
+            "formatting_report": formatting_report,
         }
 
     def regenerate(self, run_dir: Path, options: MinutesOptions) -> dict[str, Any]:
@@ -324,8 +391,77 @@ class MinutesService:
         self,
         run_dir: Path,
         updated_facts_data: list[dict[str, Any]],
+        *,
+        options: MinutesOptions | None = None,
+        mark_user_edited: bool = True,
     ) -> Path:
         """Update facts with user edits and re-render document without re-running ASR."""
+        if not GENERATION_LOCK.acquire(blocking=False):
+            raise ModelRuntimeError("Một biên bản đang được tạo. Hãy thử lại khi hoàn thành.")
+        names = [
+            "minutes",
+            "exports/completed.docx",
+            "exports/completed_minutes.zip",
+            "exports/preview_after.png",
+            "exports/minutes_preview",
+        ]
+        try:
+            with tempfile.TemporaryDirectory(prefix=".minutes-edit-", dir=run_dir) as temp:
+                backup = Path(temp)
+                for name in names:
+                    src, dst = run_dir / name, backup / name
+                    if src.is_dir():
+                        shutil.copytree(src, dst)
+                    elif src.is_file():
+                        dst.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(src, dst)
+                try:
+                    return self._update_facts_and_re_render(
+                        run_dir, updated_facts_data, options, mark_user_edited
+                    )
+                except BaseException:
+                    for name in names:
+                        dst, src = run_dir / name, backup / name
+                        if dst.is_dir():
+                            shutil.rmtree(dst)
+                        elif dst.is_file():
+                            dst.unlink()
+                        if src.is_dir():
+                            shutil.copytree(src, dst)
+                        elif src.is_file():
+                            dst.parent.mkdir(parents=True, exist_ok=True)
+                            shutil.copy2(src, dst)
+                    raise
+        finally:
+            GENERATION_LOCK.release()
+
+    def reformat_existing(self, run_dir: Path, requested: MinutesOptions) -> Path:
+        """Change presentation using saved facts; never load LLM/ASR or re-extract."""
+        facts_path = run_dir / "minutes/facts.json"
+        if not facts_path.is_file():
+            raise FileNotFoundError("Hãy tải mẫu Word và tạo biên bản trước khi áp dụng thể thức.")
+        config_path = run_dir / "minutes/configuration.json"
+        previous = MinutesOptions.model_validate(
+            json.loads(config_path.read_text()) if config_path.is_file() else {}
+        )
+        options = previous.model_copy(
+            update={
+                "format_standard": requested.format_standard,
+                "document_metadata": requested.document_metadata,
+                "two_sided": requested.two_sided,
+            }
+        )
+        return self.update_facts_and_re_render(
+            run_dir, json.loads(facts_path.read_text()), options=options, mark_user_edited=False
+        )
+
+    def _update_facts_and_re_render(
+        self,
+        run_dir: Path,
+        updated_facts_data: list[dict[str, Any]],
+        options: MinutesOptions | None,
+        mark_user_edited: bool,
+    ) -> Path:
         template_dir = run_dir / "template"
         minutes_dir = run_dir / "minutes"
         exports_dir = run_dir / "exports"
@@ -343,9 +479,10 @@ class MinutesService:
 
         # Parse updated facts
         facts = [MeetingFact.model_validate(f) for f in updated_facts_data]
-        for f in facts:
-            f.user_edited = True
-            f.transcript_revision += 1
+        if mark_user_edited:
+            for f in facts:
+                f.user_edited = True
+                f.transcript_revision += 1
 
         _write_json(minutes_dir / "facts.json", [f.model_dump() for f in facts])
 
@@ -361,11 +498,13 @@ class MinutesService:
             facts=facts,
             general_content_field_id=model_report.get("body_field_id"),
         )
-
-        try:
-            render_document_to_image(completed_docx_path, exports_dir, "preview_after.png")
-        except Exception as exc:
-            logger.warning("Re-render visual QA failed: %s", exc)
+        config_path = minutes_dir / "configuration.json"
+        options = options or MinutesOptions.model_validate(
+            json.loads(config_path.read_text()) if config_path.is_file() else {}
+        )
+        _write_json(config_path, options.model_dump(mode="json"))
+        formatting_report = _format_export(run_dir, options)
+        completed_sha = compute_file_sha256(completed_docx_path)
 
         # Re-save manifest
         manifest_path = minutes_dir / "manifest.json"
@@ -380,7 +519,11 @@ class MinutesService:
             template_original_sha256=orig_sha,
             normalized_docx_sha256=norm_sha,
             completed_docx_sha256=completed_sha,
-            models=previous_manifest.get("models", {}),
+            models={
+                **previous_manifest.get("models", {}),
+                "format_standard": options.format_standard,
+                "format_profile_version": formatting_report["profile_version"],
+            },
             timings=previous_manifest.get("timings", {}),
         )
         save_minutes_manifest(manifest, manifest_path)
@@ -394,6 +537,7 @@ class MinutesService:
             zf.write(schema_path, "schema.json")
             for name in (
                 "configuration.json",
+                "formatting_report.json",
                 "corrections.json",
                 "corrected_transcript.json",
                 "topics.json",

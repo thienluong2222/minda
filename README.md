@@ -78,6 +78,10 @@ và tạo lại DOCX từ transcript hiện có. Xem
 [hướng dẫn cài đặt, sử dụng và giới hạn](docs/LLM_FCM_MINUTES.md).
 PDF/scan và fine-tuning chưa thuộc đợt tích hợp này.
 
+DOC/DOCX có thể xuất DOCX theo **Nghị định 30/2020/NĐ-CP** hoặc
+**Hướng dẫn 05-HD/VPTW ngày 27/5/2026**. Có thể áp dụng lại thể thức cho
+nội dung đã điền mà không chạy ASR/LLM. Xem [cách sử dụng và kiểm tra thể thức](docs/DOCX_FORMAT_STANDARDS.md).
+
 ## Dữ liệu
 
 Kiểm tra kế hoạch trước khi tải:
