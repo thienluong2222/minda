@@ -236,7 +236,11 @@ class AdaptiveAsrRouter:
             return True, f"top1_{top1_hypothesis.asr_status}"
 
         # Reason 2: Top-1 produced quality warnings (e.g. repeated words or retry)
-        if top1_hypothesis.asr_warnings:
+        quality_warnings = set(top1_hypothesis.asr_warnings) - {
+            "asr_boundary_words_recovered",
+            "asr_boundary_words_reconciled",
+        }
+        if quality_warnings:
             return True, "top1_has_warnings"
 
         # Reason 3: Very narrow quality margin between top-1 and top-2

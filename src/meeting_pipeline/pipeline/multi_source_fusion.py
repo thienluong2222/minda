@@ -23,6 +23,11 @@ from meeting_pipeline.adapters.audio_io import decode_mono, probe_audio, sha256_
 from meeting_pipeline.adapters.phowhisper_asr import BaseAsrAdapter, PhoWhisperAsrAdapter
 from meeting_pipeline.adapters.pyannote_segmentation import PyannoteSegmentationAdapter
 from meeting_pipeline.application.speakers import SpeakerProfileInput
+from meeting_pipeline.asr.boundary_words import (
+    BOUNDARY_POLICY_VERSION,
+    DecodedChunk,
+    reconcile_internal_chunks,
+)
 from meeting_pipeline.asr.cache import AsrCache
 from meeting_pipeline.asr.segment_asr import (
     transcribe_turn_adaptive,
@@ -524,6 +529,7 @@ class MultiSourceFusionPipeline:
         skipped_overlap_groups: set[str] = set()
         track_speakers: dict[str, dict[str, object]] = {}
         previous_turn: MergedSpeakerTurn | None = None
+        decoded_turns: dict[int, DecodedChunk] = {}
         for turn_idx, turn in enumerate(merged_turns):
             if turn.speaker_count == 2:
                 # Keep one reviewable timeline row per overlap interval. Separation,
@@ -556,27 +562,42 @@ class MultiSourceFusionPipeline:
                 previous_turn = None
                 continue
 
-            prev_b, next_b = asr_context_boundaries(merged_turns, turn_idx)
-
-            hypotheses, routing_meta = transcribe_turn_adaptive(
-                meeting_id=meeting_id,
-                turn_id=turn.turn_id,
-                core_start_sec=turn.start_sec,
-                core_end_sec=turn.end_sec,
-                aligned_signals=aligned,
-                sync_metadata=sync_metadata,
-                asr_adapter=self._get_asr_adapter(),
-                asr_config=self.config.asr,
-                sample_rate=self.sample_rate,
-                prev_boundary_sec=prev_b,
-                next_boundary_sec=next_b,
-                cache=self.asr_cache,
-                core_end_inclusive=not (
+            if turn_idx not in decoded_turns:
+                group_end = turn_idx + 1
+                while (
                     turn.asr_chunk_group_id
-                    and turn_idx + 1 < len(merged_turns)
-                    and merged_turns[turn_idx + 1].asr_chunk_group_id == turn.asr_chunk_group_id
-                ),
-            )
+                    and group_end < len(merged_turns)
+                    and merged_turns[group_end].speaker_count == 1
+                    and merged_turns[group_end].asr_chunk_group_id == turn.asr_chunk_group_id
+                ):
+                    group_end += 1
+                group_chunks: list[DecodedChunk] = []
+                for index in range(turn_idx, group_end):
+                    chunk = merged_turns[index]
+                    prev_b, next_b = asr_context_boundaries(merged_turns, index)
+                    decoded_chunk = transcribe_turn_adaptive(
+                        meeting_id=meeting_id,
+                        turn_id=chunk.turn_id,
+                        core_start_sec=chunk.start_sec,
+                        core_end_sec=chunk.end_sec,
+                        aligned_signals=aligned,
+                        sync_metadata=sync_metadata,
+                        asr_adapter=self._get_asr_adapter(),
+                        asr_config=self.config.asr,
+                        sample_rate=self.sample_rate,
+                        prev_boundary_sec=prev_b,
+                        next_boundary_sec=next_b,
+                        cache=self.asr_cache,
+                        core_end_inclusive=index == group_end - 1,
+                        internal_start=index > turn_idx,
+                        internal_end=index < group_end - 1,
+                        asr_chunk_group_id=chunk.asr_chunk_group_id,
+                    )
+                    decoded_turns[index] = decoded_chunk
+                    group_chunks.append(decoded_chunk)
+                reconcile_internal_chunks(group_chunks)
+            hypotheses, routing_meta = decoded_turns.pop(turn_idx)
+            self._write_boundary_context_clips(run_dir, hypotheses, routing_meta, aligned)
 
             segment = MeetingSegment(
                 meeting_id=meeting_id,
@@ -1011,6 +1032,35 @@ class MultiSourceFusionPipeline:
             for source_id, signal in aligned.items()
         }
 
+    def _write_boundary_context_clips(
+        self,
+        run_dir: Path,
+        hypotheses: dict[str, SourceHypothesis],
+        metadata: dict[str, Any],
+        aligned: dict[str, FloatArray],
+    ) -> None:
+        start, end = metadata["clip_interval"]
+        for source_id, hypothesis in hypotheses.items():
+            if not any(
+                record.get("reason")
+                in {
+                    "outer_boundary_intersection",
+                    "internal_boundary_reassigned",
+                    "same_audio_in_adjacent_clip",
+                    "owner_source_unavailable",
+                }
+                for record in hypothesis.word_boundary_audit
+            ):
+                continue
+            path = run_dir / "clips" / "asr_context" / metadata["turn_id"] / f"{source_id}.wav"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            sf.write(
+                path,
+                aligned[source_id][round(start * self.sample_rate) : round(end * self.sample_rate)],
+                self.sample_rate,
+                subtype="PCM_16",
+            )
+
     @staticmethod
     def _apply_cross_source_agreement(
         hypotheses: dict[str, SourceHypothesis],
@@ -1143,7 +1193,7 @@ class MultiSourceFusionPipeline:
         if not item.get("text"):
             warnings.append("empty_fused_transcript")
         rejected = [hyp for hyp in hypotheses.values() if hyp.asr_status == "unreliable"]
-        for hypothesis in rejected:
+        for hypothesis in hypotheses.values():
             warnings.extend(hypothesis.asr_warnings)
         confidence = item.get("transcript_confidence")
         if confidence is not None and float(confidence) < 0.5:
@@ -1178,6 +1228,17 @@ class MultiSourceFusionPipeline:
                     and bool(hypothesis.text.strip()),
                     "asr_status": hypothesis.asr_status,
                     "asr_warnings": hypothesis.asr_warnings,
+                    "word_boundary_audit": hypothesis.word_boundary_audit,
+                    "asr_context_clip_artifact_id": (
+                        f"clips/asr_context/{item['segment_id']}/{source_id}.wav"
+                        if (
+                            run_dir
+                            / "clips/asr_context"
+                            / str(item["segment_id"])
+                            / f"{source_id}.wav"
+                        ).is_file()
+                        else None
+                    ),
                     "identity_weight": spk_weight,
                     "identity_eligible": spk_eligible,
                     "identity_exclusion_reason": spk_exclusion,
@@ -1296,6 +1357,25 @@ class MultiSourceFusionPipeline:
             },
         )
         _write_json(run_dir / "source_hypotheses.json", {"segments": hypotheses})
+        boundary_rows = []
+        for row in hypotheses:
+            source_data = row.get("sources", {})
+            if isinstance(source_data, dict):
+                boundary_rows.append(
+                    {
+                        "turn_id": row.get("turn_id"),
+                        "routing_metadata": row.get("routing_metadata"),
+                        "sources": {
+                            source_id: data.get("word_boundary_audit", [])
+                            for source_id, data in source_data.items()
+                            if isinstance(data, dict)
+                        },
+                    }
+                )
+        _write_json(
+            run_dir / "word_boundary_audit.json",
+            {"policy_version": BOUNDARY_POLICY_VERSION, "segments": boundary_rows},
+        )
         _write_json(run_dir / "fusion_decisions.json", {"segments": decisions})
         _write_json(run_dir / "timeline.json", {"schema_version": "2.0", "segments": timeline})
         _write_json(
@@ -1359,6 +1439,7 @@ class MultiSourceFusionPipeline:
                         "max_new_tokens": self.config.asr.max_new_tokens,
                         "max_decode_attempts": self.config.asr.max_decode_attempts,
                     },
+                    "asr_word_boundary_policy": BOUNDARY_POLICY_VERSION,
                     "speaker": (
                         f"{self.config.identity['model_id']}@"
                         f"{self.config.identity['model_revision']}"
@@ -1376,6 +1457,7 @@ class MultiSourceFusionPipeline:
                     "speaker_clusters.json",
                     "speaker_decisions.json",
                     "source_hypotheses.json",
+                    "word_boundary_audit.json",
                     "fusion_decisions.json",
                     "timeline.json",
                     "aligned/",

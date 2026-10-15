@@ -159,6 +159,26 @@
           {% else %}<p class="hint">Run này chưa lưu nguồn gốc theo từng từ.</p>{% endif %}
           <p class="hint">Điểm nguồn trong bảng là điểm chất lượng transcript của nguồn ủng hộ; không phải điểm phiếu ở vị trí từ.</p>
         </details>
+        {% for evidence in segment.source_evidence or [] %}
+        {% set boundary_words = evidence.word_boundary_audit|default([])|rejectattr("reason", "equalto", "midpoint_in_core")|list %}
+        {% if boundary_words %}
+        <details class="word-details"><summary>Đối chiếu từ ở biên · {{ evidence.source_id }}</summary>
+          <p class="hint">Các từ giao với biên có thời gian chưa chắc chắn; nghe ngữ cảnh để xác nhận nội dung.</p>
+          {% if evidence.asr_context_clip_artifact_id %}
+          <audio controls preload="none" src="{{ artifact_url(evidence.asr_context_clip_artifact_id) }}" aria-label="Ngữ cảnh từ ở biên {{ evidence.source_id }}"></audio>
+          {% endif %}
+          {% set boundary_labels = {"outer_boundary_intersection": "Giữ từ giao với biên", "same_audio_in_adjacent_clip": "Gộp bản trùng ở hai clip", "internal_boundary_reassigned": "Giữ và gán lại đoạn", "outside_core_context": "Chỉ thuộc ngữ cảnh", "owner_source_unavailable": "Chưa xác định được đoạn sở hữu", "invalid_timestamp": "Thời gian từ không hợp lệ", "rejected_asr_candidate": "ASR không đủ tin cậy", "empty_word": "Không có chữ", "internal_context": "Đang đối chiếu ngữ cảnh"} %}
+          <div class="scroll-table"><table><thead><tr><th>Từ ASR</th><th>Thời gian gốc</th><th>Xử lý</th><th>Đoạn sở hữu</th></tr></thead><tbody>
+            {% for word in boundary_words %}<tr>
+              <td>{{ word.original_text }}</td>
+              <td>{{ word.absolute_interval[0]|number(3) }}–{{ word.absolute_interval[1]|number(3) }} s</td>
+              <td>{{ boundary_labels.get(word.reason, word.reason) }}</td>
+              <td>{{ word.owner_turn_id or "—" }}</td>
+            </tr>{% endfor %}
+          </tbody></table></div>
+        </details>
+        {% endif %}
+        {% endfor %}
       </details>
     </article>
     {% endfor %}

@@ -11,6 +11,11 @@ from typing import Any, Literal
 import numpy as np
 
 from meeting_pipeline.adapters.phowhisper_asr import AsrResult, BaseAsrAdapter
+from meeting_pipeline.asr.boundary_words import (
+    BOUNDARY_POLICY_VERSION,
+    filter_boundary_words,
+    refresh_boundary_hypothesis,
+)
 from meeting_pipeline.asr.cache import AsrCache, compute_asr_cache_key
 from meeting_pipeline.asr.quality import check_asr_quality
 from meeting_pipeline.asr.router import (
@@ -166,8 +171,12 @@ def transcribe_turn_adaptive(
     next_boundary_sec: float | None = None,
     cache: AsrCache | None = None,
     core_end_inclusive: bool = True,
+    internal_start: bool = False,
+    internal_end: bool | None = None,
+    asr_chunk_group_id: str | None = None,
 ) -> tuple[dict[str, SourceHypothesis], dict[str, Any]]:
-    """Transcribe a speech turn with context windowing, adaptive routing and midpoint filtering."""
+    """Transcribe with hard speaker bounds and auditable word ownership."""
+    internal_end = not core_end_inclusive if internal_end is None else internal_end
     context_sec = float(asr_config.chunk_context_seconds)
     clip_start_sec = max(0.0, core_start_sec - context_sec)
     if prev_boundary_sec is not None and prev_boundary_sec > clip_start_sec:
@@ -262,50 +271,17 @@ def transcribe_turn_adaptive(
         asr_warnings = list(asr_res.warnings)
         raw_candidates = list(asr_res.raw_candidates)
 
-        # Midpoint ownership filtering: token belongs to core only if midpoint is inside core
-        words: list[WordHypothesis] = []
-        if asr_status == "transcribed":
-            for tw in asr_res.words:
-                raw_w = getattr(tw, "text", getattr(tw, "word", ""))
-                w_norm = normalize_vietnamese_text(raw_w)
-                if not w_norm:
-                    continue
+        words, boundary_audit = filter_boundary_words(
+            asr_res,
+            turn_id=turn_id,
+            core=(core_start_sec, core_end_sec),
+            clip=(clip_start_sec, clip_end_sec),
+            internal_start=internal_start,
+            internal_end=internal_end,
+            end_inclusive=core_end_inclusive,
+        )
 
-                abs_start = round(clip_start_sec + tw.start_sec, 3)
-                abs_end = round(clip_start_sec + tw.end_sec, 3)
-                midpoint = (abs_start + abs_end) / 2.0
-
-                # Midpoint invariant check
-                before_end = (
-                    midpoint <= core_end_sec + 1e-4
-                    if core_end_inclusive
-                    else midpoint < core_end_sec
-                )
-                if (core_start_sec - 1e-4) <= midpoint and before_end:
-                    # Flag boundary words or words with degenerate timing as uncertain
-                    is_near_boundary = (
-                        abs(abs_start - core_start_sec) < 0.05
-                        or abs(abs_end - core_end_sec) < 0.05
-                        or abs_end <= abs_start
-                    )
-                    time_status: Literal["exact", "uncertain"] = (
-                        "uncertain" if is_near_boundary else "exact"
-                    )
-                    words.append(
-                        WordHypothesis(
-                            word=w_norm,
-                            start_sec=abs_start,
-                            end_sec=max(abs_start + 0.01, abs_end),
-                            asr_confidence=(
-                                round(float(tw.confidence), 3)
-                                if tw.confidence is not None
-                                else None
-                            ),
-                            time_status=time_status,
-                        )
-                    )
-
-        # Re-derive core text from kept midpoint words
+        # Raw decoder cache remains reusable; ownership is applied after cache reads.
         core_text = " ".join(w.word for w in words).strip() if asr_status == "transcribed" else ""
 
         measured_confs = [w.asr_confidence for w in words if w.asr_confidence is not None]
@@ -321,7 +297,7 @@ def transcribe_turn_adaptive(
             else 0.0
         )
 
-        return SourceHypothesis(
+        hypothesis = SourceHypothesis(
             meeting_id=meeting_id,
             segment_id=turn_id,
             source_id=source_id,
@@ -336,10 +312,13 @@ def transcribe_turn_adaptive(
             asr_status=asr_status,
             asr_warnings=list(dict.fromkeys(asr_warnings)),
             raw_asr_candidates=raw_candidates,
+            word_boundary_audit=boundary_audit,
             audio_quality_score=round(audio_q_score, 4),
             transcript_quality_score=round(transcript_q_score, 4),
             routing_reason=reason,
         )
+        refresh_boundary_hypothesis(hypothesis)
+        return hypothesis
 
     # Decode initial scheduled sources
     for src_id in scheduled_sources:
@@ -390,6 +369,10 @@ def transcribe_turn_adaptive(
         "scheduled_sources": scheduled_sources,
         "abstained_sources": unscheduled,
         "ranked_pre_qualities": [q.as_dict() for q in ranked],
+        "word_boundary_policy": BOUNDARY_POLICY_VERSION,
+        "asr_chunk_group_id": asr_chunk_group_id,
+        "start_boundary_kind": "internal" if internal_start else "speaker_or_silence",
+        "end_boundary_kind": "internal" if internal_end else "speaker_or_silence",
     }
 
     return hypotheses, routing_metadata

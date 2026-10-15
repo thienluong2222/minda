@@ -86,6 +86,53 @@ class _OneTurnDetector:
         ]
 
 
+def test_internal_seam_drift_is_reconciled_before_fusion_and_export(tmp_path: Path) -> None:
+    sr = 16000
+    wave = (0.1 * np.sin(2 * np.pi * 220 * np.arange(sr * 36) / sr)).astype(np.float32)
+    path = tmp_path / "single.wav"
+    sf.write(path, wave, sr)
+    config = load_config(Path("configs/default.yaml"))
+    config.paths.data_dir = tmp_path / "data"
+    config.identity["method"] = "mfcc_knn"
+    config.asr.cache_enabled = False
+
+    def region(signals, vad_config, meeting_id, sample_rate):
+        return [MeetingSegment(meeting_id=meeting_id, segment_id="s", start_sec=0.1, end_sec=35.9)]
+
+    class SeamAsr(FakeAsrAdapter):
+        def transcribe(self, waveform, sample_rate=16000):
+            self._call_count += 1
+            if self._call_count == 1:
+                duration = len(waveform) / sample_rate
+                return AsrResult(
+                    text="mở ranh",
+                    status="transcribed",
+                    words=[
+                        TimedWord(text="mở", start_sec=0.5, end_sec=1.0),
+                        TimedWord(text="ranh", start_sec=duration - 0.9, end_sec=duration - 0.5),
+                    ],
+                )
+            return AsrResult(
+                text="ranh kết",
+                status="transcribed",
+                words=[
+                    TimedWord(text="ranh", start_sec=0.5, end_sec=0.9),
+                    TimedWord(text="kết", start_sec=2.0, end_sec=2.3),
+                ],
+            )
+
+    pipeline = MultiSourceFusionPipeline(
+        config, asr_adapter=SeamAsr(), segment_extractor=region, turn_detector=_OneTurnDetector()
+    )
+    run = pipeline.run("Seam ownership", [path])
+    rows = json.loads((run / "timeline.json").read_text())["segments"]
+    assert " ".join(row["text"] for row in rows) == "mở ranh kết"
+    assert len(rows) == 2 and any(row["needs_review"] for row in rows)
+    assert (run / "word_boundary_audit.json").is_file()
+    assert any((run / "clips/asr_context").rglob("*.wav"))
+    assert "asr_boundary_words_reconciled" in rows[0]["warnings"]
+
+
 class _FixedTurns:
     def __init__(self, overlap: bool) -> None:
         self.overlap = overlap

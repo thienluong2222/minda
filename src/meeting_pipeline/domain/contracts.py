@@ -132,6 +132,7 @@ class SourceHypothesis(BaseModel):
     )
     asr_warnings: list[str] = Field(default_factory=list)
     raw_asr_candidates: list[dict[str, Any]] = Field(default_factory=list)
+    word_boundary_audit: list[dict[str, Any]] = Field(default_factory=list)
     audio_quality_score: float = Field(default=0.0, ge=0.0, le=1.0)
     transcript_quality_score: float = Field(default=0.0, ge=0.0, le=1.0)
     routing_reason: str | None = None
