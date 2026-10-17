@@ -38,7 +38,8 @@ npm --prefix apps/web run build
 ```
 
 Mở `http://127.0.0.1:8010` và tạo tài khoản admin lần đầu. Xem
-[cài đặt, sử dụng và nhập dữ liệu cũ](docs/backend/QUICKSTART.md),
+[báo cáo hướng dẫn mở web và các chức năng người dùng/admin](docs/BAO_CAO_HUONG_DAN_SU_DUNG_WEB_MOI_2026-10-17.md),
+[cài đặt và nhập dữ liệu cũ](docs/backend/QUICKSTART.md),
 [bố trí backend](docs/backend/ARCHITECTURE.md) và
 [phạm vi kiểm thử](docs/backend/VALIDATION_2026-10-17.md).
 Demo cũ ở cổng 8000 có entry point độc lập bên dưới.
