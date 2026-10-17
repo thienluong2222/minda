@@ -351,7 +351,7 @@
   <div class="notice">
     <strong>Đã xử lý {{ minutes_model_report.unit_count }} đơn vị ý nghĩa.</strong>
     {% if minutes_model_report.stale_since_transcript_edit %}
-    <p>Transcript đã thay đổi. Hãy tạo lại biên bản để cập nhật nội dung.</p>
+    <p>{{ minutes_model_report.stale_reason or "Transcript đã thay đổi. Hãy tạo lại biên bản để cập nhật nội dung." }}</p>
     {% endif %}
     {% if minutes_model_report.excluded_turns %}<p>{{ minutes_model_report.excluded_turns|length }} lượt chưa có transcript hợp lệ; nội dung có thể thiếu.</p>{% endif %}
     {% for warning in minutes_model_report.warnings %}<p>{{ warning }}</p>{% endfor %}
@@ -417,7 +417,7 @@
             {% endif %}
           </td>
           <td data-label="Giá trị">
-            <textarea class="fact-value-input" data-field-id="{{ fact.field_id }}" style="width: 100%; min-width: 220px; font-family: inherit; font-size: 0.9rem; padding: 0.4rem; border: 1px solid #ccc; border-radius: 4px;" rows="2">{{ fact.value or "" }}</textarea>
+            <textarea class="fact-value-input" data-field-id="{{ fact.field_id }}" data-original-value="{{ fact.value|tojson|forceescape }}" style="width: 100%; min-width: 220px; font-family: inherit; font-size: 0.9rem; padding: 0.4rem; border: 1px solid #ccc; border-radius: 4px;" rows="2">{{ fact.value if fact.value is string else (fact.value|tojson if fact.value is not none else "") }}</textarea>
           </td>
           <td data-label="Bằng chứng">
             {% if fact.evidence_refs and fact.evidence_refs|length > 0 %}

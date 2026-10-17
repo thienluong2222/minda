@@ -235,14 +235,24 @@
       const factInputs = document.querySelectorAll(".fact-value-input");
       const facts = [];
       for (const input of factInputs) {
+        if (input.value === input.defaultValue) continue;
         const fieldId = input.dataset.fieldId;
-        const val = input.value;
-        facts.push({
-          field_id: fieldId,
-          value: val.trim() ? val : null,
-          status: val.trim() ? "supported" : "unknown",
-          user_edited: true,
-        });
+        const original = JSON.parse(input.dataset.originalValue || "null");
+        let value = input.value.trim() ? input.value : null;
+        if (Array.isArray(original) && value !== null) {
+          try {
+            value = JSON.parse(value);
+            if (!Array.isArray(value)) throw new Error();
+          } catch {
+            if (statusSpan) statusSpan.textContent = "Danh sách phải là một mảng JSON hợp lệ.";
+            return;
+          }
+        }
+        facts.push({field_id: fieldId, value});
+      }
+      if (!facts.length) {
+        if (statusSpan) statusSpan.textContent = "Không có thay đổi để lưu.";
+        return;
       }
       saveFactsBtn.disabled = true;
       saveFactsBtn.textContent = "Đang lưu…";
