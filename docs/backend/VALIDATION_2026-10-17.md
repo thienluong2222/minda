@@ -1,5 +1,15 @@
 # Nghiệm thu prototype web — 17/10/2026
 
+## Cập nhật vị trí thư mục
+
+Bản web đã chuyển từ `.codex/worktrees/web-mongodb-upgrade/…` vào **`web_app/`
+ngay trong thư mục gốc dự án** theo yêu cầu. Đã cập nhật environment/editable
+imports, đường dẫn version và storage binding cho database dev/QA; giữ nguyên
+tài khoản và dữ liệu. Kiểm lại 51 artifact, 7 phiên bản Word và build frontend
+tại vị trí mới đều đạt. Liên kết ở vị trí cũ giữ tương thích cho phiên đang mở.
+Chạy lại toàn bộ bộ kiểm thử từ `web_app`: **274 passed**, 3 deprecation
+warnings, 67.95 giây. API `/health`, worker và các lệnh vận hành đều hoạt động.
+
 ## Phạm vi và mốc mã
 
 - Worktree/nhánh: `codex/web-mongodb-upgrade`.

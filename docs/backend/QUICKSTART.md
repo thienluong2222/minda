@@ -1,5 +1,16 @@
 # Chạy prototype web user/admin
 
+**Thư mục hiện tại:** `web_app/` ngay trong thư mục gốc dự án. Mở trực tiếp
+thư mục này để kiểm tra/sửa bản web. Trước khi chạy lệnh bên dưới:
+
+```bash
+cd "/Users/thien/Documents/School/Luận văn/web_app"
+```
+
+Frontend ở `apps/web`, backend ở `src/meeting_backend`, pipeline AI/Word ở
+`src/meeting_pipeline`. Database và file đã được cập nhật đường dẫn sau khi
+di chuyển; môi trường/model cache đang có tiếp tục được sử dụng.
+
 ## 1. Môi trường và cài đặt
 
 Prototype dùng macOS Apple Silicon, Python 3.11, Node 22.12+/24, MongoDB local,

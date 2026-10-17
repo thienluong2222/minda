@@ -1,5 +1,25 @@
 # Meeting Pipeline
 
+## Vị trí bản web mới
+
+Toàn bộ bản web user/admin nằm tại **`web_app/` trong thư mục gốc dự án**:
+
+```text
+Luận văn/
+├── src/, configs/, ...            # Checkout gốc
+└── web_app/                       # Mở thư mục này để kiểm tra bản web mới
+    ├── apps/web/                  # Frontend React
+    ├── src/meeting_backend/       # API, MongoDB, worker và OCR
+    ├── src/meeting_pipeline/      # Pipeline AI/Word dùng cho bản web
+    ├── configs/backend.yaml
+    ├── data/app/
+    └── docs/backend/
+```
+
+`web_app` giữ nhánh Git `codex/web-mongodb-upgrade` riêng. Chạy các lệnh trong
+tài liệu này **từ bên trong `web_app`**. Vị trí cũ dưới `.codex/worktrees` chỉ
+còn liên kết tương thích cho phiên làm việc; mã và dữ liệu thực nằm ở đây.
+
 Pipeline offline nhận diện người nói và chép lời cuộc họp tiếng Việt từ nhiều điện thoại,
 triển khai theo `PIPELINE_IMPLEMENTATION_SPEC.md`.
 
