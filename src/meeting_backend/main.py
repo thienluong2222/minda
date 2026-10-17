@@ -43,7 +43,7 @@ def create_app(settings: Settings | None = None):
             logger.removeHandler(handler)
             handler.close()
 
-    app = FastAPI(title="Meeting Notes API", version="1.0.0", lifespan=lifespan)
+    app = FastAPI(title="Minda API", version="1.0.0", lifespan=lifespan)
     app.state.settings = settings
 
     @app.exception_handler(AppError)

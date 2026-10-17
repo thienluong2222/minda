@@ -1,5 +1,7 @@
 # BÁO CÁO HƯỚNG DẪN MỞ VÀ SỬ DỤNG WEB MỚI
 
+**Tên ứng dụng:** Minda.
+
 **Dự án:** Hệ thống hỗ trợ lập biên bản cuộc họp tiếng Việt từ nhiều nguồn ghi âm  
 **Phiên bản tài liệu:** 17/10/2026  
 **Phạm vi:** Bản web người dùng và quản trị viên, sử dụng MongoDB, chạy local phục vụ nghiên cứu và báo cáo luận văn.

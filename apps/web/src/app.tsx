@@ -81,7 +81,7 @@ function Login() {
           <span className="brand-symbol">
             <AudioLines size={23} />
           </span>
-          Biên bản<span className="brand-dot">.</span>
+          Minda<span className="brand-dot">.</span>
         </Link>
         <span className="eyebrow">KHÔNG GIAN LÀM VIỆC CUỘC HỌP</span>
         <h1>
@@ -102,7 +102,7 @@ function Login() {
             <p>Xử lý tại máy chủ của bạn. Mọi thay đổi đều có lịch sử.</p>
           </div>
         </div>
-        <span className="auth-footer">MEETING NOTES · RESEARCH PROTOTYPE</span>
+        <span className="auth-footer">MINDA. · RESEARCH PROTOTYPE</span>
       </div>
       <div className="auth-form">
         <div>
@@ -229,7 +229,7 @@ function Shell() {
           <span className="brand-symbol">
             <AudioLines size={20} />
           </span>
-          Biên bản<span className="brand-dot">.</span>
+          Minda<span className="brand-dot">.</span>
         </Link>
         <p className="nav-section">
           {admin ? "QUẢN TRỊ HỆ THỐNG" : "KHÔNG GIAN CỦA BẠN"}
@@ -373,7 +373,7 @@ function Shell() {
           <Outlet />
         </main>
         <footer className="app-footer">
-          <span>Biên bản · Meeting workspace</span>
+          <span>Minda. · Meeting workspace</span>
           <span>Rà soát nội dung trước khi sử dụng chính thức</span>
         </footer>
       </div>
