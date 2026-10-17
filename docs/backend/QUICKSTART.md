@@ -40,6 +40,36 @@ prepare không cài binary Tesseract. Máy hiện tại có Tesseract 5.5.3; má
 cài các công cụ trên và bảo đảm `ffprobe`, `soffice`, `pdftoppm`, `tesseract`
 có trên PATH. Giao diện đóng gói cả font tiếng Việt, không cần CDN.
 
+### Công cụ xem trước DOCX trên máy macOS
+
+Cài các công cụ cho máy chạy web/worker để sử dụng được từ Terminal:
+
+```bash
+brew install poppler
+brew install --cask libreoffice
+```
+
+Renderer và `doctor` cùng tìm trên PATH, sau đó tìm trong vị trí cài đặt chuẩn
+như `/Applications/LibreOffice.app` và `/opt/homebrew/bin`. Không cần môi trường
+Codex để render. `doctor` trả cả `documents.preview` và `documents.preview_tools`.
+Launcher cảnh báo khi thiếu công cụ; tác vụ tạo Word vẫn có thể hoàn tất mà
+không có preview nếu chưa cài chúng.
+
+Nếu tài liệu đã được tạo khi còn thiếu công cụ, khôi phục ảnh xem trước:
+
+```bash
+# Liệt kê phiên bản thiếu ảnh, chưa tạo ảnh
+.venv-backend/bin/python -m meeting_backend.cli repair-previews
+# Tạo ảnh và cập nhật tham chiếu
+.venv-backend/bin/python -m meeting_backend.cli repair-previews --apply
+```
+
+Lệnh dùng database/data_dir hiện được cấu hình và khóa worker trong lúc sửa.
+Chờ tác vụ đang chạy hoàn tất trước khi dùng. Chỉ bổ sung ảnh và metadata preview;
+giữ nguyên DOCX, ZIP, facts, ID phiên bản và trạng thái rà soát. Chạy lại sẽ bỏ
+qua phiên bản đã có đủ file ảnh. Ảnh phục hồi nằm dưới `data/app/previews/` với
+quyền truy cập theo cuộc họp/mẫu tương ứng.
+
 ## 2. Khởi động
 
 Chạy tại repository root, hai terminal nhận cùng cấu hình:
@@ -142,6 +172,10 @@ MEETING_QA_PASSWORD='<mat-khau-kiem-thu>' .venv-backend/bin/python scripts/backe
 Có thể dùng `--credentials-file` JSON cục bộ thay env, và `--meeting-id` để
 kiểm thêm trang biên bản. Không commit file credential. Ảnh/report nằm trong
 `data/evaluations/web_browser_smoke` mặc định.
+
+Thêm `--template-id <id>` để kiểm bản xem trước mẫu. Với `--meeting-id` hoặc
+`--template-id`, smoke yêu cầu có ảnh DOCX, kiểm tra ảnh đã giải mã được và
+chuyển qua toàn bộ trang; không coi trang rỗng hoặc “Chưa có bản xem trước” là đạt.
 
 Backend tests dùng MongoDB thật với database UUID riêng tự dọn. Test tài liệu
 cần các binary và OCR cache. Không chạy test vào database đang trình diễn.

@@ -8,6 +8,7 @@ import subprocess
 from meeting_backend.core.errors import AppError
 from meeting_backend.core.settings import ROOT
 from meeting_backend.infrastructure.mongodb.client import new_id, now
+from meeting_pipeline.minutes.document_tools import find_document_tool
 
 
 def paragraphs(document):
@@ -63,7 +64,7 @@ def reconstruct(source, destination, cache_dir, stage):
         else:
             report["engine"] = "ocr_tesseract"
             if page:
-                binary = shutil.which("pdftoppm")
+                binary = find_document_tool("pdftoppm")
                 if not binary:
                     raise AppError(
                         "PDF_RENDERER_MISSING", "Cần Poppler/pdftoppm để đọc PDF scan.", 503
@@ -207,6 +208,7 @@ def run_template(context):
         json.dumps(graph.model_dump(), ensure_ascii=False, indent=2)
     )
     previews = []
+    report = {key: value for key, value in report.items() if key != "preview_error"}
     try:
         context.stage("Tạo bản xem trước các trang mẫu")
         pages = render_document_pages(normalized, context.staging / "preview")

@@ -524,6 +524,103 @@ def test_document_ingestion_and_review(client, tmp_path, kind):
     assert client.get("/api/v1/templates/" + tid).json()["needs_review"] is False
 
 
+def test_preview_repair_preserves_content_and_shared_template_permissions(
+    client, tmp_path, monkeypatch
+):
+    import hashlib
+
+    from docx import Document
+    from PIL import Image
+
+    from meeting_backend.infrastructure.artifacts.store import ArtifactStore
+    from meeting_backend.processing.documents.previews import repair_previews
+    from meeting_pipeline.minutes.document_tools import preview_tools
+
+    # Reproduce a normal Terminal with no Codex runtime paths or Homebrew PATH entry.
+    monkeypatch.setenv("PATH", "/usr/bin:/bin")
+    if not all(preview_tools().values()):
+        pytest.skip("Install system LibreOffice/Poppler for this real rendering test")
+    mongo = client.app.state.mongo
+    store = ArtifactStore(mongo)
+    owner = mongo.db.users.find_one({"username": "admin"})["_id"]
+    template_id, template_version_id, minutes_version_id = [uuid4().hex for _ in range(3)]
+    meeting_id = meeting(client)["id"]
+    document = Document()
+    document.add_heading("BIÊN BẢN CUỘC HỌP", 0)
+    document.add_paragraph("Nội dung đã được người dùng kiểm tra.")
+    document.add_page_break()
+    document.add_paragraph("Trang thứ hai: quyết định và người thực hiện.")
+    sources = {}
+    for name, resource in [("template", template_id), ("minutes", meeting_id)]:
+        path = tmp_path / f"{name}.docx"
+        document.save(path)
+        sources[name] = store.view(store.register(path, owner, resource_id=resource))
+    mongo.db.templates.insert_one(
+        {"_id": template_id, "owner_id": owner, "visibility": "shared", "trashed": False}
+    )
+    mongo.db.template_versions.insert_one(
+        {
+            "_id": template_version_id,
+            "template_id": template_id,
+            "owner_id": owner,
+            "normalized": sources["template"],
+            "previews": [],
+            "report": {"preview_error": "missing tools", "needs_review": False},
+        }
+    )
+    facts = [{"field_id": "content", "value": "Nội dung đã sửa", "user_edited": True}]
+    archive = tmp_path / "original.zip"
+    archive.write_bytes(b"unchanged original archive")
+    mongo.db.minutes_versions.insert_one(
+        {
+            "_id": minutes_version_id,
+            "meeting_id": meeting_id,
+            "owner_id": owner,
+            "docx": sources["minutes"],
+            "zip": store.view(store.register(archive, owner, resource_id=meeting_id)),
+            "previews": [],
+            "facts": facts,
+            "formatting": {"preview_error": "missing tools", "standard": "nd30_2020"},
+        }
+    )
+    mongo.db.meetings.update_one(
+        {"_id": meeting_id},
+        {"$set": {"active_minutes_id": minutes_version_id, "reviewed_version": minutes_version_id}},
+    )
+    paths = [tmp_path / "template.docx", tmp_path / "minutes.docx", archive]
+    hashes = {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in paths}
+    artifact_count = mongo.db.artifacts.count_documents({})
+    assert len(repair_previews(mongo)["versions"]) == 2
+    assert mongo.db.artifacts.count_documents({}) == artifact_count
+    result = repair_previews(mongo, apply=True)
+    assert result["repaired"] == 2 and result["failed"] == 0, result
+    for collection, version_id in [
+        ("template_versions", template_version_id),
+        ("minutes_versions", minutes_version_id),
+    ]:
+        version = mongo.db[collection].find_one({"_id": version_id})
+        assert len(version["previews"]) == 2
+        for page in version["previews"]:
+            response = client.get(page["url"])
+            assert response.status_code == 200 and response.headers["content-type"] == "image/png"
+            with Image.open(BytesIO(response.content)) as image:
+                image.verify()
+        assert "preview_error" not in version.get("report", version.get("formatting", {}))
+    assert hashes == {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in paths}
+    assert mongo.db.minutes_versions.find_one({"_id": minutes_version_id})["facts"] == facts
+    assert mongo.db.meetings.find_one({"_id": meeting_id})["reviewed_version"] == minutes_version_id
+    assert not repair_previews(mongo, apply=True)["versions"]
+    client.post(
+        "/api/v1/admin/users",
+        json={"username": "reader", "password": PASSWORD, "display_name": "Reader"},
+    ).raise_for_status()
+    login(client, "reader")
+    shared = mongo.db.template_versions.find_one({"_id": template_version_id})["previews"][0]
+    private = mongo.db.minutes_versions.find_one({"_id": minutes_version_id})["previews"][0]
+    assert client.get(shared["url"]).status_code == 200
+    assert client.get(private["url"]).status_code == 404
+
+
 def test_legacy_import_is_read_only_dry_run_and_idempotent(client, tmp_path):
     import hashlib
     import json

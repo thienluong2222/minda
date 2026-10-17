@@ -19,6 +19,8 @@ def main():
     worker.add_argument("--once", action="store_true")
     commands.add_parser("doctor")
     commands.add_parser("prepare-ocr")
+    previews = commands.add_parser("repair-previews", help="Khôi phục ảnh xem trước DOCX bị thiếu")
+    previews.add_argument("--apply", action="store_true", help="Tạo ảnh; mặc định chỉ liệt kê")
     importer = commands.add_parser("import-run")
     importer.add_argument("source", type=Path)
     importer.add_argument("--username", required=True)
@@ -73,6 +75,13 @@ def main():
             from meeting_backend.modules.system.service import capabilities
 
             print(json.dumps(capabilities(mongo), ensure_ascii=False, indent=2, default=str))
+        elif args.command == "repair-previews":
+            from meeting_backend.processing.documents.previews import repair_previews
+
+            result = repair_previews(mongo, apply=args.apply)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            if result["failed"]:
+                raise SystemExit(1)
         elif args.command == "import-run":
             print(
                 json.dumps(

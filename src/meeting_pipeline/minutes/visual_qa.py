@@ -1,9 +1,4 @@
-"""Visual QA rendering utility for Word documents before and after form filling.
-
-Generates high-resolution PNG previews using macOS QuickLook (qlmanage) to
-allow visual layout inspection without external heavy dependencies.
-Specification: Section 5 (F1, F4) of docs/PLAN_BIEU_MAU_BIEN_BAN_V1.md.
-"""
+"""Full-page Word previews via LibreOffice/Poppler and optional QuickLook thumbnails."""
 
 from __future__ import annotations
 
@@ -12,6 +7,8 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
+
+from meeting_pipeline.minutes.document_tools import find_document_tool
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +23,13 @@ def render_document_pages(doc_path: Path, output_dir: Path) -> list[Path]:
     Optional local tools; callers report absence instead of claiming visual QA.
     PDF and PNG files are previews, not the editable export.
     """
-    soffice = shutil.which("soffice") or shutil.which("libreoffice")
-    pdftoppm = shutil.which("pdftoppm")
+    soffice = find_document_tool("soffice")
+    pdftoppm = find_document_tool("pdftoppm")
     if not soffice or not pdftoppm:
-        raise VisualRenderError("Xem trước toàn bộ trang cần LibreOffice và Poppler trên PATH.")
+        raise VisualRenderError(
+            "Chưa tìm thấy LibreOffice hoặc Poppler để xem trước DOCX. "
+            "Cần cài cả hai công cụ trên máy chạy worker."
+        )
     output_dir.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="minutes-lo-") as temp:
         pdf_dir = Path(temp) / "pdf"

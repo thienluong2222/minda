@@ -392,7 +392,7 @@ Tác vụ nền tiếp tục chạy khi đóng trang. Có thể mở lại cuộ
 | Không đăng nhập được | Kiểm tra tên tài khoản, mật khẩu, trạng thái khóa và database đang dùng; nhờ admin đặt lại mật khẩu nếu cần. |
 | Mẫu không xuất hiện trong lựa chọn tạo biên bản | Chờ phân tích hoàn tất, kiểm tra trạng thái; với PDF/ảnh cần hoàn tất duyệt chữ và trường dữ liệu. |
 | Không tạo được biên bản từ transcript cũ sau khi đổi nguồn | Chạy lại xử lý âm thanh; dữ liệu nguồn mới cần một transcript cập nhật. |
-| Không xem trước được DOCX | Kiểm tra công cụ `soffice`, `pdftoppm`, log tác vụ và trạng thái render. |
+| Không xem trước được DOCX | Kiểm tra LibreOffice/Poppler bằng `doctor`. Nếu tài liệu đã tạo lúc thiếu công cụ, dùng `repair-previews --apply` theo [QUICKSTART](backend/QUICKSTART.md#công-cụ-xem-trước-docx-trên-máy-macos) rồi tải lại trang. |
 | OCR không chạy | Kiểm tra Tesseract và trọng số `vie+eng`; xem bước `prepare-ocr` trong QUICKSTART. |
 | Mô hình chưa sẵn sàng | Xem trang Mô hình & cấu hình, chạy `doctor` và chuẩn bị runtime/cache theo tài liệu AI. |
 | File âm thanh bị từ chối | Kiểm tra định dạng, giới hạn 1 GB/file và có luồng âm thanh hợp lệ; hệ thống dùng `ffprobe` để kiểm tra. |

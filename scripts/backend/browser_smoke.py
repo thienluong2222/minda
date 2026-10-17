@@ -8,12 +8,38 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 
+def check_document_preview(page):
+    """Require actual decoded images on every page, not just an error-free route."""
+    page.locator("img.document-page").wait_for(state="visible")
+    seen = set()
+    while True:
+        page.wait_for_function(
+            """() => {
+                const image = document.querySelector('img.document-page');
+                return image && image.complete && image.naturalWidth > 0;
+            }"""
+        )
+        source = page.locator("img.document-page").get_attribute("src")
+        assert source and source not in seen, "Preview did not advance to a new page"
+        seen.add(source)
+        next_page = page.get_by_role("button", name="Trang sau", exact=True)
+        if next_page.is_disabled():
+            break
+        next_page.click()
+        page.wait_for_function(
+            "source => document.querySelector('img.document-page')?.getAttribute('src') !== source",
+            arg=source,
+        )
+    return len(seen)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", default="http://127.0.0.1:8010")
     parser.add_argument("--username")
     parser.add_argument("--credentials-file", type=Path)
     parser.add_argument("--meeting-id")
+    parser.add_argument("--template-id")
     parser.add_argument("--output", type=Path, default=Path("data/evaluations/web_browser_smoke"))
     parser.add_argument(
         "--browser-path", default="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
@@ -27,7 +53,13 @@ def main():
     if not credentials.get("username") or not credentials.get("password"):
         parser.error("Cần --username + MEETING_QA_PASSWORD hoặc --credentials-file JSON.")
     args.output.mkdir(parents=True, exist_ok=True)
-    report = {"pages": [], "console_errors": [], "mobile_overflow": False, "ok": False}
+    report = {
+        "pages": [],
+        "document_previews": [],
+        "console_errors": [],
+        "mobile_overflow": False,
+        "ok": False,
+    }
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=args.browser_path, headless=True)
         context = browser.new_context(viewport={"width": 1440, "height": 1000})
@@ -51,6 +83,10 @@ def main():
                 routes.append(
                     ("/meetings/" + args.meeting_id + "?tab=minutes", "Nội dung & dữ liệu")
                 )
+            if args.template_id:
+                response = context.request.get(args.url + "/api/v1/templates/" + args.template_id)
+                assert response.ok, "Cannot access the selected template"
+                routes.append(("/templates/" + args.template_id, response.json()["name"]))
             if user["role"] == "admin":
                 routes.extend(
                     [
@@ -66,6 +102,10 @@ def main():
             for index, (route, heading) in enumerate(routes):
                 page.goto(args.url + route)
                 page.get_by_role("heading", name=heading, exact=True).wait_for()
+                if "?tab=minutes" in route or route.startswith("/templates/"):
+                    report["document_previews"].append(
+                        {"route": route, "pages": check_document_preview(page)}
+                    )
                 page.wait_for_timeout(600)
                 filename = f"{index:02d}-desktop.png"
                 page.screenshot(path=str(args.output / filename), full_page=True)

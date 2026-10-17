@@ -7,6 +7,8 @@ import sys
 import threading
 from pathlib import Path
 
+from meeting_pipeline.minutes.document_tools import preview_tools
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -15,6 +17,14 @@ def main():
     root = Path(__file__).resolve().parents[2]
     if not (root / "apps/web/dist/index.html").is_file():
         raise SystemExit("Chạy npm --prefix apps/web ci và npm --prefix apps/web run build trước.")
+    missing = [name for name, path in preview_tools().items() if not path]
+    if missing:
+        print(
+            "Chưa có công cụ xem trước DOCX: "
+            + ", ".join(missing)
+            + ". Trên macOS: brew install poppler && brew install --cask libreoffice",
+            flush=True,
+        )
     stop = threading.Event()
     for sig in [signal.SIGINT, signal.SIGTERM]:
         signal.signal(sig, lambda *_: stop.set())

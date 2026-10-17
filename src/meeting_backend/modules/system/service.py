@@ -11,6 +11,7 @@ from meeting_backend.core.settings import ROOT
 from meeting_backend.infrastructure.mongodb.client import new_id, now, public
 from meeting_backend.modules.meetings.repository import MeetingRepository
 from meeting_backend.modules.system.schemas import Preset
+from meeting_pipeline.minutes.document_tools import preview_tools
 
 
 def preset(mongo):
@@ -36,6 +37,7 @@ def capabilities(mongo):
     extra = ROOT / "data/ocr_cache"
     if (extra / "vie.traineddata").is_file():
         languages.append("vie")
+    tools = preview_tools()
     return {
         "models": status,
         "preset": preset(mongo),
@@ -46,7 +48,8 @@ def capabilities(mongo):
             "pdf_text": bool(importlib.util.find_spec("pypdf")),
             "ocr": bool(tess and "vie" in languages),
             "ocr_languages": sorted(set(languages)),
-            "preview": bool(shutil.which("soffice") and shutil.which("pdftoppm")),
+            "preview": all(tools.values()),
+            "preview_tools": tools,
         },
         "runtime": {"python": platform.python_version(), "platform": platform.system()},
         "worker": worker_status(mongo),
