@@ -24,3 +24,10 @@ test-results/
 /Tài liệu tham khảo/
 /Tài liệu tham khảo/
 *Ta*lie*u*tham*kha*o*
+
+/.venv-backend/
+/.venv
+/.venv-llm
+/apps/web/node_modules/
+/apps/web/dist/
+/apps/web/*.tsbuildinfo

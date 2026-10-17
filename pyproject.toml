@@ -35,6 +35,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+backend = [
+  "pymongo>=4.11,<5",
+  "argon2-cffi>=23.1,<26",
+  "pypdf>=6,<7",
+  "pytesseract>=0.3.13,<0.4",
+  "opencv-python-headless>=4.10,<5",
+  "pillow>=11,<14",
+]
 ml = [
   "pyannote.audio==3.3.2",
   "silero-vad>=6.0,<7",
@@ -56,9 +64,10 @@ dev = [
 
 [project.scripts]
 meeting-pipeline = "meeting_pipeline.cli:app"
+meeting-backend = "meeting_backend.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/meeting_pipeline"]
+packages = ["src/meeting_pipeline", "src/meeting_backend"]
 
 [tool.pytest.ini_options]
 addopts = "-ra"
@@ -72,6 +81,11 @@ extend-exclude = ["data"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/meeting_backend/**/router.py" = ["B008"]
+"src/meeting_backend/api/dependencies.py" = ["B008"]
+"src/meeting_backend/main.py" = ["B008"]
 
 [tool.mypy]
 python_version = "3.11"

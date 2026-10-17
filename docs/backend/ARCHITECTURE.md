@@ -1,13 +1,13 @@
 # Kiến trúc backend cho bản web MongoDB
 
-Ngày: 17/10/2026. **Trạng thái: thiết kế tổ chức mã, chưa scaffold/triển khai.**
+Ngày: 17/10/2026. **Trạng thái: đã triển khai trên `codex/web-mongodb-upgrade`.**
 Người dùng đã đồng ý lộ trình web user/admin, MongoDB và PDF/scan–OCR; app mobile
 để làm sau. Yêu cầu bổ sung: code/file backend gọn, dễ tìm và sửa lỗi thủ công,
 bảo vệ khả năng chạy của dự án hiện có.
 
-Tài liệu này mô tả các đường dẫn dự kiến. Những file backend/frontend mới trong
-cây dưới đây chưa tồn tại ở thời điểm lưu; tên/vị trí sẽ được cập nhật theo mã
-thực tế khi triển khai. Các link đến `meeting_pipeline` là mã hiện có đã kiểm tra.
+Mục 1–6 giữ thiết kế đã được duyệt để đối chiếu. **Mục 7** mô tả mã đã triển
+khai và những vị trí được gộp lại để tránh tạo lớp/file rỗng. Xem thêm
+`QUICKSTART.md` và `VALIDATION_2026-10-17.md` trong thư mục này.
 
 ## 1. Ranh giới dự án
 
@@ -219,4 +219,43 @@ Cấu trúc tách biệt giúp kiểm soát thay đổi. Các thay đổi tới 
 vẫn có rủi ro hồi quy và phải được kiểm thử; không khẳng định tuyệt đối rằng
 mọi sửa đổi sẽ không ảnh hưởng dự án cũ.
 
-Đợt lưu thiết kế này chỉ bổ sung tài liệu, chưa tạo package hoặc di chuyển code.
+## 7. Bố trí thực tế sau triển khai
+
+- `main.py`: lifespan, handlers, middleware, đăng ký route và static frontend.
+  Chưa cần tách thêm api/router hoặc exception_handlers cho số lượng mã hiện tại.
+- `cli.py`: serve, worker, doctor, prepare-ocr, import-run và import-legacy.
+- `modules/auth`, `meetings`, `transcripts`, `jobs`, `system`: router/service và
+  schemas/repository theo công việc thực tế. Các module nhỏ users, speakers,
+  templates giữ các endpoint đơn giản ở router, không tạo service/repo rỗng.
+- `infrastructure/mongodb/client.py`: lifecycle, collections, validator, index,
+  migration `001_initial`, audit và ràng buộc database với data root.
+  `repository.py` giữ CRUD/ownership dùng chung; meetings có repository riêng.
+- `infrastructure/artifacts/store.py`: stream upload, checksum, resolve trong
+  root và artifact ID; `media.py`: ffprobe; `backup.py`: backup/restore.
+- `integrations/audio_pipeline.py`: audio và voice registry theo owner.
+  `minutes_pipeline.py`: snapshot, staging, core Word, kiểm tra, publish.
+  `legacy_import.py`: đọc SQLite chỉ đọc, dry-run, copy/hash và idempotency.
+- `processing/documents/ingest.py` và `ocr.py`: Word/PDF/ảnh → DOCX chỉnh được,
+  Tesseract vie+eng, bảng kẻ OpenCV, OCR report và bước duyệt.
+- `worker/context.py`: lease/cancel gate và CAS publication; `runner.py`:
+  claim/heartbeat/recovery/dispatch. Handler nằm tại adapter/processing tương ứng.
+- `apps/web/src/features/`: meetings, templates/voices, admin; types/client
+  được giữ tại `lib/` trước khi có nhu cầu tách package api-client cho mobile.
+
+API không import Torch/MLX/Transformers khi khởi động. Worker chạy một job nặng
+tại một thời điểm; `flock` theo root, lease MongoDB và checkpoint ngăn worker
+cũ công bố sau khi mất quyền. Hủy đang inference có thể phải chờ công đoạn xong.
+
+Phiên bản được tạo bất biến. MongoDB lưu active pointer; staging/file ứng viên
+có thể còn lại nếu tiến trình bị kill, nhưng không được trở thành bản active.
+Không mô tả đây là transaction phân tán filesystem/MongoDB.
+
+Thư mục thực tế bổ sung `templates/<id>/<job>/`, `voices/<owner>/speakers/`,
+`imported/<meeting>/`, `backups/<job>.zip`, `restores/<id>/`. Log API tại
+`logs/api.log`, log worker theo job tại `logs/jobs/<job>/worker.log`.
+
+Database phải có prefix `meeting_app_` và gắn đúng data root. Restore tạo
+database/root mới, đổi đường dẫn sidecar sau kiểm checksum; không ghi đè DB cũ.
+Lệnh import-run/import-legacy có dry-run, kiểm hash, khóa fingerprint và chạy
+lại không trùng theo nội dung + owner. Tài khoản/queue SQLite cũ không được
+phát lại; registry giọng được tạo từ mẫu qua giao diện mới.
