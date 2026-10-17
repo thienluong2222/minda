@@ -13,6 +13,9 @@ hiểu là chức năng đã có hoặc quyết định người dùng đã ch�
 - Phiên bản phục vụ prototype/báo cáo luận văn, chạy local; vẫn cần luồng nghiệp
   vụ hoàn chỉnh, quản lý dữ liệu và xử lý trạng thái thực tế.
 - Thảo luận thiết kế, chức năng và kế hoạch trước khi thực hiện.
+- Đã chốt trong phản hồi ngày 17/10: đăng nhập và phân quyền thật cho hai khu vực.
+- Đã chốt trong phản hồi ngày 17/10: rà soát theo trường/nội dung, đối chiếu
+  transcript và preview DOCX; tải DOCX để chỉnh tiếp bằng Word.
 - Giữ các yêu cầu nghiệp vụ đã thống nhất: DOCX chỉnh sửa được; biên bản chi tiết
   bảo vệ đề mục; tổng quát chia chủ đề trong vùng nội dung; người dùng chọn
   thể thức hành chính hoặc văn bản Đảng.
@@ -74,8 +77,8 @@ không cần sao chép nội dung hay cấu trúc nghiệp vụ tài chính.
     └── Đánh giá thực nghiệm
 ```
 
-**Đề xuất cần chốt:** đăng nhập và phân quyền thật, gồm hai vai trò `user` và
-`admin`, thay vì chỉ chuyển giao diện bằng một nút. Admin có thể vào không gian
+**Đã chốt:** đăng nhập và phân quyền thật. Đề xuất triển khai hai vai trò `user` và
+`admin`. Admin có thể vào không gian
 làm việc của chính mình; quyền quản trị không tự biến mọi dữ liệu người dùng
 thành dữ liệu riêng của admin.
 
@@ -169,9 +172,9 @@ thái rà soát và các file xuất hiện có.
 - DOCX là đầu ra chính. ZIP/bằng chứng là lựa chọn phụ. Bản xem trước lấy từ
   DOCX được xuất; không dùng một trang HTML gần giống để thay cho preview thật.
 
-**Đề xuất cần chốt:** prototype dùng biên tập theo trường và nội dung kèm
-preview, rồi tải DOCX để sửa tiếp bằng Word. Trình soạn thảo Word trên web là
-phạm vi lớn hơn, cần đánh giá riêng việc round-trip DOCX và bảo vệ cấu trúc mẫu.
+**Đã chốt:** prototype dùng biên tập theo trường và nội dung kèm đối chiếu
+transcript và preview, rồi tải DOCX để sửa tiếp bằng Word. Trình soạn thảo tài
+liệu giống Word trên web không thuộc phạm vi đã chọn trong đợt này.
 
 **Tab Lịch sử:** các lần chạy, revision transcript/facts/danh tính, đổi mẫu,
 đổi thể thức, người sửa và file xuất tương ứng; mở/so sánh phiên bản trước.
@@ -290,10 +293,10 @@ Không đồng nhất `job_id`, `run_id` và `meeting_id` trong thiết kế m�
 
 ## 8. Các điểm còn thảo luận
 
-1. **Auth:** đăng nhập/phân quyền thật hay chỉ tách giao diện trình diễn?
-   Đề xuất phân quyền thật với hai vai trò, phạm vi local gọn.
-2. **Editor:** rà soát theo trường/nội dung + preview + tải Word, hay bắt buộc
-   trình soạn thảo tài liệu trực tiếp trên web?
+1. **Auth — đã chốt:** đăng nhập/phân quyền thật. Cần tiếp tục chốt chi tiết
+   quyền sở hữu dữ liệu, quyền admin hỗ trợ và cách gán các run cũ.
+2. **Editor — đã chốt:** rà soát theo trường/nội dung, đối chiếu transcript,
+   preview DOCX và tải về để sửa tiếp bằng Word.
 3. **PDF/scan:** triển khai OCR trong cùng phiên bản hay là giai đoạn tiếp theo?
    Dù chọn thời điểm nào, không quảng bá upload hỗ trợ khi backend chưa làm được.
 4. **Nghiên cứu:** trang đánh giá thực nghiệm có thuộc đợt đầu hay làm sau
