@@ -16,6 +16,10 @@ hiểu là chức năng đã có hoặc quyết định người dùng đã ch�
 - Đã chốt trong phản hồi ngày 17/10: đăng nhập và phân quyền thật cho hai khu vực.
 - Đã chốt trong phản hồi ngày 17/10: rà soát theo trường/nội dung, đối chiếu
   transcript và preview DOCX; tải DOCX để chỉnh tiếp bằng Word.
+- Cập nhật ngày 17/10: người dùng đồng ý định hướng giao diện và muốn phát triển
+  thành ứng dụng trong tương lai; nền tảng ưu tiên đã xác nhận là **Android/iOS**.
+  Công nghệ ở mục 9 là đề xuất mới để đáp ứng mục tiêu này, chưa phải yêu cầu
+  triển khai app mobile ngay.
 - Giữ các yêu cầu nghiệp vụ đã thống nhất: DOCX chỉnh sửa được; biên bản chi tiết
   bảo vệ đề mục; tổng quát chia chủ đề trong vùng nội dung; người dùng chọn
   thể thức hành chính hoặc văn bản Đảng.
@@ -264,11 +268,13 @@ Không đồng nhất `job_id`, `run_id` và `meeting_id` trong thiết kế m�
 
 ### Giai đoạn C — Nền ứng dụng và người dùng
 
-- Giữ FastAPI và pipeline hiện có. Đề xuất bước đầu dùng Jinja/CSS/JavaScript
-  được tách module/component, thay layout và các trang; chưa bắt buộc thêm một
-  frontend framework hay dịch vụ ngoài để đạt phong cách ảnh.
+- Giữ FastAPI và pipeline hiện có. Đề xuất mới sau khi người dùng xác nhận mục
+  tiêu Android/iOS: web dùng React + TypeScript + Vite, tách khỏi API; app mobile
+  sau này dùng React Native + Expo. Xem phạm vi chia sẻ mã và lộ trình ở mục 9.
+  Phương án Jinja/CSS/JavaScript ban đầu được thay trong bản đề xuất kỹ thuật,
+  vì yêu cầu mới ưu tiên phát triển thêm client mobile.
 - Tách router/service khỏi `web/app.py` đang tập trung nhiều trách nhiệm.
-- Nếu chốt auth: migration SQLite, tài khoản local, session, kiểm tra quyền,
+- Triển khai auth đã chốt: migration SQLite, tài khoản local, session, kiểm tra quyền,
   sở hữu tài nguyên, xử lý dữ liệu legacy; thêm kiểm thử hai tài khoản khác nhau.
 - Xây dashboard, danh sách, wizard, theo dõi xử lý và workspace; phiên bản hóa
   mẫu/facts/exports; bảo toàn dữ liệu hiện có qua migration.
@@ -306,3 +312,94 @@ Không đồng nhất `job_id`, `run_id` và `meeting_id` trong thiết kế m�
 
 Phác thảo minh họa chỉ phục vụ thảo luận bố cục; không kết nối API và không thay
 giao diện hệ thống đang có. Server web chính tiếp tục giữ trạng thái tắt.
+
+## 9. Đề xuất công nghệ khi hướng tới Android/iOS
+
+**Yêu cầu mới đã xác nhận:** ứng dụng tương lai ưu tiên Android và iOS.
+**Trạng thái lựa chọn công nghệ:** đề xuất để thảo luận, chưa cài dependency,
+scaffold frontend hoặc thay mã nguồn. Phạm vi OCR vẫn cần chốt riêng.
+
+### 9.1. Stack đề xuất
+
+| Lớp | Công nghệ | Vai trò |
+| --- | --- | --- |
+| Web người dùng/admin | React + TypeScript + Vite | Một frontend, hai layout/nhóm route, component dùng chung |
+| Thiết kế web | Tailwind CSS + shadcn/ui | Token màu/khoảng cách, form, dialog, bảng, sidebar theo phong cách đã chọn |
+| Điều hướng và dữ liệu web | React Router + TanStack Query | Điều hướng, request/cache, loading/error và cập nhật dữ liệu |
+| API | Python + FastAPI + Pydantic | Auth, quyền sở hữu, nghiệp vụ, upload và xuất kết quả |
+| Database prototype | SQLite + SQLAlchemy + Alembic | Metadata, users, sessions, jobs, revisions và migration |
+| Xử lý AI | Python worker ngoài tiến trình API | Chạy lại pipeline hiện có, điều phối ASR/LLM, cập nhật trạng thái |
+| Hàng đợi prototype | Queue bền vững trong SQLite | Dùng nền RunQueue/Run hiện có, bổ sung runner và tích hợp API |
+| File | Artifact store local hiện có | Audio, mẫu, DOCX, preview và manifest; truy cập qua API có quyền |
+| Mobile tương lai | React Native + Expo + TypeScript | Client Android/iOS, ghi/đọc âm thanh, upload, rà soát và tải/chia sẻ DOCX |
+| Kiểm thử | Pytest + Playwright; kiểm thử frontend khi cần | API/quyền/revision, hành trình web và các trạng thái lỗi |
+
+Đây là lựa chọn kiến trúc của dự án sau khi đối chiếu yêu cầu; tài liệu chính
+thức xác nhận các khả năng của công nghệ, không tự chứng minh stack này là tối ưu:
+[React với Vite/TypeScript và các thư viện routing/data](https://react.dev/learn/build-a-react-app-from-scratch),
+[shadcn/ui với Vite/Tailwind](https://ui.shadcn.com/docs/installation/vite),
+[Expo cho Android/iOS](https://docs.expo.dev/).
+
+### 9.2. Tách client khỏi nghiệp vụ
+
+```text
+Web người dùng + web admin ─┐
+                           ├── FastAPI /api/v1
+App Android/iOS tương lai ──┘      ├── Auth, quyền, metadata và revisions
+                                  ├── Database + artifact store
+                                  └── Hàng đợi → Python AI worker
+```
+
+- Web/mobile dùng cùng định danh cuộc họp, job, người nói, mẫu và phiên bản biên
+  bản; nghiệp vụ và kiểm tra quyền nằm ở backend.
+- Chia sẻ API client, types và các hàm TypeScript thuần khi thực sự độc lập
+  nền tảng. Các phần dùng DOM, browser storage hoặc UI web giữ ở frontend web.
+- React Native dùng native components; màn hình mobile cần thiết kế và kiểm
+  thử riêng. Component shadcn/Tailwind của web không tự trở thành native UI.
+  Xem [React Native components](https://reactnative.dev/docs/intro-react-native-components).
+- API có schema/version rõ, hợp đồng lỗi ổn định, revision để kiểm tra xung đột
+  lưu; có thể sinh TypeScript types/client từ OpenAPI khi triển khai.
+- Web dùng session cookie HttpOnly với kiểm tra request phù hợp. Mobile dùng
+  cùng hệ thống users/roles, có cơ chế phiên và lưu thông tin xác thực phù hợp
+  nền tảng khi triển khai; không hardcode tài khoản hay secret trong client.
+- Polling trạng thái là nền tương thích web/mobile; SSE có thể bổ sung cho web.
+  Kết quả công việc luôn lưu ở backend, không phụ thuộc trang/app còn mở.
+
+### 9.3. Hình thức chạy AI trên mobile
+
+Đề xuất ban đầu: điện thoại đảm nhiệm giao diện, ghi/chọn file, upload, nghe,
+rà soát và nhận tài liệu; backend chạy ASR, embedding, FCM, LLM và tạo DOCX.
+Expo có [API audio](https://docs.expo.dev/versions/latest/sdk/audio/), nhưng ghi
+âm nền, khi khóa màn hình và hành vi từng hệ điều hành vẫn cần kiểm thử thiết bị.
+
+- Demo tương lai có thể chạy backend trên Mac, app kết nối qua địa chỉ LAN của
+  Mac trong cùng mạng; `127.0.0.1` trên điện thoại là chính điện thoại.
+- Dùng ngoài mạng local cần backend truy cập được và cơ chế truyền dữ liệu,
+  xác thực, lưu trữ phù hợp. Đây là đợt triển khai sau, không tự mở server hiện tại.
+- Ghi âm/lưu bản nháp offline có thể là mục tiêu mobile; xử lý AI qua backend
+  cần kết nối. Muốn toàn bộ AI chạy offline trên điện thoại là phạm vi khác:
+  chọn runtime mobile, model phù hợp, đo RAM/pin/nhiệt độ và kiểm tra chất lượng.
+- Pipeline hiện tại được kiểm tra trên Mac M4, text runtime riêng dùng MLX;
+  đưa worker lên nền tảng/server khác cần kiểm tra runtime và đường suy luận.
+  Lớp API/client vẫn có thể giữ hợp đồng khi thay runtime phía worker.
+
+### 9.4. Lộ trình và quản lý phạm vi
+
+1. Web React cho user/admin + FastAPI, sửa các lỗi dữ liệu đã phát hiện, auth và
+   worker bền vững; giữ SQLite và lưu file local cho prototype hiện tại.
+2. Ổn định API/schema/revision; tối ưu thao tác mobile ở web responsive. Đây là
+   bước chuẩn bị, không đồng nghĩa đã có ứng dụng native.
+3. Xây app React Native/Expo: đăng nhập, danh sách, ghi/chọn audio, upload,
+   trạng thái, transcript, rà soát và tải/chia sẻ DOCX. Admin ưu tiên web.
+4. Khi có nhu cầu vận hành nhiều người: đánh giá PostgreSQL, kho file server
+   và queue nhiều worker; migration và điều phối cần được kiểm thử riêng.
+   Tài liệu [FastAPI về tác vụ nặng](https://fastapi.tiangolo.com/tutorial/background-tasks/#caveat)
+   cũng phân biệt background task trong ứng dụng và công cụ xử lý nhiều tiến trình.
+
+Cùng repository có thể bố trí `apps/web`, `packages/api-client` và backend
+`src/meeting_pipeline`; `apps/mobile` chỉ tạo khi bắt đầu giai đoạn mobile.
+Ghim dependency/lockfile khi triển khai; Node phục vụ build/dev frontend,
+bundle web hoàn chỉnh có thể được FastAPI phục vụ cùng origin ở bản local.
+
+Điểm cần thảo luận tiếp: người dùng có yêu cầu AI offline hoàn toàn trên điện
+thoại hay chấp nhận mô hình app kết nối backend như đề xuất?
