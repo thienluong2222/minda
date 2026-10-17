@@ -137,6 +137,7 @@ def create_app(settings: Settings | None = None):
 
     from meeting_backend.modules.auth.router import router as auth
     from meeting_backend.modules.jobs.router import router as jobs
+    from meeting_backend.modules.meetings.admin import router as admin_meetings
     from meeting_backend.modules.meetings.router import router as meetings
     from meeting_backend.modules.minutes.router import router as minutes
     from meeting_backend.modules.speakers.router import router as speakers
@@ -145,7 +146,18 @@ def create_app(settings: Settings | None = None):
     from meeting_backend.modules.transcripts.router import router as transcripts
     from meeting_backend.modules.users.router import router as users
 
-    for router in [auth, users, meetings, jobs, transcripts, minutes, templates, speakers, system]:
+    for router in [
+        auth,
+        users,
+        meetings,
+        admin_meetings,
+        jobs,
+        transcripts,
+        minutes,
+        templates,
+        speakers,
+        system,
+    ]:
         app.include_router(router, prefix="/api/v1")
 
     @app.get("/api/v1/health")

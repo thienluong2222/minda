@@ -527,6 +527,7 @@ small {
   background: currentColor;
 }
 .status-ready,
+.status-account_active,
 .status-succeeded,
 .status-supported {
   color: #518168;
@@ -551,6 +552,10 @@ small {
 }
 .status-cancelled {
   color: #9295a0;
+}
+.status-account_locked {
+  color: #8b6570;
+  background: #f6eef0;
 }
 .panel-link {
   display: flex;

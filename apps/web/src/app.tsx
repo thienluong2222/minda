@@ -202,6 +202,7 @@ function Shell() {
     ? ([
         [LayoutDashboard, "/admin", "Tổng quan"],
         [Users, "/admin/users", "Tài khoản"],
+        [FolderOpen, "/admin/meetings", "Cuộc họp"],
         [Activity, "/admin/jobs", "Tác vụ xử lý"],
         [SlidersHorizontal, "/admin/models", "Mô hình & cấu hình"],
         [BookOpen, "/admin/templates", "Mẫu dùng chung"],
@@ -294,7 +295,10 @@ function Shell() {
               className="global-search"
               onSubmit={(e) => {
                 e.preventDefault();
-                navigate("/meetings?q=" + encodeURIComponent(search));
+                navigate(
+                  (admin ? "/admin/meetings?q=" : "/meetings?q=") +
+                    encodeURIComponent(search),
+                );
               }}
             >
               <Search size={17} />
@@ -302,7 +306,11 @@ function Shell() {
                 aria-label="Tìm cuộc họp"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Tìm cuộc họp của bạn…"
+                placeholder={
+                  admin
+                    ? "Tìm cuộc họp toàn hệ thống…"
+                    : "Tìm cuộc họp của bạn…"
+                }
               />
               <kbd>↵</kbd>
             </form>

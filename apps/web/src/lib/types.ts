@@ -6,6 +6,28 @@ export interface User {
   active: boolean;
   created_at: string;
 }
+export interface AdminUser extends User {
+  meeting_count: number;
+  trashed_meeting_count: number;
+}
+export interface AdminMeeting {
+  id: string;
+  title: string;
+  owner_id: string;
+  owner_name: string;
+  owner_username: string;
+  date: string;
+  location: string;
+  state: string;
+  trashed: boolean;
+  created_at: string;
+  updated_at: string;
+  source_count: number;
+  active_job: string | null;
+  has_transcript: boolean;
+  has_minutes: boolean;
+  minutes_stale: boolean;
+}
 export interface Artifact {
   id: string;
   url: string;

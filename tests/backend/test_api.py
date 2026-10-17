@@ -119,6 +119,81 @@ def test_invalid_audio_does_not_publish_source(client):
     assert client.app.state.mongo.db.artifacts.count_documents({}) == 0
 
 
+def test_admin_lists_users_and_meetings_across_owners_without_private_content(client):
+    own = meeting(client)
+    created = client.post(
+        "/api/v1/admin/users",
+        json={"username": "member", "password": PASSWORD, "display_name": "Thành viên (QA)"},
+    )
+    created.raise_for_status()
+    member_id = created.json()["id"]
+    login(client, "member")
+    other = client.post(
+        "/api/v1/meetings", json={"title": "[QA] Họp nhóm", "notes": "private notes"}
+    ).json()
+    trashed = meeting(client)
+    mongo = client.app.state.mongo
+    mongo.db.meetings.update_one({"_id": trashed["id"]}, {"$set": {"trashed": True}})
+    assert client.get("/api/v1/admin/meetings").status_code == 403
+    assert client.get("/api/v1/admin/users").status_code == 403
+    assert client.get("/api/v1/meetings").json()["total"] == 1
+    login(client, "admin")
+    accounts = client.get("/api/v1/admin/users").json()
+    assert len(accounts) == 2
+    member = next(account for account in accounts if account["id"] == member_id)
+    assert member["meeting_count"] == 1 and member["trashed_meeting_count"] == 1
+    assert "password_hash" not in member
+    response = client.get("/api/v1/admin/meetings")
+    response.raise_for_status()
+    result = response.json()
+    assert result["total"] == 2
+    assert {row["id"] for row in result["items"]} == {own["id"], other["id"]}
+    other_row = next(row for row in result["items"] if row["id"] == other["id"])
+    assert other_row["owner_name"] == "Thành viên (QA)"
+    assert other_row["owner_username"] == "member"
+    assert (
+        not {"notes", "source_ids", "active_transcript_id", "active_minutes_id"} & other_row.keys()
+    )
+    # Seeing management metadata does not change the private workspace's access rules.
+    assert client.get("/api/v1/meetings/" + other["id"]).status_code == 404
+    assert client.get("/api/v1/meetings").json()["total"] == 1
+    assert client.get("/api/v1/admin/meetings", params={"trashed": "all"}).json()["total"] == 3
+    rows = client.get(
+        "/api/v1/admin/meetings", params={"owner_id": member_id, "trashed": "trashed"}
+    ).json()["items"]
+    assert [row["id"] for row in rows] == [trashed["id"]]
+    for phrase in ["[QA]", "(QA)", "member"]:
+        assert client.get("/api/v1/admin/meetings", params={"q": phrase}).json()["total"] == 1
+    assert client.get("/api/v1/admin/meetings", params={"q": "[.*]"}).json()["total"] == 0
+    first = client.get("/api/v1/admin/meetings", params={"limit": 1}).json()
+    second = client.get("/api/v1/admin/meetings", params={"limit": 1, "page": 2}).json()
+    assert first["total"] == second["total"] == 2
+    assert first["items"][0]["id"] != second["items"][0]["id"]
+    assert (
+        client.get("/api/v1/admin/meetings", params={"state": "minutes_ready"}).json()["total"] == 0
+    )
+    mongo.db.meetings.update_one({"_id": other["id"]}, {"$set": {"active_job": "test-job"}})
+    assert client.get("/api/v1/admin/meetings", params={"state": "processing"}).json()["total"] == 1
+    assert client.get("/api/v1/admin/meetings", params={"limit": 101}).status_code == 422
+
+
+def test_admin_user_filters_include_locked_accounts(client):
+    response = client.post(
+        "/api/v1/admin/users",
+        json={"username": "locked", "password": PASSWORD, "display_name": "Tài khoản đã khóa"},
+    )
+    response.raise_for_status()
+    client.patch(
+        "/api/v1/admin/users/" + response.json()["id"], json={"active": False}
+    ).raise_for_status()
+    accounts = client.get("/api/v1/admin/users").json()
+    assert len(accounts) == 2
+    assert len(client.get("/api/v1/admin/users", params={"active": "false"}).json()) == 1
+    assert len(client.get("/api/v1/admin/users", params={"role": "admin"}).json()) == 1
+    assert len(client.get("/api/v1/admin/users", params={"q": "locked"}).json()) == 1
+    assert client.get("/api/v1/admin/users", params={"q": "[.*]"}).json() == []
+
+
 def test_artifact_permissions_and_shared_template_revocation(client, tmp_path):
     from meeting_backend.infrastructure.artifacts.store import ArtifactStore
 

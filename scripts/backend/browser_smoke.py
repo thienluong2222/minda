@@ -5,7 +5,7 @@ import json
 import os
 from pathlib import Path
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 
 
 def check_document_preview(page):
@@ -56,6 +56,7 @@ def main():
     report = {
         "pages": [],
         "document_previews": [],
+        "admin_lists": [],
         "console_errors": [],
         "mobile_overflow": False,
         "ok": False,
@@ -92,6 +93,7 @@ def main():
                     [
                         ("/admin", "Tổng quan hệ thống"),
                         ("/admin/users", "Tài khoản hệ thống"),
+                        ("/admin/meetings", "Cuộc họp toàn hệ thống"),
                         ("/admin/jobs", "Tác vụ xử lý"),
                         ("/admin/models", "Mô hình & công cụ"),
                         ("/admin/backups", "Sao lưu & khôi phục"),
@@ -102,6 +104,21 @@ def main():
             for index, (route, heading) in enumerate(routes):
                 page.goto(args.url + route)
                 page.get_by_role("heading", name=heading, exact=True).wait_for()
+                if route in {"/admin/users", "/admin/meetings"}:
+                    response = context.request.get(args.url + "/api/v1" + route)
+                    assert response.ok, "Cannot load the selected admin list"
+                    payload = response.json()
+                    records = payload if isinstance(payload, list) else payload["items"]
+                    rows = page.locator("table tbody tr")
+                    expect(rows).to_have_count(len(records))
+                    for record in records:
+                        value = (
+                            "@" + record["username"] if route.endswith("users") else record["title"]
+                        )
+                        expect(
+                            page.locator("table tbody").get_by_text(value, exact=False).first
+                        ).to_be_visible()
+                    report["admin_lists"].append({"route": route, "records": len(records)})
                 if "?tab=minutes" in route or route.startswith("/templates/"):
                     report["document_previews"].append(
                         {"route": route, "pages": check_document_preview(page)}

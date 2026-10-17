@@ -314,6 +314,8 @@ Sau khi đăng nhập admin, chọn **Quản trị hệ thống**.
 
 Theo dõi số tài khoản, cuộc họp, trạng thái tác vụ, worker, dung lượng đĩa và các công cụ xử lý. Dùng trang này để xác định hệ thống có sẵn sàng nhận tác vụ hay không.
 
+Nhấn thẻ **Tài khoản** hoặc **Cuộc họp** để mở danh sách tương ứng. Ô tìm cuộc họp trên thanh đầu trang trong khu vực admin tìm trên toàn hệ thống.
+
 ### 6.2. Tài khoản
 
 Admin có thể:
@@ -324,23 +326,37 @@ Admin có thể:
 
 Giao diện có bảo vệ việc admin tự khóa hoặc tự hạ quyền tài khoản đang dùng. Người dùng không tự đăng ký công khai trong phiên bản hiện tại; admin tạo tài khoản cho người dùng.
 
-### 6.3. Tác vụ xử lý
+Danh sách có tìm theo tên/tên đăng nhập, lọc vai trò và trạng thái hoạt động, nút **Làm mới**, trạng thái đang tải và thông báo lỗi. Danh sách tự cập nhật mỗi 5 giây; tài khoản khóa vẫn xuất hiện khi chọn tất cả. Mỗi tài khoản hiển thị số cuộc họp và số cuộc họp trong thùng rác; nhấn số lượng để mở danh sách theo người sở hữu.
+
+### 6.3. Cuộc họp toàn hệ thống
+
+Vào **Quản trị hệ thống → Cuộc họp** để xem cuộc họp của mọi tài khoản, gồm người sở hữu, ngày họp, trạng thái xử lý, số nguồn và tình trạng transcript/biên bản.
+
+- Tìm theo tên cuộc họp hoặc tên/tên đăng nhập của người sở hữu.
+- Lọc người sở hữu, trạng thái và phạm vi đang sử dụng/thùng rác/tất cả.
+- Chuyển trang; bộ lọc áp dụng trên toàn bộ kết quả.
+- Chọn **Thông tin** để xem thông tin quản lý của cuộc họp.
+- Với cuộc họp thuộc chính tài khoản admin, chọn **Mở cuộc họp** để vào không gian làm việc.
+
+Trang tự cập nhật mỗi 5 giây và có nút **Làm mới**. Các thông tin quản lý trên trang này không thay đổi quyền đọc/chỉnh sửa transcript, file và biên bản riêng trong không gian cá nhân.
+
+### 6.4. Tác vụ xử lý
 
 Xem tác vụ toàn hệ thống, chủ sở hữu, trạng thái, công đoạn và log. Có thể yêu cầu hủy tác vụ đang chờ/đang chạy, hoặc thử lại tác vụ thất bại, gián đoạn, đã hủy khi còn đủ điều kiện.
 
 Hủy trong lúc mô hình đang suy luận có thể phải đợi đến điểm kiểm tra tiếp theo. Nếu dữ liệu đầu vào đã đổi, tạo yêu cầu xử lý mới thay vì thử lại tác vụ dùng dữ liệu cũ.
 
-### 6.4. Mô hình & cấu hình
+### 6.5. Mô hình & cấu hình
 
 Xem môi trường thực thi, cache mô hình và trạng thái worker; chọn các preset xử lý được hệ thống cung cấp, gồm nhận diện giọng, ASR, phương pháp dung hợp, mặc định dùng LLM và thể thức mặc định.
 
 Mỗi tác vụ lưu cấu hình tại thời điểm được đưa vào hàng đợi. Thay đổi preset áp dụng cho tác vụ mới. **Có trọng số trong cache không đồng nghĩa mô hình đang nằm trong RAM**; worker nạp mô hình khi cần. Trang này chưa có chức năng fine-tune mô hình.
 
-### 6.5. Mẫu dùng chung
+### 6.6. Mẫu dùng chung
 
 Admin tải, rà soát và cung cấp mẫu dùng chung cho các tài khoản. Quy trình kiểm tra OCR và trường dữ liệu giống thư viện mẫu cá nhân. Chỉ phát hành mẫu sau khi đối chiếu cấu trúc, chữ và vị trí cần điền.
 
-### 6.6. Sao lưu dữ liệu
+### 6.7. Sao lưu dữ liệu
 
 Trong **Sao lưu dữ liệu**, tạo tác vụ sao lưu, chờ hoàn tất rồi tải ZIP. Gói sao lưu gồm metadata và các file được tham chiếu, dữ liệu phụ trợ của lượt xử lý và hồ sơ giọng. Trọng số mô hình, log, phiên đăng nhập và hàng đợi tác vụ không được đóng gói.
 
@@ -355,13 +371,13 @@ Trong **Sao lưu dữ liệu**, tạo tác vụ sao lưu, chờ hoàn tất rồ
 
 Khôi phục tạo database và thư mục mới; **không tự chuyển web đang chạy sang dữ liệu vừa khôi phục**. Hướng dẫn kỹ thuật nằm trong [QUICKSTART](backend/QUICKSTART.md#5-sao-lưu-và-tra-lỗi).
 
-### 6.7. Đánh giá
+### 6.8. Đánh giá
 
 Tạo lần đánh giá từ cuộc họp thuộc tài khoản admin, nhập văn bản tham chiếu đã được kiểm tra thủ công và ghi chú nếu có. Hệ thống tính **WER, CER**, thống kê lỗi thay thế/xóa/chèn và lưu thông tin phiên bản transcript phục vụ tái lập.
 
 Các chỉ số này đo lỗi chép lời so với văn bản tham chiếu được nhập. Chúng không thay thế đánh giá người nói, chất lượng gom cụm hoặc mức độ đúng/đủ của biên bản. Cần nhiều mẫu đại diện để kết luận chất lượng chung.
 
-### 6.8. Nhật ký hệ thống
+### 6.9. Nhật ký hệ thống
 
 Tra cứu các thao tác đã ghi nhận và lọc theo hành động/tài nguyên. Dùng nhật ký để xác định ai đã thực hiện thao tác quản trị, phục vụ kiểm tra sự cố và quản lý thay đổi.
 

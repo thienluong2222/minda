@@ -116,6 +116,13 @@ nếu sau này chạy HTTPS đặt MEETING_APP_COOKIE_SECURE=true.
 9. Admin quản lý job/log/preset/mẫu chung, audit, sao lưu và WER/CER từ tham
    chiếu thật. Không có nhãn người nói chuẩn thì không hiển thị DER giả định.
 
+Trong admin, **Tài khoản** hiển thị mọi tài khoản (gồm tài khoản khóa khi chưa
+lọc); **Cuộc họp** hiển thị metadata cuộc họp toàn hệ thống với bộ lọc chủ sở
+hữu, trạng thái và thùng rác. Thẻ số liệu ở Tổng quan mở danh sách tương ứng.
+Ô tìm kiếm đầu trang admin dẫn tới danh sách cuộc họp toàn hệ thống. Hai danh
+sách tự cập nhật; báo lỗi rõ khi API không tải được. Các quyền đọc/chỉnh sửa
+file và nội dung trong workspace cá nhân vẫn theo chủ sở hữu.
+
 Đổi thể thức dùng facts đang lưu, không chạy ASR/LLM. Tạo lại nội dung giữ các
 trường sửa tay hợp lệ còn cùng ID. Đổi nguồn/hồ sơ tham gia yêu cầu chạy lại
 âm thanh; sửa transcript đánh dấu biên bản cũ stale. Không fine-tune ở đợt này.

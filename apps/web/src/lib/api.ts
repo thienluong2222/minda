@@ -80,6 +80,8 @@ export const labels: Record<string, string> = {
   interrupted: "Gián đoạn",
   cancelled: "Đã hủy",
   ready: "Sẵn sàng",
+  account_active: "Đang hoạt động",
+  account_locked: "Đã khóa",
   pending: "Đang chuẩn bị",
   supported: "Có căn cứ",
   unknown: "Thiếu thông tin",

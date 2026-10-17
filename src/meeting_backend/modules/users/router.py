@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends
+import re
+from typing import Literal
+
+from fastapi import APIRouter, Depends, Query
 
 from meeting_backend.api.dependencies import administrator, current_user, database
 from meeting_backend.core.errors import AppError
@@ -11,8 +14,44 @@ router = APIRouter(tags=["users"])
 
 
 @router.get("/admin/users")
-def list_users(user=Depends(administrator), mongo=Depends(database)):
-    return [public(u) for u in mongo.db.users.find().sort("created_at", -1)]
+def list_users(
+    q: str = Query("", max_length=200),
+    role: Literal["user", "admin"] | None = None,
+    active: bool | None = None,
+    user=Depends(administrator),
+    mongo=Depends(database),
+):
+    query = {}
+    if q.strip():
+        pattern = {"$regex": re.escape(q.strip()), "$options": "i"}
+        query["$or"] = [{"username": pattern}, {"display_name": pattern}]
+    if role is not None:
+        query["role"] = role
+    if active is not None:
+        query["active"] = active
+    users = list(mongo.db.users.find(query).sort([("created_at", -1), ("_id", 1)]))
+    counts = {}
+    for group in mongo.db.meetings.aggregate(
+        [
+            {"$match": {"owner_id": {"$in": [account["_id"] for account in users]}}},
+            {
+                "$group": {
+                    "_id": {"owner_id": "$owner_id", "trashed": "$trashed"},
+                    "count": {"$sum": 1},
+                }
+            },
+        ]
+    ):
+        owner = counts.setdefault(group["_id"]["owner_id"], {"active": 0, "trashed": 0})
+        owner["trashed" if group["_id"].get("trashed") else "active"] += group["count"]
+    return [
+        {
+            **public(account),
+            "meeting_count": counts.get(account["_id"], {}).get("active", 0),
+            "trashed_meeting_count": counts.get(account["_id"], {}).get("trashed", 0),
+        }
+        for account in users
+    ]
 
 
 @router.post("/admin/users", status_code=201)

@@ -16,10 +16,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { AdminMeetings } from "@/features/admin/meetings";
 import { Templates } from "@/features/templates/pages";
 import { api, formatDate, labels, patch, post, size } from "@/lib/api";
 import type {
   Artifact,
+  AdminUser,
   Audit,
   Capabilities,
   Experiment,
@@ -29,9 +31,16 @@ import type {
   User,
 } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRight, Database, Plus, UploadCloud } from "lucide-react";
-import { useState } from "react";
-import { Link, Route, Routes } from "react-router-dom";
+import {
+  ArrowUpRight,
+  Database,
+  Plus,
+  RefreshCw,
+  Search,
+  UploadCloud,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, Route, Routes, useSearchParams } from "react-router-dom";
 
 function Overview() {
   const data = useQuery({
@@ -59,16 +68,24 @@ function Overview() {
       {d ? (
         <>
           <div className="stat-grid four">
-            <div className="stat-card stat-dark">
+            <Link
+              className="stat-card stat-dark"
+              to="/admin/users"
+              aria-label="Xem danh sách tài khoản"
+            >
               <span>Tài khoản</span>
               <strong>{d.users}</strong>
-              <small>Được quản trị trong hệ thống</small>
-            </div>
-            <div className="stat-card">
+              <small>Xem danh sách tài khoản →</small>
+            </Link>
+            <Link
+              className="stat-card"
+              to="/admin/meetings"
+              aria-label="Xem danh sách cuộc họp"
+            >
               <span>Cuộc họp</span>
               <strong>{d.meetings}</strong>
-              <small>Không bao gồm thùng rác</small>
-            </div>
+              <small>Xem cuộc họp toàn hệ thống →</small>
+            </Link>
             <div className="stat-card">
               <span>Tác vụ đang chờ</span>
               <strong>{d.jobs.queued || 0}</strong>
@@ -144,19 +161,30 @@ function Overview() {
             </Panel>
           </div>
         </>
-      ) : (
+      ) : data.isPending ? (
         <Loading />
-      )}
+      ) : null}
     </>
   );
 }
 
 function UsersPage() {
   const self = useUser();
+  const [params, setParams] = useSearchParams();
+  const currentSearch = params.get("q") || "";
+  const [search, setSearch] = useState(currentSearch);
+  useEffect(() => setSearch(currentSearch), [currentSearch]);
   const data = useQuery({
-    queryKey: ["users"],
-    queryFn: () => api<User[]>("/admin/users"),
+    queryKey: ["admin-users", params.toString()],
+    queryFn: () => api<AdminUser[]>("/admin/users?" + params.toString()),
+    refetchInterval: 5000,
   });
+  function filter(key: string, value: string) {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    setParams(next);
+  }
   const [open, setOpen] = useState(false),
     [username, setUsername] = useState(""),
     [name, setName] = useState(""),
@@ -183,80 +211,165 @@ function UsersPage() {
         }
       />
       <Panel>
+        <div className="list-toolbar">
+          <form
+            className="search-field"
+            onSubmit={(event) => {
+              event.preventDefault();
+              filter("q", search.trim());
+            }}
+          >
+            <Search size={17} />
+            <input
+              aria-label="Tìm tài khoản"
+              placeholder="Tên hoặc tên đăng nhập…"
+              maxLength={200}
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+            <Button variant="ghost" type="submit">
+              Tìm
+            </Button>
+          </form>
+          <select
+            aria-label="Lọc vai trò tài khoản"
+            value={params.get("role") || ""}
+            onChange={(event) => filter("role", event.target.value)}
+          >
+            <option value="">Tất cả vai trò</option>
+            <option value="admin">Quản trị viên</option>
+            <option value="user">Người dùng</option>
+          </select>
+          <select
+            aria-label="Lọc trạng thái tài khoản"
+            value={params.get("active") || ""}
+            onChange={(event) => filter("active", event.target.value)}
+          >
+            <option value="">Tất cả tài khoản</option>
+            <option value="true">Đang hoạt động</option>
+            <option value="false">Đã khóa</option>
+          </select>
+          <Button
+            variant="outline"
+            aria-label="Làm mới danh sách tài khoản"
+            disabled={data.isFetching}
+            onClick={() => void data.refetch()}
+          >
+            <RefreshCw size={15} /> Làm mới
+          </Button>
+        </div>
         <ErrorBox error={data.error} />
-        <div className="table-scroll">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Người dùng</th>
-                <th>Vai trò</th>
-                <th>Trạng thái</th>
-                <th>Ngày tạo</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.data?.map((u) => (
-                <tr key={u.id}>
-                  <td>
-                    <strong>{u.display_name}</strong>
-                    <small>
-                      @{u.username}
-                      {u.id === self.id ? " · Bạn" : ""}
-                    </small>
-                  </td>
-                  <td>
-                    <select
-                      aria-label={"Vai trò " + u.username}
-                      value={u.role}
-                      disabled={u.id === self.id}
-                      onChange={(e) =>
-                        void work(
-                          () =>
-                            patch("/admin/users/" + u.id, {
-                              role: e.target.value,
-                            }),
-                          "Đã cập nhật vai trò",
-                        )
-                      }
-                    >
-                      <option value="user">Người dùng</option>
-                      <option value="admin">Quản trị viên</option>
-                    </select>
-                  </td>
-                  <td>
-                    <Status value={u.active ? "ready" : "cancelled"} />
-                  </td>
-                  <td>{formatDate(u.created_at)}</td>
-                  <td>
-                    <div className="row wrap">
-                      <Action
-                        variant="ghost"
+        {data.isPending ? (
+          <Loading />
+        ) : data.data?.length === 0 ? (
+          <Empty
+            title="Không tìm thấy tài khoản"
+            description="Thử bỏ bộ lọc hoặc thay đổi từ khóa."
+          />
+        ) : data.data ? (
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Người dùng</th>
+                  <th>Vai trò</th>
+                  <th>Trạng thái</th>
+                  <th>Cuộc họp</th>
+                  <th>Ngày tạo</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.data?.map((u) => (
+                  <tr key={u.id}>
+                    <td>
+                      <strong>{u.display_name}</strong>
+                      <small>
+                        @{u.username}
+                        {u.id === self.id ? " · Bạn" : ""}
+                      </small>
+                    </td>
+                    <td>
+                      <select
+                        aria-label={"Vai trò " + u.username}
+                        value={u.role}
                         disabled={u.id === self.id}
-                        run={() =>
-                          patch("/admin/users/" + u.id, { active: !u.active })
+                        onChange={(e) =>
+                          void work(
+                            () =>
+                              patch("/admin/users/" + u.id, {
+                                role: e.target.value,
+                              }),
+                            "Đã cập nhật vai trò",
+                          )
                         }
                       >
-                        {u.active ? "Khóa" : "Mở khóa"}
-                      </Action>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={u.id === self.id}
-                        onClick={() => {
-                          setReset(u);
-                          setPassword("");
-                        }}
+                        <option value="user">Người dùng</option>
+                        <option value="admin">Quản trị viên</option>
+                      </select>
+                    </td>
+                    <td>
+                      <Status
+                        value={u.active ? "account_active" : "account_locked"}
+                      />
+                    </td>
+                    <td>
+                      <Link
+                        className="panel-link"
+                        to={"/admin/meetings?owner_id=" + u.id}
                       >
-                        Cấp lại mật khẩu
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                        {u.meeting_count} cuộc họp <ArrowUpRight size={14} />
+                      </Link>
+                      {!!u.trashed_meeting_count && (
+                        <small>
+                          <Link
+                            to={
+                              "/admin/meetings?owner_id=" +
+                              u.id +
+                              "&trashed=trashed"
+                            }
+                          >
+                            {u.trashed_meeting_count} trong thùng rác
+                          </Link>
+                        </small>
+                      )}
+                    </td>
+                    <td>{formatDate(u.created_at)}</td>
+                    <td>
+                      <div className="row wrap">
+                        <Action
+                          variant="ghost"
+                          disabled={u.id === self.id}
+                          run={() =>
+                            patch("/admin/users/" + u.id, { active: !u.active })
+                          }
+                        >
+                          {u.active ? "Khóa" : "Mở khóa"}
+                        </Action>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={u.id === self.id}
+                          onClick={() => {
+                            setReset(u);
+                            setPassword("");
+                          }}
+                        >
+                          Cấp lại mật khẩu
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+        {data.data && (
+          <p className="small muted">
+            {data.data.length} tài khoản phù hợp · Tự cập nhật mỗi 5 giây
+          </p>
+        )}
       </Panel>
       <Modal
         open={open}
@@ -1029,6 +1142,7 @@ export function Admin() {
     <Routes>
       <Route index element={<Overview />} />
       <Route path="users" element={<UsersPage />} />
+      <Route path="meetings" element={<AdminMeetings />} />
       <Route path="jobs" element={<JobsPage />} />
       <Route path="models" element={<ModelsPage />} />
       <Route path="templates" element={<Templates sharedOnly />} />
