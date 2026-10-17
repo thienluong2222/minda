@@ -1,8 +1,9 @@
 # Đề xuất giao diện người dùng và admin — 17/10/2026
 
-**Trạng thái:** đã thống nhất định hướng giao diện và công nghệ; người dùng chọn
-MongoDB, đưa app mobile ra khỏi đợt hiện tại. Lộ trình thực thi ở mục 10 đang
-được trình lại để người dùng xác minh trước khi bắt đầu sửa mã.
+**Trạng thái:** người dùng đã đồng ý lộ trình mục 10, gồm bản web user/admin,
+MongoDB và PDF/scan–OCR; app mobile do người dùng phát triển sau. Đang cụ thể
+hóa cách bố trí backend theo yêu cầu gọn, dễ truy xuất/sửa lỗi và bảo vệ dự án
+hiện có. Cấu trúc đề xuất ở mục 11; chưa triển khai mã nguồn trong bước này.
 
 Mốc mã nguồn tham chiếu: `75e978b`, nhánh `codex/llm-fcm-minutes`.
 Tài liệu này ghi lại yêu cầu mới và các đề xuất. Các mục đề xuất không được
@@ -25,8 +26,10 @@ hiểu là chức năng đã có hoặc quyết định người dùng đã ch�
 - Giữ các yêu cầu nghiệp vụ đã thống nhất: DOCX chỉnh sửa được; biên bản chi tiết
   bảo vệ đề mục; tổng quát chia chủ đề trong vùng nội dung; người dùng chọn
   thể thức hành chính hoặc văn bản Đảng.
-- Yêu cầu PDF/ảnh scan từ kế hoạch trước vẫn còn. Backend hiện tại chỉ hỗ trợ
-  mẫu DOC/DOCX; cần chốt OCR có thuộc cùng đợt cập nhật này hay không.
+- Lộ trình đã được người dùng đồng ý bao gồm giai đoạn PDF/ảnh scan và OCR.
+  Backend hiện tại vẫn chỉ hỗ trợ mẫu DOC/DOCX cho tới khi phần này hoàn tất.
+- Backend mới cần bố trí gọn, dễ tìm và sửa lỗi thủ công; triển khai phải giữ
+  khả năng chạy và kiểm thử dự án hiện tại, có ranh giới thay đổi rõ ràng.
 
 ## 2. Phân tích ảnh tham khảo
 
@@ -305,10 +308,10 @@ Không đồng nhất `job_id`, `run_id` và `meeting_id` trong thiết kế m�
    quyền sở hữu dữ liệu, quyền admin hỗ trợ và cách gán các run cũ.
 2. **Editor — đã chốt:** rà soát theo trường/nội dung, đối chiếu transcript,
    preview DOCX và tải về để sửa tiếp bằng Word.
-3. **PDF/scan:** triển khai OCR trong cùng phiên bản hay là giai đoạn tiếp theo?
-   Dù chọn thời điểm nào, không quảng bá upload hỗ trợ khi backend chưa làm được.
-4. **Nghiên cứu:** trang đánh giá thực nghiệm có thuộc đợt đầu hay làm sau
-   dashboard/workspace/admin cơ bản?
+3. **PDF/scan — đã chốt trong lộ trình:** giai đoạn OCR riêng trước nghiệm thu;
+   giao diện chỉ nhận định dạng tương ứng khi backend đã xử lý được.
+4. **Nghiên cứu — theo lộ trình đã đồng ý:** đánh giá thực nghiệm cơ bản nằm
+   trong admin, làm sau dashboard/workspace và luồng chính.
 5. **Nhận diện sản phẩm:** tên chính thức, logo và màu nhấn. Mockup thảo luận
    dùng tên tạm `Meeting / Notes`, các số liệu minh họa, không phải dashboard thật.
 
@@ -320,7 +323,7 @@ giao diện hệ thống đang có. Server web chính tiếp tục giữ trạng
 **Yêu cầu mới đã xác nhận:** ứng dụng tương lai ưu tiên Android và iOS.
 **Trạng thái lựa chọn công nghệ:** người dùng đã đồng ý stack và chọn MongoDB.
 Chưa cài dependency, scaffold frontend hoặc thay mã nguồn. Mobile tạm hoãn;
-phạm vi OCR đang được trình lại trong mục 10.
+  phạm vi OCR nằm trong lộ trình đã đồng ý ở mục 10.
 
 ### 9.1. Stack đề xuất
 
@@ -405,12 +408,13 @@ bundle web hoàn chỉnh có thể được FastAPI phục vụ cùng origin ở
 
 Các quyết định về AI offline trên điện thoại được để lại cho đợt mobile sau.
 
-## 10. Lộ trình web + MongoDB để xác minh lần cuối
+## 10. Lộ trình web + MongoDB đã được đồng ý
 
 **Yêu cầu điều chỉnh ngày 17/10/2026:** hoàn thành bản web user/admin theo định
 hướng đã thống nhất; database dùng MongoDB; bỏ phát triển app khỏi đợt này;
-tóm tắt lộ trình để người dùng xác minh lại. Mục này là phạm vi thực thi hiện hành,
-thay cho các đề xuất database và thời điểm làm mobile trong các phiên bản trước.
+tóm tắt lộ trình để người dùng xác minh lại. Người dùng sau đó trả lời đồng ý
+với lộ trình và bổ sung yêu cầu tổ chức backend. Mục này là phạm vi thực thi
+hiện hành, thay các đề xuất database/mobile trong các phiên bản trước.
 
 ### 10.1. Stack và phạm vi
 
@@ -423,8 +427,7 @@ thay cho các đề xuất database và thời điểm làm mobile trong các ph
   MongoDB giữ quyền sở hữu, metadata, nội dung có cấu trúc và tham chiếu phiên bản.
 - Auth thật, phân quyền ở API và các đường tải file, template/voice ownership,
   lịch sử phiên bản và thông tin truy vết.
-- Đề xuất bổ sung PDF có chữ/PDF scan/ảnh scan cùng OCR ở giai đoạn riêng để
-  đáp ứng yêu cầu đã lưu từ trước; cần xác minh thời điểm này trong phạm vi.
+- Bổ sung PDF có chữ/PDF scan/ảnh scan cùng OCR ở giai đoạn riêng trước nghiệm thu.
 - App Android/iOS và triển khai rộng rãi nằm ngoài đợt này. API vẫn chuẩn bị
   để mobile có thể sử dụng về sau. Đợt này không thay model hoặc fine-tune.
 
@@ -438,7 +441,7 @@ thay cho các đề xuất database và thời điểm làm mobile trong các ph
 | 4. Nền giao diện | Design tokens, component chung, layout user/admin, điều hướng, responsive, trạng thái | Phong cách theo ảnh, tiếng Việt rõ, loading/empty/error/saved/stale đầy đủ |
 | 5. Luồng người dùng | Dashboard, danh sách, wizard, transcript/audio, người nói, mẫu/giọng, biên bản, lịch sử, thùng rác | Chạy từ upload đến DOCX, có rà soát căn cứ; hai loại biên bản và hai thể thức |
 | 6. Admin | Tài khoản, tác vụ/log, model/cache, preset, mẫu chung, audit, dữ liệu/sao lưu, đánh giá cơ bản | Chức năng có tác động thật, ghi lịch sử; thống kê/metric lấy từ dữ liệu đo được |
-| 7. PDF/scan và OCR — đề xuất | Đọc PDF/ảnh, OCR và bố cục, kiểm tra đề mục/trường, tái dựng DOCX rồi dùng cùng pipeline biên bản | DOCX có chữ/bảng chỉnh được; vùng OCR chưa rõ phải được rà soát; không chỉ chèn ảnh nguyên trang |
+| 7. PDF/scan và OCR | Đọc PDF/ảnh, OCR và bố cục, kiểm tra đề mục/trường, tái dựng DOCX rồi dùng cùng pipeline biên bản | DOCX có chữ/bảng chỉnh được; vùng OCR chưa rõ phải được rà soát; không chỉ chèn ảnh nguyên trang |
 | 8. Nghiệm thu và bàn giao | Unit/integration/browser, MongoDB thật, model smoke và tài liệu trình diễn | Luồng chính/lỗi/phân quyền/migration/khôi phục đạt; có kịch bản báo cáo và commit từng giai đoạn |
 
 Chọn engine OCR sau phép thử nhỏ trên dữ liệu hiện có và máy M4; không coi việc
@@ -486,5 +489,25 @@ Tài liệu chính thức được đối chiếu:
   bản trước khi nghiệm thu bản mới.
 - Bàn giao hướng dẫn chạy MongoDB/API/worker/web, tài khoản demo, cách nhập dữ
   liệu cũ và kịch bản trình diễn. Không dùng số liệu giả trong dashboard thật.
-- Lần cập nhật tài liệu này chưa cài package, chưa đổi database, chưa khởi động
-  web server hoặc triển khai các tính năng. Chờ người dùng xác minh lộ trình.
+- Lộ trình đã được đồng ý; đang cụ thể hóa tổ chức mã nguồn. Chưa cài package,
+  đổi database, khởi động web server hoặc triển khai tính năng trong bước này.
+
+## 11. Bố trí backend và bảo vệ mã nguồn hiện có
+
+Đề xuất cùng repository, một dự án Python với hai package:
+
+- `src/meeting_pipeline/`: thư viện xử lý và các công cụ hiện có, giữ đường import.
+- `src/meeting_backend/`: API, auth, nghiệp vụ ứng dụng, MongoDB, worker và
+  adapter gọi pipeline. Backend chia theo chức năng; mỗi module có router,
+  schema, service và repository theo nhu cầu thực tế.
+- `apps/web/`: frontend React; `packages/api-client/`: kiểu dữ liệu/client
+  TypeScript dùng chung sau khi ổn định API. Đợt này chưa tạo app mobile.
+
+Chi tiết cấu trúc, luồng phụ thuộc, nơi tra lỗi, cấu hình và dữ liệu:
+[kiến trúc backend](/Users/thien/Documents/School/Luận văn/docs/backend/ARCHITECTURE.md).
+
+Triển khai trên nhánh/worktree riêng từ mốc đã duyệt, cấu hình/dữ liệu/database
+dev riêng; giữ runtime AI được ghim. Các thay đổi vào mã hiện tại giới hạn ở
+sửa lỗi đã xác nhận và điểm tích hợp cần thiết, có kiểm thử hồi quy và commit
+riêng. Bố trí thư mục hỗ trợ hạn chế ảnh hưởng; nghiệm thu vẫn phải dựa vào
+kiểm thử và đối chiếu artifact/model thật, không hứa tuyệt đối không có hồi quy.
