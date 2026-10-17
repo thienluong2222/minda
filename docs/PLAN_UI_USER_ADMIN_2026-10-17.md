@@ -1,6 +1,8 @@
 # Đề xuất giao diện người dùng và admin — 17/10/2026
 
-**Trạng thái:** bản nháp để thảo luận, chưa được duyệt triển khai.
+**Trạng thái:** đã thống nhất định hướng giao diện và công nghệ; người dùng chọn
+MongoDB, đưa app mobile ra khỏi đợt hiện tại. Lộ trình thực thi ở mục 10 đang
+được trình lại để người dùng xác minh trước khi bắt đầu sửa mã.
 
 Mốc mã nguồn tham chiếu: `75e978b`, nhánh `codex/llm-fcm-minutes`.
 Tài liệu này ghi lại yêu cầu mới và các đề xuất. Các mục đề xuất không được
@@ -18,8 +20,8 @@ hiểu là chức năng đã có hoặc quyết định người dùng đã ch�
   transcript và preview DOCX; tải DOCX để chỉnh tiếp bằng Word.
 - Cập nhật ngày 17/10: người dùng đồng ý định hướng giao diện và muốn phát triển
   thành ứng dụng trong tương lai; nền tảng ưu tiên đã xác nhận là **Android/iOS**.
-  Công nghệ ở mục 9 là đề xuất mới để đáp ứng mục tiêu này, chưa phải yêu cầu
-  triển khai app mobile ngay.
+  Người dùng đã đồng ý công nghệ được chọn, thay database bằng **MongoDB**;
+  **app mobile do người dùng phát triển sau, không thuộc đợt hiện tại**.
 - Giữ các yêu cầu nghiệp vụ đã thống nhất: DOCX chỉnh sửa được; biên bản chi tiết
   bảo vệ đề mục; tổng quát chia chủ đề trong vùng nội dung; người dùng chọn
   thể thức hành chính hoặc văn bản Đảng.
@@ -274,7 +276,7 @@ Không đồng nhất `job_id`, `run_id` và `meeting_id` trong thiết kế m�
   Phương án Jinja/CSS/JavaScript ban đầu được thay trong bản đề xuất kỹ thuật,
   vì yêu cầu mới ưu tiên phát triển thêm client mobile.
 - Tách router/service khỏi `web/app.py` đang tập trung nhiều trách nhiệm.
-- Triển khai auth đã chốt: migration SQLite, tài khoản local, session, kiểm tra quyền,
+- Triển khai auth đã chốt: MongoDB, nhập dữ liệu cũ, tài khoản local, session, kiểm tra quyền,
   sở hữu tài nguyên, xử lý dữ liệu legacy; thêm kiểm thử hai tài khoản khác nhau.
 - Xây dashboard, danh sách, wizard, theo dõi xử lý và workspace; phiên bản hóa
   mẫu/facts/exports; bảo toàn dữ liệu hiện có qua migration.
@@ -316,8 +318,9 @@ giao diện hệ thống đang có. Server web chính tiếp tục giữ trạng
 ## 9. Đề xuất công nghệ khi hướng tới Android/iOS
 
 **Yêu cầu mới đã xác nhận:** ứng dụng tương lai ưu tiên Android và iOS.
-**Trạng thái lựa chọn công nghệ:** đề xuất để thảo luận, chưa cài dependency,
-scaffold frontend hoặc thay mã nguồn. Phạm vi OCR vẫn cần chốt riêng.
+**Trạng thái lựa chọn công nghệ:** người dùng đã đồng ý stack và chọn MongoDB.
+Chưa cài dependency, scaffold frontend hoặc thay mã nguồn. Mobile tạm hoãn;
+phạm vi OCR đang được trình lại trong mục 10.
 
 ### 9.1. Stack đề xuất
 
@@ -327,11 +330,11 @@ scaffold frontend hoặc thay mã nguồn. Phạm vi OCR vẫn cần chốt riê
 | Thiết kế web | Tailwind CSS + shadcn/ui | Token màu/khoảng cách, form, dialog, bảng, sidebar theo phong cách đã chọn |
 | Điều hướng và dữ liệu web | React Router + TanStack Query | Điều hướng, request/cache, loading/error và cập nhật dữ liệu |
 | API | Python + FastAPI + Pydantic | Auth, quyền sở hữu, nghiệp vụ, upload và xuất kết quả |
-| Database prototype | SQLite + SQLAlchemy + Alembic | Metadata, users, sessions, jobs, revisions và migration |
+| Database | MongoDB + PyMongo + Pydantic | Users, sessions, meetings, jobs, revisions, metadata và kiểm tra cấu trúc |
 | Xử lý AI | Python worker ngoài tiến trình API | Chạy lại pipeline hiện có, điều phối ASR/LLM, cập nhật trạng thái |
-| Hàng đợi prototype | Queue bền vững trong SQLite | Dùng nền RunQueue/Run hiện có, bổ sung runner và tích hợp API |
+| Hàng đợi prototype | Jobs collection trong MongoDB | Claim nguyên tử, lease/heartbeat, retry/cancel và runner tích hợp API |
 | File | Artifact store local hiện có | Audio, mẫu, DOCX, preview và manifest; truy cập qua API có quyền |
-| Mobile tương lai | React Native + Expo + TypeScript | Client Android/iOS, ghi/đọc âm thanh, upload, rà soát và tải/chia sẻ DOCX |
+| Mobile tương lai, ngoài đợt này | React Native + Expo + TypeScript | Giữ hợp đồng API để người dùng phát triển app sau |
 | Kiểm thử | Pytest + Playwright; kiểm thử frontend khi cần | API/quyền/revision, hành trình web và các trạng thái lỗi |
 
 Đây là lựa chọn kiến trúc của dự án sau khi đối chiếu yêu cầu; tài liệu chính
@@ -386,13 +389,12 @@ Expo có [API audio](https://docs.expo.dev/versions/latest/sdk/audio/), nhưng g
 ### 9.4. Lộ trình và quản lý phạm vi
 
 1. Web React cho user/admin + FastAPI, sửa các lỗi dữ liệu đã phát hiện, auth và
-   worker bền vững; giữ SQLite và lưu file local cho prototype hiện tại.
+   worker bền vững; chuyển sang MongoDB và giữ artifact store local.
 2. Ổn định API/schema/revision; tối ưu thao tác mobile ở web responsive. Đây là
    bước chuẩn bị, không đồng nghĩa đã có ứng dụng native.
-3. Xây app React Native/Expo: đăng nhập, danh sách, ghi/chọn audio, upload,
-   trạng thái, transcript, rà soát và tải/chia sẻ DOCX. Admin ưu tiên web.
-4. Khi có nhu cầu vận hành nhiều người: đánh giá PostgreSQL, kho file server
-   và queue nhiều worker; migration và điều phối cần được kiểm thử riêng.
+3. App React Native/Expo nằm ngoài lộ trình hiện tại, người dùng phát triển sau.
+4. Khi có nhu cầu vận hành nhiều người: đánh giá triển khai MongoDB, kho file server
+   và queue nhiều worker; điều phối và vận hành cần được kiểm thử riêng.
    Tài liệu [FastAPI về tác vụ nặng](https://fastapi.tiangolo.com/tutorial/background-tasks/#caveat)
    cũng phân biệt background task trong ứng dụng và công cụ xử lý nhiều tiến trình.
 
@@ -401,5 +403,88 @@ Cùng repository có thể bố trí `apps/web`, `packages/api-client` và backe
 Ghim dependency/lockfile khi triển khai; Node phục vụ build/dev frontend,
 bundle web hoàn chỉnh có thể được FastAPI phục vụ cùng origin ở bản local.
 
-Điểm cần thảo luận tiếp: người dùng có yêu cầu AI offline hoàn toàn trên điện
-thoại hay chấp nhận mô hình app kết nối backend như đề xuất?
+Các quyết định về AI offline trên điện thoại được để lại cho đợt mobile sau.
+
+## 10. Lộ trình web + MongoDB để xác minh lần cuối
+
+**Yêu cầu điều chỉnh ngày 17/10/2026:** hoàn thành bản web user/admin theo định
+hướng đã thống nhất; database dùng MongoDB; bỏ phát triển app khỏi đợt này;
+tóm tắt lộ trình để người dùng xác minh lại. Mục này là phạm vi thực thi hiện hành,
+thay cho các đề xuất database và thời điểm làm mobile trong các phiên bản trước.
+
+### 10.1. Stack và phạm vi
+
+- Web: React, TypeScript, Vite, Tailwind CSS, shadcn/ui, React Router, TanStack Query.
+- Backend: Python, FastAPI, Pydantic; API `/api/v1`, hai khu vực user/admin.
+- Database: MongoDB local, driver PyMongo; repository tách khỏi nghiệp vụ.
+- Xử lý AI: Python worker ngoài tiến trình API, dùng pipeline/model hiện có;
+  một tác vụ ML nặng tại một thời điểm ở cấu hình prototype.
+- File: audio, mẫu, DOCX, preview và snapshot JSON lưu trong artifact store;
+  MongoDB giữ quyền sở hữu, metadata, nội dung có cấu trúc và tham chiếu phiên bản.
+- Auth thật, phân quyền ở API và các đường tải file, template/voice ownership,
+  lịch sử phiên bản và thông tin truy vết.
+- Đề xuất bổ sung PDF có chữ/PDF scan/ảnh scan cùng OCR ở giai đoạn riêng để
+  đáp ứng yêu cầu đã lưu từ trước; cần xác minh thời điểm này trong phạm vi.
+- App Android/iOS và triển khai rộng rãi nằm ngoài đợt này. API vẫn chuẩn bị
+  để mobile có thể sử dụng về sau. Đợt này không thay model hoặc fine-tune.
+
+### 10.2. Thứ tự thực hiện
+
+| Giai đoạn | Công việc | Điều kiện hoàn tất |
+| --- | --- | --- |
+| 1. Ổn định dữ liệu hiện có | Sửa bốn lỗi lưu facts, render sau sửa transcript, schema khi bận và đổi tên người nói | Tái hiện cũ trở thành kiểm thử đạt; evidence và exports giữ nhất quán |
+| 2. Chuyển sang MongoDB | Repository, collections, indexes, validation, schema migrations, importer SQLite/JSON cũ, sao lưu | Nhập có kiểm tra ID/số lượng/hash/quyền; chạy lại không tạo bản trùng; dữ liệu cũ được bảo toàn |
+| 3. API, auth và worker | Users/sessions/roles, quyền tài nguyên, API version, jobs/lease/heartbeat, revision, retry/cancel | Hai tài khoản cách ly dữ liệu; rời trang vẫn theo dõi job; bận/lỗi không ghi dữ liệu một phần |
+| 4. Nền giao diện | Design tokens, component chung, layout user/admin, điều hướng, responsive, trạng thái | Phong cách theo ảnh, tiếng Việt rõ, loading/empty/error/saved/stale đầy đủ |
+| 5. Luồng người dùng | Dashboard, danh sách, wizard, transcript/audio, người nói, mẫu/giọng, biên bản, lịch sử, thùng rác | Chạy từ upload đến DOCX, có rà soát căn cứ; hai loại biên bản và hai thể thức |
+| 6. Admin | Tài khoản, tác vụ/log, model/cache, preset, mẫu chung, audit, dữ liệu/sao lưu, đánh giá cơ bản | Chức năng có tác động thật, ghi lịch sử; thống kê/metric lấy từ dữ liệu đo được |
+| 7. PDF/scan và OCR — đề xuất | Đọc PDF/ảnh, OCR và bố cục, kiểm tra đề mục/trường, tái dựng DOCX rồi dùng cùng pipeline biên bản | DOCX có chữ/bảng chỉnh được; vùng OCR chưa rõ phải được rà soát; không chỉ chèn ảnh nguyên trang |
+| 8. Nghiệm thu và bàn giao | Unit/integration/browser, MongoDB thật, model smoke và tài liệu trình diễn | Luồng chính/lỗi/phân quyền/migration/khôi phục đạt; có kịch bản báo cáo và commit từng giai đoạn |
+
+Chọn engine OCR sau phép thử nhỏ trên dữ liệu hiện có và máy M4; không coi việc
+đổi giao diện upload là đã có pipeline OCR. Độ khớp cấu trúc scan được đánh giá
+riêng với độ giống bố cục, không hứa khôi phục tuyệt đối mọi tài liệu.
+
+### 10.3. Các quyết định dữ liệu khi dùng MongoDB
+
+- MongoDB là nơi quản lý trạng thái ứng dụng hiện hành. JSON sinh từ pipeline
+  và nằm trong gói export là artifact/snapshot có phiên bản, không tạo một job
+  store thứ hai độc lập với database.
+- Collections dự kiến: users, sessions, meetings, sources, speaker_profiles,
+  jobs, transcript_segments, templates/template_versions, minutes_versions,
+  artifacts, audit_events, settings và schema_migrations. Chốt ranh giới chi
+  tiết khi thiết kế repository; tách dữ liệu dài khỏi một document cuộc họp lớn.
+- Giữ các ID cũ khi nhập dữ liệu; phân biệt meeting/run/job; gán owner theo
+  quy tắc rõ ràng cho dữ liệu legacy. Import có dry-run, idempotency và báo cáo
+  kiểm tra; không xóa SQLite/JSON nguồn sau khi vừa nhập.
+- Pydantic ở API và MongoDB validators/indexes bảo vệ kiểu dữ liệu, trường
+  bắt buộc, tính duy nhất và truy vấn theo owner/status/thời gian. Migration
+  MongoDB dùng script có version; SQLAlchemy/Alembic chỉ còn liên quan dữ liệu cũ.
+- Queue dùng thao tác claim nguyên tử và lease/fencing để worker cũ không ghi
+  kết quả sau khi mất quyền xử lý; cancellation là cơ chế dừng hợp tác.
+- Khóa và revision xử lý xung đột lưu. Khi cần transaction nhiều document,
+  phải chọn cấu hình MongoDB hỗ trợ và kiểm thử thật, không giả định standalone
+  có transaction.
+- Transaction database không bao phủ filesystem: render/format/preview/ZIP
+  vào phiên bản mới, kiểm tra artifact, rồi publish và chuyển tham chiếu phiên
+  bản hiện hành. Lỗi giữ phiên bản đang dùng; file chưa được tham chiếu được
+  dọn an toàn. Không giữ transaction database mở trong thời gian suy luận AI.
+- Kiểm tra MongoDB và cấu hình hiện có trước khi tạo database/service cho dự
+  án; tài nguyên demo dùng namespace riêng và không ghi đè database khác.
+
+Tài liệu chính thức được đối chiếu:
+[PyMongo](https://www.mongodb.com/docs/languages/python/pymongo-driver/current/),
+[MongoDB schema validation](https://www.mongodb.com/docs/manual/core/schema-validation/),
+[transactions](https://www.mongodb.com/docs/manual/core/transactions/),
+[điều kiện chạy transaction](https://www.mongodb.com/docs/manual/core/transactions-production-consideration/).
+
+### 10.4. Quản lý thay đổi và bàn giao
+
+- Commit theo giai đoạn; báo cáo phần hoàn tất, kiểm thử và giới hạn thực tế.
+- Không đưa file kế hoạch speaker có sẵn chưa được Git theo dõi vào commit.
+- Giữ baseline dữ liệu/mẫu gốc, sao lưu trước migration; có cách quay về phiên
+  bản trước khi nghiệm thu bản mới.
+- Bàn giao hướng dẫn chạy MongoDB/API/worker/web, tài khoản demo, cách nhập dữ
+  liệu cũ và kịch bản trình diễn. Không dùng số liệu giả trong dashboard thật.
+- Lần cập nhật tài liệu này chưa cài package, chưa đổi database, chưa khởi động
+  web server hoặc triển khai các tính năng. Chờ người dùng xác minh lộ trình.
