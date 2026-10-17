@@ -57,8 +57,39 @@ def validate_export(run):
     if hashlib.sha256(blob).hexdigest() != manifest["completed_docx_sha256"]:
         raise RuntimeError("Manifest không khớp DOCX.")
     with zipfile.ZipFile(run / "exports/completed_minutes.zip") as archive:
-        if archive.testzip() or archive.read("completed.docx") != blob:
+        if (
+            archive.testzip()
+            or archive.read("completed.docx") != blob
+            or json.loads(archive.read("manifest.json")) != manifest
+        ):
             raise RuntimeError("ZIP không khớp DOCX.")
+
+
+def stamp_export_context(run, **context):
+    """Publish application IDs even when the core consumed a staging/legacy run."""
+    import zipfile
+
+    path = run / "minutes/manifest.json"
+    manifest = read_json(path)
+    manifest.update(run_id=context["job_id"], meeting_id=context["meeting_id"], app_context=context)
+    blob = json.dumps(manifest, ensure_ascii=False, indent=2).encode()
+    path.write_bytes(blob)
+    package = run / "exports/completed_minutes.zip"
+    temporary = package.with_suffix(".zip.tmp")
+    with (
+        zipfile.ZipFile(package) as source,
+        zipfile.ZipFile(temporary, "w", zipfile.ZIP_DEFLATED) as target,
+    ):
+        for info in source.infolist():
+            if info.filename == "manifest.json":
+                continue
+            with (
+                source.open(info) as reader,
+                target.open(info.filename, "w", force_zip64=True) as writer,
+            ):
+                shutil.copyfileobj(reader, writer, length=1024 * 1024)
+        target.writestr("manifest.json", blob)
+    temporary.replace(package)
 
 
 def run_minutes(context):
@@ -75,7 +106,7 @@ def run_minutes(context):
         source = context.mongo.db.minutes_versions.find_one(
             {"_id": payload["version_id"], "meeting_id": meeting["_id"]}
         )
-    run = context.staging / "run"
+    run = context.staging / meeting["_id"] / "runs" / context.job["_id"]
     if source:
         old_path = Path(source["run_path"]).resolve()
         if not old_path.is_relative_to(context.store.root):
@@ -147,6 +178,18 @@ def run_minutes(context):
         raise ValueError("Loại tác vụ biên bản không hợp lệ.")
     context.check()
     context.stage("Kiểm tra DOCX, preview, manifest và ZIP")
+    stamp_export_context(
+        run,
+        meeting_id=meeting["_id"],
+        job_id=context.job["_id"],
+        transcript_version_id=meeting.get("active_transcript_id")
+        if kind == "generate_minutes"
+        else source.get("transcript_version_id"),
+        input_content_revision=input_revision,
+        template_id=template_id,
+        template_version_id=template_version_id,
+        source_minutes_version_id=source["_id"] if source else None,
+    )
     validate_export(run)
     final = context.root / "document_versions" / meeting["_id"] / context.job["_id"]
     final.parent.mkdir(parents=True, exist_ok=True)

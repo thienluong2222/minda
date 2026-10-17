@@ -211,6 +211,48 @@ def test_cancelled_or_replaced_lease_cannot_publish(client):
     assert mongo.db.meetings.find_one({"_id": m["id"]})["title"] == m["title"]
 
 
+def test_minutes_export_context_matches_database_ids_and_zip(tmp_path):
+    import hashlib
+    import json
+    import zipfile
+
+    from docx import Document
+
+    from meeting_backend.integrations.minutes_pipeline import stamp_export_context, validate_export
+
+    run = tmp_path / "run"
+    (run / "minutes").mkdir(parents=True)
+    (run / "exports").mkdir()
+    document = Document()
+    document.add_paragraph("Nội dung không bị thay đổi khi gắn ID.")
+    docx = run / "exports/completed.docx"
+    document.save(docx)
+    original = docx.read_bytes()
+    manifest = {
+        "run_id": "old-run",
+        "meeting_id": "staging",
+        "completed_docx_sha256": hashlib.sha256(original).hexdigest(),
+    }
+    (run / "minutes/manifest.json").write_text(json.dumps(manifest))
+    with zipfile.ZipFile(run / "exports/completed_minutes.zip", "w") as archive:
+        archive.writestr("manifest.json", json.dumps(manifest))
+        archive.write(docx, "completed.docx")
+    stamp_export_context(
+        run,
+        meeting_id="meeting-uuid",
+        job_id="job-uuid",
+        transcript_version_id="transcript-uuid",
+        input_content_revision=3,
+    )
+    validate_export(run)
+    assert docx.read_bytes() == original
+    with zipfile.ZipFile(run / "exports/completed_minutes.zip") as archive:
+        assert archive.namelist().count("manifest.json") == 1
+        saved = json.loads(archive.read("manifest.json"))
+        assert saved["meeting_id"] == "meeting-uuid" and saved["run_id"] == "job-uuid"
+        assert saved["app_context"]["input_content_revision"] == 3
+
+
 def test_session_expiry_and_account_lock(client):
     mongo = client.app.state.mongo
     mongo.db.sessions.update_many(
