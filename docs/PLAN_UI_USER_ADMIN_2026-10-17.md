@@ -1,9 +1,10 @@
 # Đề xuất giao diện người dùng và admin — 17/10/2026
 
-**Trạng thái:** người dùng đã đồng ý lộ trình mục 10, gồm bản web user/admin,
-MongoDB và PDF/scan–OCR; app mobile do người dùng phát triển sau. Đang cụ thể
-hóa cách bố trí backend theo yêu cầu gọn, dễ truy xuất/sửa lỗi và bảo vệ dự án
-hiện có. Cấu trúc đề xuất ở mục 11; chưa triển khai mã nguồn trong bước này.
+**Trạng thái:** đã triển khai lộ trình web user/admin, MongoDB và PDF/scan–OCR
+trên nhánh `codex/web-mongodb-upgrade`. App mobile để người dùng phát triển sau.
+Xem `docs/backend/QUICKSTART.md`, phần bố trí thực tế trong
+`docs/backend/ARCHITECTURE.md` và báo cáo `VALIDATION_2026-10-17.md`.
+Các mục đề xuất lịch sử bên dưới được giữ để đối chiếu với phạm vi đã chốt.
 
 Mốc mã nguồn tham chiếu: `75e978b`, nhánh `codex/llm-fcm-minutes`.
 Tài liệu này ghi lại yêu cầu mới và các đề xuất. Các mục đề xuất không được

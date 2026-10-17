@@ -119,5 +119,15 @@ npm --prefix apps/web run build
 npm --prefix apps/web run format:check
 ```
 
+Smoke trình duyệt chỉ đọc, dùng tài khoản thử nghiệm và Chrome đã cài:
+
+```bash
+MEETING_QA_PASSWORD='<mat-khau-kiem-thu>' .venv-backend/bin/python scripts/backend/browser_smoke.py --username ten_kiem_thu
+```
+
+Có thể dùng `--credentials-file` JSON cục bộ thay env, và `--meeting-id` để
+kiểm thêm trang biên bản. Không commit file credential. Ảnh/report nằm trong
+`data/evaluations/web_browser_smoke` mặc định.
+
 Backend tests dùng MongoDB thật với database UUID riêng tự dọn. Test tài liệu
 cần các binary và OCR cache. Không chạy test vào database đang trình diễn.
