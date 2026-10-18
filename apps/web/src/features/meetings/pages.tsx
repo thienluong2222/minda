@@ -31,7 +31,7 @@ import {
   UploadCloud,
   Users,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 export function MeetingTable({
@@ -403,6 +403,19 @@ export function NewMeeting() {
     [template, setTemplate] = useState(""),
     [format, setFormat] = useState(""),
     [mode, setMode] = useState("detailed");
+  const [direction, setDirection] = useState<"forward" | "backward">("forward");
+  const stepHeading = useRef<HTMLHeadingElement>(null);
+  const previousStep = useRef(step);
+  useEffect(() => {
+    if (previousStep.current !== step) {
+      stepHeading.current?.focus({ preventScroll: true });
+      previousStep.current = step;
+    }
+  }, [step]);
+  function goToStep(next: number) {
+    setDirection(next > step ? "forward" : "backward");
+    setStep(next);
+  }
   const { busy, work } = useWork();
   const voices = useQuery({
     queryKey: ["voices"],
@@ -474,7 +487,7 @@ export function NewMeeting() {
             >
               <span>
                 {i < step ? (
-                  <Check size={16} />
+                  <Check className="confirmation-check" size={16} />
                 ) : (
                   String(i + 1).padStart(2, "0")
                 )}
@@ -487,219 +500,233 @@ export function NewMeeting() {
           ))}
         </ol>
         <Panel className="wizard-body">
-          <div className="wizard-title">
-            <span className="eyebrow">BƯỚC {step + 1} / 4</span>
-            <h2>{steps[step]}</h2>
-          </div>
-          {step === 0 && (
-            <div className="form-stack">
-              <label>
-                Tên cuộc họp <span className="required">*</span>
-                <Input
-                  autoFocus
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  maxLength={200}
-                  placeholder="Ví dụ: Họp triển khai kế hoạch tháng 10"
-                />
-              </label>
-              <div className="form-grid">
+          <div
+            key={step}
+            className="wizard-step-motion"
+            data-direction={direction}
+          >
+            <div className="wizard-title">
+              <span className="eyebrow">BƯỚC {step + 1} / 4</span>
+              <h2 ref={stepHeading} tabIndex={-1}>
+                {steps[step]}
+              </h2>
+            </div>
+            {step === 0 && (
+              <div className="form-stack">
                 <label>
-                  Ngày họp
+                  Tên cuộc họp <span className="required">*</span>
                   <Input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
+                    autoFocus
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    maxLength={200}
+                    placeholder="Ví dụ: Họp triển khai kế hoạch tháng 10"
                   />
                 </label>
+                <div className="form-grid">
+                  <label>
+                    Ngày họp
+                    <Input
+                      type="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                    />
+                  </label>
+                  <label>
+                    Địa điểm
+                    <Input
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      maxLength={300}
+                      placeholder="Phòng họp / Trực tuyến"
+                    />
+                  </label>
+                </div>
                 <label>
-                  Địa điểm
-                  <Input
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    maxLength={300}
-                    placeholder="Phòng họp / Trực tuyến"
+                  Ghi chú
+                  <Textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    maxLength={4000}
+                    placeholder="Thông tin bổ sung cho người rà soát…"
                   />
                 </label>
               </div>
-              <label>
-                Ghi chú
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  maxLength={4000}
-                  placeholder="Thông tin bổ sung cho người rà soát…"
-                />
-              </label>
-            </div>
-          )}
-          {step === 1 && (
-            <>
-              <label className="upload-zone">
-                <UploadCloud size={32} />
-                <strong>Chọn bản ghi âm từ thiết bị</strong>
-                <span>WAV, MP3, M4A, AAC, FLAC, OGG, WEBM, MP4</span>
-                <small>
-                  Tối đa {caps.data?.max_sources || 8} nguồn ·{" "}
-                  {size(caps.data?.max_upload_bytes || 1e9)}/file
-                </small>
-                <input
-                  type="file"
-                  multiple
-                  accept=".wav,.mp3,.m4a,.aac,.flac,.ogg,.webm,.mp4"
-                  onChange={(e) => setFiles(Array.from(e.target.files || []))}
-                />
-              </label>
-              {files.map((f, i) => (
-                <div className="file-row" key={i}>
-                  <AudioLines size={18} />
-                  <span>
-                    {f.name}
-                    <small>{size(f.size)}</small>
-                  </span>
-                  <Button
-                    variant="ghost"
-                    onClick={() =>
-                      setFiles(files.filter((_, index) => index !== i))
-                    }
-                  >
-                    Bỏ
-                  </Button>
-                </div>
-              ))}
-              {files.length > 8 && <Notice>Hãy chọn tối đa 8 file.</Notice>}
-              <Notice tone="info">
-                Các nguồn phải ghi lại cùng một cuộc họp. Hệ thống sẽ đồng bộ và
-                dung hợp âm thanh.
-              </Notice>
-            </>
-          )}
-          {step === 2 && (
-            <>
-              <p className="muted">
-                Chọn hồ sơ giọng đã có để hỗ trợ nhận diện. Đoạn chưa xác định
-                và đoạn nói chồng được hiển thị riêng.
-              </p>
-              <div className="person-grid">
-                {voices.data
-                  ?.filter((v) => v.state === "ready")
-                  .map((v) => (
-                    <label
-                      className={
-                        "person-choice " +
-                        (people.includes(v.id) ? "selected" : "")
+            )}
+            {step === 1 && (
+              <>
+                <label className="upload-zone">
+                  <UploadCloud size={32} />
+                  <strong>Chọn bản ghi âm từ thiết bị</strong>
+                  <span>WAV, MP3, M4A, AAC, FLAC, OGG, WEBM, MP4</span>
+                  <small>
+                    Tối đa {caps.data?.max_sources || 8} nguồn ·{" "}
+                    {size(caps.data?.max_upload_bytes || 1e9)}/file
+                  </small>
+                  <input
+                    type="file"
+                    multiple
+                    accept=".wav,.mp3,.m4a,.aac,.flac,.ogg,.webm,.mp4"
+                    onChange={(e) => setFiles(Array.from(e.target.files || []))}
+                  />
+                </label>
+                {files.map((f, i) => (
+                  <div className="file-row" key={i}>
+                    <AudioLines size={18} />
+                    <span>
+                      {f.name}
+                      <small>{size(f.size)}</small>
+                    </span>
+                    <Button
+                      variant="ghost"
+                      onClick={() =>
+                        setFiles(files.filter((_, index) => index !== i))
                       }
-                      key={v.id}
                     >
-                      <input
-                        type="checkbox"
-                        checked={people.includes(v.id)}
-                        onChange={(e) =>
-                          setPeople(
-                            e.target.checked
-                              ? [...people, v.id]
-                              : people.filter((id) => id !== v.id),
-                          )
-                        }
-                      />
-                      <span className="avatar">{v.name[0]}</span>
-                      <span>
-                        {v.name}
-                        <small>{v.samples.length} mẫu giọng</small>
-                      </span>
-                    </label>
-                  ))}
-              </div>
-              {!voices.data?.some((v) => v.state === "ready") && (
-                <Empty
-                  title="Chưa có hồ sơ giọng sẵn sàng"
-                  description="Bạn có thể tiếp tục. Người nói sẽ được rà soát theo cụm trong transcript."
-                  action={
-                    <Link className="text-link" to="/voices">
-                      Quản lý hồ sơ giọng ↗
-                    </Link>
-                  }
-                />
-              )}
-            </>
-          )}
-          {step === 3 && (
-            <div className="form-stack">
-              <label>
-                Mẫu biên bản
-                <select
-                  value={template}
-                  onChange={(e) => setTemplate(e.target.value)}
-                >
-                  <option value="">Chọn sau khi chép lời</option>
-                  {templates.data
-                    ?.filter((t) => t.state === "ready" && !t.needs_review)
-                    .map((t) => (
-                      <option value={t.id} key={t.id}>
-                        {t.name}
-                      </option>
-                    ))}
-                </select>
-              </label>
-              <div className="form-grid">
-                <label>
-                  Loại biên bản
-                  <select
-                    value={mode}
-                    onChange={(e) => setMode(e.target.value)}
-                  >
-                    <option value="detailed">Chi tiết · giữ đề mục mẫu</option>
-                    <option value="general">
-                      Tổng quát · chia mục theo nội dung
-                    </option>
-                  </select>
-                </label>
-                <label>
-                  Thể thức đầu ra
-                  <select
-                    value={
-                      format || caps.data?.preset.default_format || "nd30_2020"
-                    }
-                    onChange={(e) => setFormat(e.target.value)}
-                  >
-                    <option value="nd30_2020">Hành chính · Nghị định 30</option>
-                    <option value="hd05_2026">
-                      Tài liệu Đảng · Hướng dẫn 05
-                    </option>
-                  </select>
-                </label>
-              </div>
-              <div className="summary-box">
-                <h3>{title}</h3>
-                <p>
-                  {date || "Chưa đặt ngày"} · {location || "Chưa có địa điểm"}
-                </p>
-                <div className="row">
-                  <span>
-                    <AudioLines size={16} /> {files.length} nguồn ghi âm
-                  </span>
-                  <span>
-                    <Users size={16} /> {people.length} hồ sơ giọng
-                  </span>
-                </div>
-              </div>
-              <Notice tone="info">
-                Sau khi chép lời, bạn rà soát transcript và chọn “Tạo biên bản”.
-                Lựa chọn mẫu và thể thức ở đây được lưu cùng cuộc họp.
-              </Notice>
-              {!caps.data?.worker.online && (
-                <Notice>
-                  Worker chưa kết nối. Tác vụ sẽ chờ đến khi worker được khởi
-                  động.
+                      Bỏ
+                    </Button>
+                  </div>
+                ))}
+                {files.length > 8 && <Notice>Hãy chọn tối đa 8 file.</Notice>}
+                <Notice tone="info">
+                  Các nguồn phải ghi lại cùng một cuộc họp. Hệ thống sẽ đồng bộ
+                  và dung hợp âm thanh.
                 </Notice>
-              )}
-            </div>
-          )}
+              </>
+            )}
+            {step === 2 && (
+              <>
+                <p className="muted">
+                  Chọn hồ sơ giọng đã có để hỗ trợ nhận diện. Đoạn chưa xác định
+                  và đoạn nói chồng được hiển thị riêng.
+                </p>
+                <div className="person-grid">
+                  {voices.data
+                    ?.filter((v) => v.state === "ready")
+                    .map((v) => (
+                      <label
+                        className={
+                          "person-choice " +
+                          (people.includes(v.id) ? "selected" : "")
+                        }
+                        key={v.id}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={people.includes(v.id)}
+                          onChange={(e) =>
+                            setPeople(
+                              e.target.checked
+                                ? [...people, v.id]
+                                : people.filter((id) => id !== v.id),
+                            )
+                          }
+                        />
+                        <span className="avatar">{v.name[0]}</span>
+                        <span>
+                          {v.name}
+                          <small>{v.samples.length} mẫu giọng</small>
+                        </span>
+                      </label>
+                    ))}
+                </div>
+                {!voices.data?.some((v) => v.state === "ready") && (
+                  <Empty
+                    title="Chưa có hồ sơ giọng sẵn sàng"
+                    description="Bạn có thể tiếp tục. Người nói sẽ được rà soát theo cụm trong transcript."
+                    action={
+                      <Link className="text-link" to="/voices">
+                        Quản lý hồ sơ giọng ↗
+                      </Link>
+                    }
+                  />
+                )}
+              </>
+            )}
+            {step === 3 && (
+              <div className="form-stack">
+                <label>
+                  Mẫu biên bản
+                  <select
+                    value={template}
+                    onChange={(e) => setTemplate(e.target.value)}
+                  >
+                    <option value="">Chọn sau khi chép lời</option>
+                    {templates.data
+                      ?.filter((t) => t.state === "ready" && !t.needs_review)
+                      .map((t) => (
+                        <option value={t.id} key={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+                <div className="form-grid">
+                  <label>
+                    Loại biên bản
+                    <select
+                      value={mode}
+                      onChange={(e) => setMode(e.target.value)}
+                    >
+                      <option value="detailed">
+                        Chi tiết · giữ đề mục mẫu
+                      </option>
+                      <option value="general">
+                        Tổng quát · chia mục theo nội dung
+                      </option>
+                    </select>
+                  </label>
+                  <label>
+                    Thể thức đầu ra
+                    <select
+                      value={
+                        format ||
+                        caps.data?.preset.default_format ||
+                        "nd30_2020"
+                      }
+                      onChange={(e) => setFormat(e.target.value)}
+                    >
+                      <option value="nd30_2020">
+                        Hành chính · Nghị định 30
+                      </option>
+                      <option value="hd05_2026">
+                        Tài liệu Đảng · Hướng dẫn 05
+                      </option>
+                    </select>
+                  </label>
+                </div>
+                <div className="summary-box">
+                  <h3>{title}</h3>
+                  <p>
+                    {date || "Chưa đặt ngày"} · {location || "Chưa có địa điểm"}
+                  </p>
+                  <div className="row">
+                    <span>
+                      <AudioLines size={16} /> {files.length} nguồn ghi âm
+                    </span>
+                    <span>
+                      <Users size={16} /> {people.length} hồ sơ giọng
+                    </span>
+                  </div>
+                </div>
+                <Notice tone="info">
+                  Sau khi chép lời, bạn rà soát transcript và chọn “Tạo biên
+                  bản”. Lựa chọn mẫu và thể thức ở đây được lưu cùng cuộc họp.
+                </Notice>
+                {!caps.data?.worker.online && (
+                  <Notice>
+                    Worker chưa kết nối. Tác vụ sẽ chờ đến khi worker được khởi
+                    động.
+                  </Notice>
+                )}
+              </div>
+            )}
+          </div>
           <div className="wizard-footer">
             <Button
               variant="ghost"
               disabled={step === 0 || busy}
-              onClick={() => setStep(step - 1)}
+              onClick={() => goToStep(step - 1)}
             >
               <ChevronLeft size={16} />
               Quay lại
@@ -709,7 +736,7 @@ export function NewMeeting() {
                 disabled={
                   !title.trim() || files.length > 8 || people.length > 8
                 }
-                onClick={() => setStep(step + 1)}
+                onClick={() => goToStep(step + 1)}
               >
                 Tiếp tục
                 <ArrowRight size={16} />

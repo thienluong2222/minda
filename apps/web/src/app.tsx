@@ -370,7 +370,9 @@ function Shell() {
           </div>
         </header>
         <main className="page-content">
-          <Outlet />
+          <div key={location.pathname} className="route-motion">
+            <Outlet />
+          </div>
         </main>
         <footer className="app-footer">
           <span>Minda. · Meeting workspace</span>

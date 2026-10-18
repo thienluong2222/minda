@@ -184,5 +184,10 @@ Thêm `--template-id <id>` để kiểm bản xem trước mẫu. Với `--meeti
 `--template-id`, smoke yêu cầu có ảnh DOCX, kiểm tra ảnh đã giải mã được và
 chuyển qua toàn bộ trang; không coi trang rỗng hoặc “Chưa có bản xem trước” là đạt.
 
+Thêm `--check-motion` để kiểm chuyển động, polling giữ focus, chuyển bước,
+logo, hộp thoại và chế độ giảm chuyển động trên desktop/mobile. Với biên bản
+có ít nhất hai trang, kiểm thêm preview tải chậm và thử lại ảnh lỗi. Xem
+[chi tiết triển khai và kết quả](UI_MOTION_2026-10-18.md).
+
 Backend tests dùng MongoDB thật với database UUID riêng tự dọn. Test tài liệu
 cần các binary và OCR cache. Không chạy test vào database đang trình diễn.

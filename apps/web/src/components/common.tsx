@@ -18,7 +18,7 @@ import {
   FileText,
   LoaderCircle,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 export function useWork() {
@@ -173,7 +173,11 @@ export function Notice({
 }) {
   return (
     <div className={`notice ${tone}`}>
-      {tone === "success" ? <Check size={17} /> : <AlertCircle size={17} />}
+      {tone === "success" ? (
+        <Check className="confirmation-check" size={17} />
+      ) : (
+        <AlertCircle size={17} />
+      )}
       <div>{children}</div>
     </div>
   );
@@ -193,9 +197,24 @@ export function Modal({
   children: ReactNode;
   wide?: boolean;
 }) {
+  const opener = useRef<HTMLElement | null>(null);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={wide ? "modal-wide" : "modal-normal"}>
+      <DialogContent
+        className={wide ? "modal-wide" : "modal-normal"}
+        onOpenAutoFocus={() => {
+          opener.current =
+            document.activeElement instanceof HTMLElement
+              ? document.activeElement
+              : null;
+        }}
+        onCloseAutoFocus={(event) => {
+          if (opener.current?.isConnected) {
+            event.preventDefault();
+            opener.current.focus({ preventScroll: true });
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
@@ -221,6 +240,75 @@ export function DownloadLink({
     </a>
   );
 }
+function PreviewPage({
+  page,
+  source,
+  number,
+  ratio,
+  onRatio,
+  onRetry,
+}: {
+  page: Artifact;
+  source: string;
+  number: number;
+  ratio: number;
+  onRatio: (ratio: number) => void;
+  onRetry: () => void;
+}) {
+  const [status, setStatus] = useState<"loading" | "ready" | "error">(
+    "loading",
+  );
+  return (
+    <div
+      className="document-page-frame"
+      style={{ aspectRatio: ratio }}
+      aria-busy={status === "loading"}
+    >
+      <a
+        href={page.url}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={`Mở trang ${number} đầy đủ`}
+      >
+        <img
+          className={"document-page" + (status === "ready" ? " is-ready" : "")}
+          src={source}
+          alt={`Bản xem trước DOCX, trang ${number}`}
+          onLoad={(event) => {
+            const image = event.currentTarget;
+            if (image.naturalWidth && image.naturalHeight) {
+              onRatio(image.naturalWidth / image.naturalHeight);
+              setStatus("ready");
+            }
+          }}
+          onError={() => setStatus("error")}
+        />
+      </a>
+      {status !== "ready" && (
+        <div
+          className="document-page-placeholder"
+          role="status"
+          aria-live="polite"
+        >
+          {status === "error" ? (
+            <>
+              <AlertCircle size={20} />
+              <span>Không tải được trang xem trước.</span>
+              <Button variant="outline" size="sm" onClick={onRetry}>
+                Thử tải lại
+              </Button>
+            </>
+          ) : (
+            <>
+              <LoaderCircle className="animate-spin" size={20} />
+              <span>Đang tải trang {number}…</span>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 export function Preview({
   pages,
   download,
@@ -229,7 +317,16 @@ export function Preview({
   download?: Artifact;
 }) {
   const [index, setIndex] = useState(0);
+  const [ratio, setRatio] = useState(210 / 297);
+  const [retry, setRetry] = useState(0);
   const current = Math.min(index, Math.max(0, pages.length - 1));
+  const page = pages[current];
+  const imageSource = page
+    ? page.url +
+      (retry
+        ? `${page.url.includes("?") ? "&" : "?"}preview_retry=${retry}`
+        : "")
+    : "";
   return (
     <div className="document-preview">
       <div className="preview-toolbar">
@@ -260,14 +357,16 @@ export function Preview({
           </Button>
         </div>
       </div>
-      {pages[current] ? (
-        <a href={pages[current].url} target="_blank" rel="noreferrer">
-          <img
-            className="document-page"
-            src={pages[current].url}
-            alt={`Bản xem trước DOCX, trang ${current + 1}`}
-          />
-        </a>
+      {page ? (
+        <PreviewPage
+          key={imageSource}
+          page={page}
+          source={imageSource}
+          number={current + 1}
+          ratio={ratio}
+          onRatio={setRatio}
+          onRetry={() => setRetry((value) => value + 1)}
+        />
       ) : (
         <Empty
           title="Chưa có bản xem trước"

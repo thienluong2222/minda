@@ -634,17 +634,19 @@ export function Workspace() {
           );
         })}
       </nav>
-      {tab === "overview" ? (
-        <Overview meeting={meeting} />
-      ) : tab === "transcript" ? (
-        <TranscriptView meeting={meeting} />
-      ) : tab === "speakers" ? (
-        <TranscriptView meeting={meeting} people />
-      ) : tab === "minutes" ? (
-        <MinutesView meeting={meeting} />
-      ) : (
-        <HistoryView meeting={meeting} />
-      )}
+      <div key={tab} className="tab-motion">
+        {tab === "overview" ? (
+          <Overview meeting={meeting} />
+        ) : tab === "transcript" ? (
+          <TranscriptView meeting={meeting} />
+        ) : tab === "speakers" ? (
+          <TranscriptView meeting={meeting} people />
+        ) : tab === "minutes" ? (
+          <MinutesView meeting={meeting} />
+        ) : (
+          <HistoryView meeting={meeting} />
+        )}
+      </div>
     </>
   );
 }
