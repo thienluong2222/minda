@@ -1,4 +1,5 @@
 import re
+from typing import Literal
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile
 
@@ -9,8 +10,11 @@ from meeting_backend.infrastructure.artifacts.store import AUDIO_EXTENSIONS, Art
 from meeting_backend.infrastructure.mongodb.client import now, public
 from meeting_backend.modules.jobs.service import enqueue
 from meeting_backend.modules.meetings import service
+from meeting_backend.modules.meetings import timeline as timeline_service
 from meeting_backend.modules.meetings.repository import MeetingRepository
 from meeting_backend.modules.meetings.schemas import MeetingCreate, MeetingUpdate, Revision
+from meeting_backend.modules.meetings.timeline_schemas import TimelinePatch
+from meeting_pipeline.config import load_config
 
 router = APIRouter(prefix="/meetings", tags=["meetings"])
 
@@ -18,6 +22,9 @@ router = APIRouter(prefix="/meetings", tags=["meetings"])
 @router.get("")
 def list_meetings(
     q: str = "",
+    status: Literal[
+        "", "draft", "processing", "transcript_ready", "minutes_ready", "needs_review"
+    ] = "",
     trashed: bool = False,
     page: int = Query(1, ge=1),
     limit: int = Query(30, ge=1, le=100),
@@ -25,6 +32,16 @@ def list_meetings(
     mongo=Depends(database),
 ):
     query = {"owner_id": user["_id"], "trashed": trashed}
+    if status == "processing":
+        query["active_job"] = {"$ne": None}
+    elif status == "needs_review":
+        query["active_minutes_id"] = {"$ne": None}
+        query["$or"] = [
+            {"minutes_stale": True},
+            {"$expr": {"$ne": [{"$ifNull": ["$reviewed_version", None]}, "$active_minutes_id"]}},
+        ]
+    elif status:
+        query.update(state=status, active_job=None)
     if q:
         query["title"] = {"$regex": re.escape(q[:200]), "$options": "i"}
     return {
@@ -68,27 +85,67 @@ def update(
     return service.update(mongo, user, meeting_id, payload)
 
 
+@router.get("/{meeting_id}/timeline")
+def get_timeline(meeting_id: str, user=Depends(current_user), mongo=Depends(database)):
+    meeting = MeetingRepository(mongo).owned(meeting_id, user)
+    return timeline_service.view(mongo, meeting)
+
+
+@router.patch("/{meeting_id}/timeline")
+def patch_timeline(
+    meeting_id: str, payload: TimelinePatch, user=Depends(current_user), mongo=Depends(database)
+):
+    return timeline_service.patch(mongo, user, meeting_id, payload)
+
+
 @router.post("/{meeting_id}/sources", status_code=201)
 def upload_sources(
     meeting_id: str,
     files: list[UploadFile] = File(...),
     revision: int = Query(...),
+    track_id: str | None = Query(None),
+    timeline_mode: bool = Query(False),
     user=Depends(current_user),
     mongo=Depends(database),
 ):
     repo = MeetingRepository(mongo)
     meeting = repo.editable(meeting_id, user, revision)
     count = len(meeting.get("source_ids", []))
-    if not files or count + len(files) > mongo.settings.max_sources:
-        raise AppError("SOURCE_LIMIT", "Mỗi cuộc họp hỗ trợ từ 1 đến 8 nguồn âm thanh.", 422)
+    uses_timeline = meeting.get("timeline") is not None or timeline_mode or track_id is not None
+    file_limit = mongo.settings.max_source_files if uses_timeline else mongo.settings.max_sources
+    if not files or count + len(files) > file_limit:
+        raise AppError(
+            "SOURCE_LIMIT", f"Số file vượt giới hạn {file_limit} của chế độ hiện tại.", 422
+        )
+    assets = timeline_service.assets_for(mongo, meeting)
+    if track_id is not None:
+        layout = timeline_service.layout_for(meeting, assets)
+        if track_id not in {track["id"] for track in layout["tracks"]}:
+            raise AppError("TIMELINE_ITEM_NOT_FOUND", "Không tìm thấy hàng nguồn.", 422)
+    max_duration = load_config(mongo.settings.pipeline_config).audio.max_duration_seconds
     store = ArtifactStore(mongo)
     created = []
     uploaded = []
+    existing_artifacts = mongo.db.artifacts.find(
+        {
+            "_id": {"$in": [asset["artifact_id"] for asset in assets.values()]},
+            "owner_id": user["_id"],
+        }
+    )
+    total_bytes = sum(int(artifact.get("size_bytes") or 0) for artifact in existing_artifacts)
+    byte_limit = mongo.settings.max_sources * mongo.settings.max_upload_bytes
     try:
         for upload in files:
             artifact = store.upload(upload, user["_id"], AUDIO_EXTENSIONS, resource_id=meeting_id)
             uploaded.append(artifact)
-            metadata = probe_audio(store.resolve(artifact))
+            total_bytes += artifact["size_bytes"]
+            if total_bytes > byte_limit:
+                raise AppError(
+                    "SOURCE_STORAGE_LIMIT",
+                    "Tổng dung lượng audio cuộc họp vượt giới hạn.",
+                    413,
+                )
+            metadata = probe_audio(store.resolve(artifact), max_duration_seconds=max_duration)
             source = {
                 "_id": artifact["_id"],
                 "owner_id": user["_id"],
@@ -100,14 +157,22 @@ def upload_sources(
             }
             mongo.db.sources.insert_one(source)
             created.append(source)
-        result = repo.update(
+        changes = {
+            "state": "draft",
+            "transcript_stale": bool(meeting.get("active_transcript_id")),
+            "source_ids": meeting.get("source_ids", []) + [s["_id"] for s in created],
+        }
+        layout = timeline_service.append_assets(
             meeting,
-            {
-                "state": "draft",
-                "source_ids": meeting.get("source_ids", []) + [s["_id"] for s in created],
-            },
-            content_changed=True,
+            assets,
+            created,
+            mongo.settings,
+            track_id=track_id,
+            timeline_mode=timeline_mode,
         )
+        if layout is not None:
+            changes["timeline"] = layout
+        result = repo.update(meeting, changes, content_changed=True)
     except BaseException:
         for source in created:
             mongo.db.sources.delete_one({"_id": source["_id"]})
@@ -132,12 +197,28 @@ def remove_source(
     source = mongo.db.sources.find_one({"_id": source_id, "meeting_id": meeting_id})
     if not source:
         raise AppError("NOT_FOUND", "Không tìm thấy nguồn.", 404)
+    if meeting.get("timeline") is not None and any(
+        clip["asset_id"] == source_id for clip in meeting["timeline"]["clips"]
+    ):
+        raise AppError(
+            "TIMELINE_ASSET_IN_USE",
+            "Hãy bỏ các đoạn dùng file này khỏi timeline trước.",
+            409,
+        )
+    changes = {
+        "state": "draft",
+        "transcript_stale": bool(meeting.get("active_transcript_id")),
+        "source_ids": [s for s in meeting.get("source_ids", []) if s != source_id],
+    }
+    if meeting.get("timeline") is not None:
+        layout = meeting["timeline"]
+        layout["unassigned_asset_ids"] = [
+            item for item in layout["unassigned_asset_ids"] if item != source_id
+        ]
+        changes["timeline"] = layout
     result = repo.update(
         meeting,
-        {
-            "state": "draft",
-            "source_ids": [s for s in meeting.get("source_ids", []) if s != source_id],
-        },
+        changes,
         content_changed=True,
     )
     mongo.audit(user["_id"], "source_removed", meeting_id, source_id=source_id)
@@ -151,8 +232,28 @@ def process(
     meeting = MeetingRepository(mongo).editable(meeting_id, user, payload.revision)
     if not meeting.get("source_ids"):
         raise AppError("NO_SOURCES", "Hãy tải âm thanh trước khi xử lý.", 422)
+    plan = timeline_service.processing_input(
+        meeting,
+        timeline_service.assets_for(mongo, meeting),
+        mongo.settings,
+    )
+    if (
+        sum(bool(track["clip_ids"]) for track in plan["timeline"]["tracks"])
+        > load_config(mongo.settings.pipeline_config).audio.max_sources
+    ):
+        raise AppError("SOURCE_LIMIT", "Số nguồn vượt giới hạn cấu hình pipeline.", 422)
     return enqueue(
-        mongo, user, "meeting", meeting_id, "transcribe", expected_revision=payload.revision
+        mongo,
+        user,
+        "meeting",
+        meeting_id,
+        "transcribe",
+        payload={
+            "source_ids": plan["source_ids"],
+            "input_timeline": plan["timeline"],
+            "input_timeline_hash": plan["timeline_hash"],
+        },
+        expected_revision=payload.revision,
     )
 
 

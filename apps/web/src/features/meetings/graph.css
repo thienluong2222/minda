@@ -1,0 +1,482 @@
+.meeting-graph {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  color: var(--minda-text);
+}
+.meeting-graph-header,
+.meeting-graph-title,
+.meeting-graph-summary,
+.meeting-graph-stage-toolbar,
+.meeting-graph-stage-footer,
+.meeting-graph-inspector-heading,
+.meeting-graph-pager,
+.meeting-graph-list-caption,
+.meeting-graph-legend,
+.meeting-graph-trail {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.meeting-graph-header,
+.meeting-graph-stage-toolbar,
+.meeting-graph-stage-footer,
+.meeting-graph-inspector-heading,
+.meeting-graph-list-caption {
+  justify-content: space-between;
+}
+.meeting-graph-header {
+  flex-wrap: wrap;
+}
+.meeting-graph-title h2 {
+  font-size: 20px;
+  letter-spacing: -0.5px;
+}
+.meeting-graph-title p,
+.meeting-graph-version label {
+  color: var(--minda-text-secondary);
+  font-size: 12px;
+}
+.meeting-graph-mark {
+  display: grid;
+  place-items: center;
+  background: #edf4ef;
+  color: #3f7159;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+}
+.meeting-graph-version {
+  display: grid;
+  gap: 4px;
+  max-width: 100%;
+}
+.meeting-graph select {
+  min-width: 0;
+  width: auto;
+  height: 34px;
+  border: 1px solid var(--minda-border);
+  border-radius: 8px;
+  background: white;
+  padding: 5px 26px 5px 9px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--minda-text);
+  max-width: 100%;
+}
+.meeting-graph-summary {
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--minda-text-secondary);
+  gap: 20px;
+}
+.meeting-graph-summary strong {
+  color: var(--minda-text);
+  font-size: 16px;
+  margin-right: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.meeting-graph-summary-note {
+  margin-left: auto;
+}
+.meeting-graph-shell {
+  display: grid;
+  grid-template-columns: 220px minmax(260px, 1fr) 290px;
+  border: 1px solid var(--minda-border);
+  border-radius: 16px;
+  background: white;
+  overflow: hidden;
+  min-height: 620px;
+}
+.meeting-graph-browser {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-right: 1px solid var(--minda-border);
+  max-height: 720px;
+}
+.meeting-graph-browser-tools {
+  padding: 18px 14px 10px;
+  display: grid;
+  gap: 12px;
+}
+.meeting-graph-browser h3,
+.meeting-graph-inspector h3 {
+  font-size: 13px;
+}
+.meeting-graph-search {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+.meeting-graph-search > svg {
+  position: absolute;
+  left: 10px;
+  color: var(--minda-text-secondary);
+  pointer-events: none;
+}
+.meeting-graph .meeting-graph-search input[data-slot="input"] {
+  padding-left: 30px !important;
+  font-size: 12px;
+  min-width: 0;
+  background: var(--minda-canvas);
+}
+.meeting-graph-list-caption {
+  font-size: 11px;
+  color: var(--minda-text-secondary);
+}
+.meeting-graph-node-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 2px 8px 12px;
+  min-height: 100px;
+  scrollbar-width: thin;
+}
+.meeting-graph-node-row {
+  width: 100%;
+  display: grid;
+  text-align: left;
+  gap: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 11px 9px;
+  border-radius: 9px;
+  margin: 2px 0;
+  font: inherit;
+}
+.meeting-graph-node-row:hover {
+  background: var(--minda-canvas);
+}
+.meeting-graph-node-row.active {
+  background: var(--minda-accent-soft);
+  border-color: #a3bfae;
+}
+.meeting-graph-node-row > span:last-child {
+  font-size: 12px;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.meeting-graph-kind {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--minda-text-secondary);
+  font-size: 11px;
+  font-weight: 550;
+}
+.meeting-graph-kind i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+.meeting-graph-stage {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #fbfcfd;
+}
+.meeting-graph-stage-toolbar {
+  padding: 12px;
+  background: white;
+  border-bottom: 1px solid var(--minda-border);
+  min-height: 59px;
+  flex-wrap: wrap;
+}
+.meeting-graph-trail {
+  min-width: 0;
+  flex: 1;
+  gap: 5px;
+}
+.meeting-graph-trail > span {
+  font-size: 12px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.meeting-graph-canvas-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 480px;
+  background-image: radial-gradient(#cbd5e1 0.7px, transparent 0.7px);
+  background-size: 18px 18px;
+}
+.meeting-graph-canvas {
+  position: absolute;
+  inset: 0;
+}
+.meeting-graph-controls {
+  position: absolute;
+  left: 16px;
+  bottom: 44px;
+  display: grid;
+  gap: 4px;
+}
+.meeting-graph-controls button {
+  background: white;
+  box-shadow: 0 2px 5px #1d233008;
+}
+.meeting-graph-hint {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 11px;
+  pointer-events: none;
+  text-align: center;
+  color: #64748b;
+  font-size: 10px;
+}
+.meeting-graph-stage-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 480px;
+  padding: 20px;
+  flex: 1;
+}
+.meeting-graph-stage-footer {
+  border-top: 1px solid var(--minda-border);
+  padding: 8px 12px;
+  background: white;
+  font-size: 11px;
+  color: var(--minda-text-secondary);
+  flex-wrap: wrap;
+}
+.meeting-graph-pager {
+  gap: 5px;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  padding: 4px;
+}
+.meeting-graph-limits {
+  padding: 8px 14px;
+  font-size: 11px;
+  background: #fff8e8;
+  color: #8a5b12;
+  border-top: 1px solid #f0dfba;
+}
+.meeting-graph-inspector {
+  border-left: 1px solid var(--minda-border);
+  max-height: 720px;
+  overflow: auto;
+  min-width: 0;
+  scrollbar-width: thin;
+}
+.meeting-graph-inspector-heading {
+  min-height: 59px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--minda-border);
+  background: white;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.meeting-graph-inspector-empty {
+  padding: 46px 24px;
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+  color: var(--minda-text-secondary);
+}
+.meeting-graph-inspector-empty > svg {
+  color: #91a69a;
+}
+.meeting-graph-inspector-empty h3 {
+  color: var(--minda-text);
+  font-size: 15px;
+}
+.meeting-graph-inspector-empty p {
+  font-size: 12px;
+  line-height: 1.8;
+}
+.meeting-graph-inspector-body {
+  display: grid;
+  gap: 16px;
+  padding: 20px 18px;
+}
+.meeting-graph-full-text {
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.meeting-graph-review {
+  color: #8a5b12;
+  background: #fff8e8;
+  padding: 6px 9px;
+  font-size: 11px;
+  border-radius: 6px;
+}
+.meeting-graph-extraction {
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--minda-text-secondary);
+}
+.meeting-graph-properties {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 12px;
+  font-size: 12px;
+  margin: 0;
+}
+.meeting-graph-properties dt {
+  color: var(--minda-text-secondary);
+}
+.meeting-graph-properties dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.meeting-graph-source {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 2px solid #94a3b8;
+  background: #f8fafc;
+  border-radius: 0 8px 8px 0;
+}
+.meeting-graph-source > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 10px;
+  margin-bottom: 7px;
+}
+.meeting-graph-source p {
+  font-size: 12px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.meeting-graph-evidence {
+  display: grid;
+  gap: 9px;
+}
+.meeting-graph-evidence h4 {
+  font-size: 12px;
+  font-weight: 600;
+}
+.meeting-graph-evidence h4 span {
+  color: var(--minda-text-secondary);
+  margin-left: 6px;
+}
+.meeting-graph-evidence-card {
+  border: 1px solid var(--minda-border);
+  border-radius: 9px;
+  background: #f8fafc;
+  padding: 11px;
+  text-align: left;
+  font: inherit;
+}
+.meeting-graph-evidence-card:hover {
+  border-color: #9cb2a7;
+}
+.meeting-graph-evidence-card > span {
+  font-size: 10px;
+  color: var(--minda-text-secondary);
+}
+.meeting-graph-evidence-card p {
+  font-size: 12px;
+  line-height: 1.7;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+.meeting-graph-legend {
+  font-size: 11px;
+  color: var(--minda-text-secondary);
+  flex-wrap: wrap;
+  gap: 10px 20px;
+}
+.meeting-graph-legend > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.meeting-graph-solid,
+.meeting-graph-dashed {
+  display: inline-block;
+  width: 22px;
+  border-top: 2px solid #94a3b8;
+}
+.meeting-graph-dashed {
+  border-top: 2px dashed #a78bca;
+}
+.meeting-graph-legend p {
+  margin-left: auto;
+}
+.meeting-graph-no-results {
+  padding: 18px 10px;
+  color: var(--minda-text-secondary);
+  font-size: 12px;
+}
+.meeting-graph :is(button, select, input):focus-visible {
+  outline: 2px solid var(--minda-focus);
+  outline-offset: 3px;
+}
+@media (max-width: 1280px) {
+  .meeting-graph-shell {
+    grid-template-columns: 190px minmax(260px, 1fr);
+  }
+  .meeting-graph-inspector {
+    grid-column: 1 / -1;
+    border-left: 0;
+    border-top: 1px solid var(--minda-border);
+    max-height: 420px;
+  }
+  .meeting-graph-inspector-empty {
+    padding: 20px;
+    gap: 8px;
+  }
+  .meeting-graph-inspector-empty > svg {
+    display: none;
+  }
+}
+@media (max-width: 680px) {
+  .meeting-graph-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .meeting-graph-browser {
+    border-right: 0;
+    border-bottom: 1px solid var(--minda-border);
+    max-height: 280px;
+  }
+  .meeting-graph-node-list {
+    display: flex;
+    gap: 5px;
+    min-height: 100px;
+    overflow-x: auto;
+  }
+  .meeting-graph-node-row {
+    min-width: 170px;
+    max-width: 200px;
+    flex: 0 0 auto;
+    align-content: start;
+  }
+  .meeting-graph-browser-tools {
+    padding: 12px;
+    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .meeting-graph-browser-tools h3,
+  .meeting-graph-list-caption {
+    grid-column: 1 / -1;
+  }
+  .meeting-graph-canvas-wrap,
+  .meeting-graph-stage-empty {
+    min-height: 400px;
+  }
+  .meeting-graph-summary-note {
+    margin-left: 0;
+  }
+  .meeting-graph-legend p {
+    margin-left: 0;
+  }
+}

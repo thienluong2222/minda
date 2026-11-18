@@ -9,7 +9,9 @@ from pathlib import Path
 from typing import Any
 
 from meeting_pipeline.minutes.evidence_retrieval import IndexedTurn
+from meeting_pipeline.minutes.meeting_record import build_meeting_record
 from meeting_pipeline.minutes.model_runtime import ModelRuntimeError, ModelSession
+from meeting_pipeline.minutes.schema_mapper import reconcile_schema_structure
 from meeting_pipeline.minutes.schemas import (
     DocGraph,
     FactStatus,
@@ -18,7 +20,7 @@ from meeting_pipeline.minutes.schemas import (
     SemanticFieldType,
     TemplateSchema,
 )
-from meeting_pipeline.minutes.structured_fields import structured_facts
+from meeting_pipeline.minutes.structured_fields import scoped_field_ids, structured_facts
 from meeting_pipeline.minutes.text_engine import (
     BODY_TYPES,
     FREE_TYPES,
@@ -37,7 +39,15 @@ def run_text_models(
     options: MinutesOptions,
     *,
     preserve_schema: bool = False,
+    meeting_metadata: dict[str, Any] | None = None,
 ) -> tuple[TemplateSchema, list[MeetingFact], dict[str, Any]]:
+    if options.graph_enabled:
+        from meeting_pipeline.minutes.graph_pipeline import run_graph_text_models
+
+        return run_graph_text_models(
+            schema, graph, turns, run_dir, options, preserve_schema=preserve_schema,
+            meeting_metadata=meeting_metadata,
+        )
     start = time.perf_counter()
     units, excluded = make_units(turns)
     if not units:
@@ -49,13 +59,29 @@ def run_text_models(
         engine = TextEngine(session, run_dir.name)
         corrections = engine.correct(units) if options.correct_transcript else []
         if not preserve_schema:
-            schema = engine.map_schema(schema, graph)
+            fixed_ids = scoped_field_ids(schema, graph)
+            fixed_fields = {
+                field.field_id: field for field in schema.fields if field.field_id in fixed_ids
+            }
+            mapped = engine.map_schema(schema, graph)
+            schema = mapped.model_copy(
+                update={
+                    "fields": [fixed_fields.get(field.field_id, field) for field in mapped.fields]
+                }
+            )
+        schema = reconcile_schema_structure(schema, graph)
+        scoped = scoped_field_ids(schema, graph)
         # Multiple dotted lines for the same body slot are continuation capacity,
         # not separate requests to duplicate the whole discussion.
         effective = []
         seen = set()
         suppressed = []
         for field in schema.fields:
+            if (
+                field.field_id in scoped
+                or anchors[field.anchor_id].placeholder_type == PlaceholderType.FIXED_TEXT
+            ):
+                continue
             anchor = anchors[field.anchor_id]
             key = (field.semantic_type, field.raw_label, field.section)
             if field.semantic_type in FREE_TYPES and anchor.is_multiline and key in seen:
@@ -83,7 +109,9 @@ def run_text_models(
         model_facts = engine.extract_fields(
             working, graph, turns, units, general_body=body.field_id if body else None
         )
-        facts_by_id = {f.field_id: f for f in structured_facts(schema, graph, turns, run_dir.name)}
+        facts_by_id = {f.field_id: f for f in structured_facts(
+            schema, graph, turns, run_dir.name, meeting_metadata=meeting_metadata
+        )}
         facts_by_id.update({f.field_id: f for f in model_facts})
         topics: dict[str, Any] | None = None
         if body is not None:
@@ -97,9 +125,10 @@ def run_text_models(
                 )
             facts_by_id[body_fact.field_id] = body_fact
             written = {
-                item["unit_ids"][0]: item["text"]
+                uid: item["text"]
                 for section in topics["sections"]
                 for item in section["items"]
+                for uid in item["unit_ids"]
             }
             decision_turns = {
                 u.turn_id
@@ -158,8 +187,11 @@ def run_text_models(
             "calls": session.calls,
             "warnings": engine.warnings,
             "excluded_turns": excluded,
+            "excluded_units": topics.get("excluded_units", []) if topics else [],
             "unit_count": len(units),
-            "processed_turn_ids": list(dict.fromkeys(u.turn_id for u in units)),
+            "processed_turn_ids": list(
+                dict.fromkeys(tid for unit in units for tid in (unit.turn_ids or [unit.turn_id]))
+            ),
             "continuation_fields": suppressed,
             "body_field_id": body.field_id if body and options.mode == "general" else None,
             "wall_sec": round(time.perf_counter() - start, 3),
@@ -174,6 +206,7 @@ def run_text_models(
                 "Cần kiểm tra câu cố định này trước khi sử dụng biên bản."
             )
     payloads = {
+        "meeting_record.json": build_meeting_record(turns, run_dir.name),
         "corrections.json": corrections,
         "corrected_transcript.json": [
             {

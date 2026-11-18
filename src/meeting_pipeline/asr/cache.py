@@ -14,10 +14,37 @@ from typing import Any
 
 import numpy as np
 
-from meeting_pipeline.adapters.phowhisper_asr import AsrResult
+from meeting_pipeline.adapters.phowhisper_asr import ASR_DECODING_POLICY_VERSION, AsrResult
+from meeting_pipeline.config import AsrConfig
 from meeting_pipeline.domain.transcription import TimedWord
 
 logger = logging.getLogger(__name__)
+
+
+def decoding_fingerprint(config: AsrConfig) -> dict[str, Any]:
+    """Raw cached acceptance depends on decoding and quality checks, not audio alone."""
+    return {
+        "policy_version": ASR_DECODING_POLICY_VERSION,
+        "mlx_policy_version": "single_window_alignment_v1",
+        **config.model_dump(
+            include={
+                "runtime",
+                "auto_backend",
+                "mlx_model_dir",
+                "language",
+                "max_new_tokens_per_second",
+                "min_new_tokens",
+                "max_new_tokens",
+                "max_decode_attempts",
+                "max_words_per_second",
+                "max_consecutive_token_repeats",
+                "max_consecutive_ngram_repeats",
+                "max_consecutive_punctuation",
+                "min_compression_ratio",
+                "timestamp_tolerance_seconds",
+            }
+        ),
+    }
 
 
 def compute_asr_cache_key(

@@ -156,7 +156,13 @@ class Runner:
 
                 torch.set_num_threads(2)
                 (transcribe if kind == "transcribe" else enroll_voice)(context)
-            elif kind in {"generate_minutes", "edit_facts", "format_minutes", "restore_minutes"}:
+            elif kind in {
+                "generate_minutes",
+                "edit_facts",
+                "format_minutes",
+                "restore_minutes",
+                "revise_minutes_outline",
+            }:
                 from meeting_backend.integrations.minutes_pipeline import run_minutes
 
                 run_minutes(context)

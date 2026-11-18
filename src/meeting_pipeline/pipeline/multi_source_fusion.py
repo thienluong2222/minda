@@ -13,13 +13,20 @@ import re
 import uuid
 import zipfile
 from collections.abc import Callable
+from dataclasses import replace
+from itertools import pairwise
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import soundfile as sf
 
-from meeting_pipeline.adapters.audio_io import decode_mono, probe_audio, sha256_file
+from meeting_pipeline.adapters.audio_io import (
+    decode_mono,
+    probe_audio,
+    sha256_file,
+    validate_audio_duration,
+)
 from meeting_pipeline.adapters.phowhisper_asr import BaseAsrAdapter, PhoWhisperAsrAdapter
 from meeting_pipeline.adapters.pyannote_segmentation import PyannoteSegmentationAdapter
 from meeting_pipeline.application.speakers import SpeakerProfileInput
@@ -28,10 +35,12 @@ from meeting_pipeline.asr.boundary_words import (
     DecodedChunk,
     reconcile_internal_chunks,
 )
-from meeting_pipeline.asr.cache import AsrCache
+from meeting_pipeline.asr.cache import AsrCache, decoding_fingerprint
 from meeting_pipeline.asr.segment_asr import (
     transcribe_turn_adaptive,
 )
+from meeting_pipeline.audio.coverage import covers
+from meeting_pipeline.audio.signal_fusion import ASR_AUDIO_INPUT_ID, AUDIO_FUSION_METHOD
 from meeting_pipeline.audio.synchronization import (
     extract_shared_meeting_segments,
     synchronize_multi_source_audio,
@@ -66,8 +75,9 @@ from meeting_pipeline.speaker.clustering import (
     TurnAssignment,
 )
 from meeting_pipeline.speaker.encoder import (
+    DEFAULT_SPEAKER_MODEL_ID,
+    DEFAULT_SPEAKER_MODEL_REVISION,
     BaseSpeakerEncoder,
-    ECAPAEncoder,
     create_speaker_encoder,
 )
 from meeting_pipeline.speaker.source_quality import SpeakerFusionPolicy
@@ -107,13 +117,13 @@ def _normalized_weights(scores: dict[str, float], temperature: float = 1.0) -> d
 
 
 class _MultiSourceSpeakerAssigner:
-    """Assign enrolled speakers from a quality-weighted ECAPA embedding."""
+    """Assign enrolled speakers from a quality-weighted speaker embedding."""
 
     def __init__(self, config: PipelineConfig, profiles: list[SpeakerProfileInput]) -> None:
         self.config = config
         self.profiles = profiles
         self.sample_rate = config.audio.analysis_sample_rate
-        self.encoder = ECAPAEncoder(
+        self.encoder = create_speaker_encoder(
             model_id=str(config.identity["model_id"]),
             revision=str(config.identity["model_revision"]),
             cache_dir=config.paths.model_cache_dir,
@@ -179,7 +189,7 @@ class _MultiSourceSpeakerAssigner:
                     "speaker_match_score": best_score,
                     "speaker_top_candidates": candidates,
                     "identity_decision_reason": (
-                        f"multi_source_ecapa: score={best_score:.3f}, margin={actual_margin:.3f}"
+                        f"multi_source_cosine: score={best_score:.3f}, margin={actual_margin:.3f}"
                     ),
                     "warnings": [],
                     "source_weights": weights,
@@ -285,12 +295,19 @@ class MultiSourceFusionPipeline:
         source_paths: list[Path],
         speaker_profiles: list[SpeakerProfileInput] | None = None,
         fusion_method: str = "F5_RULE_WEIGHTED",
+        *,
+        prepared_sync: dict[str, dict[str, Any]] | None = None,
+        hard_boundaries: list[float] | None = None,
+        include_archive: bool = True,
     ) -> Path:
         if not 1 <= len(source_paths) <= self.config.audio.max_sources:
             raise ValueError("Source count is outside configured limits")
         requested_method = fusion_method.strip().upper()
         if requested_method not in SUPPORTED_FUSION_METHODS:
             raise ValueError(f"Unsupported fusion method: {fusion_method}")
+        audio_fusion = self.config.asr.fusion_mode == "audio"
+        if audio_fusion:
+            requested_method = AUDIO_FUSION_METHOD
 
         run_id = str(uuid.uuid4())
         meeting_id = _safe_id(meeting_name)
@@ -299,9 +316,21 @@ class MultiSourceFusionPipeline:
             (run_dir / directory).mkdir(parents=True, exist_ok=True)
 
         decoded, source_rows = self._decode_sources(source_paths, run_dir)
-        aligned, sync_metadata, reference_source = synchronize_multi_source_audio(
-            decoded, sample_rate=self.sample_rate
-        )
+        if prepared_sync is None:
+            aligned, sync_metadata, reference_source = synchronize_multi_source_audio(
+                decoded, sample_rate=self.sample_rate, **self.config.sync.model_dump()
+            )
+        else:
+            if set(prepared_sync) != set(decoded):
+                raise ValueError("Prepared timeline sources do not match rendered audio")
+            aligned, sync_metadata = decoded, prepared_sync
+            reference_source = max(
+                decoded,
+                key=lambda sid: sum(
+                    b - a for a, b in sync_metadata[sid]["valid_coverage_intervals"]
+                ),
+            )
+        hard_boundaries = sorted(set(hard_boundaries or []))
         for source_id, signal in aligned.items():
             sf.write(run_dir / "aligned" / f"{source_id}.wav", signal, self.sample_rate)
 
@@ -391,6 +420,32 @@ class MultiSourceFusionPipeline:
                 reference_source,
                 duration_sec,
             )
+        if prepared_sync is not None:
+            # Split at capture/clock/annotation boundaries before identity and ASR.
+            # Nothing is bridged through an unrecorded interval.
+            split_turns = []
+            for original_turn in turns:
+                points = [
+                    original_turn.start_sec,
+                    *[
+                        value
+                        for value in hard_boundaries
+                        if original_turn.start_sec < value < original_turn.end_sec
+                    ],
+                    original_turn.end_sec,
+                ]
+                for part, (start, end) in enumerate(pairwise(points)):
+                    if not any(covers(meta, start, end) for meta in sync_metadata.values()):
+                        continue
+                    split_turns.append(
+                        replace(
+                            original_turn,
+                            turn_id=f"{original_turn.turn_id}-part-{part}",
+                            start_sec=start,
+                            end_sec=end,
+                        )
+                    )
+            turns = split_turns
         _write_json(
             run_dir / "speaker_turns.json",
             {
@@ -418,7 +473,7 @@ class MultiSourceFusionPipeline:
             if self.clusterer is None:
                 if self.speaker_encoder is None:
                     encoder_model_id = str(
-                        self.config.identity.get("model_id", "speechbrain/spkrec-ecapa-voxceleb")
+                        self.config.identity.get("model_id", DEFAULT_SPEAKER_MODEL_ID)
                     )
                     encoder_type = (
                         "wespeaker" if "wespeaker" in encoder_model_id.lower() else "ecapa"
@@ -426,7 +481,11 @@ class MultiSourceFusionPipeline:
                     self.speaker_encoder = create_speaker_encoder(
                         encoder_type=encoder_type,
                         model_id=encoder_model_id,
-                        revision=str(self.config.identity.get("model_revision", "")),
+                        revision=str(
+                            self.config.identity.get(
+                                "model_revision", DEFAULT_SPEAKER_MODEL_REVISION
+                            )
+                        ),
                         cache_dir=self.config.paths.model_cache_dir,
                     )
                 cluster_thresh = float(
@@ -484,6 +543,7 @@ class MultiSourceFusionPipeline:
             max_merge_gap_sec=getattr(self.config.asr, "max_merge_gap_seconds", 0.6),
             max_core_sec=getattr(self.config.asr, "target_core_seconds", 22.0),
             enabled=getattr(self.config.asr, "safe_turn_merging", True),
+            hard_boundaries=hard_boundaries,
         )
         merged_turns = split_merged_turns_for_asr(
             merged_turns,
@@ -516,7 +576,9 @@ class MultiSourceFusionPipeline:
             },
         )
 
-        learned_model = self._load_learned_model()
+        learned_model = (
+            self._load_learned_model() if requested_method == "F6_LEARNED" else LearnedFusionModel()
+        )
         actual_method = requested_method
         run_warnings: list[str] = []
         if requested_method == "F6_LEARNED" and not learned_model.is_fitted:
@@ -575,6 +637,12 @@ class MultiSourceFusionPipeline:
                 for index in range(turn_idx, group_end):
                     chunk = merged_turns[index]
                     prev_b, next_b = asr_context_boundaries(merged_turns, index)
+                    before = [value for value in hard_boundaries if value <= chunk.start_sec + 1e-6]
+                    after = [value for value in hard_boundaries if value >= chunk.end_sec - 1e-6]
+                    if before:
+                        prev_b = max(prev_b if prev_b is not None else 0, max(before))
+                    if after:
+                        next_b = min(next_b if next_b is not None else float("inf"), min(after))
                     decoded_chunk = transcribe_turn_adaptive(
                         meeting_id=meeting_id,
                         turn_id=chunk.turn_id,
@@ -592,12 +660,18 @@ class MultiSourceFusionPipeline:
                         internal_start=index > turn_idx,
                         internal_end=index < group_end - 1,
                         asr_chunk_group_id=chunk.asr_chunk_group_id,
+                        asr_input_path=(
+                            run_dir / "clips" / "asr_input" / f"{chunk.turn_id}.wav"
+                            if audio_fusion
+                            else None
+                        ),
                     )
                     decoded_turns[index] = decoded_chunk
                     group_chunks.append(decoded_chunk)
                 reconcile_internal_chunks(group_chunks)
             hypotheses, routing_meta = decoded_turns.pop(turn_idx)
-            self._write_boundary_context_clips(run_dir, hypotheses, routing_meta, aligned)
+            if not audio_fusion:
+                self._write_boundary_context_clips(run_dir, hypotheses, routing_meta, aligned)
 
             segment = MeetingSegment(
                 meeting_id=meeting_id,
@@ -607,11 +681,19 @@ class MultiSourceFusionPipeline:
                 overlap=False,
             )
             turn_warnings = list(turn.warnings)
-            agreement = self._apply_cross_source_agreement(hypotheses)
-            bins = build_confusion_network(hypotheses)
-            fused_text, word_decisions = self._fuse(
-                actual_method, hypotheses, bins, learned_model, reference_source
-            )
+            if audio_fusion:
+                prepared = hypotheses.get(ASR_AUDIO_INPUT_ID)
+                fused_text = (
+                    prepared.text if prepared and prepared.asr_status == "transcribed" else ""
+                )
+                agreement: dict[str, float | None] = {}
+                word_decisions: list[dict[str, Any]] = []
+            else:
+                agreement = self._apply_cross_source_agreement(hypotheses)
+                bins = build_confusion_network(hypotheses)
+                fused_text, word_decisions = self._fuse(
+                    actual_method, hypotheses, bins, learned_model, reference_source
+                )
             final_item = build_final_timeline_item(
                 meeting_id=meeting_id,
                 segment=segment,
@@ -624,6 +706,10 @@ class MultiSourceFusionPipeline:
                 output_clips_dir=run_dir / "clips" / "evidence",
                 sample_rate=self.sample_rate,
             )
+            if audio_fusion:
+                final_item.primary_source_id = routing_meta["audio_fusion"].get(
+                    "reference_source_id", "unknown"
+                )
             audio_scores = {
                 source_id: hypothesis.audio_quality_score
                 for source_id, hypothesis in hypotheses.items()
@@ -640,8 +726,8 @@ class MultiSourceFusionPipeline:
 
             if identity_method == "mfcc_knn":
                 primary_src = final_item.primary_source_id
-                s_idx = int(turn.start_sec * self.sample_rate)
-                e_idx = int(turn.end_sec * self.sample_rate)
+                s_idx = round(turn.start_sec * self.sample_rate)
+                e_idx = round(turn.end_sec * self.sample_rate)
                 sig_to_use = aligned.get(primary_src, next(iter(aligned.values())))
                 primary_wave = sig_to_use[s_idx:e_idx]
                 raw_speaker = mfcc_assigner.assign_speaker(primary_wave, excluded)
@@ -706,6 +792,11 @@ class MultiSourceFusionPipeline:
             timeline_row["speaker_count"] = turn.speaker_count
             timeline_row["asr_chunk_group_id"] = turn.asr_chunk_group_id
             timeline_row["routing_metadata"] = routing_meta
+            if audio_fusion:
+                input_clip = run_dir / "clips" / "asr_input" / f"{turn.turn_id}.wav"
+                timeline_row["asr_input_artifact_id"] = (
+                    input_clip.relative_to(run_dir).as_posix() if input_clip.is_file() else None
+                )
             provenance = timeline_row["provenance"]
             if isinstance(provenance, dict):
                 provenance["turn_id"] = turn.turn_id
@@ -775,6 +866,7 @@ class MultiSourceFusionPipeline:
             run_warnings,
             profiles,
             vad_backend,
+            include_archive=include_archive,
         )
         return run_dir
 
@@ -825,10 +917,14 @@ class MultiSourceFusionPipeline:
             return self._overlap_encoder.encode(wave)
 
         # A clean neighboring turn can anchor a stream to an established local track.
-        self._overlap_encoder = getattr(self, "_overlap_encoder", None) or ECAPAEncoder(
-            model_id=str(self.config.identity["model_id"]),
-            revision=str(self.config.identity["model_revision"]),
-            cache_dir=self.config.paths.model_cache_dir,
+        self._overlap_encoder = (
+            getattr(self, "_overlap_encoder", None)
+            or self.speaker_encoder
+            or create_speaker_encoder(
+                model_id=str(self.config.identity["model_id"]),
+                revision=str(self.config.identity["model_revision"]),
+                cache_dir=self.config.paths.model_cache_dir,
+            )
         )
         base_id = next(iter(separated))
         base = separated[base_id]
@@ -999,15 +1095,16 @@ class MultiSourceFusionPipeline:
         checksums: set[str] = set()
         for index, source_path in enumerate(source_paths, start=1):
             metadata = probe_audio(source_path)
-            if metadata.duration_sec > self.config.audio.max_duration_seconds:
-                raise ValueError(f"Source exceeds duration limit: {source_path.name}")
+            validate_audio_duration(metadata, self.config.audio.max_duration_seconds)
             checksum = sha256_file(source_path)
             if checksum in checksums:
                 raise ValueError(f"Duplicate source content: {source_path.name}")
             checksums.add(checksum)
             source_id = f"source-{index}"
             decoded_path = run_dir / "decoded" / f"{source_id}.wav"
-            decode_mono(source_path, decoded_path, self.sample_rate)
+            sample_count = decode_mono(source_path, decoded_path, self.sample_rate)
+            if sample_count / self.sample_rate > self.config.audio.max_duration_seconds:
+                raise ValueError(f"Decoded source exceeds duration limit: {source_path.name}")
             waveform, sample_rate = sf.read(decoded_path, dtype="float32")
             if sample_rate != self.sample_rate or waveform.ndim != 1:
                 raise ValueError("Decoded audio violates mono/rate contract")
@@ -1215,6 +1312,8 @@ class MultiSourceFusionPipeline:
 
         source_evidence = []
         for source_id, hypothesis in hypotheses.items():
+            if source_id == ASR_AUDIO_INPUT_ID:
+                continue
             spk_ev = speaker_ev_by_source.get(source_id, {})
             spk_weight = spk_ev.get("identity_weight", identity_weights.get(source_id, 0.0))
             spk_eligible = spk_ev.get("is_eligible")
@@ -1343,6 +1442,7 @@ class MultiSourceFusionPipeline:
         warnings: list[str],
         profiles: list[SpeakerProfileInput],
         vad_backend: str,
+        include_archive: bool = True,
     ) -> None:
         coverage_sources = []
         for row in source_rows:
@@ -1378,6 +1478,19 @@ class MultiSourceFusionPipeline:
         )
         _write_json(run_dir / "fusion_decisions.json", {"segments": decisions})
         _write_json(run_dir / "timeline.json", {"schema_version": "2.0", "segments": timeline})
+        routes = [
+            route for row in hypotheses if isinstance(route := row.get("routing_metadata"), dict)
+        ]
+        preparations = [route.get("audio_fusion", {}) for route in routes]
+        asr_input_stats = {
+            "adapter_calls": sum(route.get("adapter_calls", 0) for route in routes),
+            "cache_hits": sum(route.get("cache_hits", 0) for route in routes),
+            "mixed_chunks": sum(p.get("method") == "delay_and_sum" for p in preparations),
+            "single_mic_chunks": sum(p.get("method") == "best_mic" for p in preparations),
+            "denoise_fallback_chunks": sum(
+                bool(p.get("denoise_fallback_reason")) for p in preparations
+            ),
+        }
         _write_json(
             run_dir / "manifest.json",
             {
@@ -1385,7 +1498,13 @@ class MultiSourceFusionPipeline:
                 "run_id": run_id,
                 "meeting_name": meeting_name,
                 "status": "succeeded",
-                "backend": "multi_source_transcript_fusion",
+                "backend": (
+                    "multi_source_audio_fusion"
+                    if self.config.asr.fusion_mode == "audio"
+                    else "multi_source_transcript_fusion"
+                ),
+                "asr_fusion_mode": self.config.asr.fusion_mode,
+                "asr_input_stats": asr_input_stats,
                 "fusion_method_requested": requested_method,
                 "fusion_method_used": actual_method,
                 "identity_method_used": str(self.config.identity.get("method", "prototype_cosine")),
@@ -1433,6 +1552,7 @@ class MultiSourceFusionPipeline:
                 "models": {
                     "asr": f"{self.config.asr.model_id}@{self.config.asr.model_revision}",
                     "asr_decoding": {
+                        **decoding_fingerprint(self.config.asr),
                         "language": self.config.asr.language,
                         "max_new_tokens_per_second": self.config.asr.max_new_tokens_per_second,
                         "min_new_tokens": self.config.asr.min_new_tokens,
@@ -1440,6 +1560,17 @@ class MultiSourceFusionPipeline:
                         "max_decode_attempts": self.config.asr.max_decode_attempts,
                     },
                     "asr_word_boundary_policy": BOUNDARY_POLICY_VERSION,
+                    "asr_context_policy": "recording_edges_and_safe_speaker_merge_v2",
+                    "asr_verification_policy": (
+                        "single_mono_input"
+                        if self.config.asr.fusion_mode == "audio"
+                        else "bounded_cross_source_micro_fragment_v2"
+                    ),
+                    "fusion_confidence_policy": (
+                        "no_transcript_votes"
+                        if self.config.asr.fusion_mode == "audio"
+                        else "keep_primary_if_unmeasured_v1"
+                    ),
                     "speaker": (
                         f"{self.config.identity['model_id']}@"
                         f"{self.config.identity['model_revision']}"
@@ -1462,14 +1593,17 @@ class MultiSourceFusionPipeline:
                     "timeline.json",
                     "aligned/",
                     "clips/evidence/",
+                    *(["clips/asr_input/"] if self.config.asr.fusion_mode == "audio" else []),
                     "exports/",
                 ],
             },
         )
-        self._write_exports(run_dir, timeline)
+        self._write_exports(run_dir, timeline, include_archive=include_archive)
 
     @staticmethod
-    def _write_exports(run_dir: Path, timeline: list[dict[str, object]]) -> None:
+    def _write_exports(
+        run_dir: Path, timeline: list[dict[str, object]], include_archive: bool = True
+    ) -> None:
         exports = run_dir / "exports"
         _write_json(exports / "result.json", {"schema_version": "2.0", "segments": timeline})
         with (exports / "result.csv").open("w", encoding="utf-8", newline="") as handle:
@@ -1513,6 +1647,8 @@ class MultiSourceFusionPipeline:
                     f"{float(str(segment['end_sec'])):.2f}] "
                     f"{segment.get('speaker_label') or 'Unknown'}: {text}\n"
                 )
+        if not include_archive:
+            return
         with zipfile.ZipFile(exports / "result.zip", "w", zipfile.ZIP_DEFLATED) as archive:
             for path in sorted(run_dir.rglob("*")):
                 if path.is_file() and path != exports / "result.zip":

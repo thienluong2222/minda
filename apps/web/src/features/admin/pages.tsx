@@ -1,3 +1,4 @@
+import { pageSize, useListPage } from "@/lib/pagination";
 import { useUser } from "@/app";
 import {
   Action,
@@ -10,6 +11,7 @@ import {
   Notice,
   PageHeader,
   Panel,
+  Pagination,
   Status,
   useWork,
 } from "@/components/common";
@@ -17,9 +19,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AdminMeetings } from "@/features/admin/meetings";
-import { Templates } from "@/features/templates/pages";
+import { NotFoundState } from "@/features/auth/pages";
+import {
+  TemplateDetail,
+  TemplateNewPage,
+  Templates,
+} from "@/features/templates/pages";
 import { api, formatDate, labels, patch, post, size } from "@/lib/api";
+import { useUnsavedForm } from "@/lib/unsaved";
 import type {
+  PaginatedResponse,
   Artifact,
   AdminUser,
   Audit,
@@ -30,7 +39,7 @@ import type {
   Preset,
   User,
 } from "@/lib/types";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   ArrowUpRight,
   Database,
@@ -86,18 +95,26 @@ function Overview() {
               <strong>{d.meetings}</strong>
               <small>Xem cuộc họp toàn hệ thống →</small>
             </Link>
-            <div className="stat-card">
+            <Link
+              className="stat-card"
+              to="/admin/jobs?state=queued"
+              aria-label="Xem tác vụ đang chờ"
+            >
               <span>Tác vụ đang chờ</span>
               <strong>{d.jobs.queued || 0}</strong>
-              <small>{d.jobs.running || 0} tác vụ đang chạy</small>
-            </div>
-            <div className="stat-card">
+              <small>{d.jobs.running || 0} tác vụ đang chạy →</small>
+            </Link>
+            <Link
+              className="stat-card"
+              to="/admin/jobs?state=failed"
+              aria-label="Xem tác vụ cần kiểm tra"
+            >
               <span>Tác vụ cần kiểm tra</span>
               <strong>
                 {(d.jobs.failed || 0) + (d.jobs.interrupted || 0)}
               </strong>
-              <small>Tổng lịch sử lỗi & gián đoạn</small>
-            </div>
+              <small>Xem lịch sử lỗi & gián đoạn →</small>
+            </Link>
           </div>
           <div className="two-columns">
             <Panel
@@ -154,10 +171,16 @@ function Overview() {
                   </strong>
                 </div>
               </div>
-              <Link className="panel-link" to="/admin/models">
-                Kiểm tra cấu hình
-                <ArrowUpRight size={16} />
-              </Link>
+              <div className="row wrap" style={{ gap: 16 }}>
+                <Link className="panel-link" to="/admin/system">
+                  Tình trạng hệ thống chi tiết
+                  <ArrowUpRight size={16} />
+                </Link>
+                <Link className="panel-link" to="/admin/models">
+                  Kiểm tra cấu hình model
+                  <ArrowUpRight size={16} />
+                </Link>
+              </div>
             </Panel>
           </div>
         </>
@@ -171,18 +194,30 @@ function Overview() {
 function UsersPage() {
   const self = useUser();
   const [params, setParams] = useSearchParams();
+  const page = Math.max(1, Number(params.get("page")) || 1);
+  const limit = pageSize(params.get("limit"));
   const currentSearch = params.get("q") || "";
   const [search, setSearch] = useState(currentSearch);
   useEffect(() => setSearch(currentSearch), [currentSearch]);
   const data = useQuery({
     queryKey: ["admin-users", params.toString()],
-    queryFn: () => api<AdminUser[]>("/admin/users?" + params.toString()),
+    queryFn: () =>
+      api<PaginatedResponse<AdminUser>>(
+        "/admin/users?" +
+          new URLSearchParams({
+            ...Object.fromEntries(params),
+            page: String(page),
+            limit: String(limit),
+          }),
+      ),
+    placeholderData: keepPreviousData,
     refetchInterval: 5000,
   });
   function filter(key: string, value: string) {
     const next = new URLSearchParams(params);
     if (value) next.set(key, value);
     else next.delete(key);
+    if (key !== "page") next.delete("page");
     setParams(next);
   }
   const [open, setOpen] = useState(false),
@@ -190,7 +225,8 @@ function UsersPage() {
     [name, setName] = useState(""),
     [password, setPassword] = useState(""),
     [role, setRole] = useState("user"),
-    [reset, setReset] = useState<User | null>(null);
+    [reset, setReset] = useState<User | null>(null),
+    [detailUser, setDetailUser] = useState<AdminUser | null>(null);
   const { busy, work } = useWork();
   return (
     <>
@@ -261,7 +297,7 @@ function UsersPage() {
         <ErrorBox error={data.error} />
         {data.isPending ? (
           <Loading />
-        ) : data.data?.length === 0 ? (
+        ) : data.data?.items.length === 0 ? (
           <Empty
             title="Không tìm thấy tài khoản"
             description="Thử bỏ bộ lọc hoặc thay đổi từ khóa."
@@ -280,7 +316,7 @@ function UsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {data.data?.map((u) => (
+                {data.data?.items.map((u) => (
                   <tr key={u.id}>
                     <td>
                       <strong>{u.display_name}</strong>
@@ -337,6 +373,13 @@ function UsersPage() {
                     <td>{formatDate(u.created_at)}</td>
                     <td>
                       <div className="row wrap">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDetailUser(u)}
+                        >
+                          Chi tiết
+                        </Button>
                         <Action
                           variant="ghost"
                           disabled={u.id === self.id}
@@ -367,9 +410,15 @@ function UsersPage() {
         ) : null}
         {data.data && (
           <p className="small muted">
-            {data.data.length} tài khoản phù hợp · Tự cập nhật mỗi 5 giây
+            {data.data.total} tài khoản phù hợp · Tự cập nhật mỗi 5 giây
           </p>
         )}
+        <Pagination
+          page={page}
+          limit={limit}
+          total={data.data?.total || 0}
+          onPageChange={(next) => filter("page", String(next))}
+        />
       </Panel>
       <Modal
         open={open}
@@ -471,33 +520,157 @@ function UsersPage() {
           </Button>
         </form>
       </Modal>
+      <Modal
+        open={!!detailUser}
+        onOpenChange={(v) => !v && setDetailUser(null)}
+        title={"Chi tiết tài khoản · " + (detailUser?.display_name || "")}
+        description="Thông tin định danh, quyền hạn và số lượng cuộc họp thuộc sở hữu của tài khoản."
+      >
+        {detailUser && (
+          <div className="stack">
+            <div className="detail-list">
+              <div>
+                <span>Tên hiển thị</span>
+                <strong>{detailUser.display_name}</strong>
+              </div>
+              <div>
+                <span>Tên đăng nhập</span>
+                <code>@{detailUser.username}</code>
+              </div>
+              <div>
+                <span>Mã định danh (ID)</span>
+                <code>{detailUser.id}</code>
+              </div>
+              <div>
+                <span>Vai trò</span>
+                <strong>
+                  {detailUser.role === "admin" ? "Quản trị viên" : "Người dùng"}
+                </strong>
+              </div>
+              <div>
+                <span>Trạng thái</span>
+                <Status
+                  value={
+                    detailUser.active ? "account_active" : "account_locked"
+                  }
+                />
+              </div>
+              <div>
+                <span>Cuộc họp đang hoạt động</span>
+                <strong>{detailUser.meeting_count} cuộc họp</strong>
+              </div>
+              <div>
+                <span>Cuộc họp trong thùng rác</span>
+                <strong>{detailUser.trashed_meeting_count} cuộc họp</strong>
+              </div>
+              <div>
+                <span>Ngày tạo</span>
+                <span>{formatDate(detailUser.created_at)}</span>
+              </div>
+            </div>
+            <div className="row between wrap" style={{ marginTop: 12 }}>
+              <Button asChild variant="outline" size="sm">
+                <Link
+                  to={`/admin/meetings?owner_id=${detailUser.id}`}
+                  onClick={() => setDetailUser(null)}
+                >
+                  Xem cuộc họp của tài khoản này
+                </Link>
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setDetailUser(null)}
+              >
+                Đóng
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </>
   );
 }
 
 function JobsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paging = useListPage();
   const data = useQuery({
-    queryKey: ["admin-jobs"],
-    queryFn: () => api<Job[]>("/admin/jobs"),
+    queryKey: ["admin-jobs", searchParams.toString()],
+    queryFn: () =>
+      api<PaginatedResponse<Job>>(
+        "/admin/jobs?" +
+          new URLSearchParams({
+            ...Object.fromEntries(searchParams),
+            page: String(paging.page),
+            limit: String(paging.limit),
+          }),
+      ),
+    placeholderData: keepPreviousData,
     refetchInterval: 3000,
   });
-  const [state, setState] = useState(""),
+  const caps = useQuery({
+    queryKey: ["capabilities"],
+    queryFn: () => api<Capabilities>("/capabilities"),
+    refetchInterval: 10000,
+  });
+  const [state, setState] = useState(searchParams.get("state") || ""),
+    [search, setSearch] = useState(searchParams.get("q") || ""),
     [log, setLog] = useState<string | null>(null);
   const { work } = useWork();
+  useEffect(() => {
+    setState(searchParams.get("state") || "");
+    setSearch(searchParams.get("q") || "");
+  }, [searchParams]);
+  const filtered = data.data?.items || [];
   return (
     <>
       <PageHeader
         eyebrow="VẬN HÀNH"
         title="Tác vụ xử lý"
-        description="Theo dõi tối đa 200 tác vụ gần nhất của tất cả tài khoản."
+        description="Theo dõi, tìm kiếm và điều phối tác vụ của tất cả tài khoản theo từng trang."
       />
+      {caps.data && !caps.data.worker.online && (
+        <Notice tone="warning">
+          <strong>Worker xử lý nền hiện chưa phản hồi heartbeat:</strong> Các
+          tác vụ có trạng thái <code>running</code> trong cơ sở dữ liệu không
+          đồng nghĩa tiến trình đang chạy. Hãy kiểm tra dịch vụ worker hoặc xem{" "}
+          <Link to="/admin/system" className="green-text">
+            Tình trạng hệ thống
+          </Link>
+          .
+        </Notice>
+      )}
       <Panel>
         <div className="list-toolbar">
-          <h2>Hàng đợi & lịch sử</h2>
+          <div className="search-field" style={{ maxWidth: 340 }}>
+            <Search size={17} />
+            <input
+              aria-label="Tìm kiếm tác vụ hệ thống"
+              placeholder="Lọc theo người dùng, loại tác vụ, mã ID…"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                const next = new URLSearchParams(searchParams);
+                if (e.target.value.trim()) next.set("q", e.target.value.trim());
+                else next.delete("q");
+                next.delete("page");
+                setSearchParams(next);
+              }}
+            />
+          </div>
           <select
             aria-label="Lọc tác vụ theo trạng thái"
             value={state}
-            onChange={(e) => setState(e.target.value)}
+            onChange={(e) => {
+              setState(e.target.value);
+              const next = new URLSearchParams(searchParams);
+              if (e.target.value) next.set("state", e.target.value);
+              else next.delete("state");
+              next.delete("page");
+              setSearchParams(next);
+            }}
           >
             <option value="">Tất cả trạng thái</option>
             {[
@@ -513,6 +686,7 @@ function JobsPage() {
               </option>
             ))}
           </select>
+          <span className="small muted">{data.data?.total || 0} tác vụ</span>
         </div>
         <ErrorBox error={data.error} />
         <div className="table-scroll">
@@ -527,82 +701,91 @@ function JobsPage() {
               </tr>
             </thead>
             <tbody>
-              {data.data
-                ?.filter((j) => !state || j.state === state)
-                .map((j) => (
-                  <tr key={j.id}>
-                    <td>
-                      <strong>{labels[j.kind] || j.kind}</strong>
-                      <small>
-                        {j.owner_name} · {j.id.slice(0, 8)}
+              {filtered.map((j) => (
+                <tr key={j.id}>
+                  <td>
+                    <strong>{labels[j.kind] || j.kind}</strong>
+                    <small>
+                      {j.owner_name} · {j.id.slice(0, 8)}
+                    </small>
+                  </td>
+                  <td>
+                    <Status value={j.state} />
+                  </td>
+                  <td>
+                    <p className="task-detail-text">{j.stage}</p>
+                    {j.error && (
+                      <small className="warning-text">{j.error.message}</small>
+                    )}
+                    {j.state === "interrupted" && (
+                      <small className="warning-text">
+                        Worker bị gián đoạn giữa chừng. Không hỗ trợ tiếp tục từ
+                        checkpoint; hãy chọn &ldquo;Thử lại&rdquo; để chạy lại
+                        từ đầu.
                       </small>
-                    </td>
-                    <td>
-                      <Status value={j.state} />
-                    </td>
-                    <td>
-                      <p>{j.stage}</p>
-                      {j.error && (
-                        <small className="warning-text">
-                          {j.error.message}
-                        </small>
-                      )}
-                    </td>
-                    <td>
-                      {formatDate(j.created_at)}
-                      <small>
-                        {j.completed_at
-                          ? "Kết thúc: " + formatDate(j.completed_at)
-                          : j.started_at
-                            ? "Bắt đầu: " + formatDate(j.started_at)
-                            : "Chưa chạy"}
-                      </small>
-                    </td>
-                    <td>
-                      <div className="column-actions">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            void work(
-                              async () =>
-                                setLog(
-                                  (
-                                    await api<{ text: string }>(
-                                      "/admin/jobs/" + j.id + "/log",
-                                    )
-                                  ).text,
-                                ),
-                              "",
-                            )
-                          }
+                    )}
+                  </td>
+                  <td>
+                    {formatDate(j.created_at)}
+                    <small>
+                      {j.completed_at
+                        ? "Kết thúc: " + formatDate(j.completed_at)
+                        : j.started_at
+                          ? "Bắt đầu: " + formatDate(j.started_at)
+                          : "Chưa chạy"}
+                    </small>
+                  </td>
+                  <td>
+                    <div className="column-actions">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          void work(
+                            async () =>
+                              setLog(
+                                (
+                                  await api<{ text: string }>(
+                                    "/admin/jobs/" + j.id + "/log",
+                                  )
+                                ).text,
+                              ),
+                            "",
+                          )
+                        }
+                      >
+                        Xem log
+                      </Button>
+                      {["queued", "running"].includes(j.state) ? (
+                        <Action
+                          disabled={j.cancel_requested}
+                          run={() => post("/admin/jobs/" + j.id + "/cancel")}
                         >
-                          Xem log
-                        </Button>
-                        {["queued", "running"].includes(j.state) ? (
-                          <Action
-                            disabled={j.cancel_requested}
-                            run={() => post("/admin/jobs/" + j.id + "/cancel")}
-                          >
-                            Hủy
-                          </Action>
-                        ) : ["failed", "interrupted", "cancelled"].includes(
-                            j.state,
-                          ) ? (
-                          <Action
-                            run={() => post("/admin/jobs/" + j.id + "/retry")}
-                          >
-                            Thử lại
-                          </Action>
-                        ) : null}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          Hủy
+                        </Action>
+                      ) : ["failed", "interrupted", "cancelled"].includes(
+                          j.state,
+                        ) ? (
+                        <Action
+                          run={() => post("/admin/jobs/" + j.id + "/retry")}
+                        >
+                          Thử lại
+                        </Action>
+                      ) : null}
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
-        {!data.data?.length && <Empty title="Chưa có tác vụ xử lý" />}
+        {!data.data?.items.length && <Empty title="Chưa có tác vụ xử lý" />}
+        <Pagination
+          page={paging.page}
+          limit={paging.limit}
+          total={data.data?.total || 0}
+          onPageChange={(next) => paging.update("page", String(next))}
+        />
       </Panel>
       <Modal
         wide
@@ -620,6 +803,8 @@ function JobsPage() {
 function PresetForm({ preset }: { preset: Preset }) {
   const [value, setValue] = useState(preset);
   const { busy, work } = useWork();
+  const isDirty = JSON.stringify(value) !== JSON.stringify(preset);
+  const unsaved = useUnsavedForm(isDirty && !busy);
   return (
     <form
       className="form-stack"
@@ -634,19 +819,9 @@ function PresetForm({ preset }: { preset: Preset }) {
         }, "Đã lưu preset mới");
       }}
     >
+      {unsaved.dialog}
+      <h3>Tùy chọn thường dùng</h3>
       <div className="form-grid">
-        <label>
-          Nhận diện người nói
-          <select
-            value={value.identity_method}
-            onChange={(e) =>
-              setValue({ ...value, identity_method: e.target.value })
-            }
-          >
-            <option value="prototype_cosine">ECAPA · prototype cosine</option>
-            <option value="mfcc_knn">MFCC · KNN</option>
-          </select>
-        </label>
         <label>
           ASR Whisper
           <select
@@ -659,41 +834,19 @@ function PresetForm({ preset }: { preset: Preset }) {
             <option value="medium">Medium</option>
           </select>
         </label>
+        <label>
+          Thể thức mặc định
+          <select
+            value={value.default_format}
+            onChange={(e) =>
+              setValue({ ...value, default_format: e.target.value })
+            }
+          >
+            <option value="nd30_2020">Nghị định 30/2020</option>
+            <option value="hd05_2026">Hướng dẫn 05/2026</option>
+          </select>
+        </label>
       </div>
-      <label>
-        Phương pháp dung hợp
-        <select
-          value={value.fusion_method}
-          onChange={(e) =>
-            setValue({ ...value, fusion_method: e.target.value })
-          }
-        >
-          {[
-            "F1_BEST_SEGMENT",
-            "F3_ROVER",
-            "F4_ASR_WEIGHTED",
-            "F5_RULE_WEIGHTED",
-            "F5_RULE_WEIGHTED_CORRECTED",
-            "F6_LEARNED",
-          ].map((f) => (
-            <option value={f} key={f}>
-              {f}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        Thể thức mặc định
-        <select
-          value={value.default_format}
-          onChange={(e) =>
-            setValue({ ...value, default_format: e.target.value })
-          }
-        >
-          <option value="nd30_2020">Nghị định 30</option>
-          <option value="hd05_2026">Hướng dẫn 05</option>
-        </select>
-      </label>
       <label className="check-label">
         <input
           type="checkbox"
@@ -702,13 +855,121 @@ function PresetForm({ preset }: { preset: Preset }) {
         />
         Mặc định bật LLM khi tạo biên bản
       </label>
+
+      <fieldset className="graph-settings">
+        <legend>Đồ thị và văn phong biên bản</legend>
+        <label className="check-label">
+          <input
+            type="checkbox"
+            role="switch"
+            checked={value.minutes_graph_enabled ?? true}
+            onChange={(e) =>
+              setValue({ ...value, minutes_graph_enabled: e.target.checked })
+            }
+          />
+          Tạo biên bản bằng đồ thị cuộc họp
+        </label>
+        <p className="muted small">
+          Áp dụng cho mọi cuộc họp mới, bất kể thời lượng. Đồ thị lưu chủ đề, sự
+          kiện và căn cứ lời chép để biên tập và đối chiếu.
+        </p>
+        <label className="check-label">
+          <input
+            type="checkbox"
+            role="switch"
+            checked={value.minutes_style_learning_enabled ?? true}
+            onChange={(e) =>
+              setValue({
+                ...value,
+                minutes_style_learning_enabled: e.target.checked,
+              })
+            }
+          />
+          Học văn phong từ biên bản đã được xác nhận
+        </label>
+        <p className="muted small">
+          Chỉ học từ chỉnh sửa đã được người dùng rà soát và xác nhận. Hồ sơ văn
+          phong tách riêng khỏi dữ kiện cuộc họp.
+        </p>
+      </fieldset>
+
+      <h3 style={{ marginTop: 12 }}>Cấu hình thuật toán nâng cao</h3>
+      <div className="form-grid">
+        <label>
+          Nhận diện người nói
+          <select
+            value={value.identity_method}
+            onChange={(e) =>
+              setValue({ ...value, identity_method: e.target.value })
+            }
+          >
+            <option value="prototype_cosine">
+              WeSpeaker · prototype cosine
+            </option>
+            <option value="mfcc_knn">MFCC · KNN</option>
+          </select>
+        </label>
+        <label>
+          Luồng dung hợp cho ASR
+          <select
+            value={value.asr_fusion_mode ?? "transcript"}
+            onChange={(e) =>
+              setValue({
+                ...value,
+                asr_fusion_mode:
+                  e.target.value === "audio" ? "audio" : "transcript",
+              })
+            }
+          >
+            <option value="transcript">Dung hợp văn bản sau ASR</option>
+            <option value="audio">Gộp âm thanh trước ASR</option>
+          </select>
+          <small>Áp dụng cho các tác vụ tạo sau khi lưu.</small>
+        </label>
+        <label>
+          Phương pháp dung hợp văn bản
+          <select
+            value={value.fusion_method}
+            disabled={value.asr_fusion_mode === "audio"}
+            onChange={(e) =>
+              setValue({ ...value, fusion_method: e.target.value })
+            }
+          >
+            {[
+              "F1_BEST_SEGMENT",
+              "F3_ROVER",
+              "F4_ASR_WEIGHTED",
+              "F5_RULE_WEIGHTED",
+              "F5_RULE_WEIGHTED_CORRECTED",
+              "F6_LEARNED",
+            ].map((f) => (
+              <option value={f} key={f}>
+                {f}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
       <Notice tone="info">
-        Mỗi tác vụ lưu một bản preset tại lúc xếp hàng. Thay đổi ở đây áp dụng
-        cho tác vụ mới.
+        Mỗi tác vụ lưu một bản chụp (snapshot) preset tại thời điểm xếp hàng.
+        Thay đổi ở đây chỉ áp dụng cho các tác vụ mới được tạo sau khi lưu.
       </Notice>
-      <Button disabled={busy} type="submit">
-        Lưu cấu hình · revision {value.revision}
-      </Button>
+      <div className="row wrap">
+        {isDirty && (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={busy}
+            onClick={() => setValue(preset)}
+          >
+            Hoàn tác
+          </Button>
+        )}
+        <Button disabled={busy} type="submit">
+          Lưu cấu hình · revision {value.revision}
+        </Button>
+      </div>
     </form>
   );
 }
@@ -789,19 +1050,21 @@ function ModelsPage() {
 }
 
 function BackupsPage() {
+  const paging = useListPage();
   const jobs = useQuery({
-    queryKey: ["admin-jobs"],
-    queryFn: () => api<Job[]>("/admin/jobs"),
+    queryKey: ["admin-jobs", "backups", paging.page, paging.limit],
+    queryFn: () =>
+      api<PaginatedResponse<Job>>(
+        `/admin/jobs?kind=backup_system,restore_system&page=${paging.page}&limit=${paging.limit}`,
+      ),
+    placeholderData: keepPreviousData,
     refetchInterval: 3000,
   });
   const [selected, setSelected] = useState<Artifact | null>(null),
     [confirm, setConfirm] = useState(false);
   const { busy, work } = useWork();
   const own = useUser();
-  const entries =
-    jobs.data?.filter((j) =>
-      ["backup_system", "restore_system"].includes(j.kind),
-    ) || [];
+  const entries = jobs.data?.items || [];
   return (
     <>
       <PageHeader
@@ -921,6 +1184,12 @@ function BackupsPage() {
           </div>
         ))}
         {!entries.length && <Empty title="Chưa có bản sao lưu" />}
+        <Pagination
+          page={paging.page}
+          limit={paging.limit}
+          total={jobs.data?.total || 0}
+          onPageChange={(next) => paging.update("page", String(next))}
+        />
       </Panel>
       <Modal
         open={confirm}
@@ -946,25 +1215,35 @@ function BackupsPage() {
 }
 
 function AuditPage() {
+  const paging = useListPage();
   const data = useQuery({
-    queryKey: ["audit"],
-    queryFn: () => api<Audit[]>("/admin/audit"),
+    queryKey: ["audit", paging.params.toString()],
+    queryFn: () =>
+      api<PaginatedResponse<Audit>>(
+        "/admin/audit?" +
+          new URLSearchParams({
+            ...Object.fromEntries(paging.params),
+            page: String(paging.page),
+            limit: String(paging.limit),
+          }),
+      ),
+    placeholderData: keepPreviousData,
     refetchInterval: 5000,
   });
-  const [search, setSearch] = useState("");
+  const search = paging.params.get("q") || "";
   return (
     <>
       <PageHeader
         eyebrow="TRUY VẾT"
         title="Nhật ký hệ thống"
-        description="300 sự kiện gần nhất: thay đổi tài khoản, tài nguyên, phiên bản và tác vụ."
+        description="Tra cứu lịch sử thay đổi tài khoản, tài nguyên, phiên bản và tác vụ theo từng trang."
       />
       <Panel>
         <Input
           placeholder="Lọc theo thao tác, mã tài nguyên…"
           aria-label="Lọc nhật ký"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => paging.update("q", e.target.value)}
         />
         <ErrorBox error={data.error} />
         <div className="table-scroll">
@@ -978,37 +1257,42 @@ function AuditPage() {
               </tr>
             </thead>
             <tbody>
-              {data.data
-                ?.filter((e) =>
-                  JSON.stringify(e)
-                    .toLowerCase()
-                    .includes(search.toLowerCase()),
-                )
-                .map((e) => (
-                  <tr key={e.id}>
-                    <td>{formatDate(e.created_at)}</td>
-                    <td>{e.action}</td>
-                    <td>
-                      <code>{e.owner_id.slice(0, 8)}</code>
-                    </td>
-                    <td>
-                      <code>{e.resource_id}</code>
-                      <JsonDetails value={e.details} />
-                    </td>
-                  </tr>
-                ))}
+              {data.data?.items.map((e) => (
+                <tr key={e.id}>
+                  <td>{formatDate(e.created_at)}</td>
+                  <td>{e.action}</td>
+                  <td>
+                    <code>{e.owner_id.slice(0, 8)}</code>
+                  </td>
+                  <td>
+                    <code>{e.resource_id}</code>
+                    <JsonDetails value={e.details} />
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
+        <Pagination
+          page={paging.page}
+          limit={paging.limit}
+          total={data.data?.total || 0}
+          onPageChange={(next) => paging.update("page", String(next))}
+        />
       </Panel>
     </>
   );
 }
 
 function ExperimentsPage() {
+  const paging = useListPage();
   const data = useQuery({
-    queryKey: ["experiments"],
-    queryFn: () => api<Experiment[]>("/admin/experiments"),
+    queryKey: ["experiments", paging.page, paging.limit],
+    queryFn: () =>
+      api<PaginatedResponse<Experiment>>(
+        `/admin/experiments?page=${paging.page}&limit=${paging.limit}`,
+      ),
+    placeholderData: keepPreviousData,
   });
   const meetings = useQuery({
     queryKey: ["evaluation-meetings"],
@@ -1099,8 +1383,8 @@ function ExperimentsPage() {
         </Panel>
         <Panel title="Các lần đánh giá">
           <ErrorBox error={data.error} />
-          {data.data?.length ? (
-            data.data.map((e) => (
+          {data.data?.items.length ? (
+            data.data.items.map((e) => (
               <div className="experiment-card" key={e.id}>
                 <h3>{e.name}</h3>
                 <p className="muted small">
@@ -1131,9 +1415,230 @@ function ExperimentsPage() {
               description="Cần văn bản tham chiếu thực để tính các chỉ số."
             />
           )}
+          <Pagination
+            page={paging.page}
+            limit={paging.limit}
+            total={data.data?.total || 0}
+            onPageChange={(next) => paging.update("page", String(next))}
+          />
         </Panel>
       </div>
     </>
+  );
+}
+
+function SystemStatusPage() {
+  const overview = useQuery({
+    queryKey: ["admin-overview"],
+    queryFn: () =>
+      api<{
+        users: number;
+        meetings: number;
+        jobs: Record<string, number>;
+        disk: { free_bytes: number; total_bytes: number };
+        capabilities: Capabilities;
+        database: string;
+      }>("/admin/overview"),
+    refetchInterval: 5000,
+  });
+  const health = useQuery({
+    queryKey: ["system-health"],
+    queryFn: () =>
+      api<{ status: string; database: string; api_version: string }>("/health"),
+    refetchInterval: 10000,
+  });
+
+  if (overview.isPending) {
+    return <Loading label="Đang kiểm tra tình trạng hệ thống…" />;
+  }
+  if (overview.error) {
+    return (
+      <ErrorBox
+        error={overview.error as Error}
+        onRetry={() => void overview.refetch()}
+      />
+    );
+  }
+
+  const d = overview.data!;
+  const caps = d.capabilities;
+  const usedBytes = Math.max(0, d.disk.total_bytes - d.disk.free_bytes);
+  const usedPct =
+    d.disk.total_bytes > 0
+      ? Math.round((usedBytes / d.disk.total_bytes) * 100)
+      : 0;
+
+  return (
+    <div className="page-container--list">
+      <PageHeader
+        eyebrow="VẬN HÀNH"
+        title="Tình trạng hệ thống"
+        description="Kiểm tra tiến trình worker heartbeat, hàng đợi xử lý, công cụ OCR/xem trước tài liệu, bộ nhớ đệm model và dung lượng lưu trữ."
+        action={
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              void overview.refetch();
+              void health.refetch();
+            }}
+          >
+            <RefreshCw size={15} />
+            Làm mới trạng thái
+          </Button>
+        }
+      />
+
+      {!caps.worker.online && (
+        <Notice tone="warning">
+          <strong>Cảnh báo Worker (E06):</strong> Tiến trình worker hiện chưa
+          gửi heartbeat định kỳ. Trạng thái <code>running</code> lưu trong cơ sở
+          dữ liệu không đồng nghĩa tác vụ đang thực sự chạy. Khi worker khởi
+          động lại, các tác vụ hết hạn lease sẽ được chuyển sang trạng thái{" "}
+          <em>Gián đoạn (interrupted)</em> để quản trị viên hoặc người dùng bấm{" "}
+          <em>Thử lại</em>.
+        </Notice>
+      )}
+
+      <div className="two-columns">
+        <Panel
+          title="Dịch vụ lõi & Tiến trình Worker"
+          description="Trạng thái phản hồi của API, cơ sở dữ liệu MongoDB và worker xử lý nền."
+        >
+          <div className="detail-list">
+            <div>
+              <span>API & Kết nối MongoDB</span>
+              <Status
+                value={health.data?.status === "ok" ? "ready" : "failed"}
+              />
+            </div>
+            <div>
+              <span>Database đang gắn kết</span>
+              <code>{d.database}</code>
+            </div>
+            <div>
+              <span>Trạng thái Worker</span>
+              <Status value={caps.worker.online ? "ready" : "interrupted"} />
+            </div>
+            <div>
+              <span>Heartbeat gần nhất</span>
+              <strong>
+                {caps.worker.last_seen
+                  ? formatDate(caps.worker.last_seen)
+                  : "Chưa ghi nhận"}
+              </strong>
+            </div>
+            <div>
+              <span>Tác vụ đang giữ lease</span>
+              <strong>{caps.worker.active_job || "Không có"}</strong>
+            </div>
+            <div>
+              <span>Môi trường Runtime</span>
+              <span>
+                Python {caps.runtime.python} · {caps.runtime.platform}
+              </span>
+            </div>
+          </div>
+        </Panel>
+
+        <Panel
+          title="Lưu trữ & Công cụ tài liệu"
+          description="Dung lượng ổ đĩa máy chủ và các công cụ chuyển đổi DOCX / PDF / OCR."
+        >
+          <div className="detail-list">
+            <div>
+              <span>Dung lượng trống</span>
+              <strong>
+                {size(d.disk.free_bytes)} / {size(d.disk.total_bytes)} (Đã dùng{" "}
+                {usedPct}%)
+              </strong>
+            </div>
+            <div>
+              <span>Đọc tài liệu Word (.doc / .docx)</span>
+              <Status value={caps.documents.word ? "ready" : "interrupted"} />
+            </div>
+            <div>
+              <span>Đọc PDF văn bản</span>
+              <Status
+                value={caps.documents.pdf_text ? "ready" : "interrupted"}
+              />
+            </div>
+            <div>
+              <span>OCR tài liệu scan</span>
+              <Status value={caps.documents.ocr ? "ready" : "interrupted"} />
+            </div>
+            <div>
+              <span>Ngôn ngữ OCR khả dụng</span>
+              <strong>
+                {caps.documents.ocr_languages?.length
+                  ? caps.documents.ocr_languages.join(", ")
+                  : "Chưa có"}
+              </strong>
+            </div>
+            <div>
+              <span>Kết xuất ảnh xem trước DOCX</span>
+              <Status
+                value={caps.documents.preview ? "ready" : "interrupted"}
+              />
+            </div>
+          </div>
+        </Panel>
+      </div>
+
+      <div className="two-columns">
+        <Panel
+          title="Tóm tắt hàng đợi tác vụ"
+          description="Số lượng tác vụ theo trạng thái trên toàn hệ thống."
+          action={
+            <Button asChild variant="outline" size="sm">
+              <Link to="/admin/jobs">Mở danh sách tác vụ</Link>
+            </Button>
+          }
+        >
+          <div className="detail-list">
+            {Object.entries(d.jobs).map(([state, count]) => (
+              <div key={state}>
+                <span>{labels[state] || state}</span>
+                <strong>{count}</strong>
+              </div>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel
+          title="Giới hạn vận hành & Trọng số Model"
+          description="Các ngưỡng cấu hình hiện tại và trạng thái bộ nhớ đệm model."
+          action={
+            <Button asChild variant="outline" size="sm">
+              <Link to="/admin/models">Cấu hình Model & Preset</Link>
+            </Button>
+          }
+        >
+          <div className="detail-list">
+            <div>
+              <span>Số nguồn âm thanh tối đa</span>
+              <strong>
+                {caps.max_sources} track ({caps.max_source_files} file)
+              </strong>
+            </div>
+            <div>
+              <span>Thời lượng âm thanh tối đa</span>
+              <strong>
+                {Math.round(caps.max_audio_duration_sec / 60)} phút
+              </strong>
+            </div>
+            <div>
+              <span>Dung lượng tải lên tối đa</span>
+              <strong>{size(caps.max_upload_bytes)}</strong>
+            </div>
+          </div>
+          <JsonDetails
+            value={caps.models}
+            label="Chi tiết bộ nhớ đệm trọng số model"
+          />
+        </Panel>
+      </div>
+    </div>
   );
 }
 
@@ -1146,12 +1651,22 @@ export function Admin() {
       <Route path="jobs" element={<JobsPage />} />
       <Route path="models" element={<ModelsPage />} />
       <Route path="templates" element={<Templates sharedOnly />} />
+      <Route path="templates/new" element={<TemplateNewPage sharedOnly />} />
+      <Route path="templates/:id" element={<TemplateDetail />} />
       <Route path="backups" element={<BackupsPage />} />
       <Route path="audit" element={<AuditPage />} />
       <Route path="experiments" element={<ExperimentsPage />} />
+      <Route path="system" element={<SystemStatusPage />} />
       <Route
         path="*"
-        element={<Empty title="Không tìm thấy trang quản trị" />}
+        element={
+          <NotFoundState
+            title="Không tìm thấy trang quản trị"
+            description="Đường dẫn quản trị bạn yêu cầu không tồn tại."
+            backTo="/admin"
+            backLabel="Về tổng quan quản trị"
+          />
+        }
       />
     </Routes>
   );

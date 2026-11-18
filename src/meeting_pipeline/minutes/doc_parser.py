@@ -13,6 +13,7 @@ import re
 from pathlib import Path
 
 import docx
+from docx.table import Table
 from docx.text.paragraph import Paragraph
 
 from meeting_pipeline.minutes.converter import compute_file_sha256
@@ -68,6 +69,7 @@ def parse_template_document(
 
     blocks: list[DocBlock] = []
     unmapped_warnings: list[str] = []
+    anchor_aliases = {}
     current_section = "Header"
     order = 0
     previous_text = ""
@@ -163,10 +165,32 @@ def parse_template_document(
                 )
             )
 
+        for index, match in enumerate(re.finditer(r"\b(?:đã|cùng)\s+ký\b[^.!?;]*", p.text, re.I)):
+            if not any(
+                a.start_offset < match.end() and a.end_offset > match.start() for a in anchors
+            ):
+                anchors.append(
+                    CandidateAnchor(
+                        anchor_id="anc_fixed_"
+                        + re.sub(r"[\[\]/]", "_", element_path)
+                        + f"_{index}",
+                        block_id=f"blk_{order}",
+                        element_path=f"{element_path}/fixed[{index}]",
+                        start_offset=match.start(),
+                        end_offset=match.end(),
+                        placeholder_text=match.group(),
+                        placeholder_type=PlaceholderType.FIXED_TEXT,
+                        nearby_label="Xác nhận ký trong mẫu",
+                        section_path=current_section,
+                    )
+                )
+
         # Check if this paragraph is a standalone signature block
         upper_text = raw_text.upper()
-        if any(sig_kw in upper_text for sig_kw in SIGNATURE_KEYWORDS) and (
-            "(KÝ" in upper_text or len(raw_text) < 40
+        if (
+            not matches
+            and any(sig_kw in upper_text for sig_kw in SIGNATURE_KEYWORDS)
+            and ("(KÝ" in upper_text or len(raw_text) < 40)
         ):
             anchor_id = (
                 f"anc_sig_{element_path.replace('/', '_').replace('[', '_').replace(']', '')}"
@@ -201,33 +225,43 @@ def parse_template_document(
             previous_text = raw_text
         return block
 
-    # Process all body paragraphs
-    for p_idx, p in enumerate(doc.paragraphs):
-        b = process_paragraph(p, f"p[{p_idx}]")
-        if b is not None:
-            blocks.append(b)
-
-    # Process all tables
-    for t_idx, table in enumerate(doc.tables):
+    def process_table(table: Table, table_path: str) -> None:
+        nonlocal order, current_section, previous_text
+        section, preceding = current_section, previous_text
+        visited = {}
         for r_idx, row in enumerate(table.rows):
             for c_idx, cell in enumerate(row.cells):
+                cell_path = f"{table_path}/row[{r_idx}]/cell[{c_idx}]"
+                if cell._tc in visited:
+                    original = visited[cell._tc]
+                    old = original.replace("/", "_").replace("[", "_").replace("]", "")
+                    new = cell_path.replace("/", "_").replace("[", "_").replace("]", "")
+                    for block in blocks:
+                        if block.element_path.startswith(original + "/"):
+                            for anchor in block.candidate_anchors:
+                                anchor_aliases[anchor.anchor_id.replace(old, new, 1)] = (
+                                    anchor.anchor_id
+                                )
+                    continue
+                visited[cell._tc] = cell_path
+                # Adjacent cells do not inherit each other's headings or labels.
+                current_section, previous_text = section, ""
+                cell_path = f"{table_path}/row[{r_idx}]/cell[{c_idx}]"
                 cell_text = cell.text.strip()
-                cell_path = f"table[{t_idx}]/row[{r_idx}]/cell[{c_idx}]"
-
-                # Check if cell is completely empty or just dots
-                if not cell_text or PLACEHOLDER_REGEX.fullmatch(cell_text):
-                    order += 1
-                    anc_id = f"anc_tbl_{t_idx}_r_{r_idx}_c_{c_idx}"
-                    anc = CandidateAnchor(
-                        anchor_id=anc_id,
+                if (not cell_text or PLACEHOLDER_REGEX.fullmatch(cell_text)) and not cell.tables:
+                    anchor = CandidateAnchor(
+                        anchor_id=(
+                            f"anc_tbl_{table_path[6:-1]}_r_{r_idx}_c_{c_idx}"
+                            if re.fullmatch(r"table\[\d+\]", table_path)
+                            else "anc_tbl_" + re.sub(r"[\[\]/]", "_", cell_path)
+                        ),
                         block_id=f"blk_{order}",
                         element_path=f"{cell_path}/empty_cell",
-                        start_offset=0,
                         end_offset=len(cell.text),
                         placeholder_text=cell.text or "[empty_cell]",
                         placeholder_type=PlaceholderType.EMPTY_CELL,
-                        nearby_label=f"Table {t_idx} Row {r_idx} Col {c_idx}",
-                        section_path=current_section,
+                        nearby_label=f"Table {table_path} Row {r_idx} Col {c_idx}",
+                        section_path=section,
                     )
                     blocks.append(
                         DocBlock(
@@ -235,19 +269,29 @@ def parse_template_document(
                             order=order,
                             block_type=BlockType.TABLE_CELL,
                             raw_text=cell_text,
-                            section_path=current_section,
+                            section_path=section,
                             element_path=cell_path,
-                            candidate_anchors=[anc],
+                            candidate_anchors=[anchor],
                         )
                     )
+                    order += 1
                 else:
-                    # Check paragraphs inside table cell
-                    for p_idx, p in enumerate(cell.paragraphs):
-                        b = process_paragraph(
-                            p, f"{cell_path}/p[{p_idx}]", block_type=BlockType.TABLE_CELL
-                        )
-                        if b is not None:
-                            blocks.append(b)
+                    walk(cell, cell_path + "/", BlockType.TABLE_CELL)
+        current_section, previous_text = section, preceding
+
+    def walk(container, prefix: str = "", kind: BlockType = BlockType.PARAGRAPH) -> None:
+        p_idx = t_idx = 0
+        for element in container.iter_inner_content():
+            if isinstance(element, Paragraph):
+                block = process_paragraph(element, f"{prefix}p[{p_idx}]", kind)
+                if block is not None:
+                    blocks.append(block)
+                p_idx += 1
+            else:
+                process_table(element, f"{prefix}table[{t_idx}]")
+                t_idx += 1
+
+    walk(doc)
 
     # Check for unmapped warning candidates
     total_anchors = sum(len(b.candidate_anchors) for b in blocks)
@@ -271,4 +315,5 @@ def parse_template_document(
         normalized_docx_sha256=file_sha,
         blocks=blocks,
         unmapped_warnings=unmapped_warnings,
+        anchor_aliases=anchor_aliases,
     )

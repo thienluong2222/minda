@@ -1,0 +1,588 @@
+/* Unified Minda Component Styles (Section 3, 5, 7) */
+
+/* 1. Buttons & Controls */
+.primary-btn,
+.secondary-btn,
+.danger-btn,
+.ghost-btn,
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--minda-control-height);
+  padding: 0 14px;
+  border-radius: var(--minda-radius-control);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  transition:
+    background var(--minda-transition),
+    border-color var(--minda-transition),
+    color var(--minda-transition);
+  white-space: nowrap;
+}
+
+.primary-btn {
+  background: var(--minda-primary);
+  color: var(--minda-on-primary);
+  border: 1px solid var(--minda-primary);
+}
+
+.primary-btn:hover:not(:disabled) {
+  background: #2d333f;
+  border-color: #2d333f;
+}
+
+.secondary-btn,
+.ghost-btn {
+  background: var(--minda-surface);
+  color: var(--minda-text);
+  border: 1px solid var(--minda-border);
+}
+
+.secondary-btn:hover:not(:disabled),
+.ghost-btn:hover:not(:disabled) {
+  background: var(--minda-surface-subtle);
+  border-color: var(--minda-control-border);
+}
+
+.danger-btn {
+  background: var(--minda-danger-soft);
+  color: var(--minda-danger);
+  border: 1px solid rgba(161, 47, 58, 0.35);
+}
+
+.danger-btn:hover:not(:disabled) {
+  background: #ffe4e6;
+}
+
+.icon-btn {
+  width: var(--minda-icon-btn-size);
+  min-width: var(--minda-icon-btn-size);
+  height: var(--minda-icon-btn-size);
+  min-height: var(--minda-icon-btn-size);
+  padding: 0;
+  background: var(--minda-surface);
+  color: var(--minda-text-secondary);
+  border: 1px solid var(--minda-border);
+}
+
+.icon-btn:hover:not(:disabled) {
+  background: var(--minda-surface-subtle);
+  color: var(--minda-text);
+}
+
+.btn-compact {
+  min-height: var(--minda-control-height-sm) !important;
+  height: var(--minda-control-height-sm);
+  padding: 0 10px !important;
+  font-size: 13px !important;
+}
+
+.primary-btn:disabled,
+.secondary-btn:disabled,
+.danger-btn:disabled,
+.ghost-btn:disabled,
+.icon-btn:disabled {
+  background: var(--minda-surface-subtle);
+  color: var(--minda-text-secondary);
+  border-color: var(--minda-border);
+}
+
+@media (pointer: coarse), (max-width: 767px) {
+  .icon-btn {
+    min-width: var(--minda-touch-target);
+    min-height: var(--minda-touch-target);
+  }
+}
+
+/* 2. Form Inputs & Fields */
+.graph-settings {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--minda-border);
+  border-radius: 12px;
+  padding: 16px;
+  background: var(--minda-canvas);
+}
+.graph-settings legend {
+  padding: 0 6px;
+  font-weight: 600;
+  font-size: 13px;
+}
+.graph-settings > .check-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 550;
+}
+.graph-settings > p {
+  margin-top: -5px;
+  padding-left: 46px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.graph-settings input[role="switch"] {
+  appearance: none;
+  position: relative;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 21px;
+  border: 1px solid #8793a2;
+  border-radius: 99px;
+  background: #8793a2;
+  cursor: pointer;
+}
+.graph-settings input[role="switch"]::before {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  top: 2px;
+  left: 2px;
+  background: white;
+  border-radius: 50%;
+}
+.graph-settings input[role="switch"]:checked {
+  background: var(--minda-accent);
+  border-color: var(--minda-accent);
+}
+.graph-settings input[role="switch"]:checked::before {
+  left: 17px;
+}
+.graph-settings input[role="switch"]:focus-visible {
+  outline: 2px solid var(--minda-focus);
+  outline-offset: 3px;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+    [type="file"]
+  ),
+select,
+textarea {
+  width: 100%;
+  min-height: var(--minda-control-height);
+  padding: 8px 12px;
+  border-radius: var(--minda-radius-control);
+  border: 1px solid var(--minda-control-border);
+  background: var(--minda-surface);
+  color: var(--minda-text);
+  font-size: 14px;
+  line-height: 1.5;
+  transition:
+    border-color var(--minda-transition),
+    box-shadow var(--minda-transition);
+}
+
+textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--minda-text-secondary);
+}
+
+.minda-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.minda-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--minda-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.minda-field-hint {
+  font-size: 12px;
+  color: var(--minda-text-secondary);
+}
+
+.minda-field-error {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--minda-danger);
+}
+
+/* 3. PageHeader & SectionHeader */
+.minda-page-header,
+.page-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--minda-space-4);
+  margin-bottom: var(--minda-space-6);
+  flex-wrap: wrap;
+}
+
+.minda-page-header-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.minda-page-header-subtitle {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--minda-text-secondary);
+  max-width: 72ch;
+}
+
+.minda-page-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--minda-text-secondary);
+}
+
+.minda-page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.minda-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--minda-space-3);
+  margin-bottom: var(--minda-space-4);
+  flex-wrap: wrap;
+}
+
+/* 4. Toolbar, FilterBar & Pagination */
+.minda-toolbar,
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--minda-space-3);
+  padding: var(--minda-space-3) var(--minda-space-4);
+  background: var(--minda-canvas);
+  border: 1px solid var(--minda-border);
+  border-radius: var(--minda-radius-surface);
+  margin-bottom: var(--minda-space-4);
+  flex-wrap: wrap;
+}
+
+.minda-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 240px;
+}
+
+.minda-search-box,
+.search-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 220px;
+  max-width: 360px;
+  flex: 1;
+  height: var(--minda-control-height);
+  padding: 0 12px;
+  background: var(--minda-surface);
+  border: 1px solid var(--minda-control-border);
+  border-radius: var(--minda-radius-control);
+}
+
+.minda-search-box input,
+.search-input input {
+  border: 0 !important;
+  padding: 0 !important;
+  min-height: auto !important;
+  height: 100%;
+  background: transparent !important;
+  outline: none !important;
+}
+
+.minda-filter-pills {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  background: var(--minda-surface);
+  border: 1px solid var(--minda-border);
+  border-radius: var(--minda-radius-control);
+  flex-wrap: wrap;
+}
+
+.minda-filter-pill {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--minda-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.minda-filter-pill:hover {
+  background: var(--minda-surface-subtle);
+  color: var(--minda-text);
+}
+
+.minda-filter-pill.active {
+  background: var(--minda-primary);
+  color: var(--minda-on-primary);
+}
+
+.minda-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--minda-space-3);
+  padding: var(--minda-space-3) 0;
+  margin-top: var(--minda-space-4);
+  border-top: 1px solid var(--minda-border);
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--minda-text-secondary);
+}
+
+.minda-pagination-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 5. DataTable & Semantic Tables */
+.minda-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--minda-border);
+  border-radius: var(--minda-radius-surface);
+  background: var(--minda-surface);
+}
+
+.minda-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+.minda-table th {
+  padding: 12px 16px;
+  background: var(--minda-canvas);
+  border-bottom: 1px solid var(--minda-border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--minda-text-secondary);
+  white-space: nowrap;
+}
+
+.minda-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--minda-border);
+  vertical-align: middle;
+  color: var(--minda-text);
+}
+
+.minda-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.minda-table tbody tr:hover {
+  background: var(--minda-surface-subtle);
+}
+
+.minda-row-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* 6. Status Badges & Semantic Notices (Section 3.1) */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.status-badge.green,
+.status-badge.ready,
+.status-badge.reviewed,
+.status-badge.completed,
+.status-badge.succeeded {
+  background: var(--minda-accent-soft);
+  color: var(--minda-accent);
+  border-color: rgba(63, 113, 89, 0.25);
+}
+
+.status-badge.warn,
+.status-badge.needs_review,
+.status-badge.stale,
+.status-badge.queued,
+.status-badge.canceling {
+  background: var(--minda-warning-soft);
+  color: var(--minda-warning);
+  border-color: rgba(138, 91, 18, 0.25);
+}
+
+.status-badge.danger,
+.status-badge.failed,
+.status-badge.rejected {
+  background: var(--minda-danger-soft);
+  color: var(--minda-danger);
+  border-color: rgba(161, 47, 58, 0.25);
+}
+
+.status-badge.info,
+.status-badge.running,
+.status-badge.processing {
+  background: var(--minda-info-soft);
+  color: var(--minda-info);
+  border-color: rgba(51, 91, 133, 0.25);
+}
+
+.status-badge.neutral,
+.status-badge.draft,
+.status-badge.canceled,
+.status-badge.archived {
+  background: var(--minda-surface-subtle);
+  color: var(--minda-text-secondary);
+  border-color: var(--minda-border);
+}
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--minda-radius-surface);
+  border: 1px solid var(--minda-border);
+  background: var(--minda-canvas);
+  color: var(--minda-text);
+  font-size: 14px;
+  margin-bottom: var(--minda-space-4);
+}
+
+.notice.warn {
+  background: var(--minda-warning-soft);
+  color: var(--minda-warning);
+  border-color: rgba(138, 91, 18, 0.3);
+}
+
+.notice.danger {
+  background: var(--minda-danger-soft);
+  color: var(--minda-danger);
+  border-color: rgba(161, 47, 58, 0.3);
+}
+
+.notice.green {
+  background: var(--minda-accent-soft);
+  color: var(--minda-accent);
+  border-color: rgba(63, 113, 89, 0.3);
+}
+
+.notice.info {
+  background: var(--minda-info-soft);
+  color: var(--minda-info);
+  border-color: rgba(51, 91, 133, 0.3);
+}
+
+/* 7. EmptyState, ErrorState & Loading */
+.empty-box,
+.minda-state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  padding: var(--minda-space-8) var(--minda-space-6);
+  background: var(--minda-canvas);
+  border: 1px dashed var(--minda-border);
+  border-radius: var(--minda-radius-surface);
+}
+
+.minda-state-card.minda-state-card--error {
+  background: var(--minda-danger-soft);
+  border-style: solid;
+  border-color: rgba(161, 47, 58, 0.3);
+  color: var(--minda-danger);
+}
+
+/* 8. Panels & Surfaces */
+.panel {
+  background: var(--minda-surface);
+  border: 1px solid var(--minda-border);
+  border-radius: var(--minda-radius-surface);
+  padding: var(--minda-space-6);
+  margin-bottom: var(--minda-space-6);
+}
+
+/* 9. Transcript & Minutes Reading Typography (Section 3.2: 16px, line-height 1.65) */
+.transcript-segment-text,
+.segment-editor textarea,
+.minutes-editor-content,
+.minutes-reading-surface,
+.doc-preview-prose {
+  font-size: var(--minda-reading-size) !important;
+  line-height: var(--minda-reading-line) !important;
+}
+
+/* 10. Preview Zoom Toolbar */
+.minda-preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--minda-canvas);
+  border-bottom: 1px solid var(--minda-border);
+  flex-wrap: wrap;
+}
+
+.minda-preview-zoom-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.minda-preview-stage {
+  overflow: auto;
+  background: var(--minda-surface-subtle);
+  padding: 16px;
+  max-height: 72vh;
+}
+
+.minda-preview-canvas {
+  transform-origin: top center;
+  transition: transform var(--minda-transition);
+  margin: 0 auto;
+}
+
+/* 11. Sticky Audio Player Clearance (Section 4.2) */
+.has-sticky-audio-player {
+  padding-bottom: 84px !important;
+}

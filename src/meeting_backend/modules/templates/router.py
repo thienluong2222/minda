@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, File, Form, UploadFile
+import re
+
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
 from pydantic import Field
 
 from meeting_backend.api.dependencies import current_user, database
@@ -18,13 +20,35 @@ class TemplateReview(Revision):
 
 
 @router.get("")
-def list_templates(user=Depends(current_user), mongo=Depends(database)):
-    return [
-        public(t)
-        for t in mongo.db.templates.find(
-            {"trashed": False, "$or": [{"owner_id": user["_id"]}, {"visibility": "shared"}]}
-        ).sort("created_at", -1)
-    ]
+def list_templates(
+    q: str = Query("", max_length=200),
+    visibility: str = "all",
+    state: str = "all",
+    page: int | None = Query(None, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    user=Depends(current_user),
+    mongo=Depends(database),
+):
+    query = {"trashed": False, "$or": [{"owner_id": user["_id"]}, {"visibility": "shared"}]}
+    if q.strip():
+        query["name"] = {"$regex": re.escape(q.strip()), "$options": "i"}
+    if visibility in {"private", "shared"}:
+        query["visibility"] = visibility
+    if state == "needs_review":
+        query["needs_review"] = True
+    elif state == "ready":
+        query.update(state="ready", needs_review=False, active_job=None)
+    elif state == "processing":
+        query["$and"] = [{"$or": [{"active_job": {"$ne": None}}, {"state": "pending"}]}]
+    cursor = mongo.db.templates.find(query).sort([("created_at", -1), ("_id", 1)])
+    if page is None:
+        return [public(t) for t in cursor]
+    return {
+        "items": [public(t) for t in cursor.skip((page - 1) * limit).limit(limit)],
+        "total": mongo.db.templates.count_documents(query),
+        "page": page,
+        "limit": limit,
+    }
 
 
 @router.post("", status_code=202)

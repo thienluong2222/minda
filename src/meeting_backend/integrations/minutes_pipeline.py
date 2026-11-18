@@ -25,21 +25,61 @@ def copy_document_run(source, destination):
 
 
 def materialize_transcript(context, meeting, run):
-    rows = rows_for(context.mongo, meeting["active_transcript_id"])
+    payload = context.job.get("payload", {})
+    snapshot_id = payload.get("input_snapshot_id")
+    if snapshot_id:
+        from meeting_pipeline.minutes.graph_contracts import digest
+
+        snapshot = context.mongo.db.minutes_input_snapshots.find_one(
+            {
+                "_id": snapshot_id,
+                "owner_id": meeting["owner_id"],
+                "meeting_id": meeting["_id"],
+            }
+        )
+        if not snapshot:
+            raise AppError("INPUT_SNAPSHOT_MISSING", "Thiếu phiên bản đầu vào đã chốt.")
+        records = context.mongo.db.minutes_input_segments.find(
+            {
+                "snapshot_id": snapshot_id,
+                "owner_id": meeting["owner_id"],
+                "meeting_id": meeting["_id"],
+            }
+        ).sort("index", 1)
+        rows = [record["segment"] for record in records]
+        if len(rows) != snapshot["row_count"] or digest(rows) != snapshot["source_sha256"]:
+            raise AppError(
+                "INPUT_SNAPSHOT_INVALID", "Đầu vào đã chốt không khớp kiểm tra toàn vẹn."
+            )
+    else:
+        rows = rows_for(
+            context.mongo, payload.get("transcript_version_id", meeting["active_transcript_id"])
+        )
     data = []
     for row in rows:
         item = dict(row.get("data", {}))
+        if not item.get("turn_id"):
+            item["turn_id"] = row["_id"]
         item.update(
             text=row.get("text", ""),
             speaker_label=row.get("speaker_label", ""),
             start_sec=row["start_sec"],
             end_sec=row["end_sec"],
         )
+        if row.get("user_edited"):
+            item["user_edited"] = True
         # The original audio artifacts remain immutable and owned by this meeting.
         if row.get("clip"):
-            artifact = context.mongo.db.artifacts.find_one({"_id": row["clip"]["id"]})
+            artifact = context.mongo.db.artifacts.find_one(
+                {
+                    "_id": row["clip"]["id"],
+                    "resource_id": meeting["_id"],
+                    "owner_id": meeting["owner_id"],
+                }
+            )
             if artifact:
                 item["evidence_clip_artifact_id"] = str(context.store.resolve(artifact))
+                item["clip_artifact_id"] = artifact["_id"]
         data.append(item)
     (run / "timeline.json").write_text(json.dumps({"segments": data}, ensure_ascii=False, indent=2))
 
@@ -92,22 +132,77 @@ def stamp_export_context(run, **context):
     temporary.replace(package)
 
 
-def run_minutes(context):
-    from meeting_pipeline.minutes.service import MinutesService
-    from meeting_pipeline.minutes.text_engine import MinutesOptions
+def reconcile_regenerated_facts(old, generated, schema, *, unchanged_input):
+    """Carry edits only across identical fields and provenance."""
+    old_fields = {field["field_id"]: field for field in old.get("schema", {}).get("fields", [])}
+    same_fields = {
+        field["field_id"]
+        for field in schema["fields"]
+        if field == old_fields.get(field["field_id"])
+    }
+    previous = {fact["field_id"]: fact for fact in old.get("facts", [])}
+    result = []
+    for fact in generated:
+        field_id = fact["field_id"]
+        prior = previous.get(field_id, {})
+        pending = prior.get("previous_edit")
+        if field_id not in same_fields or (not prior.get("user_edited") and pending is None):
+            result.append(fact)
+            continue
+        if unchanged_input and prior.get("user_edited"):
+            result.append(prior)
+            continue
+        prior_value = pending["value"] if pending is not None else prior["value"]
+        if prior_value == fact["value"] and fact["status"] == "supported":
+            result.append(fact)
+            continue
+        result.append(
+            {
+                **fact,
+                "status": "conflicting" if prior_value != fact["value"] else "needs_review",
+                "previous_edit": {
+                    "value": prior_value,
+                    "minutes_version_id": (
+                        pending["minutes_version_id"] if pending is not None else old["_id"]
+                    ),
+                },
+            }
+        )
+    return result
 
+
+def run_minutes(context):
     context.stage("Chuẩn bị phiên bản biên bản và transcript đầu vào")
     meeting = context.resource()
     kind = context.job["kind"]
     payload = context.job.get("payload", {})
+    if kind == "generate_minutes":
+        transcript = context.mongo.db.transcript_versions.find_one(
+            {
+                "_id": payload.get("transcript_version_id", meeting.get("active_transcript_id")),
+                "meeting_id": meeting["_id"],
+            }
+        )
+        if transcript and transcript.get("timing_complete") is False:
+            raise AppError("TIMELINE_REVIEW_REQUIRED", "Hãy rà các đồng hồ chưa căn trước.", 409)
+    from meeting_pipeline.minutes.service import MinutesService
+    from meeting_pipeline.minutes.text_engine import MinutesOptions
+
     old = context.mongo.db.minutes_versions.find_one({"_id": meeting.get("active_minutes_id")})
     source = old
+    if kind == "revise_minutes_outline" and (
+        not source
+        or source["_id"] != payload["version_id"]
+        or source["transcript_version_id"] != meeting.get("active_transcript_id")
+        or source["input_content_revision"] != meeting.get("content_revision")
+    ):
+        raise AppError("OUTLINE_STALE", "Biên bản hoặc lời chép đã thay đổi.", 409)
     if kind == "restore_minutes":
         source = context.mongo.db.minutes_versions.find_one(
             {"_id": payload["version_id"], "meeting_id": meeting["_id"]}
         )
     run = context.staging / meeting["_id"] / "runs" / context.job["_id"]
-    if source:
+    if source and kind != "generate_minutes":
         old_path = Path(source["run_path"]).resolve()
         if not old_path.is_relative_to(context.store.root):
             raise AppError("INVALID_PATH", "Phiên bản nguồn không hợp lệ.")
@@ -150,8 +245,11 @@ def run_minutes(context):
             json.dumps(template["schema"], ensure_ascii=False, indent=2)
         )
         materialize_transcript(context, meeting, run)
-        options = MinutesOptions.model_validate(payload["options"])
-        metadata = {
+        effective_options = dict(payload["options"])
+        # Jobs queued before this feature retain their original engine.
+        effective_options.setdefault("graph_enabled", False)
+        options = MinutesOptions.model_validate(effective_options)
+        metadata = payload.get("metadata_snapshot") or {
             "meeting_name": meeting["title"],
             "meeting_date": meeting.get("date", ""),
             "location": meeting.get("location", ""),
@@ -160,15 +258,27 @@ def run_minutes(context):
         service.process_template_for_run(
             normalized, run, meeting_metadata=metadata, options=options, reuse_schema=True
         )
-        if old:
-            edited = {f["field_id"]: f for f in old.get("facts", []) if f.get("user_edited")}
+        if old and old.get("template_version_id") == template_version_id:
             generated = read_json(run / "minutes/facts.json", [])
-            preserved = [edited.get(f["field_id"], f) for f in generated]
-            if preserved != generated:
-                service.update_facts_and_re_render(run, preserved, mark_user_edited=False)
+            reconciled = reconcile_regenerated_facts(
+                old,
+                generated,
+                read_json(run / "template/schema.json"),
+                unchanged_input=(
+                    old.get("transcript_version_id") == meeting["active_transcript_id"]
+                    and old.get("input_content_revision") == input_revision
+                ),
+            )
+            if reconciled != generated:
+                service.update_facts_and_re_render(run, reconciled, mark_user_edited=False)
     elif kind == "edit_facts":
         context.stage("Ghép các trường đã sửa, giữ bằng chứng và cập nhật tài liệu")
         service.update_facts_and_re_render(run, payload["patches"])
+    elif kind == "revise_minutes_outline":
+        from meeting_backend.modules.minutes.outline_revision import regenerate_outline
+
+        context.stage("Viết và kiểm tra các mục đã chỉnh trong dàn ý")
+        regenerate_outline(run, payload, source, service)
     elif kind == "format_minutes":
         context.stage("Áp dụng thể thức từ dữ liệu đã lưu")
         service.reformat_existing(run, MinutesOptions.model_validate(payload["options"]))
@@ -211,7 +321,9 @@ def run_minutes(context):
         "parent_id": meeting.get("active_minutes_id"),
         "reason": kind,
         "input_content_revision": input_revision,
-        "transcript_version_id": meeting.get("active_transcript_id")
+        "transcript_version_id": payload.get(
+            "transcript_version_id", meeting.get("active_transcript_id")
+        )
         if kind == "generate_minutes"
         else source.get("transcript_version_id"),
         "template_id": template_id,
@@ -224,6 +336,8 @@ def run_minutes(context):
         "formatting": read_json(final / "minutes/formatting_report.json"),
         "topics": read_json(final / "minutes/topics.json"),
         "corrections": read_json(final / "minutes/corrections.json", []),
+        "graph_id": read_json(final / "minutes/model_report.json").get("graph_id"),
+        "style_profile": read_json(final / "minutes/style_profile.json"),
         "manifest": read_json(final / "minutes/manifest.json"),
         "previews": previews,
         "docx": context.artifact(final / "exports/completed.docx", name=meeting["title"] + ".docx"),
@@ -231,6 +345,16 @@ def run_minutes(context):
             final / "exports/completed_minutes.zip", name=meeting["title"] + ".zip"
         ),
     }
+    graph_payload = read_json(final / "minutes/meeting_graph.json")
+    if graph_payload:
+        from meeting_backend.modules.minutes.graph_store import persist_graph
+
+        persist_graph(context.mongo, meeting, graph_payload)
+    from meeting_backend.modules.minutes.outline_store import persist_outline
+
+    version["outline"] = persist_outline(
+        context.mongo, meeting, version_id, read_json(final / "minutes/content_plan.json")
+    )
     context.mongo.db.minutes_versions.insert_one(version)
     stale = input_revision != meeting.get("content_revision", 0)
     context.publish(

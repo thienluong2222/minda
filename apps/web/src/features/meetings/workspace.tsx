@@ -16,7 +16,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { api, formatDate, patch, post, size, time } from "@/lib/api";
+import {
+  ApiError,
+  api,
+  formatDate,
+  formatMeetingDate,
+  jobErrorMessage,
+  labels,
+  patch,
+  post,
+  time,
+} from "@/lib/api";
+import { NotFoundState } from "@/features/auth/pages";
 import type {
   Audit,
   Job,
@@ -33,24 +44,50 @@ import {
   CalendarDays,
   FileText,
   History,
-  Play,
-  Plus,
-  RefreshCw,
+  Network,
   Trash2,
-  Users,
 } from "lucide-react";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { MinutesView } from "./minutes";
 import { TranscriptView } from "./transcript";
+import { SourcesTimeline } from "./sources";
+import { ReviewAudioProvider } from "@/components/review-audio";
+import { useUnsavedForm } from "@/lib/unsaved";
 
-function JobProgress({ jobId }: { jobId: string }) {
+const MeetingGraphView = lazy(() => import("./graph"));
+
+function JobProgress({
+  jobId,
+  meetingId,
+}: {
+  jobId: string;
+  meetingId: string;
+}) {
   const data = useQuery({
     queryKey: ["job", jobId],
     queryFn: () => api<Job>("/jobs/" + jobId),
-    refetchInterval: 2000,
+    refetchInterval: (query) =>
+      !query.state.data ||
+      ["queued", "running"].includes(query.state.data.state)
+        ? 2000
+        : false,
   });
   const j = data.data;
+  if (data.error) return <ErrorBox error={data.error} />;
+  if (j && (j.resource_type !== "meeting" || j.resource_id !== meetingId))
+    return null;
+  const finished = !!j && !["queued", "running"].includes(j.state);
+  if (finished)
+    return (
+      <Notice tone={j.state === "succeeded" ? "success" : "warning"}>
+        <strong>
+          {labels[j.kind] || j.kind} · {labels[j.state] || j.state}
+        </strong>
+        <p>{formatDate(j.created_at)} · Lần xử lý này đã kết thúc.</p>
+        {j.error && <p>{jobErrorMessage(j.error)}</p>}
+      </Notice>
+    );
   return (
     <div className="job-progress">
       <span className="pulse-icon">
@@ -60,8 +97,8 @@ function JobProgress({ jobId }: { jobId: string }) {
         <strong>{j?.stage || "Đang tải trạng thái tác vụ…"}</strong>
         <small>
           {j?.state === "queued"
-            ? "Tác vụ sẽ chạy khi worker sẵn sàng."
-            : "Tiến độ được cập nhật theo công đoạn xử lý."}
+            ? "Đang chờ xử lý"
+            : "Bạn có thể tiếp tục xem nội dung đã lưu."}
         </small>
       </div>
       <Action
@@ -98,7 +135,7 @@ function HistoryView({ meeting }: { meeting: Meeting }) {
           <Panel
             title={
               type === "transcripts"
-                ? "Phiên bản transcript"
+                ? "Phiên bản lời chép"
                 : "Phiên bản biên bản"
             }
             key={type}
@@ -121,7 +158,7 @@ function HistoryView({ meeting }: { meeting: Meeting }) {
                   <div className="column-actions">
                     {type === "minutes" && v.docx ? (
                       <>
-                        <DownloadLink artifact={v.docx} label="Tải DOCX" />
+                        <DownloadLink artifact={v.docx} label="Tải Word" />
                         <Button
                           variant="ghost"
                           size="sm"
@@ -219,7 +256,7 @@ function HistoryView({ meeting }: { meeting: Meeting }) {
         wide
         open={!!inspect}
         onOpenChange={(v) => !v && setInspect(null)}
-        title="Đối chiếu phiên bản transcript"
+        title="Đối chiếu phiên bản lời chép"
         description="Bên trái là phiên bản đã chọn, bên phải là nội dung đang sử dụng. Đoạn có thay đổi được đánh dấu."
       >
         <div className="version-comparison">
@@ -277,9 +314,16 @@ function Overview({ meeting }: { meeting: Meeting }) {
     [location, setLocation] = useState(meeting.location),
     [notes, setNotes] = useState(meeting.notes),
     [people, setPeople] = useState(meeting.participant_ids),
-    [files, setFiles] = useState<File[]>([]),
     [confirmTrash, setConfirmTrash] = useState(false);
   const { busy, work } = useWork();
+  const guard = useUnsavedForm(
+    edit &&
+      (title !== meeting.title ||
+        date !== meeting.date ||
+        location !== meeting.location ||
+        notes !== meeting.notes ||
+        JSON.stringify(people) !== JSON.stringify(meeting.participant_ids)),
+  );
   const voices = useQuery({
     queryKey: ["voices"],
     queryFn: () => api<Voice[]>("/speakers"),
@@ -309,12 +353,12 @@ function Overview({ meeting }: { meeting: Meeting }) {
           </Action>
         </Notice>
       )}
-      <div className="two-columns">
+      <div className="overview-info">
         <Panel title="Thông tin cuộc họp">
           <div className="detail-list">
             <div>
               <span>Ngày họp</span>
-              <strong>{meeting.date || "Chưa đặt"}</strong>
+              <strong>{formatMeetingDate(meeting.date)}</strong>
             </div>
             <div>
               <span>Địa điểm</span>
@@ -352,106 +396,9 @@ function Overview({ meeting }: { meeting: Meeting }) {
             Chỉnh sửa thông tin
           </Button>
         </Panel>
-        <Panel
-          title="Nguồn ghi âm"
-          description={`${meeting.source_ids.length}/8 nguồn được chọn để xử lý.`}
-        >
-          {meeting.sources?.map((s) => (
-            <div className="source-card" key={s.id}>
-              <div className="row between">
-                <strong>
-                  <AudioLines size={17} />
-                  {s.name}
-                </strong>
-                <Action
-                  variant="ghost"
-                  disabled={disabled}
-                  run={() =>
-                    api("/meetings/" + meeting.id + "/sources/" + s.id, {
-                      method: "DELETE",
-                      body: JSON.stringify({ revision: meeting.revision }),
-                    })
-                  }
-                  message="Đã bỏ nguồn khỏi lần xử lý tiếp theo"
-                >
-                  <Trash2 size={15} />
-                </Action>
-              </div>
-              <audio controls preload="none" src={s.artifact.url} />
-              <div className="row between">
-                <small className="muted">
-                  {size(s.artifact.size_bytes)}
-                  {s.duration_sec ? " · " + time(s.duration_sec) : ""}
-                  {s.sample_rate ? " · " + s.sample_rate + " Hz" : ""}
-                </small>
-                <DownloadLink artifact={s.artifact} label="Tải nguồn" />
-              </div>
-            </div>
-          ))}
-          {!meeting.source_ids.length && (
-            <Empty
-              title="Chưa có bản ghi âm"
-              description="Thêm các file ghi lại cùng một cuộc họp để bắt đầu."
-            />
-          )}
-          <label className="compact-upload">
-            <Plus size={17} />
-            <span>Thêm nguồn âm thanh</span>
-            <input
-              disabled={disabled || meeting.source_ids.length >= 8}
-              type="file"
-              multiple
-              accept=".wav,.mp3,.m4a,.aac,.flac,.ogg,.webm,.mp4"
-              onChange={(e) => setFiles(Array.from(e.target.files || []))}
-            />
-          </label>
-          {files.length > 0 && (
-            <div className="upload-pending">
-              <p>{files.map((f) => f.name).join(", ")}</p>
-              <Button
-                disabled={busy || files.length + meeting.source_ids.length > 8}
-                onClick={() =>
-                  void work(async () => {
-                    const form = new FormData();
-                    files.forEach((f) => form.append("files", f));
-                    await post(
-                      "/meetings/" +
-                        meeting.id +
-                        "/sources?revision=" +
-                        meeting.revision,
-                      form,
-                    );
-                    setFiles([]);
-                  }, "Đã tải nguồn âm thanh")
-                }
-              >
-                Tải lên {files.length} file
-              </Button>
-            </div>
-          )}
-          <Action
-            variant="default"
-            disabled={disabled || !meeting.source_ids.length}
-            run={() =>
-              post("/meetings/" + meeting.id + "/process", {
-                revision: meeting.revision,
-              })
-            }
-            message="Đã xếp hàng xử lý âm thanh"
-          >
-            {meeting.active_transcript_id ? (
-              <RefreshCw size={16} />
-            ) : (
-              <Play size={16} />
-            )}{" "}
-            {meeting.active_transcript_id
-              ? "Xử lý lại âm thanh"
-              : "Bắt đầu xử lý"}
-          </Action>
-        </Panel>
       </div>
       {meeting.transcript_exports?.length ? (
-        <Panel title="File đối chiếu transcript">
+        <Panel title="Tải lời chép">
           <div className="row wrap">
             {meeting.transcript_exports.map((a) => (
               <DownloadLink key={a.id} artifact={a} label={a.name} />
@@ -481,6 +428,7 @@ function Overview({ meeting }: { meeting: Meeting }) {
           </Button>
         )}
       </Panel>
+      {guard.dialog}
       <Modal
         open={confirmTrash}
         onOpenChange={setConfirmTrash}
@@ -500,7 +448,14 @@ function Overview({ meeting }: { meeting: Meeting }) {
           Chuyển vào thùng rác
         </Action>
       </Modal>
-      <Modal open={edit} onOpenChange={setEdit} title="Thông tin cuộc họp" wide>
+      <Modal
+        open={edit}
+        onOpenChange={(open) =>
+          open ? setEdit(true) : guard.requestClose(() => setEdit(false))
+        }
+        title="Thông tin cuộc họp"
+        wide
+      >
         <div className="form-stack">
           <label>
             Tên cuộc họp
@@ -557,6 +512,14 @@ function Overview({ meeting }: { meeting: Meeting }) {
                 </label>
               ))}
           </fieldset>
+          {meeting.active_transcript_id &&
+            JSON.stringify(people) !==
+              JSON.stringify(meeting.participant_ids) && (
+              <Notice tone="warning">
+                Thay đổi danh sách hồ sơ giọng tham gia sẽ chuyển cuộc họp về
+                trạng thái cần xử lý lại âm thanh trước khi tạo biên bản mới.
+              </Notice>
+            )}
           <Button
             disabled={busy || !title.trim() || people.length > 8}
             onClick={() =>
@@ -584,69 +547,122 @@ function Overview({ meeting }: { meeting: Meeting }) {
 export function Workspace() {
   const { id } = useParams();
   const [params, setParams] = useSearchParams();
-  const tab = params.get("tab") || "overview";
+  const tab = params.get("tab") || "sources";
   const data = useQuery({
     queryKey: ["meeting", id],
     queryFn: () => api<Meeting>("/meetings/" + id),
     refetchInterval: 2000,
   });
   if (data.isPending) return <Loading />;
-  if (data.error) return <ErrorBox error={data.error} />;
+  if (data.error) {
+    if (data.error instanceof ApiError && data.error.status === 404) {
+      return (
+        <NotFoundState
+          title="Không tìm thấy cuộc họp"
+          description="Cuộc họp không tồn tại, đã xóa hoặc không thuộc quyền sở hữu của bạn."
+          backTo="/meetings"
+          backLabel="Về danh sách cuộc họp"
+        />
+      );
+    }
+    return <ErrorBox error={data.error} onRetry={() => void data.refetch()} />;
+  }
   const meeting = data.data!;
+  const tabs = [
+    ["sources", "Nguồn âm thanh", AudioLines],
+    ["transcript", "Lời chép", FileText],
+    ["minutes", "Biên bản", FileText],
+    ["graph", "Đồ thị cuộc họp", Network],
+    ["history", "Lịch sử", History],
+  ] as const;
+  function buildTabQuery(nextTab: string) {
+    const next = new URLSearchParams(params);
+    next.set("tab", nextTab);
+    return "?" + next.toString();
+  }
   return (
-    <>
-      <Link to="/meetings" className="breadcrumb">
-        <ArrowLeft size={14} />
-        Cuộc họp của bạn
-      </Link>
+    <ReviewAudioProvider key={meeting.id}>
+      <div className="workspace-breadcrumb">
+        <Link to="/meetings" className="breadcrumb">
+          <ArrowLeft size={15} />
+          Cuộc họp
+        </Link>
+        <Button
+          variant="ghost"
+          onClick={() => {
+            const next = new URLSearchParams(params);
+            next.set("tab", "overview");
+            setParams(next);
+          }}
+        >
+          <CalendarDays size={16} />
+          Thông tin cuộc họp
+        </Button>
+      </div>
       <PageHeader
-        eyebrow="KHÔNG GIAN CUỘC HỌP"
         title={meeting.title}
-        description={`${meeting.date || "Chưa đặt ngày"} · ${meeting.location || "Chưa có địa điểm"}`}
+        description={[
+          meeting.date ? formatMeetingDate(meeting.date) : "",
+          meeting.location,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
         action={
           <Status value={meeting.active_job ? "running" : meeting.state} />
         }
       />
       {meeting.trashed && (
         <Notice>
-          Cuộc họp đang ở thùng rác. Hãy khôi phục để tiếp tục chỉnh sửa.
+          Cuộc họp đang ở thùng rác. Khôi phục tại phần thông tin để tiếp tục.
         </Notice>
       )}
-      {meeting.active_job && <JobProgress jobId={meeting.active_job} />}
-      <nav className="workspace-tabs">
-        {[
-          ["overview", "Tổng quan", CalendarDays],
-          ["transcript", "Transcript", AudioLines],
-          ["speakers", "Người nói", Users],
-          ["minutes", "Biên bản", FileText],
-          ["history", "Lịch sử", History],
-        ].map(([key, label, Icon]) => {
-          const TabIcon = Icon as typeof CalendarDays;
-          return (
-            <button
-              className={tab === key ? "active" : ""}
-              key={String(key)}
-              onClick={() => setParams({ tab: String(key) })}
-            >
-              <TabIcon size={17} />
-              {String(label)}
-            </button>
-          );
-        })}
+      {meeting.active_job && (
+        <JobProgress jobId={meeting.active_job} meetingId={meeting.id} />
+      )}
+      {params.get("job") && params.get("job") !== meeting.active_job && (
+        <JobProgress jobId={params.get("job")!} meetingId={meeting.id} />
+      )}
+      <nav className="workspace-tabs" aria-label="Các phần của cuộc họp">
+        {tabs.map(([key, label, Icon]) => (
+          <Link
+            key={key}
+            to={buildTabQuery(key)}
+            className={
+              tab === key || (key === "transcript" && tab === "speakers")
+                ? "active"
+                : ""
+            }
+            aria-current={
+              tab === key || (key === "transcript" && tab === "speakers")
+                ? "page"
+                : undefined
+            }
+          >
+            <Icon size={17} aria-hidden="true" />
+            {label}
+          </Link>
+        ))}
       </nav>
-      <div key={tab} className="tab-motion">
+      <div key={tab} className="tab-motion workspace-body">
         {tab === "overview" ? (
           <Overview meeting={meeting} />
-        ) : tab === "transcript" ? (
-          <TranscriptView meeting={meeting} />
-        ) : tab === "speakers" ? (
-          <TranscriptView meeting={meeting} people />
+        ) : tab === "transcript" || tab === "speakers" ? (
+          <TranscriptView meeting={meeting} people={tab === "speakers"} />
         ) : tab === "minutes" ? (
           <MinutesView meeting={meeting} />
-        ) : (
+        ) : tab === "graph" ? (
+          <Suspense fallback={<Loading />}>
+            <MeetingGraphView
+              key={meeting.active_minutes_id || "empty"}
+              meeting={meeting}
+            />
+          </Suspense>
+        ) : tab === "history" ? (
           <HistoryView meeting={meeting} />
+        ) : (
+          <SourcesTimeline meeting={meeting} />
         )}
       </div>
-    </>
+    </ReviewAudioProvider>
   );
 }

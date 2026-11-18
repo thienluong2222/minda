@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, File, Form, UploadFile
+import re
+
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
 
 from meeting_backend.api.dependencies import current_user, database
 from meeting_backend.core.errors import AppError
@@ -11,19 +13,67 @@ router = APIRouter(prefix="/speakers", tags=["speakers"])
 
 
 @router.get("")
-def list_speakers(user=Depends(current_user), mongo=Depends(database)):
+def list_speakers(
+    q: str = Query("", max_length=200),
+    page: int | None = Query(None, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    user=Depends(current_user),
+    mongo=Depends(database),
+):
     store = ArtifactStore(mongo)
     result = []
-    for profile in mongo.db.speakers.find({"owner_id": user["_id"], "trashed": False}).sort(
-        "created_at", -1
-    ):
+    query = {"owner_id": user["_id"], "trashed": False}
+    if q.strip():
+        query["name"] = {"$regex": re.escape(q.strip()), "$options": "i"}
+    cursor = mongo.db.speakers.find(query).sort([("created_at", -1), ("_id", 1)])
+    if page is not None:
+        cursor = cursor.skip((page - 1) * limit).limit(limit)
+    for profile in cursor:
         samples = []
         for artifact_id in profile.get("sample_ids", []):
             artifact = mongo.db.artifacts.find_one({"_id": artifact_id})
             if artifact:
                 samples.append(store.view(artifact))
         result.append({**public(profile), "samples": samples})
-    return result
+    return (
+        result
+        if page is None
+        else {
+            "items": result,
+            "total": mongo.db.speakers.count_documents(query),
+            "page": page,
+            "limit": limit,
+        }
+    )
+
+
+@router.get("/{speaker_id}")
+def get_speaker(speaker_id: str, user=Depends(current_user), mongo=Depends(database)):
+    profile = mongo.db.speakers.find_one(
+        {"_id": speaker_id, "owner_id": user["_id"], "trashed": False}
+    )
+    if not profile:
+        raise AppError("NOT_FOUND", "Không tìm thấy hồ sơ giọng.", 404)
+    store = ArtifactStore(mongo)
+    samples = []
+    for artifact_id in profile.get("sample_ids", []):
+        artifact = mongo.db.artifacts.find_one({"_id": artifact_id})
+        if artifact:
+            samples.append(store.view(artifact))
+    meetings = [
+        {
+            "id": m["_id"],
+            "title": m.get("title", ""),
+            "date": m.get("date", ""),
+            "state": m.get("state", "draft"),
+            "updated_at": m.get("updated_at") or m.get("created_at", ""),
+        }
+        for m in mongo.db.meetings.find(
+            {"owner_id": user["_id"], "trashed": False, "participant_ids": speaker_id},
+            {"_id": 1, "title": 1, "date": 1, "state": 1, "updated_at": 1, "created_at": 1},
+        ).sort("updated_at", -1)
+    ]
+    return {**public(profile), "samples": samples, "meetings": meetings}
 
 
 @router.post("", status_code=202)

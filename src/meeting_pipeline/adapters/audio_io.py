@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -22,6 +23,8 @@ class AudioMetadata:
     sample_rate: int
     channels: int
     duration_sec: float
+    duration_source: str = "stream"
+    duration_is_estimate: bool = False
 
 
 def sha256_file(path: Path, chunk_bytes: int = 1024 * 1024) -> str:
@@ -42,28 +45,59 @@ def probe_audio(path: Path, timeout_sec: float = 30) -> AudioMetadata:
         "-select_streams",
         "a:0",
         "-show_entries",
-        "stream=codec_name,sample_rate,channels,duration",
+        "stream=codec_name,sample_rate,channels,duration,duration_ts,time_base:format=duration",
         "-of",
         "json",
         str(path),
     ]
     try:
         result = subprocess.run(command, capture_output=True, check=True, timeout=timeout_sec)
-        stream = json.loads(result.stdout)["streams"][0]
+        data = json.loads(result.stdout)
+        stream = data["streams"][0]
+        duration = None
+        duration_source = "stream"
+        for value, kind in (
+            (stream.get("duration"), "stream"),
+            (data.get("format", {}).get("duration"), "container"),
+        ):
+            try:
+                candidate = float(value)
+            except (TypeError, ValueError):
+                continue
+            if math.isfinite(candidate) and candidate > 0:
+                duration, duration_source = candidate, kind
+                break
+        if duration is None:
+            raise ValueError("Missing positive finite audio duration")
+        rate, channels = int(stream["sample_rate"]), int(stream["channels"])
+        if rate <= 0 or channels <= 0:
+            raise ValueError("Invalid audio stream shape")
         return AudioMetadata(
             codec_name=str(stream["codec_name"]),
-            sample_rate=int(stream["sample_rate"]),
-            channels=int(stream["channels"]),
-            duration_sec=float(stream["duration"]),
+            sample_rate=rate,
+            channels=channels,
+            duration_sec=duration,
+            duration_source=duration_source,
+            duration_is_estimate=duration_source != "stream",
         )
     except (
         subprocess.SubprocessError,
+        OSError,
+        TypeError,
         KeyError,
         IndexError,
         ValueError,
         json.JSONDecodeError,
     ) as exc:
         raise InvalidAudioError(f"Cannot probe audio: {path.name}") from exc
+
+
+def validate_audio_duration(metadata: AudioMetadata, max_duration_seconds: float) -> None:
+    """Use the same ingest limit in the API and the inference worker."""
+    if not math.isfinite(metadata.duration_sec) or metadata.duration_sec <= 0:
+        raise InvalidAudioError("Audio duration must be positive and finite")
+    if metadata.duration_sec > max_duration_seconds:
+        raise InvalidAudioError(f"Audio exceeds duration limit ({max_duration_seconds:g} seconds)")
 
 
 def decode_mono(path: Path, output_path: Path, sample_rate: int = 16000) -> int:

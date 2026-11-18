@@ -131,6 +131,11 @@ def test_writer_keeps_source_when_numbers_change_or_coverage_is_incomplete(
     ("spoken", "number"),
     [
         ("hai nghìn không trăm hai mươi sáu", 2026),
+        ("hai nghìn không trăm hai sáu", 2026),
+        ("hai nghìn không trăm một chín", 2019),
+        ("một nghìn chín tám bảy", 1987),
+        ("hai trăm ba tư", 234),
+        ("hai nghìn không trăm sáu", 2006),
         ("hai không một", 201),
         ("mười hai", 12),
         ("hai mươi", 20),

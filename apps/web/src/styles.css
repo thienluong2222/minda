@@ -1,14 +1,4 @@
-:root {
-  font-family: "Geist Variable", Arial, sans-serif;
-  color: #1d2330;
-  background: #eef0f5;
-  font-synthesis: none;
-  --radius: 0.75rem;
-  --primary: #20242c;
-  --border: #e6e8ee;
-  --muted-foreground: #78808d;
-  --ring: #a1b0a5;
-}
+/* Legacy functional rules; design tokens live exclusively in styles/tokens.css */
 * {
   box-sizing: border-box;
 }
@@ -68,7 +58,7 @@ small {
   font-size: 12px;
 }
 .eyebrow {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 650;
   letter-spacing: 1.8px;
   color: #7c8592;
@@ -137,7 +127,7 @@ small {
   color: #7a9c87;
 }
 .nav-section {
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 1.3px;
   color: #9a9faa;
@@ -183,7 +173,7 @@ small {
   display: flex;
   align-items: center;
   gap: 9px;
-  font-size: 11px;
+  font-size: 12px;
   color: #5e6b78;
   padding: 13px 0;
   border-top: 1px solid #e5e8ee;
@@ -198,7 +188,7 @@ small {
   background: #eef1f5;
   padding: 14px 10px;
   border-radius: 12px;
-  font-size: 11px;
+  font-size: 12px;
   margin: 8px 0;
 }
 .local-note > i,
@@ -210,11 +200,11 @@ small {
   flex-shrink: 0;
 }
 .local-note strong {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 550;
 }
 .local-note p {
-  font-size: 10px;
+  font-size: 12px;
   color: #8b929e;
 }
 .logout {
@@ -249,7 +239,7 @@ small {
 }
 .global-search input {
   font: inherit;
-  font-size: 11px;
+  font-size: 12px;
   width: 100%;
   outline: none;
   background: transparent;
@@ -257,14 +247,14 @@ small {
   color: #333;
 }
 .global-search kbd {
-  font-size: 11px;
+  font-size: 12px;
   color: #b9bfca;
 }
 .header-actions {
   gap: 21px;
 }
 .today {
-  font-size: 11px;
+  font-size: 12px;
   color: #9198a2;
 }
 .icon-button {
@@ -307,12 +297,12 @@ small {
 }
 .account strong {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 .account small {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   color: #959da8;
 }
 .page-content {
@@ -378,8 +368,8 @@ small {
   gap: 7px;
 }
 .stat-card span {
-  font-size: 11px;
-  color: #737d8a;
+  font-size: 12px;
+  color: var(--minda-text-secondary);
 }
 .stat-card svg {
   color: #969daa;
@@ -393,8 +383,8 @@ small {
   margin: 7px 0 5px;
 }
 .stat-card small {
-  font-size: 9px;
-  color: #9ca3af;
+  font-size: var(--minda-meta-size);
+  color: var(--minda-text-secondary);
 }
 .stat-dark {
   background: linear-gradient(125deg, #2d3036, #1c2027);
@@ -424,7 +414,7 @@ small {
   font-size: 16px;
 }
 .panel-header p {
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 5px;
 }
 .dashboard-main > .panel {
@@ -445,7 +435,7 @@ small {
   font-size: 12px;
 }
 .data-table th {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.3px;
   color: #9a9fa9;
@@ -468,12 +458,12 @@ small {
 .data-table td > small {
   display: block;
   color: #9098a4;
-  font-size: 10px;
+  font-size: 12px;
   margin-top: 3px;
 }
 .data-table p {
   max-width: 270px;
-  font-size: 11px;
+  font-size: 12px;
 }
 .meeting-name {
   display: flex;
@@ -489,7 +479,7 @@ small {
   max-width: 280px;
 }
 .meeting-name small {
-  font-size: 10px;
+  font-size: 12px;
   color: #9a9fa9;
   display: block;
   margin-top: 3px;
@@ -509,7 +499,7 @@ small {
   color: #a0a6b1;
 }
 .status {
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 500;
   display: inline-flex;
   gap: 5px;
@@ -564,7 +554,7 @@ small {
   border-top: 1px solid #edeff3;
   margin-top: 12px;
   padding: 15px 3px;
-  font-size: 11px;
+  font-size: 12px;
   color: #757e8c;
 }
 .panel-link:hover {
@@ -580,7 +570,7 @@ small {
   margin-bottom: 22px;
 }
 .workflow-card > .eyebrow {
-  font-size: 8px;
+  font-size: var(--minda-meta-size);
   letter-spacing: 1.4px;
 }
 .workflow-card h2 {
@@ -601,7 +591,7 @@ small {
   gap: 12px;
 }
 .workflow-number {
-  font-size: 10px;
+  font-size: 12px;
   color: #7b858f;
   border: 1px solid #dfe4eb;
   border-radius: 50%;
@@ -611,18 +601,18 @@ small {
   place-items: center;
 }
 .workflow-list strong {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 550;
   display: block;
 }
 .workflow-list small {
-  font-size: 9px;
+  font-size: 12px;
   color: #949da8;
   display: block;
   margin-top: 2px;
 }
 .workflow-card a[data-slot="button"] {
-  font-size: 10px;
+  font-size: 12px;
   width: 100%;
   background: #fff;
   border-color: #e4e7ec;
@@ -640,7 +630,7 @@ small {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 10px;
+  font-size: 12px;
   color: #7e8894;
   margin-bottom: 16px;
 }
@@ -653,11 +643,11 @@ small {
   border-top: 1px solid #e9edf2;
 }
 .activity-item p {
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 7px;
 }
 .activity-item small {
-  font-size: 9px;
+  font-size: 12px;
   color: #9da4af;
 }
 .empty {
@@ -698,7 +688,7 @@ small {
   display: flex;
   justify-content: space-between;
   padding: 0 32px 16px 15px;
-  font-size: 9px;
+  font-size: 12px;
   color: #a7adb8;
 }
 .list-toolbar {
@@ -732,7 +722,7 @@ small {
 }
 .search-field button {
   height: 24px;
-  font-size: 10px;
+  font-size: 12px;
   padding: 0 7px;
 }
 select {
@@ -756,7 +746,7 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 12px;
   color: #929aa6;
   padding-top: 20px;
   margin-top: 6px;
@@ -834,7 +824,7 @@ label input[type="checkbox"] {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 11px;
+  font-size: 12px;
   background: #fff;
   z-index: 1;
 }
@@ -856,7 +846,7 @@ label input[type="checkbox"] {
   font-weight: 500;
 }
 .wizard-steps small {
-  font-size: 8px;
+  font-size: var(--minda-meta-size);
   letter-spacing: 1px;
 }
 .wizard-steps li.current {
@@ -915,10 +905,10 @@ label input[type="checkbox"] {
   color: #576774;
 }
 .upload-zone span {
-  font-size: 10px;
+  font-size: 12px;
 }
 .upload-zone small {
-  font-size: 10px;
+  font-size: 12px;
   color: #a0a8b4;
 }
 .upload-zone input {
@@ -948,7 +938,7 @@ label input[type="checkbox"] {
 .file-row small {
   display: block;
   color: #98a1ae;
-  font-size: 10px;
+  font-size: 12px;
 }
 .notice {
   display: flex;
@@ -958,7 +948,7 @@ label input[type="checkbox"] {
   background: #fbf7ef;
   border: 1px solid #eee5cf;
   border-radius: 10px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.8;
   color: #947943;
   margin: 15px 0;
@@ -983,7 +973,7 @@ label input[type="checkbox"] {
   color: #b06b5e;
 }
 .notice button {
-  font-size: 10px;
+  font-size: 12px;
   padding: 3px 10px;
   height: 28px;
   margin-top: 8px;
@@ -1010,7 +1000,7 @@ label input[type="checkbox"] {
 .person-choice small {
   display: block;
   color: #9da5b0;
-  font-size: 10px;
+  font-size: 12px;
 }
 .summary-box {
   background: #f5f7f9;
@@ -1022,7 +1012,7 @@ label input[type="checkbox"] {
   margin-bottom: 8px;
 }
 .summary-box p {
-  font-size: 11px;
+  font-size: 12px;
   color: #919ba7;
 }
 .summary-box .row {
@@ -1033,7 +1023,7 @@ label input[type="checkbox"] {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 12px;
   color: #6f7b89;
 }
 .two-columns {
@@ -1069,7 +1059,7 @@ label input[type="checkbox"] {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 10px;
+  font-size: 12px;
   color: #98a1ae;
   margin-bottom: 20px;
 }
@@ -1115,7 +1105,7 @@ label input[type="checkbox"] {
   color: #5c7292;
 }
 .job-progress small {
-  font-size: 10px;
+  font-size: 12px;
   color: #9aabc1;
   display: block;
   margin-top: 3px;
@@ -1124,7 +1114,7 @@ label input[type="checkbox"] {
   flex: 1;
 }
 .job-progress > button {
-  font-size: 11px;
+  font-size: 12px;
 }
 .pulse-icon {
   width: 37px;
@@ -1138,10 +1128,11 @@ label input[type="checkbox"] {
 }
 .detail-list {
   margin-bottom: 20px;
+  overflow-wrap: anywhere;
 }
 .detail-list > div {
   display: grid;
-  grid-template-columns: 135px 1fr;
+  grid-template-columns: 135px minmax(0, 1fr);
   gap: 14px;
   font-size: 12px;
   padding: 15px 0;
@@ -1149,7 +1140,7 @@ label input[type="checkbox"] {
 }
 .detail-list > div > span:first-child {
   color: #9aa3af;
-  font-size: 11px;
+  font-size: 12px;
 }
 .detail-list strong {
   font-weight: 500;
@@ -1175,7 +1166,7 @@ label input[type="checkbox"] {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 12px;
   color: #5c7768;
   padding: 6px 0;
 }
@@ -1215,7 +1206,7 @@ label input[type="checkbox"] {
   display: flex;
   align-items: center;
   gap: 9px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.6;
   cursor: pointer;
 }
@@ -1242,7 +1233,7 @@ label input[type="checkbox"] {
 }
 .cards-grid p {
   margin-top: 7px;
-  font-size: 11px;
+  font-size: 12px;
 }
 .quote {
   border-left: 2px solid #e0e6ee;
@@ -1269,7 +1260,7 @@ label input[type="checkbox"] {
   background: #fcfbf8;
 }
 .transcript-time {
-  font-size: 11px;
+  font-size: 12px;
   color: #8795a7;
   min-width: 39px;
   font-variant-numeric: tabular-nums;
@@ -1277,7 +1268,7 @@ label input[type="checkbox"] {
 }
 .transcript-time small {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   color: #b5bec9;
   margin-top: 3px;
 }
@@ -1301,7 +1292,7 @@ label input[type="checkbox"] {
   margin-top: 12px;
 }
 .mini-label {
-  font-size: 8px;
+  font-size: var(--minda-meta-size);
   background: #f0f2f5;
   color: #929ca8;
   border-radius: 4px;
@@ -1326,7 +1317,7 @@ label input[type="checkbox"] {
   flex-wrap: wrap;
 }
 .minutes-toolbar button {
-  font-size: 10px;
+  font-size: 12px;
 }
 .minutes-layout {
   display: grid;
@@ -1351,7 +1342,7 @@ label input[type="checkbox"] {
 }
 .segmented-control button {
   flex: 1;
-  font-size: 10px;
+  font-size: 12px;
   white-space: nowrap;
   border: 0;
   color: #8c98a7;
@@ -1377,7 +1368,7 @@ label input[type="checkbox"] {
   border: 0;
 }
 .field-section {
-  font-size: 8px;
+  font-size: var(--minda-meta-size);
   color: #9ca5b2;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -1399,7 +1390,7 @@ label input[type="checkbox"] {
   padding-left: 18px;
 }
 .fact-reason {
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.7;
   color: #a4acb7;
   margin: 10px 0;
@@ -1409,13 +1400,13 @@ label input[type="checkbox"] {
   align-items: center;
   gap: 5px;
   color: #80929f;
-  font-size: 9px;
+  font-size: 12px;
   border: 0;
   background: transparent;
   padding: 4px 0;
 }
 .fact-item button[data-slot="button"] {
-  font-size: 10px;
+  font-size: 12px;
   color: #7b8a9e;
 }
 .document-preview {
@@ -1431,7 +1422,7 @@ label input[type="checkbox"] {
   justify-content: space-between;
   gap: 10px;
   border-bottom: 1px solid #e1e6ef;
-  font-size: 10px;
+  font-size: 12px;
   color: #7b8799;
 }
 .preview-toolbar > span {
@@ -1464,7 +1455,7 @@ label input[type="checkbox"] {
 }
 .json-details {
   margin: 15px 0;
-  font-size: 10px;
+  font-size: 12px;
   color: #8c99ab;
 }
 .json-details summary {
@@ -1476,14 +1467,14 @@ label input[type="checkbox"] {
   border-radius: 8px;
   max-height: 400px;
   overflow: auto;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.7;
   color: #788696;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 .report-details {
-  font-size: 11px;
+  font-size: 12px;
   color: #8290a4;
   margin-top: 20px;
 }
@@ -1494,7 +1485,7 @@ label input[type="checkbox"] {
   border-radius: 8px;
 }
 .report-details > .notice {
-  font-size: 10px;
+  font-size: 12px;
 }
 .topic-list {
   padding: 20px;
@@ -1504,7 +1495,7 @@ label input[type="checkbox"] {
 }
 .topic-list p {
   margin-top: 9px;
-  font-size: 11px;
+  font-size: 12px;
 }
 .checks-box {
   padding: 18px;
@@ -1607,7 +1598,7 @@ details > summary {
 }
 .readable-json,
 .log-view {
-  font-size: 11px;
+  font-size: 12px;
   white-space: pre-wrap;
   overflow: auto;
   max-height: 65vh;
@@ -1619,7 +1610,7 @@ details > summary {
 .log-view {
   background: #1f2630;
   color: #c3cedb;
-  font-size: 10px;
+  font-size: 12px;
 }
 .version-row {
   display: flex;
@@ -1635,7 +1626,7 @@ details > summary {
 }
 .version-row p,
 .version-row small {
-  font-size: 10px;
+  font-size: 12px;
   color: #929eac;
 }
 .column-actions {
@@ -1645,7 +1636,7 @@ details > summary {
   align-items: flex-start;
 }
 .column-actions button {
-  font-size: 10px;
+  font-size: 12px;
 }
 .template-icon {
   display: grid;
@@ -1667,7 +1658,7 @@ details > summary {
   padding-bottom: 0;
 }
 .template-card .notice {
-  font-size: 10px;
+  font-size: 12px;
   margin-top: 20px;
 }
 .template-fields {
@@ -1686,14 +1677,14 @@ details > summary {
   font-weight: 500;
 }
 .template-field label {
-  font-size: 10px;
+  font-size: 12px;
   gap: 4px;
 }
 .template-field select {
-  font-size: 11px !important;
+  font-size: 12px !important;
 }
 .template-field button {
-  font-size: 9px;
+  font-size: 12px;
 }
 .review-footer {
   border-top: 1px solid #e6ebf3;
@@ -1704,7 +1695,7 @@ details > summary {
 }
 .review-footer > button {
   justify-self: start;
-  font-size: 11px;
+  font-size: 12px;
 }
 .ocr-text-list {
   display: grid;
@@ -1714,7 +1705,7 @@ details > summary {
   padding: 0 6px;
 }
 .ocr-text-list > label > small {
-  font-size: 9px;
+  font-size: 12px;
   color: #8b9aaf;
 }
 .ocr-text-list textarea {
@@ -1738,7 +1729,7 @@ details > summary {
   margin: 10px 0;
 }
 .voice-sample span {
-  font-size: 10px;
+  font-size: 12px;
   display: block;
   overflow-wrap: anywhere;
   color: #8392a4;
@@ -1759,7 +1750,7 @@ details > summary {
 }
 .metric-pair span {
   display: block;
-  font-size: 9px;
+  font-size: 12px;
   color: #8a98ac;
 }
 .metric-pair strong {
@@ -1787,7 +1778,7 @@ details > summary {
   grid-template-columns: 85px 1fr 30px;
   align-items: center;
   gap: 12px;
-  font-size: 10px;
+  font-size: 12px;
   color: #8e9aac;
 }
 .job-chart > div > div {
@@ -1812,13 +1803,13 @@ details > summary {
   border-radius: 10px;
   padding: 20px;
   margin-top: 15px;
-  font-size: 11px;
+  font-size: 12px;
   display: grid;
   gap: 10px;
   overflow-wrap: anywhere;
 }
 .restore-result code {
-  font-size: 10px;
+  font-size: 12px;
   white-space: pre-wrap;
 }
 .notification-wrap {
@@ -1849,7 +1840,7 @@ details > summary {
 .notifications > a small,
 .notifications > a time {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   color: #8e9bab;
 }
 .notifications > p {
@@ -1880,7 +1871,7 @@ details > summary {
 }
 .auth-story > .eyebrow {
   color: #829287;
-  font-size: 10px;
+  font-size: 12px;
 }
 .auth-story h1 {
   font-size: clamp(38px, 4.5vw, 70px);
@@ -1913,11 +1904,11 @@ details > summary {
   font-weight: 500;
 }
 .auth-note p {
-  font-size: 10px;
+  font-size: 12px;
   color: #99a59d;
 }
 .auth-footer {
-  font-size: 8px;
+  font-size: var(--minda-meta-size);
   letter-spacing: 1.8px;
   color: #a1aaa4;
   margin-top: 32px;
@@ -1932,7 +1923,7 @@ details > summary {
   width: min(365px, 100%);
 }
 .step-label {
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: #a2abb6;
 }
@@ -1960,7 +1951,7 @@ details > summary {
   height: 43px;
 }
 .auth-form > .small {
-  font-size: 10px;
+  font-size: 12px;
 }
 .mobile-menu {
   display: none;
@@ -2040,7 +2031,7 @@ details > summary {
     min-height: 145px;
   }
   .stat-card small {
-    font-size: 8px;
+    font-size: var(--minda-meta-size);
   }
   .stat-card strong {
     font-size: 33px;
@@ -2066,20 +2057,20 @@ details > summary {
     gap: 18px;
   }
   .detail-list > div {
-    grid-template-columns: 110px 1fr;
+    grid-template-columns: 110px minmax(0, 1fr);
   }
   .data-table td {
     padding: 16px 8px;
-    font-size: 11px;
+    font-size: 12px;
   }
   .data-table th {
-    font-size: 9px;
+    font-size: 12px;
   }
   .meeting-name {
     gap: 8px;
   }
   .meeting-name strong {
-    font-size: 11px;
+    font-size: 12px;
   }
   .file-icon {
     width: 30px;
@@ -2223,16 +2214,16 @@ details > summary {
     display: none;
   }
   .wizard-steps strong {
-    font-size: 10px;
+    font-size: 12px;
   }
   .wizard-steps small {
-    font-size: 7px;
+    font-size: var(--minda-meta-size);
   }
   .wizard-steps li > span {
     width: 25px;
     height: 25px;
     flex-shrink: 0;
-    font-size: 9px;
+    font-size: 12px;
   }
   .topbar {
     padding: 0 18px;
@@ -2255,19 +2246,19 @@ details > summary {
     font-size: 25px;
   }
   .page-heading button {
-    font-size: 10px;
+    font-size: 12px;
   }
   .page-heading .eyebrow {
-    font-size: 8px;
+    font-size: var(--minda-meta-size);
   }
   .page-heading p.muted {
-    font-size: 11px;
+    font-size: 12px;
   }
   .cards-grid {
     gap: 15px;
   }
   .app-footer {
-    font-size: 8px;
+    font-size: var(--minda-meta-size);
     gap: 10px;
     padding: 0 18px 12px;
   }
@@ -2289,7 +2280,7 @@ details > summary {
     font-size: 24px;
   }
   .auth-story > p {
-    font-size: 11px;
+    font-size: 12px;
   }
   .auth-note {
     align-items: flex-start;
@@ -2300,10 +2291,10 @@ details > summary {
     flex-shrink: 0;
   }
   .auth-note strong {
-    font-size: 10px;
+    font-size: 12px;
   }
   .auth-note p {
-    font-size: 9px;
+    font-size: 12px;
   }
 }
 @media (max-width: 600px) {
@@ -2374,7 +2365,7 @@ details > summary {
     padding: 7px 9px;
   }
   .global-search input {
-    font-size: 10px;
+    font-size: 12px;
   }
   .global-search kbd {
     display: none;
@@ -2382,7 +2373,7 @@ details > summary {
   .account .avatar {
     width: 28px;
     height: 28px;
-    font-size: 10px;
+    font-size: 12px;
   }
   .header-actions {
     gap: 8px;
@@ -2413,14 +2404,14 @@ details > summary {
     border-radius: 12px;
   }
   .stat-card span {
-    font-size: 9px;
+    font-size: 12px;
   }
   .stat-card strong {
     font-size: 29px;
     margin: 8px 0 2px;
   }
   .stat-card small {
-    font-size: 7px;
+    font-size: var(--minda-meta-size);
     line-height: 1.6;
   }
   .context-column {
@@ -2460,7 +2451,7 @@ details > summary {
     text-align: center;
   }
   .wizard-steps strong {
-    font-size: 8px;
+    font-size: var(--minda-meta-size);
   }
   .wizard-steps small {
     display: none;
@@ -2472,7 +2463,7 @@ details > summary {
     gap: 6px;
   }
   .wizard-footer button {
-    font-size: 10px;
+    font-size: 12px;
     padding: 8px 10px;
   }
   .person-grid {
@@ -2483,7 +2474,7 @@ details > summary {
     margin-bottom: 20px;
   }
   .workspace-tabs button {
-    font-size: 10px;
+    font-size: 12px;
     gap: 5px;
     padding-bottom: 12px;
   }
@@ -2495,13 +2486,13 @@ details > summary {
     gap: 9px;
   }
   .job-progress strong {
-    font-size: 10px;
+    font-size: 12px;
   }
   .job-progress small {
-    font-size: 8px;
+    font-size: var(--minda-meta-size);
   }
   .job-progress > button {
-    font-size: 9px;
+    font-size: 12px;
     padding: 6px 8px;
   }
   .pulse-icon {
@@ -2519,11 +2510,11 @@ details > summary {
     gap: 8px;
   }
   .minutes-toolbar button {
-    font-size: 9px;
+    font-size: 12px;
     height: 30px;
   }
   .minutes-toolbar .download-link {
-    font-size: 10px;
+    font-size: 12px;
   }
   .transcript-row {
     gap: 10px;
@@ -2531,20 +2522,20 @@ details > summary {
   }
   .transcript-time {
     min-width: 31px;
-    font-size: 10px;
+    font-size: 12px;
   }
   .transcript-text p {
     font-size: 12px;
   }
   .transcript-text strong {
-    font-size: 11px;
+    font-size: 12px;
   }
   .transcript-text > .row {
     gap: 6px;
     flex-wrap: wrap;
   }
   .mini-label {
-    font-size: 7px;
+    font-size: var(--minda-meta-size);
   }
   .transcript-row > button {
     width: 22px;
@@ -2559,25 +2550,25 @@ details > summary {
     padding: 7px 9px;
   }
   .list-toolbar select {
-    font-size: 11px !important;
+    font-size: 12px !important;
   }
   .list-toolbar .check-label {
-    font-size: 10px;
+    font-size: 12px;
   }
   .data-table {
     min-width: 610px;
   }
   .data-table th {
-    font-size: 9px;
+    font-size: 12px;
   }
   .data-table td {
-    font-size: 10px;
+    font-size: 12px;
   }
   .meeting-name strong {
-    font-size: 11px;
+    font-size: 12px;
   }
   .pagination {
-    font-size: 9px;
+    font-size: 12px;
     gap: 15px;
   }
   .pagination > span {
@@ -2587,8 +2578,8 @@ details > summary {
     gap: 5px;
   }
   .detail-list > div {
-    grid-template-columns: 100px 1fr;
-    font-size: 11px;
+    grid-template-columns: 100px minmax(0, 1fr);
+    font-size: 12px;
     gap: 8px;
   }
   .app-footer > span:last-child {
@@ -2652,19 +2643,19 @@ details > summary {
     margin-top: 25px;
   }
   .preview-toolbar {
-    font-size: 9px;
+    font-size: 12px;
     padding: 8px 11px;
   }
   .readable-json,
   .log-view {
     padding: 12px;
-    font-size: 9px;
+    font-size: 12px;
   }
   .version-row {
     align-items: flex-start;
   }
   .version-row strong {
-    font-size: 11px;
+    font-size: 12px;
   }
   .stat-grid.four {
     gap: 10px;
@@ -2715,7 +2706,7 @@ details > summary {
   background: #faf7ef;
 }
 .comparison-row small {
-  font-size: 10px;
+  font-size: 12px;
   color: #8d9aae;
 }
 .comparison-row p {

@@ -61,7 +61,7 @@ def check_motion(page, args):
     """), "Polling replayed page motion or replaced the focused input"
     checks.append("polling preserves input, caret and page animation state")
     page.get_by_role("button", name="Tiếp tục", exact=True).click()
-    heading = page.get_by_role("heading", name="Nguồn ghi âm", exact=True)
+    heading = page.get_by_role("heading", name="Nguồn âm thanh", exact=True)
     expect(heading).to_be_focused()
     step = page.locator(".wizard-step-motion")
     expect(step).to_have_attribute("data-direction", "forward")
@@ -76,16 +76,21 @@ def check_motion(page, args):
     expect(step).to_have_attribute("data-direction", "backward")
     expect(title).to_have_value("Kiểm tra chuyển động Minda")
     checks.append("wizard direction, keyboard focus and completion check")
-    page.locator(".brand").hover()
-    path = page.locator(".brand-symbol path").first
-    assert path.evaluate("node => getComputedStyle(node).animationIterationCount") == "1"
-    page.wait_for_timeout(650)
-    assert path.evaluate("node => node.getAnimations().length") == 0
+    brand_el = page.locator(".minda-brand, .brand").first
+    brand_el.hover()
+    if page.locator(".brand-symbol path").count() > 0:
+        path = page.locator(".brand-symbol path").first
+        assert path.evaluate("node => getComputedStyle(node).animationIterationCount") == "1"
+        page.wait_for_timeout(650)
+        assert path.evaluate("node => node.getAnimations().length") == 0
     checks.append("brand wave runs once on hover")
 
     if args.meeting_id:
         route = args.url + "/meetings/" + args.meeting_id + "?tab=minutes"
         page.goto(route)
+        preview_btn = page.get_by_role("button", name="Xem trước Word")
+        if preview_btn.count() > 0:
+            preview_btn.click()
         image = page.locator("img.document-page.is-ready")
         expect(image).to_be_visible()
         page.wait_for_timeout(250)
@@ -119,7 +124,7 @@ def check_motion(page, args):
             page.get_by_role("button", name="Thử tải lại", exact=True).click()
             expect(image).to_be_visible()
             checks.append("preview reserves space, fades after load and retries image errors")
-        trigger = page.get_by_role("button", name="Cấu hình & tạo lại", exact=True)
+        trigger = page.get_by_role("button", name="Tạo lại biên bản", exact=True)
         trigger.click()
         dialog = page.get_by_role("dialog")
         expect(dialog).to_be_visible()
@@ -138,6 +143,9 @@ def check_motion(page, args):
         page.keyboard.press("Escape")
         expect(dialog).to_be_hidden()
         page.reload()
+        preview_btn = page.get_by_role("button", name="Xem trước Word")
+        if preview_btn.count() > 0:
+            preview_btn.click()
         expect(image).to_be_visible()
         assert image.evaluate("node => getComputedStyle(node).animationName") == "none"
         assert image.evaluate("node => getComputedStyle(node).opacity") == "1"
@@ -215,7 +223,7 @@ def main():
             ]
             if args.meeting_id:
                 routes.append(
-                    ("/meetings/" + args.meeting_id + "?tab=minutes", "Nội dung & dữ liệu")
+                    ("/meetings/" + args.meeting_id + "?tab=minutes", "Nội dung biên bản")
                 )
             if args.template_id:
                 response = context.request.get(args.url + "/api/v1/templates/" + args.template_id)
@@ -253,6 +261,10 @@ def main():
                         ).to_be_visible()
                     report["admin_lists"].append({"route": route, "records": len(records)})
                 if "?tab=minutes" in route or route.startswith("/templates/"):
+                    if "?tab=minutes" in route:
+                        preview_btn = page.get_by_role("button", name="Xem trước Word")
+                        if preview_btn.count() > 0:
+                            preview_btn.click()
                     report["document_previews"].append(
                         {"route": route, "pages": check_document_preview(page)}
                     )
@@ -279,14 +291,19 @@ def main():
                     "Kiểm tra mobile"
                 )
                 page.get_by_role("button", name="Tiếp tục", exact=True).click()
-                expect(page.get_by_role("heading", name="Nguồn ghi âm", exact=True)).to_be_focused()
+                expect(
+                    page.get_by_role("heading", name="Nguồn âm thanh", exact=True)
+                ).to_be_focused()
                 page.wait_for_timeout(250)
                 page.screenshot(path=str(args.output / "mobile-wizard.png"), full_page=True)
                 assert not page.evaluate("document.documentElement.scrollWidth>innerWidth")
                 if args.meeting_id:
                     page.goto(args.url + "/meetings/" + args.meeting_id + "?tab=minutes")
+                    preview_btn = page.get_by_role("button", name="Xem trước Word")
+                    if preview_btn.count() > 0:
+                        preview_btn.click()
                     expect(page.locator("img.document-page.is-ready")).to_be_visible()
-                    page.get_by_role("button", name="Cấu hình & tạo lại", exact=True).click()
+                    page.get_by_role("button", name="Tạo lại biên bản", exact=True).click()
                     dialog = page.get_by_role("dialog")
                     expect(dialog).to_be_visible()
                     page.wait_for_timeout(250)

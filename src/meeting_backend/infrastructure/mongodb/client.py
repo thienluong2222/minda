@@ -20,6 +20,15 @@ COLLECTIONS = (
     "transcript_segments",
     "template_versions",
     "minutes_versions",
+    "minutes_input_snapshots",
+    "minutes_input_segments",
+    "style_profiles",
+    "style_learning_audit",
+    "meeting_graph_versions",
+    "meeting_graph_nodes",
+    "meeting_graph_edges",
+    "meeting_outline_sections",
+    "meeting_outline_items",
     "artifacts",
     "audit_events",
     "settings",
@@ -88,8 +97,31 @@ class Mongo:
         self.db.sessions.create_index("token_hash", unique=True)
         self.db.sessions.create_index("expires_at", expireAfterSeconds=0)
         self.db.transcript_segments.create_index([("version_id", 1), ("index", 1)], unique=True)
+        self.db.transcript_segments.create_index([("version_id", 1), ("needs_review", 1)])
         self.db.jobs.create_index([("state", 1), ("created_at", 1)])
         self.db.jobs.create_index("lease_until")
+        self.db.minutes_input_segments.create_index(
+            [("snapshot_id", 1), ("owner_id", 1), ("index", 1)], unique=True
+        )
+        self.db.style_profiles.create_index("owner_id", unique=True)
+        for graph_collection in (self.db.meeting_graph_nodes, self.db.meeting_graph_edges):
+            graph_collection.create_index(
+                [("owner_id", 1), ("meeting_id", 1), ("graph_id", 1), ("index", 1)]
+            )
+        graph_scope_keys = [("owner_id", 1), ("meeting_id", 1), ("graph_id", 1)]
+        self.db.meeting_graph_nodes.create_index([*graph_scope_keys, ("value.node_id", 1)])
+        self.db.meeting_graph_nodes.create_index(
+            [*graph_scope_keys, ("value.kind", 1), ("index", 1)]
+        )
+        for endpoint in ("source", "target"):
+            self.db.meeting_graph_edges.create_index(
+                [*graph_scope_keys, (f"value.{endpoint}", 1), ("index", 1)]
+            )
+        outline_keys = [("owner_id", 1), ("meeting_id", 1), ("version_id", 1)]
+        self.db.meeting_outline_sections.create_index([*outline_keys, ("index", 1)])
+        self.db.meeting_outline_items.create_index(
+            [*outline_keys, ("section_id", 1), ("index", 1)]
+        )
         for name in ["meetings", "templates", "speakers", "jobs", "audit_events", "experiments"]:
             self.db[name].create_index([("owner_id", ASCENDING), ("created_at", -1)])
         self.db.artifacts.create_index("path", unique=True)

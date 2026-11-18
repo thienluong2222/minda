@@ -16,6 +16,8 @@ router = APIRouter(tags=["users"])
 @router.get("/admin/users")
 def list_users(
     q: str = Query("", max_length=200),
+    page: int | None = Query(None, ge=1),
+    limit: int = Query(10, ge=1, le=100),
     role: Literal["user", "admin"] | None = None,
     active: bool | None = None,
     user=Depends(administrator),
@@ -29,7 +31,9 @@ def list_users(
         query["role"] = role
     if active is not None:
         query["active"] = active
-    users = list(mongo.db.users.find(query).sort([("created_at", -1), ("_id", 1)]))
+    cursor = mongo.db.users.find(query).sort([("created_at", -1), ("_id", 1)])
+    total = mongo.db.users.count_documents(query)
+    users = list(cursor.skip((page - 1) * limit).limit(limit) if page is not None else cursor)
     counts = {}
     for group in mongo.db.meetings.aggregate(
         [
@@ -44,7 +48,7 @@ def list_users(
     ):
         owner = counts.setdefault(group["_id"]["owner_id"], {"active": 0, "trashed": 0})
         owner["trashed" if group["_id"].get("trashed") else "active"] += group["count"]
-    return [
+    items = [
         {
             **public(account),
             "meeting_count": counts.get(account["_id"], {}).get("active", 0),
@@ -52,6 +56,7 @@ def list_users(
         }
         for account in users
     ]
+    return items if page is None else {"items": items, "total": total, "page": page, "limit": limit}
 
 
 @router.post("/admin/users", status_code=201)

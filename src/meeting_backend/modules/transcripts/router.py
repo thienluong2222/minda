@@ -4,6 +4,7 @@ from pydantic import Field
 from meeting_backend.api.dependencies import current_user, database
 from meeting_backend.core.errors import AppError
 from meeting_backend.infrastructure.mongodb.client import public
+from meeting_backend.modules.meetings import timeline as timeline_service
 from meeting_backend.modules.meetings.repository import MeetingRepository
 from meeting_backend.modules.meetings.schemas import Revision
 from meeting_backend.modules.transcripts import service
@@ -39,9 +40,14 @@ def transcript(
     version = mongo.db.transcript_versions.find_one({"_id": selected, "meeting_id": meeting_id})
     if not version:
         raise AppError("NOT_FOUND", "Không tìm thấy phiên bản transcript.", 404)
+    segments = []
+    for row in service.rows_for(mongo, selected):
+        view = service.view_row(row)
+        view["context_audio"] = service.review_context(mongo, meeting, row)
+        segments.append(view)
     return {
         "version": public(version),
-        "segments": [service.view_row(r) for r in service.rows_for(mongo, selected)],
+        "segments": segments,
     }
 
 
@@ -74,11 +80,23 @@ def restore(
         service.rows_for(mongo, prior["_id"]),
         reason="Khôi phục transcript",
         run_path=prior.get("run_path"),
+        input_timeline_hash=prior.get("input_timeline_hash"),
+        timing_complete=prior.get("timing_complete", True),
     )
+    changes = {"active_transcript_id": version["_id"]}
+    if prior.get("input_timeline_hash") is not None:
+        try:
+            layout = timeline_service.layout_for(
+                meeting,
+                timeline_service.assets_for(mongo, meeting),
+            )
+            current_hash = timeline_service.content_hash(layout)
+        except AppError:
+            current_hash = None
+        if current_hash != prior["input_timeline_hash"]:
+            changes.update(state="draft", transcript_stale=True)
     try:
-        result = repo.update(
-            meeting, {"active_transcript_id": version["_id"]}, content_changed=True
-        )
+        result = repo.update(meeting, changes, content_changed=True)
     except BaseException:
         service.discard_version(mongo, version["_id"])
         raise

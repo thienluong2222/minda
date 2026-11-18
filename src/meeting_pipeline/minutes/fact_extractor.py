@@ -26,6 +26,7 @@ from meeting_pipeline.minutes.schemas import (
     SemanticFieldType,
     TemplateSchema,
 )
+from meeting_pipeline.minutes.transcript_context import context_spans, evidence_refs
 
 logger = logging.getLogger(__name__)
 
@@ -54,10 +55,50 @@ def _person_evidence(turn: IndexedTurn, run_id: str) -> EvidenceRef:
         start_sec=turn.start_sec,
         end_sec=turn.end_sec,
         clip_path=turn.clip_path,
+        clip_artifact_id=turn.clip_artifact_id,
         source_kind="transcript",
         text_snippet=turn.text or f"Người nói: {turn.speaker_label}",
         confidence=None,
     )
+
+
+ROLE_PATTERNS = {
+    "chair": r"chủ trì|chủ tọa",
+    "secretary": r"thư ký|người ghi biên bản",
+    "member": r"thành viên|đại biểu|khách mời",
+}
+NAME = r"[a-zà-ỹđ]+(?:\s+[a-zà-ỹđ]+){0,4}?"
+HONORIFIC = r"(?:anh|chị|ông|bà|đồng chí)"
+
+
+def stated_people(turns: list[IndexedTurn]):
+    """Names stated in speech are independent from voice-profile identification."""
+    people = {key: {} for key in ROLE_PATTERNS}
+    for span in context_spans(turns):
+        for clause in re.split(r"[.!?;]+", span.text):
+            lower = clause.casefold()
+            for key, role in ROLE_PATTERNS.items():
+                patterns = [
+                    rf"(?:^|\b{HONORIFIC}\s+|\btôi là\s+|\bgồm\s+)"
+                    rf"(?P<name>{NAME})\s+(?:(?:là|làm)\s+)?(?:{role})\b",
+                    rf"\b(?:{role})\s*(?::|là|do)\s*(?:{HONORIFIC}\s+)?"
+                    rf"(?P<name>{NAME})(?=$|[,;.!?]|\s+(?:và|cùng|đảm nhiệm|phụ trách)\b)",
+                ]
+                for pattern in patterns:
+                    for match in re.finditer(pattern, lower):
+                        prefix = lower[max(0, match.start() - 70) : match.start()]
+                        uncertain = r"\b(?:đề xuất|đề nghị|chưa|không|dự kiến|nếu)\b"
+                        if re.search(uncertain, match.group()) or re.search(
+                            uncertain + r"[^,.!?;]*$", prefix
+                        ):
+                            continue
+                        name = re.split(r"\b(?:gồm|tôi là)\s+", match["name"])[-1]
+                        name = re.sub(r"^(?:(?:là|làm|anh|chị|ông|bà)\s+)+", "", name)
+                        name = re.sub(r"\s+(?:là|làm)$", "", name).strip()
+                        if not name or name in {"tôi", "người", "chúng ta", "các thành viên"}:
+                            continue
+                        people[key].setdefault(name.title(), []).extend(span.sources())
+    return people
 
 
 def _explicit_role(
@@ -115,6 +156,10 @@ def _explicit_role(
                 if key not in candidates:
                     candidates[key] = name, []
                 candidates[key][1].append(_person_evidence(turn, run_id))
+    if not candidates:
+        role_key = "chair" if "chủ" in role else "secretary"
+        for name, sources in stated_people(turns)[role_key].items():
+            candidates[("stated", name.casefold())] = name, evidence_refs(sources, run_id)
     if len(candidates) == 1:
         name, evidence = next(iter(candidates.values()))
         return name, FactStatus.SUPPORTED, evidence, "Vai trò được nêu rõ trong transcript"
@@ -292,6 +337,7 @@ class M2RuleFactExtractor:
                                 start_sec=t.start_sec,
                                 end_sec=t.end_sec,
                                 clip_path=t.clip_path,
+                                clip_artifact_id=t.clip_artifact_id,
                                 source_kind="transcript",
                                 text_snippet=t.text,
                                 confidence=0.85,
@@ -389,7 +435,23 @@ class M2RuleFactExtractor:
                     )
 
             elif st == SemanticFieldType.ATTENDEE_LIST:
-                if person_groups:
+                roster = stated_people(turns)
+                named = {
+                    name: sources for group in roster.values() for name, sources in group.items()
+                }
+                explicit_roster = any(
+                    re.search(r"thành phần|tham dự|dự họp|dự học", t.text, re.I) for t in turns
+                )
+                if named and explicit_roster:
+                    val = list(named)
+                    evidence = evidence_refs(
+                        [t for sources in named.values() for t in sources], run_id
+                    )
+                    status = FactStatus.NEEDS_REVIEW
+                    reason = (
+                        "Danh sách tên được nêu trong lời giới thiệu; cần xác nhận đủ thành phần."
+                    )
+                elif person_groups:
                     val = [
                         normalize_speaker_label(group[-1].speaker_label) for group in person_groups
                     ]
@@ -421,6 +483,7 @@ class M2RuleFactExtractor:
                                 start_sec=t.start_sec,
                                 end_sec=t.end_sec,
                                 clip_path=t.clip_path,
+                                clip_artifact_id=t.clip_artifact_id,
                                 source_kind="transcript",
                                 text_snippet=t.text,
                                 confidence=0.8,
@@ -452,6 +515,7 @@ class M2RuleFactExtractor:
                                 start_sec=dt.start_sec,
                                 end_sec=dt.end_sec,
                                 clip_path=dt.clip_path,
+                                clip_artifact_id=dt.clip_artifact_id,
                                 source_kind="transcript",
                                 text_snippet=dt.text,
                                 confidence=0.85,

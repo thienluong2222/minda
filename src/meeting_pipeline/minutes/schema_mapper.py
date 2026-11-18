@@ -110,8 +110,23 @@ class M0RuleSchemaMapper:
             needs_review = False
             review_reason: str | None = None
 
+            block = next(b for b in doc_graph.blocks if b.block_id == anchor.block_id)
+            line = block.raw_text.casefold()
+            # Fixed front matter is never a narrative slot, including legacy schemas.
+            front_date = (
+                sec == "header"
+                and ("ngày" in line and "tháng" in line and "năm" in line)
+                and "hôm nay" not in line
+                and not any(word in line for word in ("bắt đầu", "kết thúc", "cuộc họp"))
+            )
+            if anchor.placeholder_type == PlaceholderType.FIXED_TEXT:
+                semantic_type = SemanticFieldType.CUSTOM
+                field_id = _make_field_id("template_statement")
+            elif front_date:
+                semantic_type = SemanticFieldType.DOCUMENT_DATE_PLACE
+                field_id = _make_field_id("doc_date")
             # 1. Party specific rules (must be checked before generic date/meeting_month_year)
-            if "đảng phí" in lbl:
+            elif "đảng phí" in lbl:
                 semantic_type = SemanticFieldType.PARTY_DUES
                 field_id = _make_field_id("party_dues")
             elif "tình hình đảng viên" in lbl:
@@ -257,6 +272,54 @@ class M0RuleSchemaMapper:
             unmapped_anchors=unmapped_list,
             proposed_by="m0_rules",
         )
+
+
+def reconcile_schema_structure(schema: TemplateSchema, graph: DocGraph) -> TemplateSchema:
+    """Revalidate saved mappings against current structure without changing their IDs."""
+    proposed = M0RuleSchemaMapper().propose_schema(graph)
+    by_anchor = {field.anchor_id: field for field in proposed.fields}
+    anchors = {anchor.anchor_id: anchor for anchor in graph.all_anchors}
+    fields = []
+    used = set()
+    for field in schema.fields:
+        field = field.model_copy(
+            update={"anchor_id": graph.anchor_aliases.get(field.anchor_id, field.anchor_id)}
+        )
+        if field.anchor_id in used:
+            continue
+        used.add(field.anchor_id)
+        if field.anchor_id not in anchors:
+            raise ValueError("Mẫu đã thay đổi cấu trúc; cần duyệt lại các trường dữ liệu.")
+        anchor = anchors[field.anchor_id]
+        current = by_anchor[field.anchor_id]
+        changes = {"section": current.section}
+        if current.semantic_type == SemanticFieldType.DOCUMENT_DATE_PLACE and (
+            current.section == "Header"
+            and field.semantic_type
+            in {
+                SemanticFieldType.DECISION_LIST,
+                SemanticFieldType.ACTION_ITEM,
+                SemanticFieldType.DISCUSSION_SUMMARY,
+                SemanticFieldType.CUSTOM,
+            }
+        ):
+            changes.update(
+                semantic_type=current.semantic_type,
+                raw_label=current.raw_label,
+                mapper_status="needs_review",
+                review_reason="Đã sửa ánh xạ cũ không phù hợp vùng ngày và địa danh ban hành.",
+            )
+        if anchor.placeholder_type == PlaceholderType.SIGNATURE_BLOCK:
+            changes["semantic_type"] = SemanticFieldType.SIGNATURE
+        fields.append(field.model_copy(update=changes))
+    present = {field.anchor_id for field in fields}
+    fields.extend(
+        field
+        for field in proposed.fields
+        if field.anchor_id not in present
+        and anchors[field.anchor_id].placeholder_type == PlaceholderType.FIXED_TEXT
+    )
+    return schema.model_copy(update={"fields": fields})
 
 
 class M1Qwen3SchemaMapper:

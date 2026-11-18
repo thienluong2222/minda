@@ -11,13 +11,15 @@ import subprocess
 import threading
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import yaml
 from pydantic import BaseModel, Field
 
 ROOT = Path(__file__).resolve().parents[3]
 MODEL_LOCK = threading.Lock()
+RUNTIME_SIGNATURE = "mlx-lm-0.29.1-temp0-v2-lone-closing-quote"
+LEGACY_RUNTIME_SIGNATURE = "mlx-lm-0.29.1-temp0-v1"
 
 
 class ModelSettings(BaseModel):
@@ -33,6 +35,15 @@ class ModelSettings(BaseModel):
     max_clusters: int = Field(6, ge=2, le=12)
     minimum_silhouette: float = Field(0.08, ge=0, le=1)
     fuzziness: float = Field(2.0, gt=1)
+    compact_graph_output: bool = True
+    extraction_batch_size: int = Field(6, ge=1, le=24)
+    writer_batch_size: int = Field(8, ge=1, le=24)
+    information_budget_per_topic: int = Field(0, ge=0)
+    prefill_step_size: int = Field(1024, ge=128, le=4096)
+    prefix_cache_entries: int = Field(3, ge=0, le=8)
+    response_cache: bool = True
+    correction_policy: Literal["all", "flagged"] = "all"
+    inference_batch_size: int = Field(1, ge=1, le=4)
 
     def snapshot(self, embedding: bool = False) -> Path:
         name = self.embedding_id if embedding else self.model_id
@@ -103,6 +114,10 @@ class ModelSession:
                     str(ROOT / "scripts/minutes_model_worker.py"),
                     "--config",
                     str(ROOT / "configs/minutes.yaml"),
+                    "--prefill-step-size",
+                    str(self.settings.prefill_step_size),
+                    "--prefix-cache-entries",
+                    str(self.settings.prefix_cache_entries),
                 ],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
@@ -145,30 +160,54 @@ class ModelSession:
     def token_count(self, text: str) -> int:
         return int(self.request("tokens", text=text)["count"])
 
-    def generate_json(self, system: str, payload: Any) -> dict[str, Any]:
+    def generate_json(self, system: str, payload: Any, *, _result=None) -> dict[str, Any]:
+        signature_data = {
+            "settings": self.settings.model_dump(),
+            "system": system,
+            "payload": payload,
+            "runtime": RUNTIME_SIGNATURE,
+        }
         signature = json.dumps(
-            {
-                "settings": self.settings.model_dump(),
-                "system": system,
-                "payload": payload,
-                "runtime": "mlx-lm-0.29.1-temp0-v1",
-            },
+            signature_data,
             ensure_ascii=False,
             sort_keys=True,
         )
         key = hashlib.sha256(signature.encode()).hexdigest()
         cache = ROOT / self.settings.cache_dir / "responses" / f"{key}.json"
-        if cache.is_file():
-            saved = json.loads(cache.read_text())
-            self.calls.append({**saved["metrics"], "cache_hit": True, "wall_sec": 0.0})
-            value: dict[str, Any] = saved["value"]
-            return value
-        result = self.request(
-            "chat",
-            system=system,
-            user=json.dumps(payload, ensure_ascii=False),
-            max_tokens=self.settings.output_token_budget,
+        # Old successful values remain compatible: this parser only adds one
+        # syntax repair. Newly repaired responses never overwrite the old namespace.
+        legacy_signature = json.dumps(
+            {**signature_data, "runtime": LEGACY_RUNTIME_SIGNATURE},
+            ensure_ascii=False,
+            sort_keys=True,
         )
+        legacy_key = hashlib.sha256(legacy_signature.encode()).hexdigest()
+        legacy_cache = cache.with_name(legacy_key + ".json")
+        for candidate in (cache, legacy_cache) if self.settings.response_cache else ():
+            if candidate.is_file():
+                saved = json.loads(candidate.read_text())
+                self.calls.append(
+                    {
+                        **saved["metrics"],
+                        "cache_hit": True,
+                        "wall_sec": 0.0,
+                        "legacy_compatible_cache": candidate == legacy_cache,
+                    }
+                )
+                value: dict[str, Any] = saved["value"]
+                return value
+        result = (
+            _result
+            if _result is not None
+            else self.request(
+                "chat",
+                system=system,
+                user=json.dumps(payload, ensure_ascii=False),
+                max_tokens=self.settings.output_token_budget,
+            )
+        )
+        if _result is not None:
+            self.calls.append({k: v for k, v in result.items() if k != "text"})
         if result.get("finish_reason") != "stop":
             raise ModelRuntimeError(
                 "LLM hết ngân sách token; đầu ra bị từ chối thay vì cắt nội dung."
@@ -179,19 +218,102 @@ class ModelSession:
         try:
             value = json.loads(raw)
         except json.JSONDecodeError as exc:
-            # Repair only redundant closing braces, never arbitrary trailing text.
+            # Repair only syntax with no content after a complete object.
             value, end = json.JSONDecoder().raw_decode(raw)
-            if raw[end:].strip() not in {"}", "}}"}:
+            suffix = raw[end:].strip()
+            if suffix not in {"}", "}}", '"'}:
                 raise ModelRuntimeError("JSON không hợp lệ; không bỏ nội dung phía sau.") from exc
-            self.calls[-1]["format_repair"] = "redundant_closing_brace"
+            self.calls[-1]["format_repair"] = (
+                "redundant_closing_quote" if suffix == '"' else "redundant_closing_brace"
+            )
         if not isinstance(value, dict):
             raise ModelRuntimeError("LLM phải trả một JSON object.")
         cache.parent.mkdir(parents=True, exist_ok=True)
         metrics = {k: v for k, v in self.calls[-1].items() if k != "text"}
         metrics["cache_hit"] = False
         self.calls[-1]["cache_hit"] = False
-        cache.write_text(json.dumps({"value": value, "metrics": metrics}, ensure_ascii=False))
+        if self.settings.response_cache:
+            temp = cache.with_suffix(".tmp")
+            temp.write_text(json.dumps({"value": value, "metrics": metrics}, ensure_ascii=False))
+            temp.replace(cache)
         return value
+
+    def generate_json_many(self, system: str, payloads: list[Any]) -> list[Any]:
+        """Bounded independent inference; malformed output fails only its own packet."""
+        size = self.settings.inference_batch_size
+        # Warm response caches already eliminate inference. Avoid decoding them again.
+        if size == 1:
+            results = []
+            for payload in payloads:
+                try:
+                    results.append(self.generate_json(system, payload))
+                except (ModelRuntimeError, ValueError, TypeError, KeyError) as exc:
+                    results.append(exc)
+            return results
+        results = []
+        for start in range(0, len(payloads), size):
+            batch = payloads[start : start + size]
+            cached = []
+            fresh = []
+            for i, payload in enumerate(batch):
+                exists = False
+                if self.settings.response_cache:
+                    for signature in (RUNTIME_SIGNATURE, LEGACY_RUNTIME_SIGNATURE):
+                        key = hashlib.sha256(
+                            json.dumps(
+                                {
+                                    "settings": self.settings.model_dump(),
+                                    "system": system,
+                                    "payload": payload,
+                                    "runtime": signature,
+                                },
+                                ensure_ascii=False,
+                                sort_keys=True,
+                            ).encode()
+                        ).hexdigest()
+                        exists |= (
+                            ROOT / self.settings.cache_dir / "responses" / f"{key}.json"
+                        ).is_file()
+                (cached if exists else fresh).append(i)
+            slots = [None] * len(batch)
+            for i in cached:
+                try:
+                    slots[i] = self.generate_json(system, batch[i])
+                except (ModelRuntimeError, ValueError, TypeError, KeyError) as exc:
+                    slots[i] = exc
+            if not fresh:
+                results.extend(slots)
+                continue
+            try:
+                response = self.request(
+                    "chat_batch",
+                    requests=[
+                        {
+                            "system": system,
+                            "user": json.dumps(p, ensure_ascii=False),
+                            "max_tokens": self.settings.output_token_budget,
+                        }
+                        for p in [batch[i] for i in fresh]
+                    ],
+                )
+                raw = response["results"]
+                if not isinstance(raw, list) or len(raw) != len(fresh):
+                    raise ModelRuntimeError("Batch runtime trả thiếu kết quả.")
+            except (ModelRuntimeError, ValueError, TypeError, KeyError):
+                for i in fresh:
+                    try:
+                        slots[i] = self.generate_json(system, batch[i])
+                    except (ModelRuntimeError, ValueError, TypeError, KeyError) as exc:
+                        slots[i] = exc
+                results.extend(slots)
+                continue
+            for i, item in zip(fresh, raw, strict=True):
+                try:
+                    slots[i] = self.generate_json(system, batch[i], _result=item)
+                except (ModelRuntimeError, ValueError, TypeError, KeyError) as exc:
+                    slots[i] = exc
+            results.extend(slots)
+        return results
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         key = hashlib.sha256(

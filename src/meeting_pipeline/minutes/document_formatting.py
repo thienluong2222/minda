@@ -357,6 +357,7 @@ def _front_matter(
                     }[key],
                 }
             )
+    original_date = raw_date
     if metadata.issue_date:
         d = metadata.issue_date
         month = str(d.month).zfill(2) if d.month < 3 else str(d.month)
@@ -373,6 +374,32 @@ def _front_matter(
                 "code": "issue_date_missing",
                 "message": "Cần kiểm tra địa danh và ngày ban hành; ngày họp được quản lý riêng.",
             }
+        )
+    if any(item["code"] in {"complex_front_matter", "mixed_front_matter"} for item in issues):
+        # A retained legal block already owns this region. Repeated formatting
+        # must never add another national heading beside it.
+        if (
+            metadata.organization
+            or metadata.document_number
+            or metadata.issue_place
+            or metadata.issue_date
+        ):
+            issues.append(
+                {
+                    "code": "front_matter_metadata_not_applied",
+                    "message": "Phần đầu có bố cục phức tạp. "
+                    "Hãy đối chiếu thông tin ban hành với mẫu.",
+                }
+            )
+        return (
+            title,
+            set(),
+            {
+                "organization": organization[-1].strip() if organization else "",
+                "parent_organization": "\n".join(organization[:-1]),
+                "document_number": raw_number,
+                "issue_date_place": original_date,
+            },
         )
     safe_remove = []
     for element in remove:
@@ -796,6 +823,12 @@ def format_minutes_document(
     grounded_people: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Format a filled copy and return verifiable checks plus human review items."""
+    if standard == "minimal":
+        from meeting_pipeline.minutes.minimal_format import format_minimal
+
+        if two_sided:
+            raise ValueError("Chế độ tối giản hiện dùng bố cục một mặt.")
+        return format_minimal(path)
     profile = PROFILES[standard]
     metadata = metadata or DocumentMetadata()
     if two_sided and standard != "hd05_2026":

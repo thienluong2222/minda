@@ -17,6 +17,7 @@ from meeting_pipeline.config import AsrConfig
 from meeting_pipeline.domain.transcription import AsrChunk, ChunkTranscript, TimedWord
 
 logger = logging.getLogger(__name__)
+ASR_DECODING_POLICY_VERSION = "deterministic_beam_retry_v2"
 
 
 class AsrResult(BaseModel):
@@ -112,6 +113,7 @@ class PhoWhisperAsrAdapter(BaseAsrAdapter):
         self.config = config
         self.cache_dir = cache_dir
         self._pipeline: Any = None
+        self._cpu_fallback = None
 
     def _load_pipeline(self) -> Any:
         if self._pipeline is not None:
@@ -119,12 +121,37 @@ class PhoWhisperAsrAdapter(BaseAsrAdapter):
 
         snapshot = resolve_model_snapshot(self.config, self.cache_dir)
 
+        if self.config.runtime == "mlx" or (
+            self.config.runtime == "auto" and self.config.auto_backend == "mlx"
+        ):
+            from meeting_pipeline.adapters.mlx_asr import MlxWhisperPipeline
+
+            try:
+                self._pipeline = MlxWhisperPipeline(self.config, self.cache_dir)
+                return self._pipeline
+            except (OSError, ValueError):
+                if self.config.runtime == "mlx":
+                    raise
+                logger.warning("MLX runtime unavailable; using CPU with the pinned checkpoint")
+
+        import torch
         from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+
+        device = "cpu"
+        if self.config.runtime == "mps" or (
+            self.config.runtime == "auto" and self.config.auto_backend == "mps"
+        ):
+            if torch.backends.mps.is_available():
+                device = "mps"
+            elif self.config.runtime == "mps":
+                raise RuntimeError("MPS không khả dụng; chọn runtime=cpu hoặc auto.")
 
         processor = AutoProcessor.from_pretrained(  # type: ignore[no-untyped-call]
             snapshot, local_files_only=True
         )
         model = AutoModelForSpeechSeq2Seq.from_pretrained(snapshot, local_files_only=True)
+        if device == "mps":
+            model = model.to(dtype=torch.float16)
 
         self._pipeline = pipeline(
             "automatic-speech-recognition",
@@ -132,7 +159,7 @@ class PhoWhisperAsrAdapter(BaseAsrAdapter):
             tokenizer=processor.tokenizer,
             feature_extractor=processor.feature_extractor,
             return_timestamps="word",
-            device="cpu",
+            device=device,
         )
         return self._pipeline
 
@@ -157,7 +184,11 @@ class PhoWhisperAsrAdapter(BaseAsrAdapter):
         raw_candidates: list[dict[str, Any]] = []
         issues: list[str] = []
 
-        for attempt in range(self.config.max_decode_attempts):
+        runtime = str(getattr(pipe, "device", "cpu"))
+        # This MLX bridge implements one greedy window, not HF beam search.
+        # Repeating it with num_beams=3 would decode the identical request twice.
+        attempts = 1 if runtime == "mlx" else self.config.max_decode_attempts
+        for attempt in range(attempts):
             decoding = self._decoding_settings(attempt, max_tokens)
             try:
                 output = pipe(samples, generate_kwargs=decoding)
@@ -175,6 +206,7 @@ class PhoWhisperAsrAdapter(BaseAsrAdapter):
             raw_candidates.append(
                 {
                     "attempt": attempt + 1,
+                    "runtime": runtime,
                     "decoding": decoding,
                     "text": raw_text,
                     "words": [word.model_dump() for word in words],
@@ -202,6 +234,18 @@ class PhoWhisperAsrAdapter(BaseAsrAdapter):
             candidate.get("quality", {}).get("issues") == ["asr_empty"]
             for candidate in raw_candidates
         )
+        if self.config.runtime == "auto" and str(getattr(pipe, "device", "cpu")) != "cpu":
+            logger.warning(
+                "Accelerated ASR failed quality checks; retrying the same checkpoint on CPU"
+            )
+            if self._cpu_fallback is None:
+                self._cpu_fallback = PhoWhisperAsrAdapter(
+                    self.config.model_copy(update={"runtime": "cpu"}), self.cache_dir
+                )
+            result = self._cpu_fallback.transcribe(samples, sample_rate)
+            result.warnings = list(dict.fromkeys([*result.warnings, "asr_cpu_fallback"]))
+            result.raw_candidates = [*raw_candidates, *result.raw_candidates]
+            return result
         return AsrResult(
             text="",
             words=[],
@@ -222,14 +266,12 @@ class PhoWhisperAsrAdapter(BaseAsrAdapter):
             "language": self.config.language,
             "task": "transcribe",
             "max_new_tokens": max_tokens,
+            "do_sample": False,
         }
         if attempt:
             settings.update(
                 {
-                    "do_sample": True,
-                    "temperature": 0.3,
-                    "no_repeat_ngram_size": 3,
-                    "repetition_penalty": 1.15,
+                    "num_beams": 3,
                 }
             )
         return settings

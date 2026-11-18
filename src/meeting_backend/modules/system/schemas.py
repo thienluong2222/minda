@@ -7,6 +7,7 @@ class Preset(BaseModel):
     model_config = ConfigDict(extra="forbid")
     revision: int = Field(1, ge=1)
     identity_method: Literal["prototype_cosine", "mfcc_knn"] = "prototype_cosine"
+    asr_fusion_mode: Literal["transcript", "audio"] = "transcript"
     fusion_method: Literal[
         "F1_BEST_SEGMENT",
         "F3_ROVER",
@@ -18,6 +19,8 @@ class Preset(BaseModel):
     asr_variant: Literal["small", "medium"] = "medium"
     default_format: Literal["nd30_2020", "hd05_2026"] = "nd30_2020"
     use_model: bool = True
+    minutes_graph_enabled: bool = True
+    minutes_style_learning_enabled: bool = True
 
 
 class Evaluation(BaseModel):

@@ -11,6 +11,13 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 from meeting_pipeline.minutes.evidence_retrieval import IndexedTurn, _tokenize
+from meeting_pipeline.minutes.fact_extractor import stated_people
+from meeting_pipeline.minutes.factuality import (
+    is_fragment,
+    rewrite_risks,
+    safe_sentence,
+    statement_kind,
+)
 from meeting_pipeline.minutes.format_profiles import DocumentMetadata, FormatStandard
 from meeting_pipeline.minutes.model_runtime import ModelRuntimeError, ModelSession
 from meeting_pipeline.minutes.schemas import (
@@ -23,13 +30,14 @@ from meeting_pipeline.minutes.schemas import (
     TemplateField,
     TemplateSchema,
 )
-from meeting_pipeline.minutes.structured_fields import PHRASE, vietnamese_number
 from meeting_pipeline.minutes.topic_clustering import cluster_topics
+from meeting_pipeline.minutes.transcript_context import context_spans, evidence_refs
 
 
 class MinutesOptions(BaseModel):
     mode: Literal["detailed", "general"] = "detailed"
     use_model: bool = False
+    graph_enabled: bool = True
     correct_transcript: bool = True
     use_fcm: bool = True
     clusters: int | None = Field(default=None, ge=1, le=12)
@@ -47,6 +55,7 @@ class MeaningUnit(BaseModel):
     end_sec: float
     original: str
     text: str
+    turn_ids: list[str] = Field(default_factory=list)
 
 
 GROUNDING = (
@@ -72,30 +81,37 @@ def make_units(turns: list[IndexedTurn]) -> tuple[list[MeaningUnit], list[dict[s
                 {
                     "turn_id": turn.turn_id,
                     "status": turn.asr_status,
-                    "reason": "Không có transcript hợp lệ; không suy đoán lời bị mất.",
+                    "reason": (
+                        "Đoạn thuộc khoảng đã loại khỏi biên bản."
+                        if turn.asr_status == "excluded"
+                        else "Không có transcript hợp lệ; không suy đoán lời bị mất."
+                    ),
                 }
             )
             continue
-        sentences = re.split(r"(?<=[.!?;])\s+", turn.text.strip())
-        pieces = []
-        for sentence in sentences:
-            # Bounded units keep E5 under its input limit without silently truncating.
-            words = sentence.split()
-            while words:
-                piece, words = words[:65], words[65:]
-                pieces.append(" ".join(piece))
-        for piece in pieces:
-            units.append(
-                MeaningUnit(
-                    unit_id=f"u{len(units):04d}",
-                    turn_id=turn.turn_id,
-                    speaker=turn.speaker_label,
-                    start_sec=turn.start_sec,
-                    end_sec=turn.end_sec,
-                    original=piece,
-                    text=piece,
+    for span in context_spans(turns):
+        for sentence in re.finditer(r".+?(?:[.!?;](?=\s|$)|$)", span.text, re.S):
+            words = list(re.finditer(r"\S+", sentence.group()))
+            for start in range(0, len(words), 180):
+                batch = words[start : start + 180]
+                left, right = (
+                    sentence.start() + batch[0].start(),
+                    sentence.start() + batch[-1].end(),
                 )
-            )
+                sources = span.sources(left, right)
+                piece = span.text[left:right]
+                units.append(
+                    MeaningUnit(
+                        unit_id=f"u{len(units):04d}",
+                        turn_id=sources[0].turn_id,
+                        turn_ids=[turn.turn_id for turn in sources],
+                        speaker=sources[0].speaker_label,
+                        start_sec=sources[0].start_sec,
+                        end_sec=sources[-1].end_sec,
+                        original=piece,
+                        text=piece,
+                    )
+                )
     return units, excluded
 
 
@@ -117,16 +133,6 @@ def correction_risks(original: str, corrected: str) -> list[str]:
     if difflib.SequenceMatcher(None, original.casefold(), corrected.casefold()).ratio() < 0.8:
         risks.append("large_edit")
     return risks
-
-
-def _number_values(text: str) -> set[int]:
-    values = {int(n) for n in re.findall(r"\d+", text)}
-    for match in re.finditer(rf"\b{PHRASE}\b", text.casefold()):
-        try:
-            values.add(vietnamese_number(match.group()))
-        except ValueError:
-            pass
-    return values
 
 
 def _items_by_id(response: dict[str, Any], expected: list[str], key: str) -> dict[str, Any]:
@@ -287,7 +293,8 @@ class TextEngine:
             f
             for f in schema.fields
             if f.field_id != general_body
-            and anchors[f.anchor_id].placeholder_type != PlaceholderType.SIGNATURE_BLOCK
+            and anchors[f.anchor_id].placeholder_type
+            not in {PlaceholderType.SIGNATURE_BLOCK, PlaceholderType.FIXED_TEXT}
             and (
                 anchors[f.anchor_id].is_multiline
                 or anchors[f.anchor_id].placeholder_type == PlaceholderType.TEXT_PLACEHOLDER
@@ -406,21 +413,10 @@ class TextEngine:
     def evidence(
         self, ids: list[str], units: dict[str, MeaningUnit], turns: dict[str, IndexedTurn]
     ) -> list[EvidenceRef]:
-        refs = []
-        for tid in dict.fromkeys(units[uid].turn_id for uid in ids):
-            turn = turns[tid]
-            refs.append(
-                EvidenceRef(
-                    run_id=self.run_id,
-                    turn_id=tid,
-                    source_id=turn.source_id,
-                    start_sec=turn.start_sec,
-                    end_sec=turn.end_sec,
-                    clip_path=turn.clip_path,
-                    text_snippet=turn.text,
-                )
-            )
-        return refs
+        source_ids = dict.fromkeys(
+            tid for uid in ids for tid in (units[uid].turn_ids or [units[uid].turn_id])
+        )
+        return evidence_refs([turns[tid] for tid in source_ids], self.run_id)
 
     def write_general(
         self,
@@ -429,32 +425,84 @@ class TextEngine:
         turns: list[IndexedTurn],
         body: TemplateField,
     ) -> tuple[MeetingFact, dict[str, Any]]:
-        if options.use_fcm:
-            texts = []
-            for i, unit in enumerate(units):
-                text = unit.text
-                if (len(text.split()) <= 8 or re.search(r"\b(?:đó|này|vậy)\b", text)) and i:
-                    text = units[i - 1].text + " " + text
-                texts.append(text)
-            vectors = []
-            for start in range(0, len(texts), 24):
-                vectors.extend(self.session.embed(texts[start : start + 24]))
-            settings = self.session.settings
-            topics = cluster_topics(
-                vectors,
-                max_clusters=settings.max_clusters,
-                fixed_clusters=options.clusters,
-                fuzziness=settings.fuzziness,
-                minimum_silhouette=settings.minimum_silhouette,
-            )
-        else:
-            topics = {
-                "algorithm": "single_group_baseline",
-                "cluster_count": 1,
-                "primary": [0] * len(units),
-                "membership": [[1.0] for _ in units],
-                "ambiguous_indices": [],
+        excluded_units = [
+            {
+                "unit_id": u.unit_id,
+                "turn_ids": u.turn_ids or [u.turn_id],
+                "text": u.text,
+                "reason": "Đoạn quá ngắn, chưa đủ nghĩa để biên tập độc lập.",
             }
+            for u in units
+            if is_fragment(u.text)
+        ]
+        if excluded_units:
+            self.warnings.append(
+                f"Có {len(excluded_units)} đoạn chưa đủ nghĩa, cần nghe lại trong lời chép."
+            )
+        units = [u for u in units if not is_fragment(u.text)]
+        if not units:
+            raise ModelRuntimeError("Chưa có câu đủ nghĩa; hãy rà soát lại lời chép.")
+        phases = ("opening", "participants", "discussion", "voting", "decision", "closing")
+        groups = []
+        diagnostics = None
+        for phase in phases:
+            members = [u for u in units if statement_kind(u.text) == phase]
+            if not members:
+                continue
+            if phase == "discussion" and options.use_fcm:
+                vectors = []
+                for unit in members:
+                    words = unit.text.split()
+                    chunks = [" ".join(words[i : i + 65]) for i in range(0, len(words), 65)]
+                    embeddings = self.session.embed(chunks)
+                    vector = [
+                        sum(values) / len(embeddings) for values in zip(*embeddings, strict=True)
+                    ]
+                    vectors.append(vector)
+                settings = self.session.settings
+                requested = min(options.clusters, len(members)) if options.clusters else None
+                try:
+                    diagnostics = cluster_topics(
+                        vectors,
+                        max_clusters=settings.max_clusters,
+                        fixed_clusters=requested,
+                        fuzziness=settings.fuzziness,
+                        minimum_silhouette=settings.minimum_silhouette,
+                    )
+                except ValueError:
+                    self.warnings.append(
+                        "Số nhóm yêu cầu chưa phù hợp nội dung; đã chọn số nhóm tự động."
+                    )
+                    diagnostics = cluster_topics(vectors, max_clusters=settings.max_clusters)
+                for cluster in range(diagnostics["cluster_count"]):
+                    groups.append(
+                        (
+                            phase,
+                            [
+                                u
+                                for i, u in enumerate(members)
+                                if diagnostics["primary"][i] == cluster
+                            ],
+                        )
+                    )
+            else:
+                groups.append((phase, members))
+        owners = {u.unit_id: i for i, (_, group) in enumerate(groups) for u in group}
+        topics = {
+            "algorithm": "meeting_phases_fcm" if options.use_fcm else "meeting_phases",
+            "cluster_count": len(groups),
+            "primary": [owners[u.unit_id] for u in units],
+            "ambiguous_indices": [],
+            "membership_is_probability": False,
+            "discussion_clustering": diagnostics,
+            "excluded_units": excluded_units,
+        }
+        known_names = {name for people in stated_people(turns).values() for name in people}
+        known_names.update(
+            u.speaker
+            for u in units
+            if u.speaker and not u.speaker.casefold().startswith(("chưa", "người", "speaker"))
+        )
         system = GROUNDING + (
             "Chuyển các đơn vị ý nghĩa thành văn viết cho biên bản, giữ đủ ý và diễn biến. "
             "Trả đủ mỗi unit_id được giao đúng một lần. Mỗi item chỉ biên tập đúng "
@@ -470,10 +518,16 @@ class TextEngine:
         )
         sections = []
         covered = []
-        for cluster in range(topics["cluster_count"]):
-            group = [u for i, u in enumerate(units) if topics["primary"][i] == cluster]
+        for cluster, (phase, group) in enumerate(groups):
             rows = [{"unit_id": u.unit_id, "speaker": u.speaker, "text": u.text} for u in group]
-            title = "Nội dung thảo luận"
+            phase_titles = {
+                "opening": "Thông tin cuộc họp",
+                "participants": "Thành phần tham dự",
+                "voting": "Kết quả biểu quyết",
+                "decision": "Kết luận và phân công",
+                "closing": "Kết thúc cuộc họp",
+            }
+            title = phase_titles.get(phase, "Nội dung thảo luận")
             paragraphs = []
             writing_batches = [
                 part[i : i + 6]
@@ -522,40 +576,12 @@ class TextEngine:
                             row["text"] for row in batch if row["unit_id"] == item["unit_ids"][0]
                         )
                         candidate = str(item["text"])
-                        protected = re.findall(
-                            r"\b(?:không|chưa|nếu|đề xuất|đề nghị|có thể|dự kiến|"
-                            r"xin biểu quyết|rút)\b",
-                            source.casefold(),
-                        )
-                        lost = [word for word in protected if word not in candidate.casefold()]
-                        changed_name = any(
-                            re.search(rf"\b{re.escape(unit.speaker)}\b", source, re.IGNORECASE)
-                            and not re.search(
-                                rf"\b{re.escape(unit.speaker)}\b", candidate, re.IGNORECASE
-                            )
-                            for unit in units
-                            if unit.speaker
-                            and not unit.speaker.casefold().startswith(("chưa", "người", "speaker"))
-                        )
-                        added_completion = bool(
-                            re.search(r"\bđã\b", candidate.casefold())
-                            and not re.search(r"\bđã\b", source.casefold())
-                        )
-                        if (
-                            lost
-                            or changed_name
-                            or added_completion
-                            or _number_values(candidate) != _number_values(source)
-                            or (
-                                "cam kết" in candidate.casefold()
-                                and "cam kết" not in source.casefold()
-                            )
-                        ):
+                        risks = rewrite_risks(source, candidate, known_names)
+                        if risks:
                             self.warnings.append(
-                                f"Giữ ý gốc {item['unit_ids'][0]}: "
-                                "biên tập thay đổi số liệu, chủ thể hoặc trạng thái phát biểu."
+                                f"Giữ dữ kiện nguồn {item['unit_ids'][0]}: " + ", ".join(risks)
                             )
-                            candidate = source
+                            candidate = safe_sentence(source)
                         # Honorifics/gender are unnecessary for these narrative slots.
                         candidate = re.sub(
                             r"\b(?:[Aa]nh|[Cc]hị|[Ôô]ng|[Bb]à)\s+(?=[A-ZĐ])", "", candidate
@@ -570,18 +596,33 @@ class TextEngine:
                     row_order = {r["unit_id"]: i for i, r in enumerate(batch)}
                     items.sort(key=lambda item: min(row_order[uid] for uid in item["unit_ids"]))
                     if not title_assigned:
-                        title = re.sub(r"[\r\n]+", " ", str(response.get("title") or title))[:120]
+                        if phase == "discussion":
+                            title = re.sub(r"[\r\n]+", " ", str(response.get("title") or title))[
+                                :120
+                            ]
+                            title = re.sub(
+                                r"^(?:chốt|quyết định|thống nhất)\s+",
+                                "Thảo luận ",
+                                title,
+                                flags=re.I,
+                            )
                         title_assigned = True
                     paragraphs.extend(items)
                     covered.extend(ids)
                 except (ModelRuntimeError, ValueError, KeyError, TypeError) as exc:
                     self.warnings.append(f"Giữ ý gốc ở nhóm {cluster + 1}: {exc}")
                     paragraphs.extend(
-                        {"unit_ids": [r["unit_id"]], "text": r["text"]} for r in batch
+                        {"unit_ids": [r["unit_id"]], "text": safe_sentence(r["text"])}
+                        for r in batch
                     )
                     covered.extend(r["unit_id"] for r in batch)
             sections.append(
-                {"title": title, "items": paragraphs, "unit_ids": [u.unit_id for u in group]}
+                {
+                    "title": title,
+                    "kind": phase,
+                    "items": paragraphs,
+                    "unit_ids": [u.unit_id for u in group],
+                }
             )
         topics["sections"] = sections
         topics["units"] = [u.model_dump() for u in units]
@@ -595,7 +636,8 @@ class TextEngine:
             field_id=body.field_id,
             value=value,
             status=FactStatus.NEEDS_REVIEW,
-            reason="Các đơn vị được phủ đủ; cần kiểm tra bảo toàn ngữ nghĩa.",
+            reason="Đã biên tập các ý đủ nghĩa. "
+            "Các đoạn chưa rõ được liệt kê trong báo cáo rà soát.",
             evidence_refs=self.evidence(
                 covered, {u.unit_id: u for u in units}, {t.turn_id: t for t in turns}
             ),
@@ -606,7 +648,8 @@ class TextEngine:
 def corrected_turns(turns: list[IndexedTurn], units: list[MeaningUnit]) -> list[IndexedTurn]:
     by_turn: dict[str, list[str]] = {}
     for unit in units:
-        by_turn.setdefault(unit.turn_id, []).append(unit.text)
+        if len(unit.turn_ids) <= 1:
+            by_turn.setdefault(unit.turn_id, []).append(unit.text)
     result = []
     for turn in turns:
         text = " ".join(by_turn.get(turn.turn_id, [turn.text]))

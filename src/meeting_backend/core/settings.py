@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     cookie_secure: bool = False
     max_upload_bytes: int = Field(1_000_000_000, ge=1024)
     max_sources: int = Field(8, ge=1, le=8)
+    max_source_files: int = Field(128, ge=1, le=2000)
+    max_timeline_clips: int = Field(512, ge=1, le=5000)
     lease_seconds: int = Field(90, ge=15)
     allowed_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
 

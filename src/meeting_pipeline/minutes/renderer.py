@@ -18,6 +18,7 @@ from typing import Any
 import docx
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+from docx.table import Table
 from docx.text.paragraph import Paragraph
 
 from meeting_pipeline.minutes.converter import compute_file_sha256
@@ -141,82 +142,75 @@ def render_completed_document(
     fields_by_anchor = {f.anchor_id: f for f in schema.fields}
     facts_by_field = {f.field_id: f for f in facts}
 
-    # Group anchors by element path
-    anchors_by_elem: dict[str, list[CandidateAnchor]] = {}
-    for a in doc_graph.all_anchors:
-        # Base element e.g. p[13] or table[0]/row[1]/cell[2]
-        base_elem = (
-            a.element_path.split("/")[0]
-            if "table" not in a.element_path
-            else "/".join(a.element_path.split("/")[:3])
-        )
-        anchors_by_elem.setdefault(base_elem, []).append(a)
+    paragraphs = {}
+    cells = {}
 
-    # Iterate through paragraphs in body
-    for p_idx, p in enumerate(doc.paragraphs):
-        p_elem = f"p[{p_idx}]"
-        matching_anchors = anchors_by_elem.get(p_elem, [])
-        # Right-to-left offsets stay valid when earlier slots are unknown and
-        # repeated placeholders have identical text or prefix each other.
-        for anchor in sorted(matching_anchors, key=lambda a: a.start_offset, reverse=True):
+    def walk(container, prefix=""):
+        p_idx = t_idx = 0
+        for element in container.iter_inner_content():
+            if isinstance(element, Paragraph):
+                paragraphs[f"{prefix}p[{p_idx}]"] = element
+                p_idx += 1
+            elif isinstance(element, Table):
+                for r_idx, row in enumerate(element.rows):
+                    for c_idx, cell in enumerate(row.cells):
+                        path = f"{prefix}table[{t_idx}]/row[{r_idx}]/cell[{c_idx}]"
+                        cells[path] = cell
+                        walk(cell, path + "/")
+                t_idx += 1
+
+    walk(doc)
+    by_path: dict[str, list[CandidateAnchor]] = {}
+    for anchor in doc_graph.all_anchors:
+        path = anchor.element_path.rsplit("/", 1)[0]
+        by_path.setdefault(path, []).append(anchor)
+    rendered_slots = {}
+    for path, anchors in by_path.items():
+        target = paragraphs.get(path)
+        if target is None:
+            target = cells.get(path)
+        if target is None:
+            raise ValueError(f"Không tìm thấy vị trí dữ liệu trong mẫu: {path}")
+        for anchor in sorted(anchors, key=lambda a: a.start_offset, reverse=True):
             field = fields_by_anchor.get(anchor.anchor_id)
-            if not field:
-                continue
-            fact = facts_by_field.get(field.field_id)
+            fact = facts_by_field.get(field.field_id) if field else None
             if not fact or fact.status == FactStatus.UNKNOWN or fact.value is None:
                 continue
-
-            formatted_val = _format_value_for_doc(fact.value)
-            if anchor.placeholder_type in (PlaceholderType.DOTTED_LINE, PlaceholderType.UNDERLINE):
-                if "\n" in formatted_val and anchor.is_multiline:
+            formatted = _format_value_for_doc(fact.value)
+            if (
+                fact.status == FactStatus.CONFLICTING
+                and anchor.placeholder_type == PlaceholderType.FIXED_TEXT
+            ):
+                formatted = "[Cần rà soát câu xác nhận ký]"
+            element = target._p if isinstance(target, Paragraph) else target._tc
+            slot = (element, anchor.start_offset, anchor.end_offset)
+            if slot in rendered_slots:
+                if rendered_slots[slot] != formatted:
+                    raise ValueError("Ô gộp có các giá trị mâu thuẫn, cần duyệt lại ánh xạ mẫu.")
+                continue
+            rendered_slots[slot] = formatted
+            if anchor.placeholder_type == PlaceholderType.EMPTY_CELL:
+                target.text = formatted
+            elif anchor.placeholder_type in {
+                PlaceholderType.DOTTED_LINE,
+                PlaceholderType.UNDERLINE,
+                PlaceholderType.FIXED_TEXT,
+            }:
+                if not isinstance(target, Paragraph):
+                    raise ValueError("Chỗ trống không thuộc đoạn văn hợp lệ.")
+                if "\n" in formatted and anchor.is_multiline:
                     _fill_multiline(
-                        p,
+                        target,
                         anchor.placeholder_text,
-                        formatted_val,
+                        formatted,
                         field.field_id == general_content_field_id,
                     )
                 else:
                     _replace_text_in_paragraph(
-                        p, anchor.placeholder_text, formatted_val, anchor.start_offset
+                        target, anchor.placeholder_text, formatted, anchor.start_offset
                     )
             elif anchor.placeholder_type == PlaceholderType.TEXT_PLACEHOLDER:
-                # Append formatted text to the paragraph
-                p.add_run(("" if p.text.endswith(" ") else " ") + formatted_val)
-            elif anchor.placeholder_type == PlaceholderType.SIGNATURE_BLOCK:
-                # Add signature confirmation underneath
-                pass
-
-    # Iterate through tables
-    for t_idx, table in enumerate(doc.tables):
-        for r_idx, row in enumerate(table.rows):
-            for c_idx, cell in enumerate(row.cells):
-                cell_elem = f"table[{t_idx}]/row[{r_idx}]/cell[{c_idx}]"
-                matching_anchors = anchors_by_elem.get(cell_elem, [])
-
-                for anchor in sorted(matching_anchors, key=lambda a: a.start_offset, reverse=True):
-                    field = fields_by_anchor.get(anchor.anchor_id)
-                    if not field:
-                        continue
-                    fact = facts_by_field.get(field.field_id)
-                    if not fact or fact.status == FactStatus.UNKNOWN or fact.value is None:
-                        continue
-
-                    formatted_val = _format_value_for_doc(fact.value)
-                    if not formatted_val:
-                        continue
-
-                    if anchor.placeholder_type == PlaceholderType.EMPTY_CELL:
-                        cell.text = formatted_val
-                    elif anchor.placeholder_type in (
-                        PlaceholderType.DOTTED_LINE,
-                        PlaceholderType.UNDERLINE,
-                    ):
-                        paragraph_match = re.search(r"/p\[(\d+)\]", anchor.element_path)
-                        if paragraph_match:
-                            cp = cell.paragraphs[int(paragraph_match.group(1))]
-                            _replace_text_in_paragraph(
-                                cp, anchor.placeholder_text, formatted_val, anchor.start_offset
-                            )
+                target.add_run(("" if target.text.endswith(" ") else " ") + formatted)
 
     # Preserve every untouched package part byte-for-byte, including styles,
     # headers, footers, fields, controls, relationships and document metadata.

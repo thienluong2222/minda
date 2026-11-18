@@ -1,3 +1,5 @@
+import { pageSize } from "@/lib/pagination";
+import { moveItem, useDragSort } from "@/lib/drag-sort";
 import { useUser } from "@/app";
 import {
   Action,
@@ -7,25 +9,39 @@ import {
   Notice,
   PageHeader,
   Panel,
+  Pagination,
   Status,
   useWork,
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { api, formatDate, post, size } from "@/lib/api";
-import type { Capabilities, Job, Meeting, Template, Voice } from "@/lib/types";
-import { useQuery } from "@tanstack/react-query";
+import {
+  api,
+  formatDate,
+  formatMeetingDate,
+  post,
+  size,
+  time,
+} from "@/lib/api";
+import type {
+  Capabilities,
+  Job,
+  Meeting,
+  Template,
+  Voice,
+  TimelineOperation,
+} from "@/lib/types";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   ArrowUpRight,
   AudioLines,
   Check,
   ChevronLeft,
-  ChevronRight,
-  FileCheck2,
   FileText,
   FolderOpen,
+  GripVertical,
   Plus,
   Search,
   UploadCloud,
@@ -33,6 +49,12 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useUnsavedForm } from "@/lib/unsaved";
+import {
+  getTimeline,
+  updateTimeline,
+  uploadTimelineFiles,
+} from "@/lib/timeline";
 
 export function MeetingTable({
   items,
@@ -57,24 +79,33 @@ export function MeetingTable({
           {items.map((m) => (
             <tr key={m.id}>
               <td>
-                <Link to={"/meetings/" + m.id} className="meeting-name">
+                <Link
+                  to={"/meetings/" + m.id}
+                  className="meeting-name"
+                  title={m.title}
+                >
                   <span className="file-icon">
                     <AudioLines size={19} />
                   </span>
-                  <div>
-                    <strong>{m.title}</strong>
+                  <div style={{ minWidth: 0 }}>
+                    <strong
+                      style={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {m.title}
+                    </strong>
                     <small>
-                      {m.location || "Chưa có địa điểm"} · {m.source_ids.length}{" "}
-                      nguồn
+                      {m.location || "Chưa có địa điểm"} ·{" "}
+                      {m.source_ids?.length || 0} nguồn
                     </small>
                   </div>
                 </Link>
               </td>
-              <td>
-                {m.date
-                  ? new Date(m.date).toLocaleDateString("vi-VN")
-                  : "Chưa đặt"}
-              </td>
+              <td>{formatMeetingDate(m.date)}</td>
               <td>
                 <Status value={m.active_job ? "running" : m.state} />
                 {m.minutes_stale && (
@@ -112,7 +143,6 @@ export function MeetingTable({
 }
 
 export function Dashboard() {
-  const user = useUser();
   const data = useQuery({
     queryKey: ["dashboard"],
     queryFn: () =>
@@ -123,25 +153,21 @@ export function Dashboard() {
       }>("/dashboard"),
     refetchInterval: 5000,
   });
-  const caps = useQuery({
-    queryKey: ["capabilities"],
-    queryFn: () => api<Capabilities>("/capabilities"),
-    refetchInterval: 15000,
-  });
   if (data.isPending) return <Loading />;
   if (data.error) return <ErrorBox error={data.error} />;
   const d = data.data!;
-  const cards = [
-    ["Cuộc họp", d.counts.meetings, FolderOpen],
-    ["Biên bản đã tạo", d.counts.minutes, FileCheck2],
-    ["Cần rà soát", d.counts.needs_review, FileText],
-  ] as const;
+  const continuing = d.recent_meetings
+    .filter(
+      (m) =>
+        m.minutes_stale ||
+        m.state !== "minutes_ready" ||
+        (m.active_minutes_id && m.reviewed_version !== m.active_minutes_id),
+    )
+    .slice(0, 3);
   return (
     <>
       <PageHeader
-        eyebrow="TỔNG QUAN"
-        title={`Chào ${user.display_name.split(" ").slice(-1)[0]}, một ngày làm việc rõ ràng.`}
-        description="Tiếp nối cuộc họp. Hoàn thiện từng biên bản."
+        title="Tổng quan"
         action={
           <Button asChild>
             <Link to="/meetings/new">
@@ -151,121 +177,108 @@ export function Dashboard() {
           </Button>
         }
       />
-      <div className="dashboard-grid">
-        <div className="dashboard-main">
-          <div className="stat-grid">
-            {cards.map(([label, value, Icon], i) => (
-              <div
-                className={`stat-card ${i === 0 ? "stat-dark" : ""}`}
-                key={label}
+      <div className="summary-links">
+        <Link to="/meetings">
+          <FolderOpen size={19} />
+          <span>
+            Cuộc họp<strong>{d.counts.meetings}</strong>
+          </span>
+          <ArrowUpRight size={16} />
+        </Link>
+        <Link to="/meetings?status=needs_review">
+          <FileText size={19} />
+          <span>
+            Cần rà biên bản<strong>{d.counts.needs_review}</strong>
+          </span>
+          <ArrowUpRight size={16} />
+        </Link>
+        <Link to="/meetings?status=processing">
+          <AudioLines size={19} />
+          <span>
+            Đang xử lý<strong>{d.counts.processing}</strong>
+          </span>
+          <ArrowUpRight size={16} />
+        </Link>
+      </div>
+      {!!continuing.length && (
+        <section className="continue-section">
+          <h2>Tiếp tục công việc</h2>
+          <div className="continue-grid">
+            {continuing.map((m) => (
+              <Link
+                className="continue-card"
+                key={m.id}
+                to={
+                  "/meetings/" +
+                  m.id +
+                  "?tab=" +
+                  (m.active_job ||
+                  m.state === "draft" ||
+                  !m.active_transcript_id
+                    ? "sources"
+                    : "minutes")
+                }
               >
-                <div>
-                  <span>{label}</span>
-                  <Icon size={20} />
-                </div>
-                <strong>{value.toString().padStart(2, "0")}</strong>
-                <small>
-                  {i === 0
-                    ? "Trong không gian cá nhân"
-                    : i === 1
-                      ? "File Word có thể chỉnh sửa"
-                      : "Đối chiếu trước khi hoàn tất"}
-                </small>
-              </div>
+                <Status value={m.active_job ? "running" : m.state} />
+                <h3>{m.title}</h3>
+                <span>
+                  {m.minutes_stale
+                    ? "Cập nhật biên bản"
+                    : m.active_job
+                      ? "Xem tiến độ"
+                      : !m.active_transcript_id
+                        ? "Chuẩn bị nguồn âm thanh"
+                        : "Hoàn thiện biên bản"}
+                  <ArrowRight size={16} />
+                </span>
+              </Link>
             ))}
           </div>
-          <Panel
-            title="Cuộc họp gần đây"
-            description="Các cuộc họp được cập nhật gần nhất."
-          >
-            {d.recent_meetings.length ? (
-              <MeetingTable items={d.recent_meetings} />
-            ) : (
-              <Empty
-                title="Bắt đầu với cuộc họp đầu tiên"
-                description="Tải bản ghi âm và chọn mẫu. Hệ thống sẽ giúp bạn chuẩn bị biên bản để rà soát."
-                action={
-                  <Button asChild>
-                    <Link to="/meetings/new">
-                      <Plus size={16} />
-                      Tạo cuộc họp
-                    </Link>
-                  </Button>
-                }
-              />
-            )}
-            <Link className="panel-link" to="/meetings">
-              Xem tất cả cuộc họp
-              <ArrowRight size={16} />
-            </Link>
-          </Panel>
-        </div>
-        <aside className="context-column">
-          <div className="workflow-card">
-            <span className="eyebrow">QUY TRÌNH LÀM VIỆC</span>
-            <h2>
-              Từ bản ghi
-              <br />
-              đến biên bản.
-            </h2>
-            <div className="workflow-list">
-              {[
-                [UploadCloud, "Tải nguồn ghi âm", "Một hoặc nhiều thiết bị"],
-                [AudioLines, "Chép lời & đối chiếu", "Giữ liên kết bằng chứng"],
-                [
-                  FileText,
-                  "Hoàn thiện nội dung",
-                  "Rà soát từng trường dữ liệu",
-                ],
-                [FileCheck2, "Xuất file Word", "Chọn thể thức phù hợp"],
-              ].map(([, title, text], i) => (
-                <div key={i}>
-                  <span className="workflow-number">0{i + 1}</span>
-                  <div>
-                    <strong>{String(title)}</strong>
-                    <small>{String(text)}</small>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <Button asChild variant="outline">
-              <Link to="/templates">
-                Khám phá thư viện mẫu
-                <ArrowUpRight size={16} />
-              </Link>
-            </Button>
-          </div>
-          <Panel title="Đang diễn ra">
-            <div className="worker-indicator">
-              <i className={caps.data?.worker.online ? "online" : "offline"} />
-              <span>
-                {caps.data?.worker.online
-                  ? "Worker đang kết nối"
-                  : "Worker chưa kết nối"}
-              </span>
-            </div>
-            {d.jobs.length ? (
-              d.jobs.slice(0, 4).map((j) => (
-                <Link
-                  className="activity-item"
-                  key={j.id}
-                  to={
-                    j.resource_type === "meeting"
-                      ? "/meetings/" + j.resource_id
-                      : "/settings"
-                  }
-                >
-                  <Status value={j.state} />
-                  <p>{j.stage}</p>
-                  <small>{formatDate(j.created_at)}</small>
+        </section>
+      )}
+      <Panel title="Cuộc họp gần đây">
+        {d.recent_meetings.length ? (
+          <MeetingTable items={d.recent_meetings} />
+        ) : (
+          <Empty
+            title="Tạo cuộc họp đầu tiên"
+            description="Thêm bản ghi âm để bắt đầu chuẩn bị biên bản."
+            action={
+              <Button asChild>
+                <Link to="/meetings/new">
+                  <Plus size={16} />
+                  Tạo cuộc họp
                 </Link>
-              ))
-            ) : (
-              <p className="muted small">Hiện không có tác vụ cần chú ý.</p>
-            )}
-          </Panel>
-        </aside>
-      </div>
+              </Button>
+            }
+          />
+        )}
+        {!!d.recent_meetings.length && (
+          <Link className="panel-link" to="/meetings">
+            Xem tất cả cuộc họp
+            <ArrowRight size={16} />
+          </Link>
+        )}
+      </Panel>
+      {!!d.jobs.length && (
+        <details className="activity-details">
+          <summary>Tác vụ cần chú ý ({d.jobs.length})</summary>
+          {d.jobs.slice(0, 4).map((j) => (
+            <Link
+              className="activity-item"
+              key={j.id}
+              to={
+                j.resource_type === "meeting"
+                  ? "/meetings/" + j.resource_id
+                  : "/settings"
+              }
+            >
+              <Status value={j.state} />
+              <span>{j.stage}</span>
+            </Link>
+          ))}
+        </details>
+      )}
     </>
   );
 }
@@ -273,37 +286,58 @@ export function Dashboard() {
 export function Meetings({ trashed = false }: { trashed?: boolean }) {
   const [params, setParams] = useSearchParams();
   const [search, setSearch] = useState(params.get("q") || "");
-  const page = Number(params.get("page") || 1);
-  const [filter, setFilter] = useState("all");
+  const limit = pageSize(params.get("limit"));
+  const requestedPage = Number(params.get("page") || 1);
+  const page =
+    Number.isSafeInteger(requestedPage) && requestedPage > 0
+      ? requestedPage
+      : 1;
+  const requestedFilter = params.get("status") || "all";
+  const filter = [
+    "all",
+    "draft",
+    "processing",
+    "transcript_ready",
+    "minutes_ready",
+    "needs_review",
+  ].includes(requestedFilter)
+    ? requestedFilter
+    : "all";
   const data = useQuery({
     queryKey: ["meetings", trashed, params.toString()],
+    placeholderData: keepPreviousData,
     queryFn: () =>
       api<{ items: Meeting[]; total: number }>(
         "/meetings?trashed=" +
           trashed +
           "&page=" +
           page +
+          "&limit=" +
+          limit +
           "&q=" +
-          encodeURIComponent(params.get("q") || ""),
+          encodeURIComponent(params.get("q") || "") +
+          "&status=" +
+          encodeURIComponent(filter === "all" ? "" : filter),
       ),
     refetchInterval: 5000,
   });
-  const items =
-    data.data?.items.filter(
-      (m) =>
-        filter === "all" ||
-        (filter === "processing" && m.active_job) ||
-        m.state === filter,
-    ) || [];
+  const items = data.data?.items || [];
+  useEffect(() => setSearch(params.get("q") || ""), [params]);
+  function pageTo(next: number) {
+    setParams({
+      q: params.get("q") || "",
+      status: filter,
+      limit: String(limit),
+      page: String(next),
+    });
+  }
   return (
     <>
       <PageHeader
         eyebrow="THƯ VIỆN CÁ NHÂN"
         title={trashed ? "Thùng rác" : "Cuộc họp của bạn"}
         description={
-          trashed
-            ? "Khôi phục cuộc họp đã chuyển vào thùng rác."
-            : "Quản lý bản ghi, transcript và tài liệu trong cùng một nơi."
+          trashed ? "Khôi phục cuộc họp đã chuyển vào thùng rác." : undefined
         }
         action={
           !trashed && (
@@ -322,7 +356,12 @@ export function Meetings({ trashed = false }: { trashed?: boolean }) {
             className="search-field"
             onSubmit={(e) => {
               e.preventDefault();
-              setParams({ q: search, page: "1" });
+              setParams({
+                q: search,
+                status: filter,
+                limit: String(limit),
+                page: "1",
+              });
             }}
           >
             <Search size={17} />
@@ -339,12 +378,20 @@ export function Meetings({ trashed = false }: { trashed?: boolean }) {
           <select
             aria-label="Trạng thái cuộc họp"
             value={filter}
-            onChange={(e) => setFilter(e.target.value)}
+            onChange={(e) =>
+              setParams({
+                q: params.get("q") || "",
+                limit: String(limit),
+                status: e.target.value,
+                page: "1",
+              })
+            }
           >
             <option value="all">Tất cả trạng thái</option>
             <option value="draft">Bản nháp</option>
             <option value="processing">Đang xử lý</option>
-            <option value="transcript_ready">Có transcript</option>
+            <option value="transcript_ready">Có lời chép</option>
+            <option value="needs_review">Cần rà biên bản</option>
             <option value="minutes_ready">Có biên bản</option>
           </select>
         </div>
@@ -353,39 +400,48 @@ export function Meetings({ trashed = false }: { trashed?: boolean }) {
           <Loading />
         ) : items.length ? (
           <MeetingTable items={items} trashed={trashed} />
+        ) : Boolean((params.get("q") || "").trim()) || filter !== "all" ? (
+          <Empty
+            title="Không có kết quả khớp bộ lọc"
+            description="Không tìm thấy cuộc họp nào phù hợp với từ khóa hoặc trạng thái đang chọn."
+            action={
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setSearch("");
+                  setParams({ q: "", status: "all", page: "1" });
+                }}
+              >
+                Xóa bộ lọc
+              </Button>
+            }
+          />
+        ) : trashed ? (
+          <Empty
+            title="Thùng rác trống"
+            description="Các cuộc họp đã xóa mềm sẽ xuất hiện tại đây để bạn có thể khôi phục khi cần."
+          />
         ) : (
           <Empty
-            title={trashed ? "Thùng rác trống" : "Chưa tìm thấy cuộc họp"}
-            description="Thử thay đổi từ khóa hoặc tạo một cuộc họp mới."
+            title="Chưa có cuộc họp nào"
+            description="Tạo cuộc họp đầu tiên và tải lên bản ghi âm để bắt đầu chuẩn bị biên bản."
+            action={
+              <Button asChild>
+                <Link to="/meetings/new">
+                  <Plus size={16} />
+                  Tạo cuộc họp
+                </Link>
+              </Button>
+            }
           />
         )}
-        <div className="pagination">
-          <span>
-            {data.data?.total || 0} cuộc họp · Bộ lọc trạng thái áp dụng trên
-            trang hiện tại
-          </span>
-          <div className="row">
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Trang trước"
-              disabled={page === 1}
-              onClick={() => setParams({ q: search, page: String(page - 1) })}
-            >
-              <ChevronLeft size={16} />
-            </Button>
-            <span>Trang {page}</span>
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Trang sau"
-              disabled={page * 30 >= (data.data?.total || 0)}
-              onClick={() => setParams({ q: search, page: String(page + 1) })}
-            >
-              <ChevronRight size={16} />
-            </Button>
-          </div>
-        </div>
+        <Pagination
+          page={page}
+          limit={limit}
+          total={data.data?.total || 0}
+          onPageChange={pageTo}
+        />
       </Panel>
     </>
   );
@@ -393,16 +449,96 @@ export function Meetings({ trashed = false }: { trashed?: boolean }) {
 
 export function NewMeeting() {
   const navigate = useNavigate();
+  const user = useUser();
+  const draftKey = "minda:meeting-draft:" + user.id;
+  const [draft] = useState(() => {
+    try {
+      const value = JSON.parse(sessionStorage.getItem(draftKey) || "{}");
+      return {
+        title: typeof value.title === "string" ? value.title : "",
+        date: typeof value.date === "string" ? value.date : "",
+        location: typeof value.location === "string" ? value.location : "",
+        notes: typeof value.notes === "string" ? value.notes : "",
+        template: typeof value.template === "string" ? value.template : "",
+        format: typeof value.format === "string" ? value.format : "",
+        mode: value.mode === "general" ? "general" : "detailed",
+        people: Array.isArray(value.people)
+          ? (value.people.filter(
+              (id: unknown) => typeof id === "string",
+            ) as string[])
+          : [],
+        fileCount: Number(value.fileCount) || 0,
+      };
+    } catch {
+      return {
+        title: "",
+        date: "",
+        location: "",
+        notes: "",
+        template: "",
+        format: "",
+        mode: "detailed",
+        people: [] as string[],
+        fileCount: 0,
+      };
+    }
+  });
   const [step, setStep] = useState(0),
-    [title, setTitle] = useState(""),
-    [date, setDate] = useState(""),
-    [location, setLocation] = useState(""),
-    [notes, setNotes] = useState(""),
+    [title, setTitle] = useState(draft.title),
+    [date, setDate] = useState(draft.date),
+    [location, setLocation] = useState(draft.location),
+    [notes, setNotes] = useState(draft.notes),
     [files, setFiles] = useState<File[]>([]),
-    [people, setPeople] = useState<string[]>([]),
-    [template, setTemplate] = useState(""),
-    [format, setFormat] = useState(""),
-    [mode, setMode] = useState("detailed");
+    [people, setPeople] = useState<string[]>(draft.people),
+    [template, setTemplate] = useState(draft.template),
+    [format, setFormat] = useState(draft.format),
+    [mode, setMode] = useState(draft.mode);
+  const [fileLayout, setFileLayout] = useState("devices");
+  const dirty = !!(
+    title ||
+    date ||
+    location ||
+    notes ||
+    files.length ||
+    people.length ||
+    template ||
+    format
+  );
+  const guard = useUnsavedForm(dirty);
+  useEffect(() => {
+    try {
+      if (dirty)
+        sessionStorage.setItem(
+          draftKey,
+          JSON.stringify({
+            title,
+            date,
+            location,
+            notes,
+            template,
+            format,
+            mode,
+            people,
+            fileCount: files.length,
+          }),
+        );
+      else sessionStorage.removeItem(draftKey);
+    } catch {
+      /* Draft recovery is optional. */
+    }
+  }, [
+    draftKey,
+    title,
+    date,
+    location,
+    notes,
+    template,
+    format,
+    mode,
+    people,
+    files,
+    dirty,
+  ]);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const stepHeading = useRef<HTMLHeadingElement>(null);
   const previousStep = useRef(step);
@@ -417,6 +553,19 @@ export function NewMeeting() {
     setStep(next);
   }
   const { busy, work } = useWork();
+  const fileKey = (file: File, index: number) =>
+    `${file.name}:${file.size}:${file.lastModified}:${index}`;
+  const fileSortScope = "new-meeting-files";
+  const fileSort = useDragSort(fileSortScope, busy, (item, destination) => {
+    const from = files.findIndex(
+      (file, index) => fileKey(file, index) === item.id,
+    );
+    const to = files.findIndex(
+      (file, index) =>
+        fileKey(file, index) === destination.target.dataset.sortItem,
+    );
+    setFiles((current) => moveItem(current, from, to, destination.after));
+  });
   const voices = useQuery({
     queryKey: ["voices"],
     queryFn: () => api<Voice[]>("/speakers"),
@@ -429,6 +578,10 @@ export function NewMeeting() {
     queryKey: ["capabilities"],
     queryFn: () => api<Capabilities>("/capabilities"),
   });
+  const fileLimit =
+    fileLayout === "parts"
+      ? caps.data?.max_source_files || 128
+      : caps.data?.max_sources || 8;
   async function create(process: boolean) {
     await work(
       async () => {
@@ -443,22 +596,73 @@ export function NewMeeting() {
             format || caps.data?.preset.default_format || "nd30_2020",
           preferred_mode: mode,
         });
+        guard.allowNavigation();
+        try {
+          sessionStorage.removeItem(draftKey);
+        } catch {
+          /* Server draft is authoritative. */
+        }
         try {
           if (files.length) {
-            const form = new FormData();
-            files.forEach((f) => form.append("files", f));
-            m = await post<Meeting>(
-              "/meetings/" + m.id + "/sources?revision=" + m.revision,
-              form,
-            );
+            m = await uploadTimelineFiles(m.id, m.revision, files);
+            const view = await getTimeline(m.id);
+            const operations: TimelineOperation[] = [];
+            if (fileLayout === "parts") {
+              const track = "source-" + crypto.randomUUID();
+              operations.push({
+                op: "create_track",
+                id: track,
+                name: "Nguồn ghi 1",
+              });
+              m.source_ids
+                .filter((asset) =>
+                  view.timeline.unassigned_asset_ids.includes(asset),
+                )
+                .forEach((asset) =>
+                  operations.push({
+                    op: "add_clip",
+                    id: "part-" + crypto.randomUUID(),
+                    track_id: track,
+                    asset_id: asset,
+                  }),
+                );
+            } else
+              m.source_ids
+                .filter((asset) =>
+                  view.timeline.unassigned_asset_ids.includes(asset),
+                )
+                .forEach((asset, index) => {
+                  const track = "source-" + crypto.randomUUID();
+                  operations.push(
+                    {
+                      op: "create_track",
+                      id: track,
+                      name: "Nguồn ghi " + (index + 1),
+                    },
+                    {
+                      op: "add_clip",
+                      id: "part-" + crypto.randomUUID(),
+                      track_id: track,
+                      asset_id: asset,
+                    },
+                  );
+                });
+            for (let start = 0; start < operations.length; start += 200) {
+              const saved = await updateTimeline(
+                m.id,
+                m.revision,
+                operations.slice(start, start + 200),
+              );
+              m = { ...m, revision: saved.revision };
+            }
           }
           if (process)
             await post("/meetings/" + m.id + "/process", {
               revision: m.revision,
             });
-          navigate("/meetings/" + m.id);
+          navigate("/meetings/" + m.id + "?tab=sources");
         } catch (error) {
-          navigate("/meetings/" + m.id);
+          navigate("/meetings/" + m.id + "?tab=sources");
           throw error;
         }
       },
@@ -467,17 +671,23 @@ export function NewMeeting() {
   }
   const steps = [
     "Thông tin cuộc họp",
-    "Nguồn ghi âm",
+    "Nguồn âm thanh",
     "Người tham gia",
     "Mẫu & xác nhận",
   ];
   return (
     <>
-      <PageHeader
-        eyebrow="CUỘC HỌP MỚI"
-        title="Chuẩn bị một cuộc họp"
-        description="Thêm thông tin và nguồn ghi âm. Bạn có thể bổ sung nội dung sau."
-      />
+      {fileSort.overlay}
+      <PageHeader title="Tạo cuộc họp" />
+      {draft.title && (
+        <Notice tone="info">
+          Đã khôi phục bản nháp trong phiên này.
+          {draft.fileCount > 0
+            ? " Hãy chọn lại file âm thanh trước khi tải lên."
+            : ""}
+        </Notice>
+      )}
+      {guard.dialog}
       <div className="wizard-layout">
         <ol className="wizard-steps">
           {steps.map((label, i) => (
@@ -560,7 +770,8 @@ export function NewMeeting() {
                   <strong>Chọn bản ghi âm từ thiết bị</strong>
                   <span>WAV, MP3, M4A, AAC, FLAC, OGG, WEBM, MP4</span>
                   <small>
-                    Tối đa {caps.data?.max_sources || 8} nguồn ·{" "}
+                    Tối đa {fileLimit} file ·{" "}
+                    {time(caps.data?.max_audio_duration_sec || 7200)} mỗi file ·{" "}
                     {size(caps.data?.max_upload_bytes || 1e9)}/file
                   </small>
                   <input
@@ -570,27 +781,114 @@ export function NewMeeting() {
                     onChange={(e) => setFiles(Array.from(e.target.files || []))}
                   />
                 </label>
-                {files.map((f, i) => (
-                  <div className="file-row" key={i}>
-                    <AudioLines size={18} />
-                    <span>
-                      {f.name}
-                      <small>{size(f.size)}</small>
-                    </span>
-                    <Button
-                      variant="ghost"
-                      onClick={() =>
-                        setFiles(files.filter((_, index) => index !== i))
+                {files.length > 1 && (
+                  <p className="context-hint">
+                    Kéo tay nắm để đổi thứ tự file, hoặc dùng nút Lên / Xuống.
+                  </p>
+                )}
+                <div data-sort-list="file" data-sort-scope={fileSortScope}>
+                  {files.map((f, i) => (
+                    <div
+                      className="file-row"
+                      key={fileKey(f, i)}
+                      data-sort-scope={fileSortScope}
+                      data-sort-file
+                      data-sort-item={fileKey(f, i)}
+                      data-sort-axis="y"
+                      onPointerDown={(event) =>
+                        fileSort.start(event, {
+                          kind: "file",
+                          id: fileKey(f, i),
+                          label: f.name,
+                        })
                       }
                     >
-                      Bỏ
-                    </Button>
-                  </div>
-                ))}
-                {files.length > 8 && <Notice>Hãy chọn tối đa 8 file.</Notice>}
+                      <button
+                        type="button"
+                        className="drag-handle"
+                        data-drag-handle
+                        disabled={busy}
+                        aria-label={"Kéo " + f.name + " để đổi thứ tự"}
+                        onPointerDown={(event) =>
+                          fileSort.start(event, {
+                            kind: "file",
+                            id: fileKey(f, i),
+                            label: f.name,
+                          })
+                        }
+                      >
+                        <GripVertical size={16} />
+                      </button>
+                      <AudioLines size={18} />
+                      <span>
+                        {f.name}
+                        <small>{size(f.size)}</small>
+                      </span>
+                      <div className="row" style={{ gap: 4 }}>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={i === 0}
+                          aria-label={`Đưa ${f.name} lên trước`}
+                          onClick={() => {
+                            const next = [...files];
+                            [next[i - 1], next[i]] = [next[i], next[i - 1]];
+                            setFiles(next);
+                          }}
+                        >
+                          Lên
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={i === files.length - 1}
+                          aria-label={`Đưa ${f.name} xuống sau`}
+                          onClick={() => {
+                            const next = [...files];
+                            [next[i], next[i + 1]] = [next[i + 1], next[i]];
+                            setFiles(next);
+                          }}
+                        >
+                          Xuống
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setFiles(files.filter((_, index) => index !== i))
+                          }
+                        >
+                          Bỏ
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {files.length > fileLimit && (
+                  <Notice>
+                    Hãy chọn tối đa {fileLimit} file cho cách xếp này.
+                  </Notice>
+                )}
+                <label className="form-stack">
+                  Các file thuộc nguồn nào?
+                  <select
+                    value={fileLayout}
+                    onChange={(e) => setFileLayout(e.target.value)}
+                  >
+                    <option value="devices">
+                      Mỗi file từ một nguồn ghi khác nhau
+                    </option>
+                    <option value="parts">
+                      Các phần nối tiếp của cùng một nguồn
+                    </option>
+                  </select>
+                </label>
                 <Notice tone="info">
-                  Các nguồn phải ghi lại cùng một cuộc họp. Hệ thống sẽ đồng bộ
-                  và dung hợp âm thanh.
+                  Bạn có thể đổi nguồn và thứ tự sau khi tải lên. Khoảng nghỉ
+                  giữa các phần chưa biết sẽ được giữ là chưa xác định.
                 </Notice>
               </>
             )}
@@ -633,7 +931,7 @@ export function NewMeeting() {
                 {!voices.data?.some((v) => v.state === "ready") && (
                   <Empty
                     title="Chưa có hồ sơ giọng sẵn sàng"
-                    description="Bạn có thể tiếp tục. Người nói sẽ được rà soát theo cụm trong transcript."
+                    description="Bạn có thể đặt tên người nói sau khi có lời chép."
                     action={
                       <Link className="text-link" to="/voices">
                         Quản lý hồ sơ giọng ↗
@@ -698,11 +996,11 @@ export function NewMeeting() {
                 <div className="summary-box">
                   <h3>{title}</h3>
                   <p>
-                    {date || "Chưa đặt ngày"} · {location || "Chưa có địa điểm"}
+                    {formatMeetingDate(date)} · {location || "Chưa có địa điểm"}
                   </p>
                   <div className="row">
                     <span>
-                      <AudioLines size={16} /> {files.length} nguồn ghi âm
+                      <AudioLines size={16} /> {files.length} file âm thanh
                     </span>
                     <span>
                       <Users size={16} /> {people.length} hồ sơ giọng
@@ -710,13 +1008,13 @@ export function NewMeeting() {
                   </div>
                 </div>
                 <Notice tone="info">
-                  Sau khi chép lời, bạn rà soát transcript và chọn “Tạo biên
-                  bản”. Lựa chọn mẫu và thể thức ở đây được lưu cùng cuộc họp.
+                  Sau khi chép lời, bạn rà lời chép và chọn “Tạo biên bản”. Lựa
+                  chọn mẫu và thể thức ở đây được lưu cùng cuộc họp.
                 </Notice>
                 {!caps.data?.worker.online && (
                   <Notice>
-                    Worker chưa kết nối. Tác vụ sẽ chờ đến khi worker được khởi
-                    động.
+                    Hệ thống chưa sẵn sàng xử lý. Bạn vẫn có thể lưu cuộc họp;
+                    tác vụ sẽ chờ đến khi hệ thống sẵn sàng.
                   </Notice>
                 )}
               </div>
@@ -734,7 +1032,7 @@ export function NewMeeting() {
             {step < 3 ? (
               <Button
                 disabled={
-                  !title.trim() || files.length > 8 || people.length > 8
+                  !title.trim() || files.length > fileLimit || people.length > 8
                 }
                 onClick={() => goToStep(step + 1)}
               >
@@ -751,7 +1049,7 @@ export function NewMeeting() {
                   Lưu bản nháp
                 </Button>
                 <Button
-                  disabled={busy || !files.length || files.length > 8}
+                  disabled={busy || !files.length || files.length > fileLimit}
                   onClick={() => void create(true)}
                 >
                   {busy ? "Đang tải lên…" : "Tải lên & xử lý"}
@@ -835,11 +1133,12 @@ export function Settings() {
           </form>
         </Panel>
         <Panel title="Khả năng hệ thống">
+          <p className="muted">Minda · Không gian làm việc cục bộ</p>
           <ErrorBox error={caps.error} />
           {caps.data ? (
             <div className="capability-list">
               {[
-                ["Worker", caps.data.worker.online],
+                ["Xử lý âm thanh", caps.data.worker.online],
                 ["Đọc Word", caps.data.documents.word],
                 ["Đọc PDF văn bản", caps.data.documents.pdf_text],
                 ["OCR tiếng Việt", caps.data.documents.ocr],
@@ -851,8 +1150,21 @@ export function Settings() {
                 </div>
               ))}
               <p className="muted small">
-                Tối đa {caps.data.max_sources} nguồn âm thanh. Khả năng chạy
-                model được kiểm tra riêng trong trang quản trị.
+                Tối đa {caps.data.max_sources} nguồn âm thanh. Cấu hình model &
+                preset AI hiện hành ({caps.data.preset.asr_variant} /{" "}
+                {caps.data.preset.default_format}) do quản trị viên thiết lập
+                {user.role === "admin" ? (
+                  <>
+                    {" "}
+                    tại{" "}
+                    <Link to="/admin/models" className="green-text">
+                      Model & preset
+                    </Link>
+                    .
+                  </>
+                ) : (
+                  "."
+                )}
               </p>
             </div>
           ) : (

@@ -1,3 +1,4 @@
+import { pageSize } from "@/lib/pagination";
 import { useUser } from "@/app";
 import {
   Empty,
@@ -6,13 +7,14 @@ import {
   Modal,
   PageHeader,
   Panel,
+  Pagination,
   Status,
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { api, formatDate } from "@/lib/api";
 import type { AdminMeeting, AdminUser } from "@/lib/types";
-import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, RefreshCw, Search } from "lucide-react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { RefreshCw, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
@@ -23,6 +25,7 @@ export function AdminMeetings() {
   const [search, setSearch] = useState(currentSearch);
   useEffect(() => setSearch(currentSearch), [currentSearch]);
   const [selected, setSelected] = useState<AdminMeeting | null>(null);
+  const limit = pageSize(params.get("limit"));
   const page = Math.max(1, Number(params.get("page")) || 1);
   const data = useQuery({
     queryKey: ["admin-meetings", params.toString()],
@@ -32,7 +35,14 @@ export function AdminMeetings() {
         total: number;
         page: number;
         limit: number;
-      }>("/admin/meetings?" + params.toString()),
+      }>(
+        "/admin/meetings?" +
+          new URLSearchParams({
+            ...Object.fromEntries(params),
+            limit: String(limit),
+          }),
+      ),
+    placeholderData: keepPreviousData,
     refetchInterval: 5000,
   });
   const users = useQuery({
@@ -198,34 +208,12 @@ export function AdminMeetings() {
             description="Thử thay đổi người sở hữu, trạng thái hoặc phạm vi thùng rác."
           />
         ) : null}
-        <div className="pagination">
-          <span>
-            {data.data?.total || 0} cuộc họp phù hợp · Tự cập nhật mỗi 5 giây
-          </span>
-          <div className="row">
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Trang cuộc họp trước"
-              disabled={page <= 1}
-              onClick={() => filter("page", String(page - 1))}
-            >
-              <ChevronLeft size={16} />
-            </Button>
-            <span>Trang {page}</span>
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Trang cuộc họp sau"
-              disabled={
-                page * (data.data?.limit || 30) >= (data.data?.total || 0)
-              }
-              onClick={() => filter("page", String(page + 1))}
-            >
-              <ChevronRight size={16} />
-            </Button>
-          </div>
-        </div>
+        <Pagination
+          page={page}
+          limit={limit}
+          total={data.data?.total || 0}
+          onPageChange={(next) => filter("page", String(next))}
+        />
       </Panel>
       <Modal
         open={!!selected}

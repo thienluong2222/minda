@@ -48,8 +48,17 @@ def enqueue(mongo, user, resource_type, resource_id, kind, payload=None, expecte
         "attempt": 1,
     }
     try:
+        if kind == "generate_minutes":
+            from meeting_backend.modules.minutes.graph_settings import freeze_inputs
+
+            job["payload"] = freeze_inputs(
+                mongo, locked, user, job_id, job["payload"], job["preset_snapshot"]
+            )
         mongo.db.jobs.insert_one(job)
     except BaseException:
+        if kind == "generate_minutes":
+            mongo.db.minutes_input_segments.delete_many({"snapshot_id": job_id})
+            mongo.db.minutes_input_snapshots.delete_one({"_id": job_id})
         collection.update_one(
             {"_id": resource_id, "active_job": job_id},
             {"$set": {"active_job": None}, "$inc": {"revision": 1}},

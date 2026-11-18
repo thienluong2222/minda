@@ -16,15 +16,15 @@ from meeting_pipeline.minutes.document_tools import preview_tools
 
 def preset(mongo):
     record = mongo.db.settings.find_one({"_id": "processing_preset"})
-    return {
-        key: value
-        for key, value in (record or Preset().model_dump()).items()
-        if key not in {"_id", "updated_by", "created_at", "updated_at"}
-    }
+    # Old records acquire new defaults without mutating live settings on a read.
+    return Preset.model_validate(
+        {key: value for key, value in (record or {}).items() if key in Preset.model_fields}
+    ).model_dump()
 
 
 def capabilities(mongo):
     # model_runtime only reads settings/cache; it does not import Torch/MLX or load weights.
+    from meeting_pipeline.config import load_config
     from meeting_pipeline.minutes.model_runtime import model_status
 
     status = model_status()
@@ -42,6 +42,11 @@ def capabilities(mongo):
         "models": status,
         "preset": preset(mongo),
         "max_sources": mongo.settings.max_sources,
+        "max_source_files": mongo.settings.max_source_files,
+        "max_timeline_clips": mongo.settings.max_timeline_clips,
+        "max_audio_duration_sec": load_config(
+            mongo.settings.pipeline_config
+        ).audio.max_duration_seconds,
         "max_upload_bytes": mongo.settings.max_upload_bytes,
         "documents": {
             "word": True,

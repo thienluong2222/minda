@@ -13,7 +13,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-FormatStandard = Literal["nd30_2020", "hd05_2026"]
+FormatStandard = Literal["nd30_2020", "hd05_2026", "minimal"]
 
 
 class DocumentMetadata(BaseModel):
@@ -49,6 +49,9 @@ class FormatProfile:
 
 
 PROFILES: dict[str, FormatProfile] = {
+    "minimal": FormatProfile(
+        "minimal", "Biên bản tối giản", "local:minimal-v1", 12, 16, 12, 1.15, False, 12, 12
+    ),
     "nd30_2020": FormatProfile(
         "nd30_2020",
         "Nghị định 30/2020/NĐ-CP",

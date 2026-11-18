@@ -145,6 +145,7 @@ def create_app(settings: Settings | None = None):
     from meeting_backend.modules.templates.router import router as templates
     from meeting_backend.modules.transcripts.router import router as transcripts
     from meeting_backend.modules.users.router import router as users
+    from meeting_backend.modules.workspace.router import router as workspace
 
     for router in [
         auth,
@@ -157,6 +158,7 @@ def create_app(settings: Settings | None = None):
         templates,
         speakers,
         system,
+        workspace,
     ]:
         app.include_router(router, prefix="/api/v1")
 
@@ -195,11 +197,20 @@ def create_app(settings: Settings | None = None):
         assets = settings.web_dist / "assets"
         if assets.is_dir():
             app.mount("/assets", StaticFiles(directory=assets), name="assets")
+        branding_dir = settings.web_dist / "branding"
+        if branding_dir.is_dir():
+            app.mount("/branding", StaticFiles(directory=branding_dir), name="branding")
+        for namespace in ("illustrations", "product"):
+            directory = settings.web_dist / namespace
+            if directory.is_dir():
+                app.mount(f"/{namespace}", StaticFiles(directory=directory), name=namespace)
 
         @app.get("/{path:path}", include_in_schema=False)
         def frontend(path: str):
-            if path.startswith("api/"):
+            if path.startswith("api/") or path == "api":
                 raise AppError("NOT_FOUND", "API không tồn tại.", 404)
+            if path.split("/", 1)[0] in {"branding", "assets", "illustrations", "product"}:
+                raise AppError("NOT_FOUND", "Không tìm thấy file tĩnh.", 404)
             return FileResponse(settings.web_dist / "index.html")
 
     return app

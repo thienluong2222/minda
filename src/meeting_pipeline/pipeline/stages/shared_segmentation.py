@@ -16,6 +16,7 @@ from meeting_pipeline.adapters.pyannote_segmentation import (
     PyannoteSegmentationAdapter,
     SegmentationResult,
 )
+from meeting_pipeline.audio.coverage import intersect_recorded, recorded_intervals
 from meeting_pipeline.domain.contracts import MeetingSegment, VadConfig
 from meeting_pipeline.pipeline.stages.activity_detection import fuse_vad_intervals
 
@@ -230,7 +231,12 @@ def run_shared_pyannote_segmentation(
             speech_pad_ms=round(vad_config.padding_sec * 1000),
             meeting_duration_sec=meeting_duration_sec,
         )
-        source_intervals[source_id] = intervals
+        source_intervals[source_id] = intersect_recorded(
+            intervals,
+            recorded_intervals(
+                (sync_metadata or {}).get(source_id, {}), (0.0, meeting_duration_sec)
+            ),
+        )
 
     # Multi-source VAD fusion
     fused_regions = fuse_vad_intervals(

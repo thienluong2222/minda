@@ -15,6 +15,9 @@ import torch
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_SPEAKER_MODEL_ID = "pyannote/wespeaker-voxceleb-resnet34-LM"
+DEFAULT_SPEAKER_MODEL_REVISION = "837717ddb9ff5507820346191109dc79c958d614"
+
 
 class BaseSpeakerEncoder(Protocol):
     """Protocol for offline speaker embedding encoders."""
@@ -101,8 +104,8 @@ class WeSpeakerEncoder:
 
     def __init__(
         self,
-        model_id: str = "pyannote/wespeaker-voxceleb-resnet34-LM",
-        revision: str = "837717ddb9ff5507820346191109dc79c958d614",
+        model_id: str = DEFAULT_SPEAKER_MODEL_ID,
+        revision: str = DEFAULT_SPEAKER_MODEL_REVISION,
         cache_dir: Path | str = "data/model_cache",
         device: str = "cpu",
         sample_rate: int = 16000,
@@ -162,8 +165,8 @@ class WeSpeakerEncoder:
 
 
 def create_speaker_encoder(
-    model_id: str,
-    revision: str,
+    model_id: str = DEFAULT_SPEAKER_MODEL_ID,
+    revision: str = DEFAULT_SPEAKER_MODEL_REVISION,
     cache_dir: Path | str = "data/model_cache",
     device: str = "cpu",
     encoder_type: str = "",

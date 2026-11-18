@@ -87,7 +87,7 @@ def generate_speaker_enrollment_table(
     lines = [
         "# Kết Quả Nhận Dạng Người Nói Theo Thời Lượng Enrollment",
         "",
-        "Mô hình: SpeechBrain ECAPA-TDNN (192-dim) kết hợp Cosine và Quality-Weighting.",
+        "Mô hình: WeSpeaker ResNet34-LM (256-dim) kết hợp Cosine và Quality-Weighting.",
         "",
         "| Enrollment | Accuracy (%) ↑ | Macro Precision ↑ | Macro Recall ↑ | Macro F1 ↑ |",
         "|---|---:|---:|---:|---:|",

@@ -31,6 +31,8 @@ def merge_fact_edits(
         merged = {**original.model_dump(), **changes}
         if mark_user_edited:
             merged["user_edited"] = True
+            if merged["status"] in {"supported", "unknown"}:
+                merged["previous_edit"] = None
             merged["transcript_revision"] = original.transcript_revision + 1
             merged.pop("updated_at", None)
         by_id[field_id] = MeetingFact.model_validate(merged)

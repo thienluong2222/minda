@@ -114,7 +114,8 @@ def test_adapter_retries_once_and_never_publishes_rejected_candidate(tmp_path: P
     assert result.status == "transcribed" and result.text == "xin chào"
     assert len(result.raw_candidates) == 2
     assert calls[0]["max_new_tokens"] <= _config().max_new_tokens
-    assert calls[1]["no_repeat_ngram_size"] == 3
+    assert all(call["do_sample"] is False for call in calls)
+    assert calls[1]["num_beams"] == 3
 
 
 def test_adapter_marks_both_bad_decodes_unreliable(tmp_path: Path) -> None:

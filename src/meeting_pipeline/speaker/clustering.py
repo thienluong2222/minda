@@ -14,6 +14,11 @@ from typing import Any
 import numpy as np
 
 from meeting_pipeline.application.speakers import SpeakerProfileInput
+from meeting_pipeline.audio.coverage import (
+    intersect_recorded,
+    interval_metadata,
+    recorded_intervals,
+)
 from meeting_pipeline.pipeline.speaker_turns import SpeakerTurn
 from meeting_pipeline.speaker.encoder import (
     BaseSpeakerEncoder,
@@ -258,10 +263,16 @@ class GlobalSpeakerClusterer:
         for source_id, signal in aligned_signals.items():
             sync = (sync_metadata or {}).get(source_id, {})
             activity = turn.source_activity.get(source_id, {})
+            sync = interval_metadata(sync, start_s, end_s)
             coverage = sync.get("valid_coverage_interval")
-            covered_start = max(start_s, float(coverage[0])) if coverage else start_s
-            covered_end = min(end_s, float(coverage[1])) if coverage else end_s
-            coverage_fraction = max(0.0, covered_end - covered_start) / max(end_s - start_s, 1e-8)
+            common = intersect_recorded(
+                [(start_s, end_s)], recorded_intervals(sync, (start_s, end_s))
+            )
+            coverage_fraction = sum(b - a for a, b in common) / max(end_s - start_s, 1e-8)
+            covered_start, covered_end = max(
+                common, key=lambda pair: pair[1] - pair[0], default=(start_s, start_s)
+            )
+            coverage = [covered_start, covered_end]
             intervals = activity.get("speech_intervals") or []
             valid_intervals = [
                 (max(covered_start, float(row[0])), min(covered_end, float(row[1])))
@@ -513,8 +524,11 @@ class GlobalSpeakerClusterer:
                         if sid in weights
                     }
                     strong = sorted(
-                        ((sid, weights[sid]) for sid in source_scores
-                         if weights[sid] >= self.disagreement_min_weight),
+                        (
+                            (sid, weights[sid])
+                            for sid in source_scores
+                            if weights[sid] >= self.disagreement_min_weight
+                        ),
                         key=lambda item: item[1],
                         reverse=True,
                     )
@@ -530,8 +544,10 @@ class GlobalSpeakerClusterer:
                             self.enrolled_margin,
                         )
                         if first_top and second_top and first_top != second_top:
-                            if (strong[0][1] >= self.dominant_source_weight
-                                and strong[0][1] - strong[1][1] >= self.dominant_source_gap):
+                            if (
+                                strong[0][1] >= self.dominant_source_weight
+                                and strong[0][1] - strong[1][1] >= self.dominant_source_gap
+                            ):
                                 source_scores = {strong[0][0]: source_scores[strong[0][0]]}
                                 weights = {strong[0][0]: 1.0}
                                 policy_notes.append(f"dominant_source_top1:{strong[0][0]}")

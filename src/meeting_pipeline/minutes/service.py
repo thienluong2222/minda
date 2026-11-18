@@ -20,8 +20,9 @@ from meeting_pipeline.minutes.doc_parser import parse_template_document
 from meeting_pipeline.minutes.document_formatting import format_minutes_document
 from meeting_pipeline.minutes.evidence_retrieval import load_indexed_turns
 from meeting_pipeline.minutes.fact_edits import merge_fact_edits
-from meeting_pipeline.minutes.fact_extractor import M2RuleFactExtractor
+from meeting_pipeline.minutes.graph_export import guard_graph_export
 from meeting_pipeline.minutes.manifest import generate_minutes_manifest, save_minutes_manifest
+from meeting_pipeline.minutes.meeting_record import build_meeting_record
 from meeting_pipeline.minutes.model_pipeline import run_text_models
 from meeting_pipeline.minutes.model_runtime import ModelRuntimeError, model_status
 from meeting_pipeline.minutes.renderer import render_completed_document
@@ -29,6 +30,7 @@ from meeting_pipeline.minutes.schema_mapper import (
     M0RuleSchemaMapper,
     SchemaValidator,
     load_schema,
+    reconcile_schema_structure,
     save_schema,
 )
 from meeting_pipeline.minutes.schemas import (
@@ -37,6 +39,7 @@ from meeting_pipeline.minutes.schemas import (
     RunMetrics,
     TemplateField,
 )
+from meeting_pipeline.minutes.structured_fields import structured_facts
 from meeting_pipeline.minutes.text_engine import MinutesOptions
 from meeting_pipeline.minutes.transactions import GENERATION_LOCK, minutes_transaction
 from meeting_pipeline.minutes.visual_qa import render_document_pages, render_document_to_image
@@ -223,6 +226,7 @@ class MinutesService:
         if reuse_schema and (template_dir / "schema.json").is_file():
             proposed_schema = load_schema(template_dir / "schema.json")
 
+        proposed_schema = reconcile_schema_structure(proposed_schema, doc_graph)
         m1_status = "not_run"
 
         save_schema(proposed_schema, template_dir / "schema_proposal.json")
@@ -233,17 +237,19 @@ class MinutesService:
         # 4. Load audio timeline turns & retrieve evidence
         t0 = time.perf_counter()
         turns = load_indexed_turns(run_dir)
+        _write_json(minutes_dir / "meeting_record.json", build_meeting_record(turns, run_dir.name))
         metrics.turn_count = len(turns)
         metrics.retrieval_sec = round(time.perf_counter() - t0, 4)
 
         # 5. Extract facts (M2 rule baseline + M3 model if enabled)
         t0 = time.perf_counter()
-        extractor = M2RuleFactExtractor()
-        facts = extractor.extract_facts(
+        facts = structured_facts(
+            graph=doc_graph,
             schema=proposed_schema,
             turns=turns,
             meeting_metadata=meeting_metadata,
             run_id=run_dir.name,
+            scoped_only=True,
         )
 
         m3_status = "not_run"
@@ -256,6 +262,7 @@ class MinutesService:
                 run_dir,
                 options,
                 preserve_schema=reuse_schema and proposed_schema.proposed_by == "user_manual",
+                meeting_metadata=meeting_metadata,
             )
             m1_status = "preserved" if reuse_schema else "success"
             m3_status = "needs_review" if model_report["warnings"] else "success"
@@ -269,6 +276,13 @@ class MinutesService:
                 "corrections.json",
                 "corrected_transcript.json",
                 "topics.json",
+                "meeting_graph.json",
+                "content_plan.json",
+                "content_plan_prepared.json",
+                "verification.json",
+                "coverage.json",
+                "style_profile.json",
+                "input_snapshot.json",
             ):
                 (minutes_dir / name).unlink(missing_ok=True)
 
@@ -282,6 +296,9 @@ class MinutesService:
             }
             facts = [edited.get(f.field_id, f) for f in facts]
 
+        facts = guard_graph_export(
+            run_dir, proposed_schema, doc_graph, facts, turns, meeting_metadata
+        )
         _write_json(minutes_dir / "facts.json", [f.model_dump() for f in facts])
         metrics.extraction_sec = round(time.perf_counter() - t0, 4)
 
@@ -353,11 +370,19 @@ class MinutesService:
             zf.write(template_dir / "schema.json", "schema.json")
             zf.write(minutes_dir / "timings.json", "timings.json")
             for name in (
+                "meeting_record.json",
                 "configuration.json",
                 "formatting_report.json",
                 "corrections.json",
                 "corrected_transcript.json",
                 "topics.json",
+                "meeting_graph.json",
+                "content_plan.json",
+                "content_plan_prepared.json",
+                "verification.json",
+                "coverage.json",
+                "style_profile.json",
+                "input_snapshot.json",
                 "model_report.json",
             ):
                 if (minutes_dir / name).is_file():
@@ -451,6 +476,10 @@ class MinutesService:
             else [MeetingFact.model_validate(f) for f in updated_facts_data]
         )
 
+        if (minutes_dir / "meeting_graph.json").is_file():
+            facts = guard_graph_export(
+                run_dir, schema, doc_graph, facts, load_indexed_turns(run_dir)
+            )
         _write_json(minutes_dir / "facts.json", [f.model_dump() for f in facts])
 
         # Re-render
@@ -503,11 +532,19 @@ class MinutesService:
             zf.write(minutes_dir / "facts.json", "facts.json")
             zf.write(schema_path, "schema.json")
             for name in (
+                "meeting_record.json",
                 "configuration.json",
                 "formatting_report.json",
                 "corrections.json",
                 "corrected_transcript.json",
                 "topics.json",
+                "meeting_graph.json",
+                "content_plan.json",
+                "content_plan_prepared.json",
+                "verification.json",
+                "coverage.json",
+                "style_profile.json",
+                "input_snapshot.json",
                 "model_report.json",
                 "timings.json",
             ):
@@ -574,12 +611,13 @@ class MinutesService:
 
         # Re-extract facts
         turns = load_indexed_turns(run_dir)
-        extractor = M2RuleFactExtractor()
-        facts = extractor.extract_facts(
+        facts = structured_facts(
+            graph=doc_graph,
             schema=current_schema,
             turns=turns,
             meeting_metadata=meeting_metadata,
             run_id=run_dir.name,
+            scoped_only=True,
         )
         _write_json(minutes_dir / "facts.json", [f.model_dump() for f in facts])
 

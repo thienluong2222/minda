@@ -1,6 +1,7 @@
+import re
 import shutil
 
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, Query, UploadFile
 from pymongo import ReturnDocument
 
 from meeting_backend.api.dependencies import administrator, current_user, database
@@ -71,13 +72,59 @@ def overview(user=Depends(administrator), mongo=Depends(database)):
     }
 
 
+def paged_records(collection, query, page, limit, legacy_limit):
+    cursor = collection.find(query).sort([("created_at", -1), ("_id", 1)])
+    if page is None:
+        return [public(record) for record in cursor.limit(legacy_limit)]
+    return {
+        "items": [public(record) for record in cursor.skip((page - 1) * limit).limit(limit)],
+        "total": collection.count_documents(query),
+        "page": page,
+        "limit": limit,
+    }
+
+
 @router.get("/admin/jobs")
-def jobs(user=Depends(administrator), mongo=Depends(database)):
-    users = {u["_id"]: u["display_name"] for u in mongo.db.users.find({}, {"display_name": 1})}
-    return [
-        {**job_view(j), "owner_name": users.get(j["owner_id"], j["owner_id"])}
-        for j in mongo.db.jobs.find().sort("created_at", -1).limit(200)
+def jobs(
+    q: str = Query("", max_length=200),
+    state: str = Query("", max_length=60),
+    kind: str = Query("", max_length=200),
+    page: int | None = Query(None, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    user=Depends(administrator),
+    mongo=Depends(database),
+):
+    query = {}
+    if state and state != "all":
+        query["state"] = state
+    if kind and kind != "all":
+        query["kind"] = {"$in": kind.split(",")}
+    if q.strip():
+        pattern = {"$regex": re.escape(q.strip()), "$options": "i"}
+        owners = [
+            u["_id"]
+            for u in mongo.db.users.find(
+                {"$or": [{"display_name": pattern}, {"username": pattern}]}, {"_id": 1}
+            )
+        ]
+        query["$or"] = [
+            {key: pattern}
+            for key in ["_id", "kind", "state", "stage", "resource_id", "error.message"]
+        ] + [{"owner_id": {"$in": owners}}]
+    result = paged_records(mongo.db.jobs, query, page, limit, 200)
+    records = result if page is None else result["items"]
+    owner_ids = [j["owner_id"] for j in records]
+    users = {
+        u["_id"]: u["display_name"]
+        for u in mongo.db.users.find({"_id": {"$in": owner_ids}}, {"display_name": 1})
+    }
+    views = [
+        {**job_view({**j, "_id": j["id"]}), "owner_name": users.get(j["owner_id"], j["owner_id"])}
+        for j in records
     ]
+    if page is None:
+        return views
+    return {**result, "items": views}
 
 
 @router.get("/admin/jobs/{job_id}/log")
@@ -115,8 +162,20 @@ def operate_job(job_id: str, action: str, user=Depends(administrator), mongo=Dep
 
 
 @router.get("/admin/audit")
-def audit(user=Depends(administrator), mongo=Depends(database)):
-    return [public(e) for e in mongo.db.audit_events.find().sort("created_at", -1).limit(300)]
+def audit(
+    q: str = Query("", max_length=200),
+    page: int | None = Query(None, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    user=Depends(administrator),
+    mongo=Depends(database),
+):
+    query = {}
+    if q.strip():
+        pattern = {"$regex": re.escape(q.strip()), "$options": "i"}
+        query["$or"] = [
+            {key: pattern} for key in ["action", "resource_id", "owner_id", "created_at"]
+        ]
+    return paged_records(mongo.db.audit_events, query, page, limit, 300)
 
 
 @router.get("/admin/preset")
@@ -145,8 +204,13 @@ def update_preset(payload: Preset, user=Depends(administrator), mongo=Depends(da
 
 
 @router.get("/admin/experiments")
-def experiments(user=Depends(administrator), mongo=Depends(database)):
-    return [public(e) for e in mongo.db.experiments.find().sort("created_at", -1).limit(100)]
+def experiments(
+    page: int | None = Query(None, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    user=Depends(administrator),
+    mongo=Depends(database),
+):
+    return paged_records(mongo.db.experiments, {}, page, limit, 100)
 
 
 @router.post("/admin/experiments", status_code=201)
