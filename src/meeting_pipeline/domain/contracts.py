@@ -229,7 +229,7 @@ class SpeakerEncoderConfig(BaseModel):
     model_id: str
     revision: str
     cache_dir: str
-    embedding_dim: int = 192
+    embedding_dim: int = 256
 
 
 class VadConfig(BaseModel):

@@ -19,6 +19,7 @@ def cluster_topics(
     fixed_clusters: int | None = None,
     fuzziness: float = 2.0,
     minimum_silhouette: float = 0.08,
+    include_model: bool = False,
 ) -> dict[str, Any]:
     """Membership is a similarity weight, never a factual confidence/probability.
 
@@ -34,10 +35,12 @@ def cluster_topics(
     x = x / np.maximum(np.linalg.norm(x, axis=1, keepdims=True), 1e-12)
     # Reduce dimensionality only for distance fitting; evaluate in original space.
     fit_x = x
+    projection = None
     if min(x.shape) > 12:
-        fit_x = PCA(n_components=min(12, n - 1), random_state=0).fit_transform(x)
+        projection = PCA(n_components=min(12, n - 1), random_state=0)
+        fit_x = projection.fit_transform(x)
     candidates: list[dict[str, Any]] = []
-    best: tuple[float, NDArray[np.float64], NDArray[np.int64]] | None = None
+    best = None
     possible = (
         [fixed_clusters]
         if fixed_clusters and fixed_clusters > 1
@@ -47,7 +50,7 @@ def cluster_topics(
         for c in possible:
             attempts = []
             for seed in (0, 17, 42):
-                _, membership, _, _, _, _, fpc = cmeans(
+                centers, membership, _, _, _, _, fpc = cmeans(
                     fit_x.T,
                     c,
                     fuzziness,
@@ -59,8 +62,16 @@ def cluster_topics(
                 sizes = np.bincount(labels, minlength=c)
                 if len(set(labels)) != c or min(sizes) < (1 if fixed_clusters else 2):
                     continue
-                silhouette = float(silhouette_score(x, labels, metric="cosine")) if c < n else -1.0
-                attempts.append((silhouette, membership, labels, float(fpc)))
+                silhouette = (
+                    float(
+                        silhouette_score(
+                            x, labels, metric="cosine", sample_size=min(n, 1500), random_state=0
+                        )
+                    )
+                    if c < n
+                    else -1.0
+                )
+                attempts.append((silhouette, membership, labels, float(fpc), centers))
             stability = (
                 float(
                     np.mean([adjusted_rand_score(a[2], b[2]) for a, b in combinations(attempts, 2)])
@@ -72,7 +83,7 @@ def cluster_topics(
                 candidates.append({"c": c, "accepted": False, "reason": "empty_or_tiny_cluster"})
                 continue
             selected = max(attempts, key=lambda item: item[0])
-            sil, membership, labels, fpc = selected
+            sil, membership, labels, fpc, centers = selected
             accepted = bool(fixed_clusters) or (
                 len(attempts) == 3
                 and stability >= 0.6
@@ -90,14 +101,15 @@ def cluster_topics(
             )
             score = sil + 0.1 * stability
             if accepted and (best is None or score > best[0]):
-                best = score, membership, labels
+                best = score, membership, labels, centers
     if best is None:
         if fixed_clusters and fixed_clusters > 1:
             raise ValueError("FCM không tạo được số nhóm yêu cầu từ các embedding này.")
         membership = np.ones((1, n))
         labels = np.zeros(n, dtype=np.int64)
+        centers = np.mean(fit_x, axis=0, keepdims=True)
     else:
-        _, membership, labels = best
+        _, membership, labels, centers = best
     # Stable names ordered by first occurrence, independent of FCM centroid IDs.
     order = sorted(set(labels.tolist()), key=lambda label: labels.tolist().index(label))
     remap = {old: new for new, old in enumerate(order)}
@@ -108,7 +120,7 @@ def cluster_topics(
         values = sorted(membership[:, i], reverse=True)
         if len(values) > 1 and (values[0] < 0.55 or values[0] - values[1] < 0.15):
             ambiguous.append(i)
-    return {
+    result = {
         "algorithm": "fuzzy_c_means",
         "cluster_count": len(order),
         "primary": primary,
@@ -119,3 +131,13 @@ def cluster_topics(
         "embedding_dimensions": x.shape[1],
         "membership_is_probability": False,
     }
+    if include_model:
+        result["model"] = {
+            "centers": centers[order].tolist(),
+            "projection_mean": projection.mean_.tolist() if projection is not None else None,
+            "projection_components": projection.components_.tolist()
+            if projection is not None
+            else None,
+            "fuzziness": fuzziness,
+        }
+    return result

@@ -10,7 +10,7 @@ from typing import Any
 
 import numpy as np
 
-from meeting_pipeline.speaker.encoder import ECAPAEncoder
+from meeting_pipeline.speaker.encoder import BaseSpeakerEncoder, create_speaker_encoder
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ def identify_multi_source_speaker(
     segment_waveforms: dict[str, np.ndarray[Any, np.dtype[np.float32]]],
     speaker_prototypes: dict[str, np.ndarray[Any, np.dtype[np.float32]]],
     audio_quality_scores: dict[str, float],
-    encoder: ECAPAEncoder | None = None,
+    encoder: BaseSpeakerEncoder | None = None,
     fixed_source_id: str | None = None,
     temperature: float = 1.5,
     unknown_threshold: float = 0.35,
@@ -33,7 +33,7 @@ def identify_multi_source_speaker(
     - Quality-weighted multi-source baseline
     """
     if encoder is None:
-        encoder = ECAPAEncoder()
+        encoder = create_speaker_encoder()
 
     # Extract embeddings for each device
     device_embeddings: dict[str, np.ndarray[Any, np.dtype[np.float32]]] = {}

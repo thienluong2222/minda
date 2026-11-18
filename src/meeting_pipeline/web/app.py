@@ -48,7 +48,7 @@ FUSION_METHODS = {
     "F6_LEARNED": "Căn hàng từ rồi dùng mô hình đã huấn luyện để chấm token; có thể chuyển về F5.",
 }
 IDENTITY_METHODS = {
-    "prototype_cosine": "ECAPA: so cosine embedding với hồ sơ, xét ngưỡng và margin.",
+    "prototype_cosine": "Đối chiếu mẫu giọng đã đăng ký, xét độ tương đồng và độ chênh lệch.",
     "mfcc_knn": "MFCC + KNN: so đặc trưng giọng với mẫu đăng ký, xét khoảng cách và margin.",
 }
 

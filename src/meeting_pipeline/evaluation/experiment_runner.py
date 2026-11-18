@@ -53,7 +53,7 @@ from meeting_pipeline.fusion.confusion_network import build_confusion_network
 from meeting_pipeline.fusion.model import LearnedFusionModel
 from meeting_pipeline.fusion.provenance import build_final_timeline_item
 from meeting_pipeline.simulation.meeting_recipe import load_recipe
-from meeting_pipeline.speaker.encoder import ECAPAEncoder
+from meeting_pipeline.speaker.encoder import create_speaker_encoder
 from meeting_pipeline.speaker.enrollment import build_speaker_prototypes
 from meeting_pipeline.speaker.identification import identify_multi_source_speaker
 
@@ -86,14 +86,18 @@ def run_experiment_pipeline(
     reports_dir.mkdir(parents=True, exist_ok=True)
 
     # Initialize shared model adapters
-    logger.info("Initializing offline PhoWhisper and ECAPA adapters...")
+    logger.info("Initializing offline PhoWhisper and configured speaker adapters...")
     asr_cfg = AsrConfig(
         model_id=models_cfg.asr.model_id,
         model_revision=models_cfg.asr.revision,
         language=models_cfg.asr.language,
     )
     asr_adapter = PhoWhisperAsrAdapter(config=asr_cfg, cache_dir=Path("data/model_cache"))
-    ecapa_encoder = ECAPAEncoder(cache_dir="data/model_cache")
+    speaker_encoder = create_speaker_encoder(
+        model_id=models_cfg.speaker_encoder.model_id,
+        revision=models_cfg.speaker_encoder.revision,
+        cache_dir="data/model_cache",
+    )
 
     # ---------------------------------------------------------------------------
     # Step 1: Train Learned Fusion Model on Development Split
@@ -205,7 +209,7 @@ def run_experiment_pipeline(
             enrollment_catalog=catalog,
             manifest_records=manifest_records,
             target_duration_sec=dur_sec,
-            encoder=ecapa_encoder,
+            encoder=speaker_encoder,
         )
         speaker_prototypes_by_dur[dur_label] = protos
 
@@ -266,7 +270,7 @@ def run_experiment_pipeline(
                 segment_waveforms=seg_waves,
                 speaker_prototypes=protos,
                 audio_quality_scores={d: h.audio_quality_score for d, h in source_hyps.items()},
-                encoder=ecapa_encoder,
+                encoder=speaker_encoder,
                 unknown_threshold=unknown_threshold,
             )
             pred_spk = spk_res["predicted_speaker_id"]

@@ -9,10 +9,10 @@ asr:
   return_timestamps: true
 
 speaker_encoder:
-  model_id: "speechbrain/spkrec-ecapa-voxceleb"
-  revision: "0f99f2d0ebe89ac095bcc5903c4dd8f72b367286"
-  cache_dir: "data/model_cache/models--speechbrain--spkrec-ecapa-voxceleb/snapshots/0f99f2d0ebe89ac095bcc5903c4dd8f72b367286"
-  embedding_dim: 192
+  model_id: "pyannote/wespeaker-voxceleb-resnet34-LM"
+  revision: "837717ddb9ff5507820346191109dc79c958d614"
+  cache_dir: "data/model_cache/models--pyannote--wespeaker-voxceleb-resnet34-LM/snapshots/837717ddb9ff5507820346191109dc79c958d614"
+  embedding_dim: 256
 
 vad:
   backend: "silero"

@@ -37,7 +37,15 @@ def run_text_models(
     options: MinutesOptions,
     *,
     preserve_schema: bool = False,
+    meeting_metadata: dict[str, Any] | None = None,
 ) -> tuple[TemplateSchema, list[MeetingFact], dict[str, Any]]:
+    if options.graph_enabled:
+        from meeting_pipeline.minutes.graph_pipeline import run_graph_text_models
+
+        return run_graph_text_models(
+            schema, graph, turns, run_dir, options, preserve_schema=preserve_schema,
+            meeting_metadata=meeting_metadata,
+        )
     start = time.perf_counter()
     units, excluded = make_units(turns)
     if not units:
@@ -83,7 +91,9 @@ def run_text_models(
         model_facts = engine.extract_fields(
             working, graph, turns, units, general_body=body.field_id if body else None
         )
-        facts_by_id = {f.field_id: f for f in structured_facts(schema, graph, turns, run_dir.name)}
+        facts_by_id = {f.field_id: f for f in structured_facts(
+            schema, graph, turns, run_dir.name, meeting_metadata=meeting_metadata
+        )}
         facts_by_id.update({f.field_id: f for f in model_facts})
         topics: dict[str, Any] | None = None
         if body is not None:

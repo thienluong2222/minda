@@ -9,7 +9,7 @@ audio:
   separator_sample_rate: 8000
   max_sources: 8
   max_profiles: 8
-  max_duration_seconds: 1200
+  max_duration_seconds: 7200
   max_upload_bytes: 1000000000
   preserve_originals: true
 sync:
@@ -38,13 +38,14 @@ separation:
   context_seconds: 1
   overlap_seconds: 1
 identity:
-  model_id: speechbrain/spkrec-ecapa-voxceleb
-  model_revision: 0f99f2d0ebe89ac095bcc5903c4dd8f72b367286
+  model_id: pyannote/wespeaker-voxceleb-resnet34-LM
+  model_revision: 837717ddb9ff5507820346191109dc79c958d614
   method: prototype_cosine
-  identity_threshold: 0.25
-  identity_margin: 0.05
+  # WeSpeaker thresholds selected on the synthetic validation split (2026-11-04).
+  identity_threshold: 0.41430566012859343
+  identity_margin: 0.10853255093097687
   anonymous_cluster_threshold: 0.1
-  cluster_threshold: 0.40
+  cluster_threshold: 0.50
   assign_threshold: 0.35
   assign_margin: 0.05
   fusion_policy: P2_EMBEDDING_FUSION
@@ -66,6 +67,8 @@ identity:
     metric: cosine
     weights: distance
 asr:
+  runtime: auto
+  auto_backend: mlx
   model_id: vinai/PhoWhisper-medium
   model_revision: 55a7e3eb6c906de891f8f06a107754427dd3be79
   model_variants:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import uuid
@@ -14,7 +15,13 @@ import soundfile as sf
 
 from meeting_pipeline.adapters.audio_io import decode_mono
 from meeting_pipeline.config import PipelineConfig
-from meeting_pipeline.speaker.encoder import ECAPAEncoder, WeSpeakerEncoder, create_speaker_encoder
+from meeting_pipeline.speaker.encoder import (
+    DEFAULT_SPEAKER_MODEL_ID,
+    DEFAULT_SPEAKER_MODEL_REVISION,
+    ECAPAEncoder,
+    WeSpeakerEncoder,
+    create_speaker_encoder,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -87,10 +94,10 @@ class SpeakerRegistry:
 
     def _get_encoder(self) -> ECAPAEncoder | WeSpeakerEncoder:
         if self._encoder is None:
-            default_m = "speechbrain/spkrec-ecapa-voxceleb"
-            default_rev = "0f99f2d0ebe89ac095bcc5903c4dd8f72b367286"
-            model_id = str(self.config.identity.get("model_id", default_m))
-            revision = str(self.config.identity.get("model_revision", default_rev))
+            model_id = str(self.config.identity.get("model_id", DEFAULT_SPEAKER_MODEL_ID))
+            revision = str(
+                self.config.identity.get("model_revision", DEFAULT_SPEAKER_MODEL_REVISION)
+            )
             self._encoder = create_speaker_encoder(
                 model_id=model_id,
                 revision=revision,
@@ -219,9 +226,21 @@ class SpeakerRegistry:
                     except Exception:
                         pass
 
-            # Detect encoder model / dimension mismatch
-            if saved_emb.shape[0] != target_dim:
-                if samples:
+            # Equal dimensions do not imply the same model or embedding space.
+            incompatible = (
+                saved_emb.shape != (target_dim,)
+                or metadata.get("model_id") != encoder.model_id
+                or metadata.get("model_revision") != encoder.revision
+            )
+            if incompatible:
+                valid_samples = [
+                    wave
+                    for wave in samples
+                    if evaluate_sample_quality(wave, self.config.audio.analysis_sample_rate)[
+                        "valid"
+                    ]
+                ]
+                if valid_samples:
                     logger.info(
                         "Re-encoding speaker %s (%s) from raw audio for current encoder dimension"
                         " %d",
@@ -229,16 +248,60 @@ class SpeakerRegistry:
                         metadata.get("display_name"),
                         target_dim,
                     )
-                    re_embs = [self.encode(w) for w in samples]
+                    re_embs = [self.encode(w) for w in valid_samples]
+                    if len(re_embs) >= 3:
+                        matrix = np.stack(re_embs)
+                        keep = (np.sum(matrix @ matrix.T, axis=1) - 1.0) / (
+                            len(re_embs) - 1
+                        ) >= 0.30
+                        if np.any(keep):
+                            re_embs = [
+                                emb for emb, accepted in zip(re_embs, keep, strict=True) if accepted
+                            ]
                     prototype = np.mean(np.stack(re_embs), axis=0)
-                    prototype /= max(float(np.linalg.norm(prototype)), 1e-12)
+                    norm = float(np.linalg.norm(prototype))
+                    if (
+                        prototype.shape != (target_dim,)
+                        or not np.all(np.isfinite(prototype))
+                        or norm < 1e-8
+                    ):
+                        raise ValueError(
+                            "Encoder trả về embedding không hợp lệ; hồ sơ gốc được giữ nguyên."
+                        )
+                    prototype /= norm
                     saved_emb = prototype.astype(np.float32)
-                    np.save(embedding_path, saved_emb)
+                    old_metadata = metadata_path.read_bytes()
+                    old_embedding = embedding_path.read_bytes()
+                    fingerprint = hashlib.sha256(old_metadata + old_embedding).hexdigest()[:16]
+                    backup = speaker_dir / "encoder_backups" / fingerprint
+                    backup.mkdir(parents=True, exist_ok=True)
+                    (backup / "profile.json").write_bytes(old_metadata)
+                    (backup / "embedding.npy").write_bytes(old_embedding)
+                    metadata.update(
+                        model_id=encoder.model_id,
+                        model_revision=encoder.revision,
+                        embedding_dimension=target_dim,
+                    )
+                    token = uuid.uuid4().hex
+                    temporary_embedding = embedding_path.with_suffix(f".npy.{token}.tmp")
+                    temporary_metadata = metadata_path.with_suffix(f".json.{token}.tmp")
+                    try:
+                        with temporary_embedding.open("wb") as handle:
+                            np.save(handle, saved_emb)
+                        temporary_metadata.write_text(
+                            json.dumps(metadata, ensure_ascii=False, indent=2) + "\n",
+                            encoding="utf-8",
+                        )
+                        temporary_embedding.replace(embedding_path)
+                        temporary_metadata.replace(metadata_path)
+                    finally:
+                        temporary_embedding.unlink(missing_ok=True)
+                        temporary_metadata.unlink(missing_ok=True)
                 else:
                     d_name = metadata.get("display_name")
                     raise ValueError(
-                        f"Hồ sơ '{d_name}' có embedding {saved_emb.shape[0]}D "
-                        f"không khớp encoder hiện tại ({target_dim}D) và thiếu file âm thanh gốc. "
+                        f"Hồ sơ '{d_name}' không khớp encoder hiện tại ({target_dim}D) "
+                        "và thiếu mẫu âm thanh hợp lệ để tạo lại embedding. "
                         f"Vui lòng đăng ký lại mẫu cho model này."
                     )
 

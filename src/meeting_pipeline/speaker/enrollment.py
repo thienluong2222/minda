@@ -1,4 +1,4 @@
-"""Speaker enrollment prototype extraction using SpeechBrain ECAPA-TDNN.
+"""Speaker enrollment prototype extraction using the configured speaker encoder.
 
 Specification: Section 10.1 of docs/PLAN_VIVOS_SYNTHETIC_PIPELINE.md.
 """
@@ -12,7 +12,7 @@ import numpy as np
 import soundfile as sf
 
 from meeting_pipeline.domain.contracts import UtteranceRecord
-from meeting_pipeline.speaker.encoder import ECAPAEncoder
+from meeting_pipeline.speaker.encoder import BaseSpeakerEncoder, create_speaker_encoder
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +22,11 @@ def build_speaker_prototypes(
     enrollment_catalog: dict[str, list[str]],
     manifest_records: list[UtteranceRecord],
     target_duration_sec: float = 30.0,
-    encoder: ECAPAEncoder | None = None,
+    encoder: BaseSpeakerEncoder | None = None,
 ) -> dict[str, np.ndarray[Any, np.dtype[np.float32]]]:
     """Extract and build L2-normalized prototype embedding for each speaker."""
     if encoder is None:
-        encoder = ECAPAEncoder()
+        encoder = create_speaker_encoder()
 
     utt_lookup = {r.utterance_id: r for r in manifest_records}
     prototypes: dict[str, np.ndarray[Any, np.dtype[np.float32]]] = {}
@@ -55,7 +55,7 @@ def build_speaker_prototypes(
 
         if not embeddings:
             logger.warning("No embeddings extracted for speaker %s; using random prototype", spk_id)
-            dummy = np.random.normal(0, 1, 192).astype(np.float32)
+            dummy = np.random.normal(0, 1, encoder.embedding_dimension).astype(np.float32)
             dummy = dummy / float(np.linalg.norm(dummy))
             prototypes[spk_id] = dummy
         else:

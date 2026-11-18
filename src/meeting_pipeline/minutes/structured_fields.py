@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from datetime import date
+from typing import Any
 
 from meeting_pipeline.minutes.evidence_retrieval import IndexedTurn
 from meeting_pipeline.minutes.fact_extractor import M2RuleFactExtractor
@@ -80,9 +81,15 @@ def vietnamese_number(text: str) -> int:
 
 
 def structured_facts(
-    schema: TemplateSchema, graph: DocGraph, turns: list[IndexedTurn], run_id: str
+    schema: TemplateSchema,
+    graph: DocGraph,
+    turns: list[IndexedTurn],
+    run_id: str,
+    meeting_metadata: dict[str, Any] | None = None,
 ) -> list[MeetingFact]:
-    baseline = M2RuleFactExtractor().extract_facts(schema, turns, run_id=run_id)
+    baseline = M2RuleFactExtractor().extract_facts(
+        schema, turns, meeting_metadata=meeting_metadata, run_id=run_id
+    )
     facts = {f.field_id: f for f in baseline}
     valid = [t for t in turns if t.text and t.asr_status in {"transcribed", "user_edited"}]
     anchors = {a.anchor_id: a for a in graph.all_anchors}

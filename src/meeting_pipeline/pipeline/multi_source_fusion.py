@@ -66,8 +66,9 @@ from meeting_pipeline.speaker.clustering import (
     TurnAssignment,
 )
 from meeting_pipeline.speaker.encoder import (
+    DEFAULT_SPEAKER_MODEL_ID,
+    DEFAULT_SPEAKER_MODEL_REVISION,
     BaseSpeakerEncoder,
-    ECAPAEncoder,
     create_speaker_encoder,
 )
 from meeting_pipeline.speaker.source_quality import SpeakerFusionPolicy
@@ -107,13 +108,13 @@ def _normalized_weights(scores: dict[str, float], temperature: float = 1.0) -> d
 
 
 class _MultiSourceSpeakerAssigner:
-    """Assign enrolled speakers from a quality-weighted ECAPA embedding."""
+    """Assign enrolled speakers from a quality-weighted speaker embedding."""
 
     def __init__(self, config: PipelineConfig, profiles: list[SpeakerProfileInput]) -> None:
         self.config = config
         self.profiles = profiles
         self.sample_rate = config.audio.analysis_sample_rate
-        self.encoder = ECAPAEncoder(
+        self.encoder = create_speaker_encoder(
             model_id=str(config.identity["model_id"]),
             revision=str(config.identity["model_revision"]),
             cache_dir=config.paths.model_cache_dir,
@@ -179,7 +180,7 @@ class _MultiSourceSpeakerAssigner:
                     "speaker_match_score": best_score,
                     "speaker_top_candidates": candidates,
                     "identity_decision_reason": (
-                        f"multi_source_ecapa: score={best_score:.3f}, margin={actual_margin:.3f}"
+                        f"multi_source_cosine: score={best_score:.3f}, margin={actual_margin:.3f}"
                     ),
                     "warnings": [],
                     "source_weights": weights,
@@ -418,7 +419,7 @@ class MultiSourceFusionPipeline:
             if self.clusterer is None:
                 if self.speaker_encoder is None:
                     encoder_model_id = str(
-                        self.config.identity.get("model_id", "speechbrain/spkrec-ecapa-voxceleb")
+                        self.config.identity.get("model_id", DEFAULT_SPEAKER_MODEL_ID)
                     )
                     encoder_type = (
                         "wespeaker" if "wespeaker" in encoder_model_id.lower() else "ecapa"
@@ -426,7 +427,11 @@ class MultiSourceFusionPipeline:
                     self.speaker_encoder = create_speaker_encoder(
                         encoder_type=encoder_type,
                         model_id=encoder_model_id,
-                        revision=str(self.config.identity.get("model_revision", "")),
+                        revision=str(
+                            self.config.identity.get(
+                                "model_revision", DEFAULT_SPEAKER_MODEL_REVISION
+                            )
+                        ),
                         cache_dir=self.config.paths.model_cache_dir,
                     )
                 cluster_thresh = float(
@@ -825,10 +830,14 @@ class MultiSourceFusionPipeline:
             return self._overlap_encoder.encode(wave)
 
         # A clean neighboring turn can anchor a stream to an established local track.
-        self._overlap_encoder = getattr(self, "_overlap_encoder", None) or ECAPAEncoder(
-            model_id=str(self.config.identity["model_id"]),
-            revision=str(self.config.identity["model_revision"]),
-            cache_dir=self.config.paths.model_cache_dir,
+        self._overlap_encoder = (
+            getattr(self, "_overlap_encoder", None)
+            or self.speaker_encoder
+            or create_speaker_encoder(
+                model_id=str(self.config.identity["model_id"]),
+                revision=str(self.config.identity["model_revision"]),
+                cache_dir=self.config.paths.model_cache_dir,
+            )
         )
         base_id = next(iter(separated))
         base = separated[base_id]

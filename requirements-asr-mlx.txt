@@ -1,0 +1,6 @@
+# Isolated runtime; do not install into the backend environment.
+mlx-whisper==0.4.3
+mlx==0.32.3
+numpy==2.4.6
+torch==2.15.0
+PyYAML==6.0.3

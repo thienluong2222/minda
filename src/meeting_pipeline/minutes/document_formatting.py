@@ -796,6 +796,12 @@ def format_minutes_document(
     grounded_people: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Format a filled copy and return verifiable checks plus human review items."""
+    if standard == "minimal":
+        from meeting_pipeline.minutes.minimal_format import format_minimal
+
+        if two_sided:
+            raise ValueError("Chế độ tối giản hiện dùng bố cục một mặt.")
+        return format_minimal(path)
     profile = PROFILES[standard]
     metadata = metadata or DocumentMetadata()
     if two_sided and standard != "hd05_2026":

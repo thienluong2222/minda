@@ -30,6 +30,7 @@ from meeting_pipeline.minutes.topic_clustering import cluster_topics
 class MinutesOptions(BaseModel):
     mode: Literal["detailed", "general"] = "detailed"
     use_model: bool = False
+    graph_enabled: bool = True
     correct_transcript: bool = True
     use_fcm: bool = True
     clusters: int | None = Field(default=None, ge=1, le=12)

@@ -50,7 +50,7 @@ def test_models_config_loading() -> None:
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
     cfg = ModelsConfig.model_validate(data)
     assert cfg.asr.model_id == "vinai/PhoWhisper-medium"
-    assert cfg.speaker_encoder.embedding_dim == 192
+    assert cfg.speaker_encoder.embedding_dim == 256
 
 
 def test_fusion_config_loading() -> None:

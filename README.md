@@ -3,6 +3,16 @@
 Pipeline offline nhận diện người nói và chép lời cuộc họp tiếng Việt từ nhiều điện thoại,
 triển khai theo `PIPELINE_IMPLEMENTATION_SPEC.md`.
 
+## Cấu trúc dự án
+
+- [Mã pipeline](src/meeting_pipeline/), [cấu hình](configs/), [script](scripts/) và [kiểm thử](tests/).
+- [Demo Streamlit](app/) và [hướng dẫn chạy ứng dụng web](web_app/README.md).
+- [Tài liệu dự án](docs/), [bàn giao kỹ thuật](docs/handoff/PROJECT_CONTEXT_HANDOFF_2026-10-22.md)
+  và [tài liệu tham khảo trên máy](docs/references/).
+- [Bản ghi gốc](dataset/voices/), [dữ liệu chạy](data/) và [manifest bộ dữ liệu](manifests/).
+- [Mã thí nghiệm](experiments/), [báo cáo phân tích](docs/reports/) và [kết quả benchmark](reports/).
+- [Đầu ra demo](artifacts/) và [bảng tính, tệp xuất](outputs/).
+
 ## Trạng thái
  
 CLI và web demo dùng backend dung hợp transcript đa nguồn và chạy end-to-end bằng model thật.

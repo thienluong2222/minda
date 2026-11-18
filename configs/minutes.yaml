@@ -11,3 +11,13 @@ request_timeout_sec: 240
 max_clusters: 4
 minimum_silhouette: 0.08
 fuzziness: 1.3
+
+# Bounded inference; semantic verification remains mandatory.
+compact_graph_output: true
+extraction_batch_size: 6
+writer_batch_size: 4
+prefill_step_size: 1024
+prefix_cache_entries: 3
+inference_batch_size: 1
+information_budget_per_topic: 0
+correction_policy: all

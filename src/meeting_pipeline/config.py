@@ -20,7 +20,7 @@ class AudioConfig(BaseModel):
     separator_sample_rate: int = Field(8000, gt=0)
     max_sources: int = Field(8, ge=1, le=8)
     max_profiles: int = Field(8, ge=1, le=8)
-    max_duration_seconds: float = Field(1200, gt=0)
+    max_duration_seconds: float = Field(7200, gt=0)
     max_upload_bytes: int = Field(gt=0)
     preserve_originals: bool = True
 
@@ -63,6 +63,10 @@ class AsrConfig(BaseModel):
     model_revision: str
     model_variants: dict[str, AsrModelReference] = Field(default_factory=dict)
     language: str = "vi"
+    runtime: Literal["cpu", "mps", "auto", "mlx"] = "cpu"
+    auto_backend: Literal["mps", "mlx"] = "mps"
+    mlx_runtime_python: str = ".venv-asr-mlx/bin/python"
+    mlx_model_dir: str = ""
     target_core_seconds: float = Field(default=22.0, gt=0)
     max_chunk_seconds: float = Field(default=25.0, gt=0)
     chunk_context_seconds: float = Field(default=0.75, ge=0)

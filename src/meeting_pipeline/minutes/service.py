@@ -256,6 +256,7 @@ class MinutesService:
                 run_dir,
                 options,
                 preserve_schema=reuse_schema and proposed_schema.proposed_by == "user_manual",
+                meeting_metadata=meeting_metadata,
             )
             m1_status = "preserved" if reuse_schema else "success"
             m3_status = "needs_review" if model_report["warnings"] else "success"
@@ -269,6 +270,13 @@ class MinutesService:
                 "corrections.json",
                 "corrected_transcript.json",
                 "topics.json",
+                "meeting_graph.json",
+                "content_plan.json",
+                "content_plan_prepared.json",
+                "verification.json",
+                "coverage.json",
+                "style_profile.json",
+                "input_snapshot.json",
             ):
                 (minutes_dir / name).unlink(missing_ok=True)
 
@@ -358,6 +366,13 @@ class MinutesService:
                 "corrections.json",
                 "corrected_transcript.json",
                 "topics.json",
+                "meeting_graph.json",
+                "content_plan.json",
+                "content_plan_prepared.json",
+                "verification.json",
+                "coverage.json",
+                "style_profile.json",
+                "input_snapshot.json",
                 "model_report.json",
             ):
                 if (minutes_dir / name).is_file():
@@ -541,6 +556,13 @@ class MinutesService:
                 "corrections.json",
                 "corrected_transcript.json",
                 "topics.json",
+                "meeting_graph.json",
+                "content_plan.json",
+                "content_plan_prepared.json",
+                "verification.json",
+                "coverage.json",
+                "style_profile.json",
+                "input_snapshot.json",
                 "model_report.json",
                 "timings.json",
             ):

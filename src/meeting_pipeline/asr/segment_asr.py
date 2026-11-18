@@ -16,7 +16,7 @@ from meeting_pipeline.asr.boundary_words import (
     filter_boundary_words,
     refresh_boundary_hypothesis,
 )
-from meeting_pipeline.asr.cache import AsrCache, compute_asr_cache_key
+from meeting_pipeline.asr.cache import AsrCache, compute_asr_cache_key, decoding_fingerprint
 from meeting_pipeline.asr.quality import check_asr_quality
 from meeting_pipeline.asr.router import (
     AdaptiveAsrRouter,
@@ -246,6 +246,7 @@ def transcribe_turn_adaptive(
             sample_rate=sample_rate,
             model_id=asr_config.model_id,
             model_revision=asr_config.model_revision,
+            decoding_settings=decoding_fingerprint(asr_config),
         )
 
         asr_res: AsrResult | None = None
