@@ -1,0 +1,27 @@
+{
+  "protocol_sha256": "005fc360494bc0f8b3d499c3e9892ac09416593f92d9ed30742da09d8cf33745",
+  "model": "gemma4",
+  "snapshot": {
+    "repo": "mlx-community/gemma-4-e2b-it-4bit",
+    "revision": "238767527555cb75a05732a84dff5d6ba0dd6809",
+    "bytes": 3583086498,
+    "sha256": {
+      "generation_config.json": "d4226bbe3117d2d253ba4609720ba82c6c4ce4627a9a6ae05387c78983ac03de",
+      "processor_config.json": "de3e580aebdc98272d4c4547daffe6525fcbae18a83a0e0bcf0d7444d4ee6f37",
+      "tokenizer_config.json": "080d9e1aff284e2f6043889cd05367966f7c7b80e025fbc0b06745e218158656",
+      "config.json": "6397cb6eca41b911d1dcab74e17941351057bd759284052a2331918ff6f9246c",
+      "chat_template.jinja": "2f1b4d75d067bae3fe44e676721c7f077d243bc007156cb9c2f8b5836613d082",
+      "model.safetensors.index.json": "edb157dbf495e23f37377af4a628a9ad13c4ee7937f93ccb36ec9e9a19940f16",
+      "tokenizer.json": "cc8d3a0ce36466ccc1278bf987df5f71db1719b9ca6b4118264f45cb627bfe0f",
+      "model.safetensors": "038e39a37a7667373d2c3991375446b10c96ae1d717a68674870343db376b76e"
+    }
+  },
+  "packages": {
+    "mlx": "0.32.4",
+    "mlx-lm": "0.32.2",
+    "transformers": "5.23.0",
+    "torch": "2.6.0"
+  },
+  "generator_sha256": "307ce7d4987826d6b6666bcbf2159d6a10160b3a2eb6d7b7fe2c184cbe2d72b1",
+  "machine": "arm64"
+}

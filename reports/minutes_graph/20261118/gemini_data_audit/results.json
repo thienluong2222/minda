@@ -1,0 +1,551 @@
+{
+  "splits": {
+    "train": {
+      "families": 12,
+      "cases": 18
+    },
+    "dev": {
+      "families": 6,
+      "cases": 7
+    },
+    "test": {
+      "families": 6,
+      "cases": 8
+    }
+  },
+  "export": {
+    "rows": {
+      "train/extract.jsonl": 21,
+      "train/relations.jsonl": 21,
+      "dev/extract.jsonl": 7,
+      "dev/relations.jsonl": 7,
+      "test/extract.jsonl": 8,
+      "test/relations.jsonl": 8
+    },
+    "duplicate_groups": [
+      [
+        {
+          "file": "train/extract.jsonl",
+          "line_number": 17,
+          "case_id": "case_mm_02_base",
+          "family_id": "fam_mm_02",
+          "split": "train",
+          "step": "extract",
+          "batch_index": 0
+        },
+        {
+          "file": "train/extract.jsonl",
+          "line_number": 19,
+          "case_id": "case_mm_02_out_of_window",
+          "family_id": "fam_mm_02",
+          "split": "train",
+          "step": "extract",
+          "batch_index": 0
+        }
+      ],
+      [
+        {
+          "file": "train/relations.jsonl",
+          "line_number": 17,
+          "case_id": "case_mm_02_base",
+          "family_id": "fam_mm_02",
+          "split": "train",
+          "step": "relations",
+          "batch_index": 0,
+          "relation_count": 0,
+          "has_relations": false
+        },
+        {
+          "file": "train/relations.jsonl",
+          "line_number": 19,
+          "case_id": "case_mm_02_out_of_window",
+          "family_id": "fam_mm_02",
+          "split": "train",
+          "step": "relations",
+          "batch_index": 0,
+          "relation_count": 0,
+          "has_relations": false
+        }
+      ]
+    ],
+    "cross_split_duplicate_groups": [],
+    "conflicting_duplicate_groups": [],
+    "token_counts": {
+      "extract": {
+        "prompt": [
+          604,
+          662.5,
+          906
+        ],
+        "assistant": [
+          31,
+          93.0,
+          218
+        ],
+        "total": [
+          658,
+          759.5,
+          1048
+        ]
+      },
+      "relations": {
+        "prompt": [
+          390,
+          442.0,
+          775
+        ],
+        "assistant": [
+          11,
+          81.0,
+          180
+        ],
+        "total": [
+          401,
+          532.5,
+          786
+        ]
+      }
+    },
+    "assistant_templates_passed": 72
+  },
+  "runtime_replay": {
+    "cases": 33,
+    "total": {
+      "events": 120,
+      "facts": 75,
+      "relations": 35,
+      "state_edges": 13,
+      "state_rows": 37,
+      "checks": 83,
+      "multi_event_units": 0
+    },
+    "each_case": {
+      "case_sp_01_base": {
+        "events": 4,
+        "facts": 0,
+        "relations": 0,
+        "state_edges": 0,
+        "state_rows": 1,
+        "checks": 4,
+        "multi_event_units": 0
+      },
+      "case_sp_01_info_only": {
+        "events": 3,
+        "facts": 0,
+        "relations": 0,
+        "state_edges": 0,
+        "state_rows": 0,
+        "checks": 0,
+        "multi_event_units": 0
+      },
+      "case_sp_02_base": {
+        "events": 3,
+        "facts": 0,
+        "relations": 0,
+        "state_edges": 0,
+        "state_rows": 2,
+        "checks": 3,
+        "multi_event_units": 0
+      },
+      "case_sp_03_base": {
+        "events": 3,
+        "facts": 1,
+        "relations": 0,
+        "state_edges": 0,
+        "state_rows": 1,
+        "checks": 3,
+        "multi_event_units": 0
+      },
+      "case_sp_04_base": {
+        "events": 3,
+        "facts": 0,
+        "relations": 0,
+        "state_edges": 0,
+        "state_rows": 0,
+        "checks": 0,
+        "multi_event_units": 0
+      },
+      "case_qa_01_base": {
+        "events": 3,
+        "facts": 0,
+        "relations": 2,
+        "state_edges": 0,
+        "state_rows": 0,
+        "checks": 0,
+        "multi_event_units": 0
+      },
+      "case_qa_02_base": {
+        "events": 3,
+        "facts": 1,
+        "relations": 2,
+        "state_edges": 0,
+        "state_rows": 1,
+        "checks": 3,
+        "multi_event_units": 0
+      },
+      "case_qa_03_base": {
+        "events": 3,
+        "facts": 3,
+        "relations": 2,
+        "state_edges": 0,
+        "state_rows": 0,
+        "checks": 0,
+        "multi_event_units": 0
+      },
+      "case_qa_04_base": {
+        "events": 3,
+        "facts": 3,
+        "relations": 2,
+        "state_edges": 0,
+        "state_rows": 0,
+        "checks": 0,
+        "multi_event_units": 0
+      },
+      "case_md_01_base": {
+        "events": 4,
+        "facts": 0,
+        "relations": 2,
+        "state_edges": 0,
+        "state_rows": 2,
+        "checks": 2,
+        "multi_event_units": 0
+      },
+      "case_md_02_agreement_only": {
+        "events": 2,
+        "facts": 0,
+        "relations": 1,
+        "state_edges": 0,
+        "state_rows": 1,
+        "checks": 1,
+        "multi_event_units": 0
+      },
+      "case_md_02_decision": {
+        "events": 2,
+        "facts": 0,
+        "relations": 1,
+        "state_edges": 1,
+        "state_rows": 1,
+        "checks": 1,
+        "multi_event_units": 0
+      },
+      "case_md_03_base": {
+        "events": 5,
+        "facts": 0,
+        "relations": 3,
+        "state_edges": 2,
+        "state_rows": 2,
+        "checks": 2,
+        "multi_event_units": 0
+      },
+      "case_md_04_base": {
+        "events": 3,
+        "facts": 0,
+        "relations": 2,
+        "state_edges": 0,
+        "state_rows": 1,
+        "checks": 1,
+        "multi_event_units": 0
+      },
+      "case_dv_01_base": {
+        "events": 4,
+        "facts": 1,
+        "relations": 2,
+        "state_edges": 1,
+        "state_rows": 2,
+        "checks": 2,
+        "multi_event_units": 0
+      },
+      "case_dv_02_base": {
+        "events": 3,
+        "facts": 3,
+        "relations": 2,
+        "state_edges": 1,
+        "state_rows": 2,
+        "checks": 3,
+        "multi_event_units": 0
+      },
+      "case_dv_03_base": {
+        "events": 3,
+        "facts": 0,
+        "relations": 2,
+        "state_edges": 0,
+        "state_rows": 2,
+        "checks": 2,
+        "multi_event_units": 0
+      },
+      "case_dv_04_base": {
+        "events": 3,
+        "facts": 1,
+        "relations": 1,
+        "state_edges": 1,
+        "state_rows": 2,
+        "checks": 2,
+        "multi_event_units": 0
+      },
+      "case_tt_01_amend_confirmed": {
+        "events": 3,
+        "facts": 6,
+        "relations": 1,
+        "state_edges": 1,
+        "state_rows": 1,
+        "checks": 5,
+        "multi_event_units": 0
+      },
+      "case_tt_01_amend_proposal": {
+        "events": 3,
+        "facts": 6,
+        "relations": 1,
+        "state_edges": 0,
+        "state_rows": 1,
+        "checks": 5,
+        "multi_event_units": 0
+      },
+      "case_tt_01_name_swap": {
+        "events": 2,
+        "facts": 4,
+        "relations": 1,
+        "state_edges": 1,
+        "state_rows": 1,
+        "checks": 4,
+        "multi_event_units": 0
+      },
+      "case_tt_02_base": {
+        "events": 3,
+        "facts": 5,
+        "relations": 1,
+        "state_edges": 1,
+        "state_rows": 2,
+        "checks": 6,
+        "multi_event_units": 0
+      },
+      "case_tt_02_swap_target": {
+        "events": 3,
+        "facts": 5,
+        "relations": 1,
+        "state_edges": 1,
+        "state_rows": 2,
+        "checks": 6,
+        "multi_event_units": 0
+      },
+      "case_tt_03_assigned": {
+        "events": 2,
+        "facts": 5,
+        "relations": 1,
+        "state_edges": 0,
+        "state_rows": 2,
+        "checks": 5,
+        "multi_event_units": 0
+      },
+      "case_tt_03_completed": {
+        "events": 2,
+        "facts": 2,
+        "relations": 0,
+        "state_edges": 0,
+        "state_rows": 2,
+        "checks": 4,
+        "multi_event_units": 0
+      },
+      "case_tt_04_amend_confirmed": {
+        "events": 3,
+        "facts": 3,
+        "relations": 1,
+        "state_edges": 1,
+        "state_rows": 1,
+        "checks": 3,
+        "multi_event_units": 0
+      },
+      "case_tt_04_amend_proposal": {
+        "events": 3,
+        "facts": 3,
+        "relations": 1,
+        "state_edges": 0,
+        "state_rows": 1,
+        "checks": 3,
+        "multi_event_units": 0
+      },
+      "case_mm_01_base": {
+        "events": 4,
+        "facts": 2,
+        "relations": 0,
+        "state_edges": 0,
+        "state_rows": 1,
+        "checks": 4,
+        "multi_event_units": 0
+      },
+      "case_mm_02_base": {
+        "events": 9,
+        "facts": 5,
+        "relations": 1,
+        "state_edges": 1,
+        "state_rows": 1,
+        "checks": 3,
+        "multi_event_units": 0
+      },
+      "case_mm_02_out_of_window": {
+        "events": 13,
+        "facts": 5,
+        "relations": 0,
+        "state_edges": 0,
+        "state_rows": 0,
+        "checks": 0,
+        "multi_event_units": 0
+      },
+      "case_mm_03_base": {
+        "events": 4,
+        "facts": 0,
+        "relations": 0,
+        "state_edges": 0,
+        "state_rows": 0,
+        "checks": 0,
+        "multi_event_units": 0
+      },
+      "case_mm_04_amend_confirmed": {
+        "events": 6,
+        "facts": 7,
+        "relations": 1,
+        "state_edges": 1,
+        "state_rows": 1,
+        "checks": 3,
+        "multi_event_units": 0
+      },
+      "case_mm_04_amend_proposal": {
+        "events": 3,
+        "facts": 4,
+        "relations": 1,
+        "state_edges": 0,
+        "state_rows": 1,
+        "checks": 3,
+        "multi_event_units": 0
+      }
+    }
+  },
+  "production_context_mismatches": [
+    {
+      "case_id": "case_mm_02_base",
+      "batch": 1,
+      "exported_context": [
+        "t4",
+        "t5",
+        "t6"
+      ],
+      "production_context": [
+        "t1",
+        "t3",
+        "t4",
+        "t5",
+        "t6"
+      ],
+      "exported_aliases": [
+        "u3",
+        "u4",
+        "u5"
+      ],
+      "production_aliases": [
+        "u5",
+        "u6",
+        "u7"
+      ]
+    },
+    {
+      "case_id": "case_mm_02_out_of_window",
+      "batch": 1,
+      "exported_context": [
+        "t4",
+        "t5",
+        "t6"
+      ],
+      "production_context": [
+        "t3",
+        "t4",
+        "t5",
+        "t6"
+      ],
+      "exported_aliases": [
+        "u3",
+        "u4",
+        "u5",
+        "u6",
+        "u7",
+        "u8"
+      ],
+      "production_aliases": [
+        "u4",
+        "u5",
+        "u6",
+        "u7",
+        "u8",
+        "u9"
+      ]
+    },
+    {
+      "case_id": "case_mm_02_out_of_window",
+      "batch": 2,
+      "exported_context": [
+        "t10",
+        "t11",
+        "t12"
+      ],
+      "production_context": [
+        "t1",
+        "t2",
+        "t3",
+        "t10",
+        "t11",
+        "t12"
+      ],
+      "exported_aliases": [
+        "u3"
+      ],
+      "production_aliases": [
+        "u6"
+      ]
+    }
+  ],
+  "issue_anchor_counterfactual": {
+    "case_id": "case_mm_02_out_of_window",
+    "old_task_in_final_relation_context_with_exported_issues": false,
+    "old_task_in_final_relation_context_with_grounded_issues": true
+  },
+  "changed_extract_batches_replayed_after_alias_remap": 3,
+  "conditional_state_edge_quotes": [
+    {
+      "case_id": "case_dv_01_base",
+      "kind": "accepts",
+      "condition": "nếu nhà cung cấp bảo hành 24 tháng",
+      "source_quote": "quyết định thông qua gói tài trợ thiết bị phòng lab",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "case_dv_04_base",
+      "kind": "supersedes",
+      "condition": "nếu chi phí không vượt ngưỡng",
+      "source_quote": "thay phương án máy chủ nội bộ",
+      "target_lifecycle": "superseded"
+    }
+  ],
+  "stored_timestamps": 0,
+  "turns_per_case_min_median_max": [
+    2,
+    3,
+    13
+  ],
+  "max_whitespace_words_per_turn": 23,
+  "rejected": [
+    "case_qa_02_noise_ambiguous",
+    "case_tt_01_ambiguous_speaker",
+    "case_dv_02_competing_transitions"
+  ],
+  "sha256": {
+    "cases.jsonl": "94b7e0bca26423fee1ffc5558662ef38ca7aaee3710c5e08a501943c79826a8e",
+    "scenarios.jsonl": "32f8ba8ac77e84611c2fcc2034cd0098f5f5ebc464f9a986509f78bf97ed0dad",
+    "split_manifest.json": "6cb67dce65ad203982da6d58b1cd7df8363470074946585ac8d5c366bb1a9be6",
+    "export_index.jsonl": "df3edeccada3962c5469a945710f1a81556bf783d3dfa71d46d500b4ce0c353e",
+    "rejected.jsonl": "f70c8a509c1698b433ab4f54810f76344fcda457d6c57d91879da5b349b26acd",
+    "train/extract.jsonl": "b1b1f1bd613da8b15fa86edb26ae82323f95f0af62a6b39fa3ba1127c29f9919",
+    "train/relations.jsonl": "ddc1abccab4691b4f1704f791bdfd9a0d6486840d65191a9dfe4d399c87b6344",
+    "dev/extract.jsonl": "c086932f5ea208f65912f7e73d24fc230530d40e40e50c0a2b7941e666b2fcc2",
+    "dev/relations.jsonl": "10680d55e40aca36b83624734ab66d5e2fa6c4823e32db935bbffc677e794dff",
+    "test/extract.jsonl": "d442fac2aa7046a7d84564ee823dc097dd683613b9d2ccd04929ca7a19474dfb",
+    "test/relations.jsonl": "72d560fab2e8ebf9b5010974a8b33497566741aa9d49b8fca7bb79454cd71212"
+  }
+}

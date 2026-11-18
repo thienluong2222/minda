@@ -1,0 +1,102 @@
+{
+  "bundle_sha256": "5af4ad5abe5b4922ee2fa4a8e7223077b4a21bad981694e4ee064dff635d9d53",
+  "split_manifest_sha256": "a8cde2dfc1b709dfa498c2d8e8c93ced19ffd387723ba12c6c8daa9b95c3662e",
+  "test_files": {
+    "test/export_index.jsonl": "822af9cc962272048fd719f16acdb6709d4cb560b3b68e402f40249d73a245c3",
+    "test/inputs/extract_inputs.jsonl": "56511b2e96f5880fa44a7bb5cc51b7a36a7c6253bc57802c2aad343d9441f124",
+    "test/inputs/relations_gold_events_inputs.jsonl": "f579c52d8161fc12df940ef4a4c4e11bc7264502e87743f17c5454037822202c",
+    "test/inputs/transcripts.jsonl": "15f83e3fb5936742725a45fed5ed7ecf5faf5f115bfcd129c7592e7b1d130e53",
+    "test/references/cases.jsonl": "a26751f864ad648016575fcca32a653583ecec129d5c0ccfc289245354b318b1",
+    "test/references/extract_targets.jsonl": "c714ca2fcbbff77acdf930866bf66288a21067c33b6d9b3b5f7104c19cb1e206",
+    "test/references/relations_targets.jsonl": "515698eaf141d79e0d8fde578cbab8c08188de9beab9e5959c5ce3e1cdaf0bbe",
+    "test/review_requests.jsonl": "78203b318e0d2be06aca8a42f36954a2afc0bef6a382a3568746b9f741179cba"
+  },
+  "prompt_hashes": {
+    "extract": "1e4c584030c035c1bcf8ccb722ebf20306beb51833d7ca101a3e4615638e02e3",
+    "relations": "5d3691add012435969b8154909f4d3a6d6f635de969af66f2d72230d911d2ff3"
+  },
+  "colab_lock_sha256": "9e23d4781452907c338ed2a6401066e34f84b769ee0d00e179f1707d9889197d",
+  "colab_models": {
+    "base": {
+      "adapter": null,
+      "base_model": {
+        "id": "Qwen/Qwen3-4B-Instruct-2507",
+        "revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+        "quant_type": "nf4",
+        "double_quant": true,
+        "attention": "sdpa"
+      }
+    },
+    "A": {
+      "adapter": "runs/A/checkpoint-132",
+      "epoch": 2.0,
+      "step": 132,
+      "adapter_sha256": "e6911307de90758a598075059251d3707473ab7e5a956b8a244d6041f25948c4",
+      "adapter_config_sha256": "80360695476381d430d35eff39520741e96dc0bac18798d2c8f296b40ec4335e",
+      "dev_selection_sha256": "9b45d3e2a827f82d8536d37dfa72933a3abdc56a458711096a2ca65a21b3dc73",
+      "checkpoint_manifest_sha256": "4966e2614eac93855a36fcb9430068fe8cd3d681c32ccc6d4e1634157f783743"
+    },
+    "B": {
+      "adapter": "runs/B/checkpoint-132",
+      "epoch": 2.0,
+      "step": 132,
+      "adapter_sha256": "225903836f4e2780b685ec85e80c3f3226b3b05d92767d15fce291f6d2cb949c",
+      "adapter_config_sha256": "550fb062048da5942c6424726aefd3b5003ae090536bdc7c102e1541195d6a55",
+      "dev_selection_sha256": "115bac0eacda43fb920b0adb77e4e1ab0ac8e2ab2bf111263733f76c2d77f2f0",
+      "checkpoint_manifest_sha256": "ff0ceebc78fef85e9d5f74b4bbe123a865ef65edb82db30d5503fc6349e4e7de"
+    }
+  },
+  "colab_dtype": "fp16",
+  "mlx_snapshots": {
+    "qwen35": {
+      "repo": "mlx-community/Qwen3.5-4B-4bit",
+      "revision": "0e7ffd5c629ef7719d4cbc04069232580bfa9d9c",
+      "bytes": 3061129077,
+      "sha256": {
+        "video_preprocessor_config.json": "7768af27c1fafa9cc9011c1dc20067e03f8915e03b63504550e11d5066986d13",
+        "preprocessor_config.json": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516",
+        "tokenizer_config.json": "e98f1901ac6f0adff67b1d540bfa0c36ac1a0cf59eb72ed78146ef89aafa1182",
+        "processor_config.json": "14932921ca485d458a04dafd8069fbb0a4505622a48208d19ed247115801385b",
+        "config.json": "f3efc81b2ea8d96a45301037d3ccccbcccdef44a961845c87f286aaddbc6eaaa",
+        "chat_template.jinja": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+        "model.safetensors.index.json": "52e534c41f7b97708329c85f762e5882bf48bd5955a422c6ae74eba321e6048a",
+        "vocab.json": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003",
+        "tokenizer.json": "87a7830d63fcf43bf241c3c5242e96e62dd3fdc29224ca26fed8ea333db72de4",
+        "model.safetensors": "5fb9acd0246866381cf8c5c354c6db1019f6498eec4ccb4f5edcc71ffeacb2db"
+      }
+    },
+    "gemma4": {
+      "repo": "mlx-community/gemma-4-e2b-it-4bit",
+      "revision": "238767527555cb75a05732a84dff5d6ba0dd6809",
+      "bytes": 3583086498,
+      "sha256": {
+        "generation_config.json": "d4226bbe3117d2d253ba4609720ba82c6c4ce4627a9a6ae05387c78983ac03de",
+        "processor_config.json": "de3e580aebdc98272d4c4547daffe6525fcbae18a83a0e0bcf0d7444d4ee6f37",
+        "tokenizer_config.json": "080d9e1aff284e2f6043889cd05367966f7c7b80e025fbc0b06745e218158656",
+        "config.json": "6397cb6eca41b911d1dcab74e17941351057bd759284052a2331918ff6f9246c",
+        "chat_template.jinja": "2f1b4d75d067bae3fe44e676721c7f077d243bc007156cb9c2f8b5836613d082",
+        "model.safetensors.index.json": "edb157dbf495e23f37377af4a628a9ad13c4ee7937f93ccb36ec9e9a19940f16",
+        "tokenizer.json": "cc8d3a0ce36466ccc1278bf987df5f71db1719b9ca6b4118264f45cb627bfe0f",
+        "model.safetensors": "038e39a37a7667373d2c3991375446b10c96ae1d717a68674870343db376b76e"
+      }
+    },
+    "qwen3_mlx": {
+      "repo": "mlx-community/Qwen3-4B-Instruct-2507-4bit",
+      "revision": "50d427756c6b1b2fe0c0a10f67fbda1fc8e82c1b",
+      "bytes": 2263022417,
+      "sha256": {
+        "model.safetensors": "2a73c6c248601ab904e035548abd8e6abb65ea27dcb5f342fb0a8910eb44173f"
+      }
+    }
+  },
+  "embedding": {
+    "id": "intfloat/multilingual-e5-small",
+    "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3"
+  },
+  "decoding": {
+    "sampler": "greedy",
+    "enable_thinking": false,
+    "input_token_budget": 6144,
+    "output_token_budget": 2048
+  }
+}

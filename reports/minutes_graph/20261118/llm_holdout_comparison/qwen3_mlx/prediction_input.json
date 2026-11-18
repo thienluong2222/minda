@@ -1,0 +1,20 @@
+{
+  "protocol_sha256": "005fc360494bc0f8b3d499c3e9892ac09416593f92d9ed30742da09d8cf33745",
+  "model": "qwen3_mlx",
+  "snapshot": {
+    "repo": "mlx-community/Qwen3-4B-Instruct-2507-4bit",
+    "revision": "50d427756c6b1b2fe0c0a10f67fbda1fc8e82c1b",
+    "bytes": 2263022417,
+    "sha256": {
+      "model.safetensors": "2a73c6c248601ab904e035548abd8e6abb65ea27dcb5f342fb0a8910eb44173f"
+    }
+  },
+  "packages": {
+    "mlx": "0.32.4",
+    "mlx-lm": "0.32.2",
+    "transformers": "5.23.0",
+    "torch": "2.6.0"
+  },
+  "generator_sha256": "307ce7d4987826d6b6666bcbf2159d6a10160b3a2eb6d7b7fe2c184cbe2d72b1",
+  "machine": "arm64"
+}

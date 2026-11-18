@@ -1,0 +1,11 @@
+{
+  "hardware": "Apple M4 · Metal",
+  "elapsed_this_execution_s": 2168.8858503340743,
+  "peak_mlx_allocated_gib": 2.7906509190797806,
+  "packages": {
+    "mlx": "0.32.4",
+    "mlx-lm": "0.32.2",
+    "transformers": "5.23.0",
+    "torch": "2.6.0"
+  }
+}

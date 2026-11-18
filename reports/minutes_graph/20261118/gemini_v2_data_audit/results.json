@@ -1,0 +1,1363 @@
+{
+  "packet_audit": {
+    "rows": {
+      "train/extract.jsonl": 254,
+      "train/relations.jsonl": 254,
+      "dev/extract.jsonl": 108,
+      "dev/relations.jsonl": 108,
+      "test/inputs/extract_inputs.jsonl": 130,
+      "test/inputs/relations_gold_events_inputs.jsonl": 130
+    },
+    "verified_chat_templates": 984,
+    "identical_payload_groups": 0,
+    "conflicting_identical_payload_groups": 0,
+    "cross_split_identical_payload_groups": 0,
+    "awaiting_independent_review_batches": 984,
+    "token_counts": {
+      "train/extract": {
+        "prompt": [
+          613,
+          751.5,
+          1014
+        ],
+        "assistant": [
+          32,
+          103.5,
+          155
+        ],
+        "total": [
+          675,
+          829.0,
+          1130
+        ]
+      },
+      "train/relations": {
+        "prompt": [
+          396,
+          532.0,
+          780
+        ],
+        "assistant": [
+          11,
+          68.0,
+          217
+        ],
+        "total": [
+          408,
+          569.5,
+          791
+        ]
+      },
+      "dev/extract": {
+        "prompt": [
+          614,
+          739.5,
+          980
+        ],
+        "assistant": [
+          32,
+          104.0,
+          157
+        ],
+        "total": [
+          680,
+          831.0,
+          1097
+        ]
+      },
+      "dev/relations": {
+        "prompt": [
+          399,
+          495.0,
+          776
+        ],
+        "assistant": [
+          11,
+          68.5,
+          201
+        ],
+        "total": [
+          412,
+          569.0,
+          787
+        ]
+      },
+      "test/extract": {
+        "prompt": [
+          611,
+          739.5,
+          980
+        ],
+        "assistant": [
+          32,
+          111.0,
+          156
+        ],
+        "total": [
+          674,
+          828.0,
+          1097
+        ]
+      },
+      "test/relations": {
+        "prompt": [
+          396,
+          519.0,
+          777
+        ],
+        "assistant": [
+          11,
+          69.5,
+          215
+        ],
+        "total": [
+          411,
+          572.5,
+          788
+        ]
+      }
+    }
+  },
+  "replayed_packets": 984,
+  "replay_metrics": {
+    "train": {
+      "cases": 194,
+      "units": 954,
+      "events": 954,
+      "facts": 448,
+      "relations": 190,
+      "state_edges": 94,
+      "state_checks": 332,
+      "multi_event_units": 0,
+      "multi_batch_extraction_cases": 40,
+      "retrieved_missing_relation_targets_in_extraction": 10,
+      "relation_labels_exported": 226,
+      "unanchored_relation_labels": 36,
+      "unanchored_relation_cases": 28,
+      "unanchored_relation_batches": 28,
+      "restored_relations_from_full_quotes": 36
+    },
+    "dev": {
+      "cases": 84,
+      "units": 396,
+      "events": 396,
+      "facts": 208,
+      "relations": 80,
+      "state_edges": 44,
+      "state_checks": 148,
+      "multi_event_units": 0,
+      "multi_batch_extraction_cases": 16,
+      "retrieved_missing_relation_targets_in_extraction": 4,
+      "relation_labels_exported": 96,
+      "unanchored_relation_labels": 16,
+      "unanchored_relation_cases": 12,
+      "unanchored_relation_batches": 12,
+      "restored_relations_from_full_quotes": 16
+    },
+    "test": {
+      "cases": 100,
+      "units": 486,
+      "events": 486,
+      "facts": 239,
+      "relations": 96,
+      "state_edges": 50,
+      "state_checks": 172,
+      "multi_event_units": 0,
+      "multi_batch_extraction_cases": 20,
+      "retrieved_missing_relation_targets_in_extraction": 5,
+      "relation_labels_exported": 116,
+      "unanchored_relation_labels": 20,
+      "unanchored_relation_cases": 14,
+      "unanchored_relation_batches": 14,
+      "restored_relations_from_full_quotes": 20
+    }
+  },
+  "replay_errors": [],
+  "production_context_mismatches": [
+    {
+      "case_id": "fam_qa_03_long_qa",
+      "split": "train",
+      "batch_index": 1,
+      "exported_context": [
+        "t2",
+        "t4",
+        "t5",
+        "t6"
+      ],
+      "production_context": [
+        "t1",
+        "t2",
+        "t4",
+        "t5",
+        "t6"
+      ],
+      "aliases_changed": true,
+      "exported_aliases": [
+        "u4",
+        "u5"
+      ],
+      "production_aliases": [
+        "u5",
+        "u6"
+      ]
+    },
+    {
+      "case_id": "fam_mm_03_issue_anchored",
+      "split": "train",
+      "batch_index": 2,
+      "exported_context": [
+        "t1",
+        "t3",
+        "t6",
+        "t10",
+        "t11",
+        "t12"
+      ],
+      "production_context": [
+        "t1",
+        "t3",
+        "t10",
+        "t11",
+        "t12"
+      ],
+      "aliases_changed": true,
+      "exported_aliases": [
+        "u6"
+      ],
+      "production_aliases": [
+        "u5"
+      ]
+    },
+    {
+      "case_id": "fam_mm_07_issue_anchored",
+      "split": "train",
+      "batch_index": 1,
+      "exported_context": [
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6"
+      ],
+      "production_context": [
+        "t1",
+        "t2",
+        "t4",
+        "t5",
+        "t6"
+      ],
+      "aliases_changed": true,
+      "exported_aliases": [
+        "u6",
+        "u7",
+        "u8",
+        "u9",
+        "u10",
+        "u11"
+      ],
+      "production_aliases": [
+        "u5",
+        "u6",
+        "u7",
+        "u8",
+        "u9",
+        "u10"
+      ]
+    },
+    {
+      "case_id": "fam_mm_10_issue_anchored",
+      "split": "train",
+      "batch_index": 2,
+      "exported_context": [
+        "t1",
+        "t6",
+        "t10",
+        "t11",
+        "t12"
+      ],
+      "production_context": [
+        "t1",
+        "t2",
+        "t10",
+        "t11",
+        "t12"
+      ],
+      "aliases_changed": false,
+      "exported_aliases": [
+        "u5"
+      ],
+      "production_aliases": [
+        "u5"
+      ]
+    },
+    {
+      "case_id": "fam_mm_15_issue_anchored",
+      "split": "test",
+      "batch_index": 2,
+      "exported_context": [
+        "t1",
+        "t7",
+        "t10",
+        "t11",
+        "t12"
+      ],
+      "production_context": [
+        "t1",
+        "t6",
+        "t10",
+        "t11",
+        "t12"
+      ],
+      "aliases_changed": false,
+      "exported_aliases": [
+        "u5"
+      ],
+      "production_aliases": [
+        "u5"
+      ]
+    }
+  ],
+  "conditional_quote_omissions": [
+    {
+      "case_id": "fam_dv_01_vote_conditional",
+      "split": "train",
+      "kind": "accepts",
+      "condition": "nếu nhà cung cấp bảo hành 24 tháng",
+      "source_quote": "quyết định thông qua thông qua gói tài trợ thiết bị phòng lab",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_02_vote_conditional",
+      "split": "train",
+      "kind": "accepts",
+      "condition": "nếu công đoàn xác nhận",
+      "source_quote": "quyết định thông qua áp dụng quy chế chấm công theo bản v2.0",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_03_vote_conditional",
+      "split": "train",
+      "kind": "accepts",
+      "condition": "nếu đủ chữ ký hai phòng",
+      "source_quote": "quyết định thông qua hợp nhất hai mẫu báo cáo tháng thành một",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_04_vote_conditional",
+      "split": "train",
+      "kind": "accepts",
+      "condition": "nếu chi phí không vượt ngưỡng",
+      "source_quote": "quyết định thông qua triển khai cụm thử nghiệm trên máy chủ nội bộ",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_05_vote_conditional",
+      "split": "train",
+      "kind": "accepts",
+      "condition": "nếu hoàn tất xuất hàng trước đó",
+      "source_quote": "quyết định thông qua chốt kiểm kê toàn kho vào ngày 28/12",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_06_vote_conditional",
+      "split": "train",
+      "kind": "accepts",
+      "condition": "nếu hệ thống điểm danh ổn định",
+      "source_quote": "quyết định thông qua tính điểm chuyên cần theo điểm danh đầu giờ",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_07_vote_conditional",
+      "split": "train",
+      "kind": "accepts",
+      "condition": "nếu sáng kiến được áp dụng thực tế",
+      "source_quote": "quyết định thông qua duyệt mức thưởng tối đa 15 triệu đồng",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_08_vote_conditional",
+      "split": "train",
+      "kind": "accepts",
+      "condition": "nếu đối tác nâng cấp kịp",
+      "source_quote": "quyết định thông qua giữ cấu trúc phản hồi cũ cho bản v2",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_09_vote_conditional",
+      "split": "train",
+      "kind": "accepts",
+      "condition": "nếu in ấn kịp tiến độ",
+      "source_quote": "quyết định thông qua dùng bộ nhận diện màu xanh dương",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_10_vote_conditional",
+      "split": "train",
+      "kind": "accepts",
+      "condition": "nếu chủ đầu tư duyệt mặt bằng",
+      "source_quote": "quyết định thông qua thuê thêm kho lạnh vệ tinh ở quận 9",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_11_vote_conditional",
+      "split": "dev",
+      "kind": "accepts",
+      "condition": "nếu kế toán trưởng đồng thuận",
+      "source_quote": "quyết định thông qua duyệt quy trình chi tiêu theo bản v1.0",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_12_vote_conditional",
+      "split": "dev",
+      "kind": "accepts",
+      "condition": "nếu công cụ tự động chạy ổn",
+      "source_quote": "quyết định thông qua xoay vòng khóa truy cập mỗi chín mươi ngày",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_13_vote_conditional",
+      "split": "dev",
+      "kind": "accepts",
+      "condition": "nếu quỹ phúc lợi còn dư",
+      "source_quote": "quyết định thông qua chọn gói bảo hiểm cơ bản",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_14_vote_conditional",
+      "split": "dev",
+      "kind": "accepts",
+      "condition": "nếu hội đồng đủ thành viên",
+      "source_quote": "quyết định thông qua tổ chức bảo vệ tập trung một ngày",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_15_vote_conditional",
+      "split": "test",
+      "kind": "accepts",
+      "condition": "nếu phòng tài chính xác nhận",
+      "source_quote": "quyết định thông qua áp dụng quy chế cấp kinh phí bản v3.0",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_16_vote_conditional",
+      "split": "test",
+      "kind": "accepts",
+      "condition": "nếu kiểm thử tải đạt chuẩn",
+      "source_quote": "quyết định thông qua di trú dữ liệu vào ban đêm cuối tuần",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_17_vote_conditional",
+      "split": "test",
+      "kind": "accepts",
+      "condition": "nếu đơn hàng đi đường biển",
+      "source_quote": "quyết định thông qua dùng thùng các-tông năm lớp tiêu chuẩn",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_18_vote_conditional",
+      "split": "test",
+      "kind": "accepts",
+      "condition": "nếu người mua gửi mã xác nhận",
+      "source_quote": "quyết định thông qua hoàn tiền 100% nếu hủy trước bảy ngày",
+      "target_lifecycle": "accepted"
+    },
+    {
+      "case_id": "fam_dv_19_vote_conditional",
+      "split": "test",
+      "kind": "accepts",
+      "condition": "nếu có xác nhận của trợ giảng",
+      "source_quote": "quyết định thông qua cho mượn thiết bị tối đa ba ngày",
+      "target_lifecycle": "accepted"
+    }
+  ],
+  "partial_word_edge_quotes": [],
+  "dropped_relation_quotes": [
+    {
+      "case_id": "fam_qa_01_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Số liệu 180 mili-giây đo ở m",
+      "target_quote": "Độ trễ trung bình máy chủ tì",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_01_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Xin đính chính, 180 mili-giâ",
+      "target_quote": "Số liệu 180 mili-giây đo ở m",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_01_long_qa",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Xin đính chính, 180 mili-giâ",
+      "target_quote": "Số liệu 180 mili-giây đo ở m",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_01_asr_unk_speaker",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "độ trễ máy chủ tìm kiếm",
+      "target_quote": "Độ trễ trung bình máy chủ tì",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_02_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Hiện tại vẫn chưa chốt ngày ",
+      "target_quote": "Khi nào thì chốt hạn nhận hồ",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_02_long_qa",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Hiện tại vẫn chưa chốt ngày ",
+      "target_quote": "Khi nào thì chốt hạn nhận hồ",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_02_asr_drop_neg",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Hiện tại vẫn chốt ngày mở đơ",
+      "target_quote": "Khi nào thì chốt hạn nhận hồ",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_03_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Nếu phòng máy tầng ba chưa x",
+      "target_quote": "Lớp sẽ thi thực hành vào sán",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_03_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Khi đó lớp sẽ chuyển sang ph",
+      "target_quote": "Nếu phòng máy tầng ba chưa x",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_03_long_qa",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Khi đó lớp sẽ chuyển sang ph",
+      "target_quote": "Nếu phòng máy tầng ba chưa x",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_03_asr_unk_speaker",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "lịch thi thực hành",
+      "target_quote": "Lớp sẽ thi thực hành vào sán",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_04_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Bản v1.2 có mục kiểm tra mã ",
+      "target_quote": "Quy trình nhập kho áp dụng t",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_04_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Mục kiểm tra mã vạch hàng lạ",
+      "target_quote": "Bản v1.2 có mục kiểm tra mã ",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_04_long_qa",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Mục kiểm tra mã vạch hàng lạ",
+      "target_quote": "Bản v1.2 có mục kiểm tra mã ",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_04_asr_unk_speaker",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "quy trình kiểm tra hàng lạnh",
+      "target_quote": "Quy trình nhập kho áp dụng t",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_05_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Mức 2 triệu đồng có bao gồm ",
+      "target_quote": "Mức tạm ứng công tác ngoại t",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_05_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Vé tàu xe được thanh toán ri",
+      "target_quote": "Mức 2 triệu đồng có bao gồm ",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_05_long_qa",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Vé tàu xe được thanh toán ri",
+      "target_quote": "Mức 2 triệu đồng có bao gồm ",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_05_asr_unk_speaker",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "mức tạm ứng công tác",
+      "target_quote": "Mức tạm ứng công tác ngoại t",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_06_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Hiện chưa ghi nhận trễ quá n",
+      "target_quote": "Khung giờ cao điểm 19 giờ có",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_06_long_qa",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Hiện chưa ghi nhận trễ quá n",
+      "target_quote": "Khung giờ cao điểm 19 giờ có",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_07_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Cuối tuần có chạy chuyến 6 g",
+      "target_quote": "Tuyến ngoại thành xuất bến l",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_07_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Chủ nhật vẫn chạy chuyến 6 g",
+      "target_quote": "Cuối tuần có chạy chuyến 6 g",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_07_long_qa",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Chủ nhật vẫn chạy chuyến 6 g",
+      "target_quote": "Cuối tuần có chạy chuyến 6 g",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_07_asr_unk_speaker",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "khung giờ giao nhận ngoại thành",
+      "target_quote": "Tuyến ngoại thành xuất bến l",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_08_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Khoản 320 triệu đồng đã tính",
+      "target_quote": "Tổng dự toán sự kiện ra mắt ",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_08_asr_unk_speaker",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "ngân sách sự kiện ra mắt",
+      "target_quote": "Tổng dự toán sự kiện ra mắt ",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_09_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Nếu một thành viên vắng mặt ",
+      "target_quote": "Điểm phản biện nhóm chiếm 30",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_09_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Hiện vẫn chưa chốt cách tính",
+      "target_quote": "Nếu một thành viên vắng mặt ",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_09_long_qa",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Hiện vẫn chưa chốt cách tính",
+      "target_quote": "Nếu một thành viên vắng mặt ",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_09_asr_drop_neg",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Nếu một thành viên vắng mặt ",
+      "target_quote": "Điểm phản biện nhóm chiếm 30",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_09_asr_drop_neg",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Hiện vẫn chốt cách tính điểm",
+      "target_quote": "Nếu một thành viên vắng mặt ",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_10_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Hồ sơ bản giấy có cần lưu so",
+      "target_quote": "Hồ sơ đấu thầu điện tử phải ",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_10_base",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Bản giấy chỉ cần lưu ba năm ",
+      "target_quote": "Hồ sơ bản giấy có cần lưu so",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_10_long_qa",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "Bản giấy chỉ cần lưu ba năm ",
+      "target_quote": "Hồ sơ bản giấy có cần lưu so",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_10_asr_unk_speaker",
+      "split": "train",
+      "kind": "refers_to",
+      "source_quote": "thời hạn lưu trữ hồ sơ số",
+      "target_quote": "Hồ sơ đấu thầu điện tử phải ",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_11_base",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "Đối tác tích hợp gói doanh n",
+      "target_quote": "Cổng API công khai giới hạn ",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_11_base",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "Gói doanh nghiệp được mở lên",
+      "target_quote": "Đối tác tích hợp gói doanh n",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_11_long_qa",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "Gói doanh nghiệp được mở lên",
+      "target_quote": "Đối tác tích hợp gói doanh n",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_11_asr_unk_speaker",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "giới hạn tốc độ gọi API",
+      "target_quote": "Cổng API công khai giới hạn ",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_12_base",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "Khi mất điện lưới thì máy ph",
+      "target_quote": "Kho lạnh số hai duy trì dải ",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_12_base",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "Máy phát dự phòng tự khởi độ",
+      "target_quote": "Khi mất điện lưới thì máy ph",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_12_long_qa",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "Máy phát dự phòng tự khởi độ",
+      "target_quote": "Khi mất điện lưới thì máy ph",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_12_asr_unk_speaker",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "nhiệt độ bảo quản vắc-xin",
+      "target_quote": "Kho lạnh số hai duy trì dải ",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_13_base",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "Chính sách này có áp dụng ch",
+      "target_quote": "Nhân viên chính thức được đă",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_13_base",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "Nhân sự thử việc chưa áp dụn",
+      "target_quote": "Chính sách này có áp dụng ch",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_13_long_qa",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "Nhân sự thử việc chưa áp dụn",
+      "target_quote": "Chính sách này có áp dụng ch",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_13_asr_unk_speaker",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "chế độ hỗ trợ làm việc từ xa",
+      "target_quote": "Nhân viên chính thức được đă",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_14_base",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "Có cần đính kèm tệp trọng số",
+      "target_quote": "Các nhóm nộp mã nguồn qua kh",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_14_base",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "Không nộp tệp trọng số nặng ",
+      "target_quote": "Có cần đính kèm tệp trọng số",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_14_long_qa",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "Không nộp tệp trọng số nặng ",
+      "target_quote": "Có cần đính kèm tệp trọng số",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_14_asr_unk_speaker",
+      "split": "dev",
+      "kind": "refers_to",
+      "source_quote": "nộp mã nguồn cuối kỳ",
+      "target_quote": "Các nhóm nộp mã nguồn qua kh",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_15_base",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Thời gian ngừng dịch vụ dự k",
+      "target_quote": "Cụm máy chủ chính sẽ nâng cấ",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_15_base",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Xin đính chính, thời gian bả",
+      "target_quote": "Thời gian ngừng dịch vụ dự k",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_15_long_qa",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Xin đính chính, thời gian bả",
+      "target_quote": "Thời gian ngừng dịch vụ dự k",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_15_asr_unk_speaker",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "chuyển đổi phiên bản cơ sở dữ liệu",
+      "target_quote": "Cụm máy chủ chính sẽ nâng cấ",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_16_base",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Trường hợp mất hộp ngoài thì",
+      "target_quote": "Khách hàng được đổi mới tron",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_16_base",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Hiện chưa chốt quy định ngoạ",
+      "target_quote": "Trường hợp mất hộp ngoài thì",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_16_long_qa",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Hiện chưa chốt quy định ngoạ",
+      "target_quote": "Trường hợp mất hộp ngoài thì",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_16_asr_drop_neg",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Trường hợp mất hộp ngoài thì",
+      "target_quote": "Khách hàng được đổi mới tron",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_16_asr_drop_neg",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Hiện chốt quy định ngoại lệ ",
+      "target_quote": "Trường hợp mất hộp ngoài thì",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_17_base",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Mức giải ngân đợt một chiếm ",
+      "target_quote": "Quỹ nghiên cứu năm nay ưu ti",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_17_base",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Đợt một giải ngân 40% kinh p",
+      "target_quote": "Mức giải ngân đợt một chiếm ",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_17_long_qa",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Đợt một giải ngân 40% kinh p",
+      "target_quote": "Mức giải ngân đợt một chiếm ",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_17_asr_unk_speaker",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "phân bổ quỹ nghiên cứu",
+      "target_quote": "Quỹ nghiên cứu năm nay ưu ti",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_18_base",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Doanh số tối thiểu để giữ hạ",
+      "target_quote": "Đại lý cấp một hưởng chiết k",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_18_base",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Mức doanh số giữ hạng vẫn là",
+      "target_quote": "Doanh số tối thiểu để giữ hạ",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_18_long_qa",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Mức doanh số giữ hạng vẫn là",
+      "target_quote": "Doanh số tối thiểu để giữ hạ",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_18_asr_unk_speaker",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "chính sách chiết khấu đại lý",
+      "target_quote": "Đại lý cấp một hưởng chiết k",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_19_base",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Nhóm bốn người có được tách ",
+      "target_quote": "Mỗi nhóm tối đa ba sinh viên",
+      "cut_inside_word": false
+    },
+    {
+      "case_id": "fam_qa_19_base",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Khi đó nhóm bốn người bắt bu",
+      "target_quote": "Nhóm bốn người có được tách ",
+      "cut_inside_word": true
+    },
+    {
+      "case_id": "fam_qa_19_long_qa",
+      "split": "test",
+      "kind": "refers_to",
+      "source_quote": "Khi đó nhóm bốn người bắt bu",
+      "target_quote": "Nhóm bốn người có được tách ",
+      "cut_inside_word": true
+    }
+  ],
+  "coverage": {
+    "train": {
+      "families": 60,
+      "cases": 194,
+      "turns_min_median_max": [
+        2,
+        4.0,
+        13
+      ],
+      "relations": {
+        "refers_to": 82,
+        "opposes": 20,
+        "supports": 20,
+        "withdraws": 10,
+        "accepts": 30,
+        "supersedes": 10,
+        "depends_on": 10,
+        "amends": 44
+      },
+      "visible_amends": {
+        "deadline": 30,
+        "owner": 10,
+        "condition": 4
+      },
+      "missing_target_cases": 10,
+      "missing_target_with_no_expected_state": 10,
+      "asr_cases": 30,
+      "source_only_case_status": {
+        "passed_technical_awaiting_independent_llm_review": 194
+      }
+    },
+    "dev": {
+      "families": 24,
+      "cases": 84,
+      "turns_min_median_max": [
+        2,
+        3.0,
+        13
+      ],
+      "relations": {
+        "refers_to": 32,
+        "opposes": 8,
+        "supports": 8,
+        "withdraws": 4,
+        "accepts": 12,
+        "supersedes": 4,
+        "depends_on": 4,
+        "amends": 24
+      },
+      "visible_amends": {
+        "deadline": 12,
+        "owner": 4,
+        "condition": 4,
+        "document_version": 4
+      },
+      "missing_target_cases": 4,
+      "missing_target_with_no_expected_state": 4,
+      "asr_cases": 12,
+      "source_only_case_status": {
+        "passed_technical_awaiting_independent_llm_review": 84
+      }
+    },
+    "test": {
+      "families": 30,
+      "cases": 100,
+      "turns_min_median_max": [
+        2,
+        3.5,
+        13
+      ],
+      "relations": {
+        "refers_to": 41,
+        "opposes": 10,
+        "supports": 10,
+        "withdraws": 5,
+        "accepts": 15,
+        "supersedes": 5,
+        "depends_on": 5,
+        "amends": 25
+      },
+      "visible_amends": {
+        "deadline": 15,
+        "owner": 5,
+        "condition": 5
+      },
+      "missing_target_cases": 5,
+      "missing_target_with_no_expected_state": 5,
+      "asr_cases": 15,
+      "source_only_case_status": {
+        "passed_technical_awaiting_independent_llm_review": 100
+      }
+    }
+  },
+  "scaffold_audit": {
+    "counts": {
+      "dev_shared_variant": 80,
+      "dev_exact_scaffold": 56,
+      "test_shared_variant": 100,
+      "test_exact_scaffold": 68
+    },
+    "matched_train_cases": {
+      "fam_md_11_personal_agree": "fam_md_01_personal_agree",
+      "fam_md_11_decision_withdraw": "fam_md_01_decision_withdraw",
+      "fam_md_11_long_return": "fam_md_01_long_return",
+      "fam_md_12_personal_agree": "fam_md_01_personal_agree",
+      "fam_md_12_decision_withdraw": "fam_md_01_decision_withdraw",
+      "fam_md_12_long_return": "fam_md_01_long_return",
+      "fam_md_13_personal_agree": "fam_md_01_personal_agree",
+      "fam_md_13_decision_withdraw": "fam_md_01_decision_withdraw",
+      "fam_md_13_long_return": "fam_md_01_long_return",
+      "fam_md_14_personal_agree": "fam_md_01_personal_agree",
+      "fam_md_14_decision_withdraw": "fam_md_01_decision_withdraw",
+      "fam_md_14_long_return": "fam_md_01_long_return",
+      "fam_dv_11_vote_conditional": "fam_dv_01_vote_conditional",
+      "fam_dv_11_supersedes_ver": "fam_dv_01_supersedes_ver",
+      "fam_dv_11_ver_unchanged": "fam_dv_01_ver_unchanged",
+      "fam_dv_12_vote_conditional": "fam_dv_01_vote_conditional",
+      "fam_dv_12_supersedes_ver": "fam_dv_01_supersedes_ver",
+      "fam_dv_12_ver_unchanged": "fam_dv_01_ver_unchanged",
+      "fam_dv_13_vote_conditional": "fam_dv_01_vote_conditional",
+      "fam_dv_13_supersedes_ver": "fam_dv_01_supersedes_ver",
+      "fam_dv_13_ver_unchanged": "fam_dv_01_ver_unchanged",
+      "fam_dv_14_vote_conditional": "fam_dv_01_vote_conditional",
+      "fam_dv_14_supersedes_ver": "fam_dv_01_supersedes_ver",
+      "fam_dv_14_ver_unchanged": "fam_dv_01_ver_unchanged",
+      "fam_tt_11_amend_deadline_ok": "fam_tt_02_amend_deadline_ok",
+      "fam_tt_11_amend_deadline_prop": "fam_tt_02_amend_deadline_prop",
+      "fam_tt_11_amend_owner": "fam_tt_01_amend_owner",
+      "fam_tt_11_amend_cond_ver": "fam_tt_01_amend_cond_ver",
+      "fam_tt_11_asr_unk_owner": "fam_tt_02_asr_unk_owner",
+      "fam_tt_12_amend_deadline_ok": "fam_tt_01_amend_deadline_ok",
+      "fam_tt_12_amend_deadline_prop": "fam_tt_01_amend_deadline_prop",
+      "fam_tt_12_amend_owner": "fam_tt_01_amend_owner",
+      "fam_tt_12_amend_cond_ver": "fam_tt_01_amend_cond_ver",
+      "fam_tt_12_asr_unk_owner": "fam_tt_01_asr_unk_owner",
+      "fam_tt_13_amend_deadline_ok": "fam_tt_01_amend_deadline_ok",
+      "fam_tt_13_amend_deadline_prop": "fam_tt_01_amend_deadline_prop",
+      "fam_tt_13_amend_owner": "fam_tt_01_amend_owner",
+      "fam_tt_13_amend_cond_ver": "fam_tt_01_amend_cond_ver",
+      "fam_tt_13_asr_unk_owner": "fam_tt_01_asr_unk_owner",
+      "fam_tt_14_amend_deadline_ok": "fam_tt_01_amend_deadline_ok",
+      "fam_tt_14_amend_deadline_prop": "fam_tt_01_amend_deadline_prop",
+      "fam_tt_14_amend_owner": "fam_tt_01_amend_owner",
+      "fam_tt_14_amend_cond_ver": "fam_tt_01_amend_cond_ver",
+      "fam_tt_14_asr_unk_owner": "fam_tt_01_asr_unk_owner",
+      "fam_mm_11_multi_session": "fam_mm_01_multi_session",
+      "fam_mm_11_out_of_window": "fam_mm_01_out_of_window",
+      "fam_mm_11_issue_anchored": "fam_mm_01_issue_anchored",
+      "fam_mm_12_multi_session": "fam_mm_01_multi_session",
+      "fam_mm_12_out_of_window": "fam_mm_02_out_of_window",
+      "fam_mm_12_issue_anchored": "fam_mm_02_issue_anchored",
+      "fam_mm_13_multi_session": "fam_mm_01_multi_session",
+      "fam_mm_13_out_of_window": "fam_mm_01_out_of_window",
+      "fam_mm_13_issue_anchored": "fam_mm_01_issue_anchored",
+      "fam_mm_14_multi_session": "fam_mm_01_multi_session",
+      "fam_mm_14_out_of_window": "fam_mm_01_out_of_window",
+      "fam_mm_14_issue_anchored": "fam_mm_01_issue_anchored",
+      "fam_md_15_personal_agree": "fam_md_01_personal_agree",
+      "fam_md_15_decision_withdraw": "fam_md_01_decision_withdraw",
+      "fam_md_15_long_return": "fam_md_06_long_return",
+      "fam_md_16_personal_agree": "fam_md_01_personal_agree",
+      "fam_md_16_decision_withdraw": "fam_md_01_decision_withdraw",
+      "fam_md_16_long_return": "fam_md_01_long_return",
+      "fam_md_17_personal_agree": "fam_md_01_personal_agree",
+      "fam_md_17_decision_withdraw": "fam_md_01_decision_withdraw",
+      "fam_md_17_long_return": "fam_md_01_long_return",
+      "fam_md_18_personal_agree": "fam_md_01_personal_agree",
+      "fam_md_18_decision_withdraw": "fam_md_01_decision_withdraw",
+      "fam_md_18_long_return": "fam_md_01_long_return",
+      "fam_md_19_personal_agree": "fam_md_01_personal_agree",
+      "fam_md_19_decision_withdraw": "fam_md_01_decision_withdraw",
+      "fam_md_19_long_return": "fam_md_01_long_return",
+      "fam_dv_15_vote_conditional": "fam_dv_01_vote_conditional",
+      "fam_dv_15_supersedes_ver": "fam_dv_01_supersedes_ver",
+      "fam_dv_15_ver_unchanged": "fam_dv_01_ver_unchanged",
+      "fam_dv_16_vote_conditional": "fam_dv_01_vote_conditional",
+      "fam_dv_16_supersedes_ver": "fam_dv_01_supersedes_ver",
+      "fam_dv_16_ver_unchanged": "fam_dv_01_ver_unchanged",
+      "fam_dv_17_vote_conditional": "fam_dv_01_vote_conditional",
+      "fam_dv_17_supersedes_ver": "fam_dv_01_supersedes_ver",
+      "fam_dv_17_ver_unchanged": "fam_dv_01_ver_unchanged",
+      "fam_dv_18_vote_conditional": "fam_dv_01_vote_conditional",
+      "fam_dv_18_supersedes_ver": "fam_dv_01_supersedes_ver",
+      "fam_dv_18_ver_unchanged": "fam_dv_01_ver_unchanged",
+      "fam_dv_19_vote_conditional": "fam_dv_01_vote_conditional",
+      "fam_dv_19_supersedes_ver": "fam_dv_01_supersedes_ver",
+      "fam_dv_19_ver_unchanged": "fam_dv_01_ver_unchanged",
+      "fam_tt_15_amend_deadline_ok": "fam_tt_02_amend_deadline_ok",
+      "fam_tt_15_amend_deadline_prop": "fam_tt_02_amend_deadline_prop",
+      "fam_tt_15_amend_owner": "fam_tt_01_amend_owner",
+      "fam_tt_15_amend_cond_ver": "fam_tt_01_amend_cond_ver",
+      "fam_tt_15_asr_unk_owner": "fam_tt_02_asr_unk_owner",
+      "fam_tt_16_amend_deadline_ok": "fam_tt_01_amend_deadline_ok",
+      "fam_tt_16_amend_deadline_prop": "fam_tt_01_amend_deadline_prop",
+      "fam_tt_16_amend_owner": "fam_tt_01_amend_owner",
+      "fam_tt_16_amend_cond_ver": "fam_tt_01_amend_cond_ver",
+      "fam_tt_16_asr_unk_owner": "fam_tt_01_asr_unk_owner",
+      "fam_tt_17_amend_deadline_ok": "fam_tt_01_amend_deadline_ok",
+      "fam_tt_17_amend_deadline_prop": "fam_tt_01_amend_deadline_prop",
+      "fam_tt_17_amend_owner": "fam_tt_01_amend_owner",
+      "fam_tt_17_amend_cond_ver": "fam_tt_01_amend_cond_ver",
+      "fam_tt_17_asr_unk_owner": "fam_tt_01_asr_unk_owner",
+      "fam_tt_18_amend_deadline_ok": "fam_tt_01_amend_deadline_ok",
+      "fam_tt_18_amend_deadline_prop": "fam_tt_01_amend_deadline_prop",
+      "fam_tt_18_amend_owner": "fam_tt_01_amend_owner",
+      "fam_tt_18_amend_cond_ver": "fam_tt_01_amend_cond_ver",
+      "fam_tt_18_asr_unk_owner": "fam_tt_01_asr_unk_owner",
+      "fam_tt_19_amend_deadline_ok": "fam_tt_01_amend_deadline_ok",
+      "fam_tt_19_amend_deadline_prop": "fam_tt_01_amend_deadline_prop",
+      "fam_tt_19_amend_owner": "fam_tt_01_amend_owner",
+      "fam_tt_19_amend_cond_ver": "fam_tt_01_amend_cond_ver",
+      "fam_tt_19_asr_unk_owner": "fam_tt_01_asr_unk_owner",
+      "fam_mm_15_multi_session": "fam_mm_01_multi_session",
+      "fam_mm_15_out_of_window": "fam_mm_01_out_of_window",
+      "fam_mm_16_multi_session": "fam_mm_01_multi_session",
+      "fam_mm_16_out_of_window": "fam_mm_01_out_of_window",
+      "fam_mm_16_issue_anchored": "fam_mm_01_issue_anchored",
+      "fam_mm_17_multi_session": "fam_mm_01_multi_session",
+      "fam_mm_17_out_of_window": "fam_mm_01_out_of_window",
+      "fam_mm_17_issue_anchored": "fam_mm_01_issue_anchored",
+      "fam_mm_18_multi_session": "fam_mm_01_multi_session",
+      "fam_mm_18_out_of_window": "fam_mm_01_out_of_window",
+      "fam_mm_18_issue_anchored": "fam_mm_01_issue_anchored",
+      "fam_mm_19_multi_session": "fam_mm_01_multi_session",
+      "fam_mm_19_issue_anchored": "fam_mm_01_issue_anchored"
+    },
+    "examples": {
+      "dev": {
+        "train": "fam_tt_01_amend_owner",
+        "other": "fam_tt_11_amend_owner",
+        "normalized_turns": [
+          [
+            "session_0",
+            0,
+            "giao ‹a1› ‹t1› trước ‹d1›."
+          ],
+          [
+            "session_0",
+            0,
+            "giao ‹a2› ‹t2› trước ‹d1›."
+          ],
+          [
+            "session_0",
+            0,
+            "chốt đổi người phụ trách ‹t1› sang ‹a3›."
+          ]
+        ],
+        "relations": [
+          [
+            "e3",
+            "e1",
+            "amends",
+            "owner"
+          ]
+        ]
+      },
+      "test": {
+        "train": "fam_tt_01_amend_owner",
+        "other": "fam_tt_15_amend_owner",
+        "normalized_turns": [
+          [
+            "session_0",
+            0,
+            "giao ‹a1› ‹t1› trước ‹d1›."
+          ],
+          [
+            "session_0",
+            0,
+            "giao ‹a2› ‹t2› trước ‹d1›."
+          ],
+          [
+            "session_0",
+            0,
+            "chốt đổi người phụ trách ‹t1› sang ‹a3›."
+          ]
+        ],
+        "relations": [
+          [
+            "e3",
+            "e1",
+            "amends",
+            "owner"
+          ]
+        ]
+      }
+    }
+  },
+  "sha256": {
+    "dev/cases.jsonl": "8b84469c4b39871f2302eead492299d47bb59824fcead6aafd6d433f17228c3e",
+    "dev/extract.jsonl": "2fe3863b506b63b00ed11ae0e965eb90420f69cf0576936ac8ed7d64adb7e887",
+    "dev/relations.jsonl": "72243db8549c69eecfc5570163bc76ac660ae1cffe455db34616c74da3c1a7f0",
+    "export_index.jsonl": "083aa1e5cda442de3333b27f37ca0725fdd4956df6867151edacf9c9f80bfa01",
+    "rejected.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "review_requests.jsonl": "9c52294f4765f6c00945fca654dc7020c81324e4a2fbf59d02c4a56dfca7c037",
+    "review_results.jsonl": "f8a9a37cd7ab8c59ee1b3aa4e43d6b28707ec6282d5f997c85193b1511ded053",
+    "scenarios.jsonl": "6015d119b8cbe4d571ea3885bb40d83670c2a795d7046746fe0d4e8239d060fd",
+    "split_manifest.json": "6e5c07612615c99450e81415b85a0eb14a20a4e67f4fea38c1ef1b76ee4b83f3",
+    "test/cases.jsonl": "cc5e21c5053918d7bd220038823d9bbf4f234e88b1c62cb1447f45df0c8f9797",
+    "test/inputs/extract_inputs.jsonl": "33378e2f6ff2892d53071cf51716e5a86a8d248a0d4b5ef95dc599fe6bd70136",
+    "test/inputs/relations_gold_events_inputs.jsonl": "0754932807742baa7479652532a024cca90caf334dee09a43afbf453a1f2d576",
+    "test/inputs/transcripts.jsonl": "b5e1c092b00541531cd58910d7a4f93c1d844183246944c2912bc01f10ef9c2d",
+    "test/references/cases.jsonl": "cc5e21c5053918d7bd220038823d9bbf4f234e88b1c62cb1447f45df0c8f9797",
+    "test/references/extract_targets.jsonl": "20809fc68bae25c026081237474a2668f3f985485c5c18d4e6d3e9047133ed3a",
+    "test/references/relations_targets.jsonl": "c77632b943e01a08e2376e8d564a3287900f5b6b8998d172ca6d2cf77288ab4e",
+    "train/cases.jsonl": "f7dff12c26ffedaa24ec088f4e8ce2782b63470f4b82ea92b989a88dbfc45953",
+    "train/extract.jsonl": "b3f3294c96192cc199bb23149acef5fadb48d1b0623759b2c3b7316f5b2be9d7",
+    "train/relations.jsonl": "1b4aa757199195438a1fcb2b1f1e21dcf37bdd79d5bb75483e8968a58922cedc",
+    "train_manifest.json": "29a712edec290e0aa695ef6c05dbddda266ccfb318405e3380bac4873392fbc9"
+  }
+}

@@ -1,0 +1,1439 @@
+{
+  "cases": 60,
+  "families": 30,
+  "event_span": {
+    "precision": 0.9861111111111112,
+    "recall": 0.9403973509933775,
+    "f1": 0.9627118644067797,
+    "tp": 284,
+    "fp": 4,
+    "fn": 18,
+    "support": 302
+  },
+  "event": {
+    "precision": 0.7118055555555556,
+    "recall": 0.6788079470198676,
+    "f1": 0.6949152542372882,
+    "tp": 205,
+    "fp": 83,
+    "fn": 97,
+    "support": 302
+  },
+  "event_types": {
+    "agreement": {
+      "precision": 0.5,
+      "recall": 0.6,
+      "f1": 0.5454545454545454,
+      "tp": 3,
+      "fp": 3,
+      "fn": 2,
+      "support": 5
+    },
+    "amendment": {
+      "precision": 1.0,
+      "recall": 0.13333333333333333,
+      "f1": 0.23529411764705882,
+      "tp": 2,
+      "fp": 0,
+      "fn": 13,
+      "support": 15
+    },
+    "decision": {
+      "precision": 1.0,
+      "recall": 0.8333333333333334,
+      "f1": 0.9090909090909091,
+      "tp": 10,
+      "fp": 0,
+      "fn": 2,
+      "support": 12
+    },
+    "filler": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "support": 3
+    },
+    "information": {
+      "precision": 0.6621621621621622,
+      "recall": 0.9074074074074074,
+      "f1": 0.765625,
+      "tp": 98,
+      "fp": 50,
+      "fn": 10,
+      "support": 108
+    },
+    "objection": {
+      "precision": 1.0,
+      "recall": 0.75,
+      "f1": 0.8571428571428571,
+      "tp": 6,
+      "fp": 0,
+      "fn": 2,
+      "support": 8
+    },
+    "proposal": {
+      "precision": 0.8333333333333334,
+      "recall": 0.6944444444444444,
+      "f1": 0.7575757575757576,
+      "tp": 25,
+      "fp": 5,
+      "fn": 11,
+      "support": 36
+    },
+    "question": {
+      "precision": 0.9130434782608695,
+      "recall": 0.65625,
+      "f1": 0.7636363636363637,
+      "tp": 21,
+      "fp": 2,
+      "fn": 11,
+      "support": 32
+    },
+    "response": {
+      "precision": 0.7,
+      "recall": 0.2916666666666667,
+      "f1": 0.4117647058823529,
+      "tp": 7,
+      "fp": 3,
+      "fn": 17,
+      "support": 24
+    },
+    "task": {
+      "precision": 0.6170212765957447,
+      "recall": 0.6904761904761905,
+      "f1": 0.651685393258427,
+      "tp": 29,
+      "fp": 18,
+      "fn": 13,
+      "support": 42
+    },
+    "unresolved": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 2,
+      "fn": 12,
+      "support": 12
+    },
+    "vote": {
+      "precision": 1.0,
+      "recall": 0.25,
+      "f1": 0.4,
+      "tp": 1,
+      "fp": 0,
+      "fn": 3,
+      "support": 4
+    },
+    "withdrawal": {
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "support": 1
+    }
+  },
+  "event_confusion": [
+    [
+      "(thừa)",
+      "information",
+      2
+    ],
+    [
+      "(thừa)",
+      "response",
+      1
+    ],
+    [
+      "(thừa)",
+      "task",
+      1
+    ],
+    [
+      "agreement",
+      "agreement",
+      3
+    ],
+    [
+      "agreement",
+      "information",
+      1
+    ],
+    [
+      "agreement",
+      "proposal",
+      1
+    ],
+    [
+      "amendment",
+      "(thiếu)",
+      2
+    ],
+    [
+      "amendment",
+      "amendment",
+      2
+    ],
+    [
+      "amendment",
+      "information",
+      1
+    ],
+    [
+      "amendment",
+      "proposal",
+      1
+    ],
+    [
+      "amendment",
+      "task",
+      7
+    ],
+    [
+      "amendment",
+      "unresolved",
+      2
+    ],
+    [
+      "decision",
+      "decision",
+      10
+    ],
+    [
+      "decision",
+      "information",
+      2
+    ],
+    [
+      "filler",
+      "filler",
+      3
+    ],
+    [
+      "information",
+      "(thiếu)",
+      4
+    ],
+    [
+      "information",
+      "agreement",
+      1
+    ],
+    [
+      "information",
+      "information",
+      98
+    ],
+    [
+      "information",
+      "task",
+      5
+    ],
+    [
+      "objection",
+      "information",
+      1
+    ],
+    [
+      "objection",
+      "objection",
+      6
+    ],
+    [
+      "objection",
+      "question",
+      1
+    ],
+    [
+      "proposal",
+      "information",
+      6
+    ],
+    [
+      "proposal",
+      "proposal",
+      25
+    ],
+    [
+      "proposal",
+      "question",
+      1
+    ],
+    [
+      "proposal",
+      "task",
+      4
+    ],
+    [
+      "question",
+      "(thiếu)",
+      2
+    ],
+    [
+      "question",
+      "information",
+      9
+    ],
+    [
+      "question",
+      "question",
+      21
+    ],
+    [
+      "response",
+      "(thiếu)",
+      2
+    ],
+    [
+      "response",
+      "information",
+      15
+    ],
+    [
+      "response",
+      "response",
+      7
+    ],
+    [
+      "task",
+      "(thiếu)",
+      7
+    ],
+    [
+      "task",
+      "agreement",
+      2
+    ],
+    [
+      "task",
+      "information",
+      4
+    ],
+    [
+      "task",
+      "task",
+      29
+    ],
+    [
+      "unresolved",
+      "(thiếu)",
+      1
+    ],
+    [
+      "unresolved",
+      "information",
+      6
+    ],
+    [
+      "unresolved",
+      "proposal",
+      2
+    ],
+    [
+      "unresolved",
+      "response",
+      2
+    ],
+    [
+      "unresolved",
+      "task",
+      1
+    ],
+    [
+      "vote",
+      "information",
+      3
+    ],
+    [
+      "vote",
+      "vote",
+      1
+    ],
+    [
+      "withdrawal",
+      "proposal",
+      1
+    ]
+  ],
+  "relation_end_to_end": {
+    "precision": 0.3333333333333333,
+    "recall": 0.045454545454545456,
+    "f1": 0.08,
+    "tp": 5,
+    "fp": 10,
+    "fn": 105,
+    "support": 110
+  },
+  "relation_types": {
+    "accepts": {
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 8,
+      "support": 8
+    },
+    "amends": {
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 14,
+      "support": 14
+    },
+    "depends_on": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 1,
+      "fn": 5,
+      "support": 5
+    },
+    "opposes": {
+      "precision": 0.5555555555555556,
+      "recall": 0.625,
+      "f1": 0.5882352941176471,
+      "tp": 5,
+      "fp": 4,
+      "fn": 3,
+      "support": 8
+    },
+    "refers_to": {
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 67,
+      "support": 67
+    },
+    "supersedes": {
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 2,
+      "support": 2
+    },
+    "supports": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 5,
+      "fn": 5,
+      "support": 5
+    },
+    "withdraws": {
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "support": 1
+    }
+  },
+  "relation_macro_f1_gold_types": 0.07352941176470588,
+  "edge_set_exact": {
+    "correct": 4,
+    "support": 60,
+    "accuracy": 0.06666666666666667
+  },
+  "graph_exact_labeled": {
+    "correct": 2,
+    "support": 60,
+    "accuracy": 0.03333333333333333
+  },
+  "false_edges_on_empty_gold_cases": {
+    "correct": 0,
+    "support": 4,
+    "accuracy": 0.0
+  },
+  "amends_by_field": {
+    "condition": {
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 2,
+      "support": 2
+    },
+    "deadline": {
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 4,
+      "support": 4
+    },
+    "document_version": {
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 5,
+      "support": 5
+    },
+    "owner": {
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 3,
+      "support": 3
+    }
+  },
+  "fields": {
+    "condition": {
+      "precision": 0.4,
+      "recall": 0.26666666666666666,
+      "f1": 0.32,
+      "tp": 4,
+      "fp": 6,
+      "fn": 11,
+      "support": 15
+    },
+    "deadline": {
+      "precision": 0.15,
+      "recall": 0.07692307692307693,
+      "f1": 0.1016949152542373,
+      "tp": 3,
+      "fp": 17,
+      "fn": 36,
+      "support": 39
+    },
+    "document_version": {
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 35,
+      "support": 35
+    },
+    "owner": {
+      "precision": 0.8620689655172413,
+      "recall": 0.5952380952380952,
+      "f1": 0.704225352112676,
+      "tp": 25,
+      "fp": 4,
+      "fn": 17,
+      "support": 42
+    }
+  },
+  "field_accuracy_on_matched_events": {
+    "condition": {
+      "correct": 4,
+      "support": 11,
+      "accuracy": 0.36363636363636365
+    },
+    "deadline": {
+      "correct": 3,
+      "support": 24,
+      "accuracy": 0.125
+    },
+    "document_version": {
+      "correct": 0,
+      "support": 19,
+      "accuracy": 0.0
+    },
+    "owner": {
+      "correct": 25,
+      "support": 27,
+      "accuracy": 0.9259259259259259
+    }
+  },
+  "wrong_non_null_on_matched_gold_null": {
+    "condition": {
+      "correct": 1,
+      "support": 194,
+      "accuracy": 0.005154639175257732
+    },
+    "deadline": {
+      "correct": 0,
+      "support": 181,
+      "accuracy": 0.0
+    },
+    "document_version": {
+      "correct": 0,
+      "support": 186,
+      "accuracy": 0.0
+    },
+    "owner": {
+      "correct": 3,
+      "support": 178,
+      "accuracy": 0.016853932584269662
+    }
+  },
+  "field_evidence": {
+    "valid_anchors_on_predictions": {
+      "correct": 59,
+      "support": 59,
+      "accuracy": 1.0
+    },
+    "correct_with_anchors_on_gold": {
+      "correct": 32,
+      "support": 131,
+      "accuracy": 0.24427480916030533
+    }
+  },
+  "relation_evidence": {
+    "valid_anchors_on_predictions": {
+      "correct": 15,
+      "support": 15,
+      "accuracy": 1.0
+    },
+    "correct_with_anchors_on_gold": {
+      "correct": 5,
+      "support": 110,
+      "accuracy": 0.045454545454545456
+    }
+  },
+  "state_exact": {
+    "correct": 8,
+    "support": 42,
+    "accuracy": 0.19047619047619047
+  },
+  "state_values": {
+    "condition": {
+      "correct": 0,
+      "support": 4,
+      "accuracy": 0.0
+    },
+    "deadline": {
+      "correct": 0,
+      "support": 12,
+      "accuracy": 0.0
+    },
+    "document_version": {
+      "correct": 0,
+      "support": 10,
+      "accuracy": 0.0
+    },
+    "lifecycle": {
+      "correct": 15,
+      "support": 38,
+      "accuracy": 0.39473684210526316
+    },
+    "owner": {
+      "correct": 0,
+      "support": 5,
+      "accuracy": 0.0
+    }
+  },
+  "all_declared_state_checks_by_name": {
+    "condition": {
+      "correct": 0,
+      "support": 1,
+      "accuracy": 0.0
+    },
+    "deadline": {
+      "correct": 3,
+      "support": 6,
+      "accuracy": 0.5
+    },
+    "effective_condition": {
+      "correct": 0,
+      "support": 4,
+      "accuracy": 0.0
+    },
+    "effective_condition_source_key": {
+      "correct": 0,
+      "support": 2,
+      "accuracy": 0.0
+    },
+    "effective_deadline": {
+      "correct": 0,
+      "support": 12,
+      "accuracy": 0.0
+    },
+    "effective_deadline_source_key": {
+      "correct": 0,
+      "support": 3,
+      "accuracy": 0.0
+    },
+    "effective_document_version": {
+      "correct": 0,
+      "support": 10,
+      "accuracy": 0.0
+    },
+    "effective_document_version_source_key": {
+      "correct": 0,
+      "support": 5,
+      "accuracy": 0.0
+    },
+    "effective_owner": {
+      "correct": 0,
+      "support": 5,
+      "accuracy": 0.0
+    },
+    "effective_owner_source_key": {
+      "correct": 0,
+      "support": 3,
+      "accuracy": 0.0
+    },
+    "kind": {
+      "correct": 6,
+      "support": 7,
+      "accuracy": 0.8571428571428571
+    },
+    "lifecycle": {
+      "correct": 15,
+      "support": 38,
+      "accuracy": 0.39473684210526316
+    },
+    "original_condition": {
+      "correct": 0,
+      "support": 2,
+      "accuracy": 0.0
+    },
+    "original_deadline": {
+      "correct": 0,
+      "support": 3,
+      "accuracy": 0.0
+    },
+    "original_document_version": {
+      "correct": 0,
+      "support": 5,
+      "accuracy": 0.0
+    },
+    "original_owner": {
+      "correct": 1,
+      "support": 3,
+      "accuracy": 0.3333333333333333
+    },
+    "owner": {
+      "correct": 16,
+      "support": 22,
+      "accuracy": 0.7272727272727273
+    }
+  },
+  "update_value_and_source": {
+    "condition": {
+      "correct": 0,
+      "support": 2,
+      "accuracy": 0.0
+    },
+    "deadline": {
+      "correct": 0,
+      "support": 3,
+      "accuracy": 0.0
+    },
+    "document_version": {
+      "correct": 0,
+      "support": 5,
+      "accuracy": 0.0
+    },
+    "owner": {
+      "correct": 0,
+      "support": 3,
+      "accuracy": 0.0
+    }
+  },
+  "lifecycle_confusion": [
+    [
+      "accepted",
+      "(thiếu)",
+      2
+    ],
+    [
+      "accepted",
+      "proposed",
+      6
+    ],
+    [
+      "proposed",
+      "(thiếu)",
+      6
+    ],
+    [
+      "proposed",
+      "proposed",
+      13
+    ],
+    [
+      "stated",
+      "(thiếu)",
+      1
+    ],
+    [
+      "stated",
+      "stated",
+      2
+    ],
+    [
+      "superseded",
+      "proposed",
+      1
+    ],
+    [
+      "superseded",
+      "stated",
+      1
+    ],
+    [
+      "unresolved",
+      "(thiếu)",
+      5
+    ],
+    [
+      "withdrawn",
+      "proposed",
+      1
+    ]
+  ],
+  "important_errors": {
+    "edge_missing_with_both_endpoints": 46,
+    "accepts_outside_labels": 0,
+    "amends_outside_labels": 0,
+    "downgraded_state_transitions": 21,
+    "proposal_as_decision": 0,
+    "edge_endpoint_missing_or_mistyped": 58,
+    "wrong_edge_type_or_field": 1,
+    "stale_effective_value": 1
+  },
+  "important_error_cases": {
+    "edge_missing_with_both_endpoints": 34,
+    "accepts_outside_labels": 0,
+    "amends_outside_labels": 0,
+    "downgraded_state_transitions": 17,
+    "proposal_as_decision": 0,
+    "edge_endpoint_missing_or_mistyped": 38,
+    "wrong_edge_type_or_field": 1,
+    "stale_effective_value": 1
+  },
+  "paired_family_edge_and_state_exact": {
+    "correct": 1,
+    "support": 30,
+    "accuracy": 0.03333333333333333
+  },
+  "multi_event_units_complete": {
+    "correct": 0,
+    "support": 6,
+    "accuracy": 0.0
+  },
+  "slices": {
+    "asr_noise": {
+      "cases": 7,
+      "event": {
+        "precision": 0.6538461538461539,
+        "recall": 0.6296296296296297,
+        "f1": 0.6415094339622641,
+        "tp": 17,
+        "fp": 9,
+        "fn": 10,
+        "support": 27
+      },
+      "relations": {
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 14,
+        "support": 14
+      },
+      "state_exact": {
+        "correct": 0,
+        "support": 2,
+        "accuracy": 0.0
+      }
+    },
+    "meeting_mode/decision_vote": {
+      "cases": 10,
+      "event": {
+        "precision": 0.6190476190476191,
+        "recall": 0.6190476190476191,
+        "f1": 0.6190476190476191,
+        "tp": 26,
+        "fp": 16,
+        "fn": 16,
+        "support": 42
+      },
+      "relations": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 4,
+        "fn": 17,
+        "support": 17
+      },
+      "state_exact": {
+        "correct": 1,
+        "support": 10,
+        "accuracy": 0.1
+      }
+    },
+    "meeting_mode/mixed_multi_session": {
+      "cases": 10,
+      "event": {
+        "precision": 0.765625,
+        "recall": 0.765625,
+        "f1": 0.765625,
+        "tp": 49,
+        "fp": 15,
+        "fn": 15,
+        "support": 64
+      },
+      "relations": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 2,
+        "fn": 16,
+        "support": 16
+      },
+      "state_exact": {
+        "correct": 0,
+        "support": 8,
+        "accuracy": 0.0
+      }
+    },
+    "meeting_mode/multi_discussion": {
+      "cases": 10,
+      "event": {
+        "precision": 0.782608695652174,
+        "recall": 0.782608695652174,
+        "f1": 0.782608695652174,
+        "tp": 36,
+        "fp": 10,
+        "fn": 10,
+        "support": 46
+      },
+      "relations": {
+        "precision": 1.0,
+        "recall": 0.22727272727272727,
+        "f1": 0.37037037037037035,
+        "tp": 5,
+        "fp": 0,
+        "fn": 17,
+        "support": 22
+      },
+      "state_exact": {
+        "correct": 5,
+        "support": 8,
+        "accuracy": 0.625
+      }
+    },
+    "meeting_mode/presenter_qa": {
+      "cases": 10,
+      "event": {
+        "precision": 0.7258064516129032,
+        "recall": 0.703125,
+        "f1": 0.7142857142857143,
+        "tp": 45,
+        "fp": 17,
+        "fn": 19,
+        "support": 64
+      },
+      "relations": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 2,
+        "fn": 24,
+        "support": 24
+      },
+      "state_exact": {
+        "correct": 0,
+        "support": 1,
+        "accuracy": 0.0
+      }
+    },
+    "meeting_mode/single_presenter": {
+      "cases": 10,
+      "event": {
+        "precision": 0.75,
+        "recall": 0.717391304347826,
+        "f1": 0.7333333333333333,
+        "tp": 33,
+        "fp": 11,
+        "fn": 13,
+        "support": 46
+      },
+      "relations": {
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 7,
+        "support": 7
+      },
+      "state_exact": {
+        "correct": 2,
+        "support": 5,
+        "accuracy": 0.4
+      }
+    },
+    "meeting_mode/task_tracking": {
+      "cases": 10,
+      "event": {
+        "precision": 0.5333333333333333,
+        "recall": 0.4,
+        "f1": 0.45714285714285713,
+        "tp": 16,
+        "fp": 14,
+        "fn": 24,
+        "support": 40
+      },
+      "relations": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 2,
+        "fn": 24,
+        "support": 24
+      },
+      "state_exact": {
+        "correct": 0,
+        "support": 10,
+        "accuracy": 0.0
+      }
+    },
+    "multi_batch": {
+      "cases": 6,
+      "event": {
+        "precision": 0.8428571428571429,
+        "recall": 0.8428571428571429,
+        "f1": 0.8428571428571429,
+        "tp": 59,
+        "fp": 11,
+        "fn": 11,
+        "support": 70
+      },
+      "relations": {
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 7,
+        "support": 7
+      },
+      "state_exact": {
+        "correct": 1,
+        "support": 4,
+        "accuracy": 0.25
+      }
+    },
+    "multi_event_unit": {
+      "cases": 6,
+      "event": {
+        "precision": 0.35714285714285715,
+        "recall": 0.17857142857142858,
+        "f1": 0.23809523809523808,
+        "tp": 5,
+        "fp": 9,
+        "fn": 23,
+        "support": 28
+      },
+      "relations": {
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 12,
+        "support": 12
+      },
+      "state_exact": {
+        "correct": 1,
+        "support": 4,
+        "accuracy": 0.25
+      }
+    },
+    "multi_session": {
+      "cases": 10,
+      "event": {
+        "precision": 0.765625,
+        "recall": 0.765625,
+        "f1": 0.765625,
+        "tp": 49,
+        "fp": 15,
+        "fn": 15,
+        "support": 64
+      },
+      "relations": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 2,
+        "fn": 16,
+        "support": 16
+      },
+      "state_exact": {
+        "correct": 0,
+        "support": 8,
+        "accuracy": 0.0
+      }
+    },
+    "outside_gold_linker_window": {
+      "cases": 2,
+      "event": {
+        "precision": 0.9285714285714286,
+        "recall": 0.9285714285714286,
+        "f1": 0.9285714285714286,
+        "tp": 26,
+        "fp": 2,
+        "fn": 2,
+        "support": 28
+      },
+      "relations": {
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 4,
+        "support": 4
+      },
+      "state_exact": {
+        "correct": 0,
+        "support": 0,
+        "accuracy": null
+      }
+    }
+  },
+  "format_and_generation": {
+    "extract": {
+      "json": {
+        "correct": 3,
+        "support": 70,
+        "accuracy": 0.04285714285714286
+      },
+      "schema": {
+        "correct": 0,
+        "support": 70,
+        "accuracy": 0.0
+      },
+      "ids": {
+        "correct": 0,
+        "support": 70,
+        "accuracy": 0.0
+      },
+      "accepted_by_parser": {
+        "correct": 36,
+        "support": 70,
+        "accuracy": 0.5142857142857142
+      },
+      "attempts": 160,
+      "retries": 90,
+      "format_repairs": 0,
+      "parsed_after_format_cleanup": 44,
+      "generation_truncated": {
+        "correct": 0,
+        "support": 160,
+        "accuracy": 0.0
+      },
+      "input_too_long": 0,
+      "cross_session_raw": 0,
+      "wrong_direction_raw": 0,
+      "literal_quotes_raw": {
+        "correct": 0,
+        "support": 0,
+        "accuracy": null
+      },
+      "mean_extraction_unit_coverage_when_schema_valid": null,
+      "prompt_tokens": 105480,
+      "generation_tokens": 18900,
+      "generation_wall_sec": 1117.9832183765247,
+      "generated_tokens_per_sec": 16.905441592804557
+    },
+    "relations": {
+      "json": {
+        "correct": 51,
+        "support": 70,
+        "accuracy": 0.7285714285714285
+      },
+      "schema": {
+        "correct": 50,
+        "support": 70,
+        "accuracy": 0.7142857142857143
+      },
+      "ids": {
+        "correct": 50,
+        "support": 70,
+        "accuracy": 0.7142857142857143
+      },
+      "accepted_by_parser": {
+        "correct": 69,
+        "support": 70,
+        "accuracy": 0.9857142857142858
+      },
+      "attempts": 70,
+      "retries": 0,
+      "format_repairs": 0,
+      "parsed_after_format_cleanup": 18,
+      "generation_truncated": {
+        "correct": 0,
+        "support": 70,
+        "accuracy": 0.0
+      },
+      "input_too_long": 0,
+      "cross_session_raw": 0,
+      "wrong_direction_raw": 0,
+      "literal_quotes_raw": {
+        "correct": 21,
+        "support": 22,
+        "accuracy": 0.9545454545454546
+      },
+      "mean_extraction_unit_coverage_when_schema_valid": null,
+      "prompt_tokens": 34378,
+      "generation_tokens": 3742,
+      "generation_wall_sec": 301.23278429498896,
+      "generated_tokens_per_sec": 12.422286666963721
+    }
+  },
+  "valid_graph": {
+    "correct": 58,
+    "support": 60,
+    "accuracy": 0.9666666666666667
+  },
+  "fallback_events": {
+    "correct": 53,
+    "support": 288,
+    "accuracy": 0.1840277777777778
+  },
+  "wall_sec_total": 1421.6795476656407,
+  "case_wall_sec_median": 18.883648603921756,
+  "case_wall_sec_p95": 71.46189951323903,
+  "oracle_linker": {
+    "relation_on_gold_events": {
+      "precision": 0.4666666666666667,
+      "recall": 0.19444444444444445,
+      "f1": 0.27450980392156865,
+      "tp": 21,
+      "fp": 24,
+      "fn": 87,
+      "support": 108
+    },
+    "packets": 70,
+    "by_kind": {
+      "accepts": {
+        "precision": 0.75,
+        "recall": 0.75,
+        "f1": 0.75,
+        "tp": 6,
+        "fp": 2,
+        "fn": 2,
+        "support": 8
+      },
+      "amends": {
+        "precision": 0.6363636363636364,
+        "recall": 0.5,
+        "f1": 0.56,
+        "tp": 7,
+        "fp": 4,
+        "fn": 7,
+        "support": 14
+      },
+      "depends_on": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 5,
+        "support": 5
+      },
+      "opposes": {
+        "precision": 0.45454545454545453,
+        "recall": 0.625,
+        "f1": 0.5263157894736842,
+        "tp": 5,
+        "fp": 6,
+        "fn": 3,
+        "support": 8
+      },
+      "refers_to": {
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 65,
+        "support": 65
+      },
+      "supersedes": {
+        "precision": 0.14285714285714285,
+        "recall": 0.5,
+        "f1": 0.2222222222222222,
+        "tp": 1,
+        "fp": 6,
+        "fn": 1,
+        "support": 2
+      },
+      "supports": {
+        "precision": 0.16666666666666666,
+        "recall": 0.2,
+        "f1": 0.18181818181818182,
+        "tp": 1,
+        "fp": 5,
+        "fn": 4,
+        "support": 5
+      },
+      "withdraws": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "support": 1
+      }
+    },
+    "amends_by_field": {
+      "owner": {
+        "precision": 1.0,
+        "recall": 0.6666666666666666,
+        "f1": 0.8,
+        "tp": 2,
+        "fp": 0,
+        "fn": 1,
+        "support": 3
+      },
+      "deadline": {
+        "precision": 0.25,
+        "recall": 0.25,
+        "f1": 0.25,
+        "tp": 1,
+        "fp": 3,
+        "fn": 3,
+        "support": 4
+      },
+      "condition": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "support": 2
+      },
+      "document_version": {
+        "precision": 0.6666666666666666,
+        "recall": 0.4,
+        "f1": 0.5,
+        "tp": 2,
+        "fp": 1,
+        "fn": 3,
+        "support": 5
+      }
+    },
+    "false_edges_on_empty_gold_packet": {
+      "correct": 1,
+      "support": 14,
+      "accuracy": 0.07142857142857142
+    },
+    "format_and_generation": {
+      "extract": {
+        "json": {
+          "correct": 0,
+          "support": 0,
+          "accuracy": null
+        },
+        "schema": {
+          "correct": 0,
+          "support": 0,
+          "accuracy": null
+        },
+        "ids": {
+          "correct": 0,
+          "support": 0,
+          "accuracy": null
+        },
+        "accepted_by_parser": {
+          "correct": 0,
+          "support": 0,
+          "accuracy": null
+        },
+        "attempts": 0,
+        "retries": 0,
+        "format_repairs": 0,
+        "parsed_after_format_cleanup": 0,
+        "generation_truncated": {
+          "correct": 0,
+          "support": 0,
+          "accuracy": null
+        },
+        "input_too_long": 0,
+        "cross_session_raw": 0,
+        "wrong_direction_raw": 0,
+        "literal_quotes_raw": {
+          "correct": 0,
+          "support": 0,
+          "accuracy": null
+        },
+        "mean_extraction_unit_coverage_when_schema_valid": null,
+        "prompt_tokens": 0,
+        "generation_tokens": 0,
+        "generation_wall_sec": 0,
+        "generated_tokens_per_sec": null
+      },
+      "relations": {
+        "json": {
+          "correct": 50,
+          "support": 70,
+          "accuracy": 0.7142857142857143
+        },
+        "schema": {
+          "correct": 47,
+          "support": 70,
+          "accuracy": 0.6714285714285714
+        },
+        "ids": {
+          "correct": 47,
+          "support": 70,
+          "accuracy": 0.6714285714285714
+        },
+        "accepted_by_parser": {
+          "correct": 68,
+          "support": 70,
+          "accuracy": 0.9714285714285714
+        },
+        "attempts": 70,
+        "retries": 0,
+        "format_repairs": 0,
+        "parsed_after_format_cleanup": 18,
+        "generation_truncated": {
+          "correct": 0,
+          "support": 70,
+          "accuracy": 0.0
+        },
+        "input_too_long": 0,
+        "cross_session_raw": 0,
+        "wrong_direction_raw": 0,
+        "literal_quotes_raw": {
+          "correct": 22,
+          "support": 23,
+          "accuracy": 0.9565217391304348
+        },
+        "mean_extraction_unit_coverage_when_schema_valid": null,
+        "prompt_tokens": 34447,
+        "generation_tokens": 4081,
+        "generation_wall_sec": 330.6036429912783,
+        "generated_tokens_per_sec": 12.34408660193639
+      }
+    }
+  }
+}
