@@ -19,7 +19,7 @@ from meeting_pipeline.domain.contracts import MeetingSegment, VadConfig
 from meeting_pipeline.pipeline.stages.activity_detection import fuse_vad_intervals
 from meeting_pipeline.pipeline.stages.shared_segmentation import run_shared_pyannote_segmentation
 from meeting_pipeline.pipeline.stages.synchronize import estimate_offset
-from meeting_pipeline.simulation.device import apply_clock_drift, apply_start_offset
+from meeting_pipeline.simulation.device import apply_clock_drift
 
 logger = logging.getLogger(__name__)
 
@@ -51,21 +51,32 @@ def _estimate_windowed_drift(
     base_offset_sec: float,
     window_sec: float = 8.0,
     step_sec: float = 15.0,
+    envelope_rate_hz: int = 100,
+    minimum_common_speech_seconds: float = 3.0,
+    minimum_drift_inliers: int = 3,
 ) -> tuple[float, float, str]:
-    """Measure offset at multiple common windows to detect clock drift and stability."""
-    total_sec = min(len(ref_signal), len(source_signal)) / sample_rate
-    if total_sec < 25.0:
-        return 0.0, 0.5, "aligned"
+    """Measure local residual offsets in corresponding (coarse-aligned) windows.
 
+    Short or silent recordings do not prove zero drift. The activity check here is
+    signal variance, not a speech detector; speech-aware anchors belong to stage 3.
+    """
     window_samples = int(window_sec * sample_rate)
-    step_samples = int(step_sec * sample_rate)
+    step_samples = max(1, round(step_sec * sample_rate))
+    base_samples = round(base_offset_sec * sample_rate)
+    source_start = max(0, -base_samples)
+    source_end = min(len(source_signal), len(ref_signal) - base_samples)
+    if window_samples < 1 or (source_end - source_start) / sample_rate < max(
+        window_sec, minimum_common_speech_seconds
+    ):
+        return 0.0, 999.0, "drift_unresolved"
 
     time_points: list[float] = []
     measured_offsets: list[float] = []
 
-    pos = 0
-    while pos + window_samples <= min(len(ref_signal), len(source_signal)):
-        sub_ref = ref_signal[pos : pos + window_samples]
+    pos = source_start
+    while pos + window_samples <= source_end:
+        ref_pos = pos + base_samples
+        sub_ref = ref_signal[ref_pos : ref_pos + window_samples]
         sub_src = source_signal[pos : pos + window_samples]
 
         # Only measure if both windows have substantial signal variance
@@ -75,17 +86,19 @@ def _estimate_windowed_drift(
                     reference=sub_ref,
                     source=sub_src,
                     sample_rate=sample_rate,
-                    envelope_rate_hz=100,
-                    max_offset_seconds=5.0,
+                    envelope_rate_hz=envelope_rate_hz,
+                    max_offset_seconds=min(1.0, window_sec / 4),
                 )
                 time_points.append(pos / sample_rate)
-                measured_offsets.append(float(est.mapping.offset_sec or 0.0))
+                measured_offsets.append(
+                    base_samples / sample_rate + float(est.mapping.offset_sec or 0.0)
+                )
             except Exception:
                 pass
         pos += step_samples
 
-    if len(measured_offsets) < 3:
-        return 0.0, 5.0, "drift_unresolved"
+    if len(measured_offsets) < minimum_drift_inliers:
+        return 0.0, 999.0, "drift_unresolved"
 
     t_arr = np.array(time_points, dtype=np.float64)
     off_arr = np.array(measured_offsets, dtype=np.float64)
@@ -95,8 +108,8 @@ def _estimate_windowed_drift(
     mad = np.median(np.abs(off_arr - med_off)) + 1e-6
     inliers = np.abs(off_arr - med_off) <= 3.0 * mad
 
-    if np.sum(inliers) < 3:
-        return 0.0, float(mad * 1000.0), "drift_unresolved"
+    if np.sum(inliers) < minimum_drift_inliers:
+        return 0.0, 999.0, "drift_unresolved"
 
     t_in = t_arr[inliers]
     off_in = off_arr[inliers]
@@ -118,6 +131,13 @@ def synchronize_multi_source_audio(
     sample_rate: int = 16000,
     reference_source_id: str | None = None,
     allow_drift: bool = True,
+    *,
+    envelope_rate_hz: int = 100,
+    max_offset_seconds: float = 120.0,
+    fine_window_seconds: float = 8.0,
+    long_recording_step_seconds: float = 30.0,
+    minimum_common_speech_seconds: float = 3.0,
+    minimum_drift_inliers: int = 3,
 ) -> tuple[
     dict[str, np.ndarray[Any, np.dtype[np.float32]]],
     dict[str, dict[str, Any]],
@@ -129,26 +149,32 @@ def synchronize_multi_source_audio(
     - aligned_signals: dict[source_id, 1D float32 array] of equal length.
     - sync_metadata: dict[source_id, {offset_sec, drift_ppm, residual_ms, status}].
     - reference_source_id: the chosen reference device.
+
+    ``offset_sec`` retains the estimate relative to the original reference for
+    diagnostics. Use ``timeline_offset_sec`` and ``time_scale`` for the shifted
+    output clock; ``origin_shift_sec`` explains the change of meeting origin.
     """
+    if not audio_signals or sample_rate <= 0:
+        raise ValueError("At least one source and a positive sample rate are required")
+    if any(sig.ndim != 1 or not len(sig) for sig in audio_signals.values()):
+        raise ValueError("Sources must be nonempty mono waveforms")
     ref_id = reference_source_id or select_reference_source(audio_signals)
     ref_signal = audio_signals[ref_id]
 
     aligned_signals: dict[str, np.ndarray[Any, np.dtype[np.float32]]] = {}
     sync_metadata: dict[str, dict[str, Any]] = {}
 
-    max_len = 0
-
+    # First estimate on source-local clocks. Do not trim negative offsets.
     for src_id, sig in audio_signals.items():
         if src_id == ref_id:
-            aligned_signals[src_id] = sig.copy()
             sync_metadata[src_id] = {
                 "offset_sec": 0.0,
                 "drift_ppm": 0.0,
                 "residual_ms": 0.0,
                 "status": "reference",
-                "valid_coverage_interval": [0.0, len(sig) / sample_rate],
+                "coarse_residual_ms": 0.0,
+                "drift_status": "reference",
             }
-            max_len = max(max_len, len(sig))
             continue
 
         try:
@@ -157,12 +183,12 @@ def synchronize_multi_source_audio(
                 reference=ref_signal,
                 source=sig,
                 sample_rate=sample_rate,
-                envelope_rate_hz=100,
-                max_offset_seconds=10.0,
+                envelope_rate_hz=envelope_rate_hz,
+                max_offset_seconds=max_offset_seconds,
             )
             offset_sec = float(align_est.mapping.offset_sec or 0.0)
             residual_ms = float(align_est.residual_sec * 1000.0)
-            status = "aligned"
+            status = "drift_unresolved"
         except Exception as exc:
             logger.warning("Alignment correlation failed for %s: %s; marked failed", src_id, exc)
             offset_sec = 0.0
@@ -170,37 +196,66 @@ def synchronize_multi_source_audio(
             status = "alignment_failed"
 
         drift_ppm = 0.0
+        coarse_residual_ms = residual_ms
+        drift_residual_ms = None
+        drift_status = "not_measured"
         if status != "alignment_failed" and allow_drift:
             meas_drift, win_res_ms, win_status = _estimate_windowed_drift(
-                ref_signal, sig, sample_rate, offset_sec
+                ref_signal,
+                sig,
+                sample_rate,
+                offset_sec,
+                window_sec=fine_window_seconds,
+                step_sec=long_recording_step_seconds,
+                envelope_rate_hz=envelope_rate_hz,
+                minimum_common_speech_seconds=minimum_common_speech_seconds,
+                minimum_drift_inliers=minimum_drift_inliers,
             )
-            if abs(meas_drift) > 5.0 and win_res_ms < 25.0:
+            drift_status = win_status
+            status = win_status
+            if win_status == "aligned" and np.isfinite(meas_drift) and win_res_ms < 20.0:
                 drift_ppm = meas_drift
                 residual_ms = max(residual_ms, win_res_ms)
-                status = win_status
-
-        # Apply alignment shift
-        shifted = apply_start_offset(sig, offset_sec, sample_rate=sample_rate)
-        if abs(drift_ppm) > 0.01:
-            shifted = apply_clock_drift(shifted, -drift_ppm)
-
-        # Record real samples before equal-length tail padding; a shifted leading
-        # zero region is also outside coverage. Drift resampling scales both.
-        leading_sec = max(0.0, offset_sec)
-        if abs(drift_ppm) > 0.01:
-            leading_sec *= len(shifted) / max(
-                len(apply_start_offset(sig, offset_sec, sample_rate)), 1
-            )
-
-        aligned_signals[src_id] = shifted
+                drift_residual_ms = win_res_ms
+            else:
+                status = "drift_unresolved"
+                residual_ms = 999.0
+        elif status != "alignment_failed":
+            residual_ms = 999.0
         sync_metadata[src_id] = {
             "offset_sec": offset_sec,
             "drift_ppm": drift_ppm,
             "residual_ms": residual_ms,
             "status": status,
-            "valid_coverage_interval": [leading_sec, len(shifted) / sample_rate],
+            "coarse_residual_ms": coarse_residual_ms,
+            "drift_status": drift_status,
+            "drift_residual_ms": drift_residual_ms,
         }
-        max_len = max(max_len, len(shifted))
+
+    # Shift the origin of the entire meeting, including the reference. This keeps
+    # unique early speech when the selected reference began recording later.
+    origin_shift = -min(
+        float(meta["offset_sec"])
+        for meta in sync_metadata.values()
+        if meta["status"] != "alignment_failed"
+    )
+    max_len = 0
+    for src_id, sig in audio_signals.items():
+        meta = sync_metadata[src_id]
+        scale = 1.0 + float(meta["drift_ppm"]) * 1e-6
+        if not np.isfinite(scale) or scale <= 0:
+            raise ValueError("Invalid measured clock scale")
+        corrected = apply_clock_drift(sig, (1.0 / scale - 1.0) * 1e6)
+        start = max(0, round((float(meta["offset_sec"]) + origin_shift) * sample_rate))
+        aligned_signals[src_id] = np.pad(corrected, (start, 0))
+        meta.update(
+            origin_shift_sec=origin_shift,
+            timeline_offset_sec=start / sample_rate,
+            time_scale=scale,
+            coverage_confirmed=meta["status"] in {"reference", "aligned"},
+            valid_coverage_interval=[start / sample_rate, (start + len(corrected)) / sample_rate],
+        )
+        max_len = max(max_len, len(aligned_signals[src_id]))
 
     # Pad all signals to max_len so they have identical timeline
     for src_id, sig in aligned_signals.items():

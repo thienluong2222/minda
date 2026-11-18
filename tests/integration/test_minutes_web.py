@@ -242,3 +242,112 @@ def test_format_selection_persists_through_api_without_inference(
             data={"document_metadata": "{invalid json"},
         )
     assert invalid.status_code == 422
+
+
+def _create_regression_minutes(client, job_id):
+    return client.post(
+        f"/api/runs/{job_id}/template",
+        files={
+            "template": (
+                "mau.docx",
+                (TEMPLATES_DIR / "bien_ban_hop_chi_bo.docx").read_bytes(),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            )
+        },
+        data={"format_standard": "hd05_2026"},
+    )
+
+
+def test_busy_schema_has_no_partial_writes(web_client):
+    from meeting_pipeline.minutes.service import GENERATION_LOCK
+
+    client, job_id, run = web_client
+    assert _create_regression_minutes(client, job_id).status_code == 200
+    paths = [
+        run / "template/schema.json",
+        run / "minutes/facts.json",
+        run / "exports/completed.docx",
+    ]
+    before = [p.read_bytes() for p in paths]
+    fields = json.loads(paths[0].read_text())["fields"]
+    GENERATION_LOCK.acquire()
+    try:
+        response = client.post(f"/api/runs/{job_id}/template/schema", json={"fields": fields})
+    finally:
+        GENERATION_LOCK.release()
+    assert response.status_code == 503
+    assert [p.read_bytes() for p in paths] == before
+
+
+def test_transcript_edit_keeps_profile_manifest_and_zip_consistent(web_client):
+    import hashlib
+    import zipfile
+
+    from docx import Document
+
+    client, job_id, run = web_client
+    assert _create_regression_minutes(client, job_id).status_code == 200
+    rows = json.loads((run / "timeline.json").read_text())["segments"]
+    result = client.post(
+        f"/api/runs/{job_id}/edit-transcript",
+        json={"segment_index": 0, "new_text": rows[0]["text"] + "."},
+    )
+    assert result.status_code == 200
+    output = (run / "exports/completed.docx").read_bytes()
+    assert "Minutes Body" in Document(run / "exports/completed.docx").styles
+    assert abs(Document(run / "exports/completed.docx").sections[0].page_width.mm - 210) < 0.1
+    assert (
+        hashlib.sha256(output).hexdigest()
+        == json.loads((run / "minutes/manifest.json").read_text())["completed_docx_sha256"]
+    )
+    with zipfile.ZipFile(run / "exports/completed_minutes.zip") as archive:
+        assert archive.read("completed.docx") == output
+
+
+def test_rename_marks_document_stale(web_client):
+    client, job_id, run = web_client
+    assert _create_regression_minutes(client, job_id).status_code == 200
+    timeline_path = run / "timeline.json"
+    timeline = json.loads(timeline_path.read_text())
+    timeline["segments"][0].update(
+        meeting_speaker_id="speaker_001",
+        speaker_label="Minh",
+        speaker_status="identified",
+        speaker_id="person-001",
+    )
+    timeline_path.write_text(json.dumps(timeline))
+    speakers = client.get(f"/api/runs/{job_id}/speakers").json()
+    target = next(s for s in speakers if s["meeting_speaker_id"])
+    result = client.post(
+        f"/api/runs/{job_id}/rename-speaker",
+        json={"meeting_speaker_id": target["meeting_speaker_id"], "new_label": "Tên đã kiểm tra"},
+    )
+    assert result.status_code == 200
+    assert json.loads((run / "minutes/model_report.json").read_text())[
+        "stale_since_transcript_edit"
+    ]
+
+
+def test_schema_render_failure_rolls_back_schema_facts_and_audit(web_client, monkeypatch):
+    from meeting_pipeline.minutes.service import MinutesService
+
+    client, job_id, run = web_client
+    assert _create_regression_minutes(client, job_id).status_code == 200
+    paths = [
+        run / "template/schema.json",
+        run / "minutes/facts.json",
+        run / "exports/completed.docx",
+    ]
+    before = [p.read_bytes() for p in paths]
+
+    def fail(*args, **kwargs):
+        raise RuntimeError("simulated render failure")
+
+    monkeypatch.setattr(MinutesService, "_update_facts_and_re_render", fail)
+    result = client.post(
+        f"/api/runs/{job_id}/template/schema",
+        json={"fields": json.loads(paths[0].read_text())["fields"]},
+    )
+    assert result.status_code == 400
+    assert [p.read_bytes() for p in paths] == before
+    assert not (run / "template/schema_review.json").exists()

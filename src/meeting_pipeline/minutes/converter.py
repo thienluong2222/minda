@@ -20,6 +20,8 @@ from pathlib import Path
 
 import docx
 
+from meeting_pipeline.minutes.document_tools import find_document_tool
+
 logger = logging.getLogger(__name__)
 
 DOC_OLE_HEADER = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
@@ -92,7 +94,7 @@ def convert_doc_to_docx(src_doc: Path, dst_docx: Path) -> str:
     dst_docx.parent.mkdir(parents=True, exist_ok=True)
 
     # Prefer a Word-aware converter for tables, headers, fields and page setup.
-    soffice_path = shutil.which("soffice") or shutil.which("libreoffice")
+    soffice_path = find_document_tool("soffice")
     if soffice_path:
         try:
             with tempfile.TemporaryDirectory(prefix="minutes-convert-") as temp:

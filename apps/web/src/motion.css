@@ -1,0 +1,233 @@
+/* Shared motion for Minda. Keep polling updates and layout dimensions stable. */
+:root {
+  --motion-fast: 140ms;
+  --motion-base: 200ms;
+  --motion-page: 240ms;
+  --motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.route-motion {
+  min-width: 0;
+  animation: minda-enter var(--motion-page) var(--motion-ease) both;
+}
+.tab-motion,
+.notifications {
+  animation: minda-enter var(--motion-base) var(--motion-ease) both;
+}
+.wizard-step-motion {
+  --step-offset: 6px;
+  animation: minda-step var(--motion-base) var(--motion-ease) both;
+}
+.wizard-step-motion[data-direction="backward"] {
+  --step-offset: -6px;
+}
+.wizard-title h2[tabindex="-1"]:focus {
+  outline: none;
+}
+
+[data-slot="button"],
+.icon-button,
+a.stat-card,
+.sidebar nav > a,
+.workspace-tabs button,
+.segmented-control button,
+.person-choice,
+.download-link,
+.wizard-steps li,
+.wizard-steps li > span {
+  transition-property:
+    background-color, color, border-color, box-shadow, transform;
+  transition-duration: var(--motion-fast);
+  transition-timing-function: var(--motion-ease);
+}
+[data-slot="button"]:active:not(:disabled):not([aria-disabled="true"]),
+.icon-button:active {
+  transform: translateY(1px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-slot="button"]:hover:not(:disabled):not([aria-disabled="true"]) {
+    transform: translateY(-1px);
+  }
+  [data-slot="button"]:active:not(:disabled):not([aria-disabled="true"]) {
+    transform: translateY(1px);
+  }
+  a.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px #20242c0d;
+  }
+  .brand:hover .brand-symbol path {
+    animation: minda-wave 450ms var(--motion-ease) 1;
+  }
+}
+.brand-symbol path {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.brand:focus-visible .brand-symbol path {
+  animation: minda-wave 450ms var(--motion-ease) 1;
+}
+.brand .brand-symbol path:nth-child(2n) {
+  animation-delay: 40ms;
+}
+.brand .brand-symbol path:nth-child(3n) {
+  animation-delay: 80ms;
+}
+
+.minda-dialog-overlay[data-state="open"] {
+  animation: minda-fade-in var(--motion-base) var(--motion-ease) both;
+}
+.minda-dialog-overlay[data-state="closed"] {
+  animation: minda-fade-out var(--motion-fast) ease-in both;
+}
+.minda-dialog-content[data-state="open"] {
+  animation: minda-dialog-in var(--motion-base) var(--motion-ease) both;
+}
+.minda-dialog-content[data-state="closed"] {
+  animation: minda-dialog-out var(--motion-fast) ease-in both;
+}
+.confirmation-check path {
+  stroke-dasharray: 32;
+  stroke-dashoffset: 0;
+  animation: minda-check 280ms var(--motion-ease) both;
+}
+.status-succeeded {
+  animation: minda-fade-in var(--motion-base) var(--motion-ease) both;
+}
+
+.document-page-frame {
+  position: relative;
+  display: block;
+  width: calc(100% - 32px);
+  margin: 18px 16px;
+  background: #fff;
+  box-shadow: 0 5px 18px #111a2e16;
+}
+.document-page-frame .document-page {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: contain;
+  box-shadow: none;
+  opacity: 0;
+}
+.document-page-frame > a {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.document-page-frame .document-page.is-ready {
+  opacity: 1;
+  animation: minda-fade-in 180ms var(--motion-ease) both;
+}
+.document-page-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  color: #78808d;
+  font-size: 12px;
+  text-align: center;
+}
+
+@keyframes minda-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes minda-step {
+  from {
+    opacity: 0;
+    transform: translateX(var(--step-offset));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes minda-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes minda-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes minda-dialog-in {
+  from {
+    opacity: 0;
+    scale: 0.98;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes minda-dialog-out {
+  from {
+    opacity: 1;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 0.98;
+  }
+}
+@keyframes minda-wave {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  40% {
+    transform: scaleY(0.65);
+  }
+  70% {
+    transform: scaleY(1.12);
+  }
+}
+@keyframes minda-check {
+  from {
+    stroke-dashoffset: 32;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar.mobile-open {
+    animation: minda-step var(--motion-base) var(--motion-ease) both;
+    --step-offset: -8px;
+  }
+  .mobile-overlay {
+    animation: minda-fade-in var(--motion-base) var(--motion-ease) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

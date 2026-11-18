@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+import pytest
 import soundfile as sf
 
 from meeting_pipeline.adapters.phowhisper_asr import AsrResult, FakeAsrAdapter
@@ -86,7 +87,10 @@ class _OneTurnDetector:
         ]
 
 
-def test_internal_seam_drift_is_reconciled_before_fusion_and_export(tmp_path: Path) -> None:
+@pytest.mark.parametrize("fusion_mode", ["transcript", "audio"])
+def test_internal_seam_drift_is_reconciled_before_fusion_and_export(
+    tmp_path: Path, fusion_mode
+) -> None:
     sr = 16000
     wave = (0.1 * np.sin(2 * np.pi * 220 * np.arange(sr * 36) / sr)).astype(np.float32)
     path = tmp_path / "single.wav"
@@ -95,6 +99,7 @@ def test_internal_seam_drift_is_reconciled_before_fusion_and_export(tmp_path: Pa
     config.paths.data_dir = tmp_path / "data"
     config.identity["method"] = "mfcc_knn"
     config.asr.cache_enabled = False
+    config.asr.fusion_mode = fusion_mode
 
     def region(signals, vad_config, meeting_id, sample_rate):
         return [MeetingSegment(meeting_id=meeting_id, segment_id="s", start_sec=0.1, end_sec=35.9)]
@@ -129,7 +134,10 @@ def test_internal_seam_drift_is_reconciled_before_fusion_and_export(tmp_path: Pa
     assert " ".join(row["text"] for row in rows) == "mở ranh kết"
     assert len(rows) == 2 and any(row["needs_review"] for row in rows)
     assert (run / "word_boundary_audit.json").is_file()
-    assert any((run / "clips/asr_context").rglob("*.wav"))
+    if fusion_mode == "audio":
+        assert all((run / row["asr_input_artifact_id"]).is_file() for row in rows)
+    else:
+        assert any((run / "clips/asr_context").rglob("*.wav"))
     assert "asr_boundary_words_reconciled" in rows[0]["warnings"]
 
 
@@ -258,6 +266,68 @@ def test_multi_source_backend_fuses_all_sources_and_writes_provenance(tmp_path: 
     assert len(turns["turns"]) == 1
     assert segment["speech_region_id"] == "seg_0000"
     assert segment["turn_id"] == "turn_0000"
+
+
+@pytest.mark.parametrize("common_speech", [True, False])
+def test_audio_fusion_decodes_once_and_keeps_original_evidence(
+    tmp_path: Path, common_speech: bool
+) -> None:
+    sample_rate = 16000
+    lag = 39
+    rng = np.random.default_rng(180)
+    reference = np.zeros(2 * sample_rate, dtype=np.float32)
+    reference[1600:28800] = rng.normal(0, 0.12, size=27200)
+    other = np.pad(reference[:-lag], (lag, 0)) * 0.75
+    if not common_speech:
+        other[1600:28800] = rng.normal(0, 0.08, size=27200)
+    paths = [tmp_path / "phone-a.wav", tmp_path / "phone-b.wav"]
+    sf.write(paths[0], reference, sample_rate)
+    sf.write(paths[1], other, sample_rate)
+
+    config = load_config(Path("configs/default.yaml"))
+    config.paths.data_dir = tmp_path / "data"
+    config.identity["method"] = "mfcc_knn"
+    config.asr.fusion_mode = "audio"
+    config.asr.cache_enabled = False
+    asr = FakeAsrAdapter(default_result=_asr_result("xin chào bạn"))
+    sync = {
+        f"source-{number}": {
+            "status": "aligned",
+            "valid_coverage_intervals": [[0, 2]],
+            "coverage_ratio": 1,
+        }
+        for number in (1, 2)
+    }
+    run = MultiSourceFusionPipeline(
+        config,
+        asr_adapter=asr,
+        segment_extractor=_one_segment,
+        turn_detector=_OneTurnDetector(),
+    ).run("Audio fusion", paths, fusion_method="F6_LEARNED", prepared_sync=sync)
+
+    row = json.loads((run / "timeline.json").read_text())["segments"][0]
+    assert row["fusion_method"] == "AUDIO_DELAY_AND_SUM"
+    assert row["text"] == "xin chào bạn"
+    assert row["provenance"]["word_provenance"] == []
+    route = row["routing_metadata"]
+    assert route["adapter_calls"] == 1 and route["cache_hits"] == 0
+    preparation = route["audio_fusion"]
+    if common_speech:
+        assert preparation["method"] == "delay_and_sum"
+        assert len(preparation["source_weights"]) == 2
+        assert abs(preparation["secondary_lag_samples"]) == lag
+    else:
+        assert preparation["method"] == "best_mic"
+        assert preparation["fallback_reason"] == "uncertain_local_delay"
+    assert preparation["denoise_used"] == "afftdn"
+    assert row["selected_source_id"] == preparation["reference_source_id"]
+    assert len(row["original_clip_artifact_ids"]) == 2
+    assert all((run / path).is_file() for path in row["original_clip_artifact_ids"])
+    assert row["asr_input_artifact_id"] not in row["original_clip_artifact_ids"]
+    mono, rate = sf.read(run / row["asr_input_artifact_id"])
+    start, end = route["clip_interval"]
+    assert mono.shape == (round((end - start) * sample_rate),)
+    assert rate == sample_rate
 
 
 def test_two_adjacent_speakers_inside_one_vad_region_remain_distinct(tmp_path: Path) -> None:
@@ -415,7 +485,10 @@ def test_configured_p3_reaches_artifact_and_timeline(tmp_path: Path, monkeypatch
     sf.write(paths[0], signal_a, sample_rate)
     sf.write(paths[1], signal_b, sample_rate)
 
-    def fake_sync(decoded, sample_rate):
+    def fake_sync(decoded, sample_rate, **sync_config):
+        assert sync_config["max_offset_seconds"] == 120
+        assert sync_config["envelope_rate_hz"] == 100
+        assert sync_config["long_recording_step_seconds"] == 30
         del sample_rate
         return (
             decoded,

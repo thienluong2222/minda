@@ -253,5 +253,7 @@ class AdaptiveAsrRouter:
         mean_conf = top1_hypothesis.asr_features.get("mean_confidence")
         if mean_conf is not None and mean_conf < 0.70:
             return True, f"low_top1_confidence_{mean_conf:.2f}"
+        if mean_conf is None:
+            return True, "top1_confidence_unavailable"
 
         return False, None

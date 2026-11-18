@@ -26,4 +26,11 @@ test-results/
 *Ta*lie*u*tham*kha*o*
 /docs/references/
 
+/.venv-backend/
+/.venv
+/.venv-llm
+/apps/web/node_modules/
+/apps/web/dist/
+/apps/web/*.tsbuildinfo
+
 /.venv-asr-mlx/

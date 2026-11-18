@@ -1,5 +1,25 @@
 # Meeting Pipeline
 
+## Vị trí bản web mới
+
+Toàn bộ bản web user/admin nằm tại **`web_app/` trong thư mục gốc dự án**:
+
+```text
+Luận văn/
+├── src/, configs/, ...            # Checkout gốc
+└── web_app/                       # Mở thư mục này để kiểm tra bản web mới
+    ├── apps/web/                  # Frontend React
+    ├── src/meeting_backend/       # API, MongoDB, worker và OCR
+    ├── src/meeting_pipeline/      # Pipeline AI/Word dùng cho bản web
+    ├── configs/backend.yaml
+    ├── data/app/
+    └── docs/backend/
+```
+
+`web_app` giữ nhánh Git `codex/web-mongodb-upgrade` riêng. Chạy các lệnh trong
+tài liệu này **từ bên trong `web_app`**. Vị trí cũ dưới `.codex/worktrees` chỉ
+còn liên kết tương thích cho phiên làm việc; mã và dữ liệu thực nằm ở đây.
+
 Pipeline offline nhận diện người nói và chép lời cuộc họp tiếng Việt từ nhiều điện thoại,
 triển khai theo `PIPELINE_IMPLEMENTATION_SPEC.md`.
 
@@ -14,6 +34,25 @@ triển khai theo `PIPELINE_IMPLEMENTATION_SPEC.md`.
 - [Đầu ra demo](artifacts/) và [bảng tính, tệp xuất](outputs/).
 
 ## Trạng thái
+
+### Prototype web user/admin + MongoDB
+
+Bản web mới có đăng nhập/phân quyền, worker riêng, quản lý cuộc họp/mẫu/giọng,
+rà soát transcript và biên bản, preview DOCX, lịch sử, quản trị và backup/restore.
+Hỗ trợ DOC/DOCX, PDF văn bản, PDF scan và ảnh; PDF/ảnh qua bước duyệt trước khi dùng.
+
+```bash
+npm --prefix apps/web ci
+npm --prefix apps/web run build
+.venv-backend/bin/python scripts/backend/run_local.py
+```
+
+Mở `http://127.0.0.1:8010` và tạo tài khoản admin lần đầu. Xem
+[báo cáo hướng dẫn mở web và các chức năng người dùng/admin](docs/BAO_CAO_HUONG_DAN_SU_DUNG_WEB_MOI_2026-10-17.md),
+[cài đặt và nhập dữ liệu cũ](docs/backend/QUICKSTART.md),
+[bố trí backend](docs/backend/ARCHITECTURE.md) và
+[phạm vi kiểm thử](docs/backend/VALIDATION_2026-10-17.md).
+Demo cũ ở cổng 8000 có entry point độc lập bên dưới.
  
 CLI và web demo dùng backend dung hợp transcript đa nguồn và chạy end-to-end bằng model thật.
  
@@ -86,7 +125,8 @@ Demo hỗ trợ Qwen3-4B 4-bit qua MLX, embedding multilingual-e5-small và FCM.
 Có chế độ chi tiết giữ đề mục mẫu, tổng quát sinh chủ đề trong vùng nội dung,
 và tạo lại DOCX từ transcript hiện có. Xem
 [hướng dẫn cài đặt, sử dụng và giới hạn](docs/LLM_FCM_MINUTES.md).
-PDF/scan và fine-tuning chưa thuộc đợt tích hợp này.
+PDF/scan đã được bổ sung ở **bản web MongoDB mới**; demo cũ giữ luồng Word.
+Fine-tuning chưa thực hiện trong đợt này.
 
 DOC/DOCX có thể xuất DOCX theo **Nghị định 30/2020/NĐ-CP** hoặc
 **Hướng dẫn 05-HD/VPTW ngày 27/5/2026**. Có thể áp dụng lại thể thức cho

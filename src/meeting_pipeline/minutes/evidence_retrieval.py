@@ -43,6 +43,10 @@ class IndexedTurn:
     speaker_status: str = ""
     speaker_count: int = 1
     overlap_group_id: str | None = None
+    clip_artifact_id: str | None = None
+    clock_id: str | None = None
+    session_id: str | None = None
+    speech_region_id: str | None = None
 
 
 class TurnSearchIndex:
@@ -110,31 +114,39 @@ def load_indexed_turns(run_dir: Path) -> list[IndexedTurn]:
 
     data = json.loads(timeline_path.read_text(encoding="utf-8"))
     segments = data.get("segments") or []
+    if data.get("timing_complete") is False or any(
+        row.get("time_status") == "unresolved" or row.get("timing_complete") is False
+        for row in segments
+    ):
+        raise ValueError("Timeline clocks need review before generating meeting minutes")
 
     turns: list[IndexedTurn] = []
     for s in segments:
         turn_id = s.get("segment_id") or s.get("turn_id") or f"turn_{len(turns)}"
         text = str(s.get("text") or "").strip()
+        asr_status = str(s.get("asr_status") or "transcribed")
+        if s.get("excluded_from_minutes") or asr_status == "excluded":
+            # Rule extractors and retrieval also consume this list. Removing
+            # only writer eligibility would still leak excluded source text.
+            text = ""
+            asr_status = "excluded"
+        elif s.get("user_edited") and text:
+            asr_status = "user_edited"
         tokens = _tokenize(text)
 
         source_id = s.get("selected_source_id") or "source-1"
 
-        # Clip resolution
-        clip_rel = None
-        evidences = s.get("source_evidence") or []
-        for ev in evidences:
-            if ev.get("source_id") == source_id and ev.get("evidence_clip_artifact_id"):
-                clip_rel = ev.get("evidence_clip_artifact_id")
-                break
-        if not clip_rel and s.get("clip_path"):
-            clip_rel = s.get("clip_path")
-
-        # Verify real clip file
-        clip_path_str = None
-        if clip_rel:
-            full_clip = run_dir / clip_rel
-            if full_clip.is_file():
-                clip_path_str = str(clip_rel)
+        # Prefer the resolved artifact from the backend. Legacy evidence paths
+        # are retained only when they resolve to a real file.
+        candidates = [s.get("clip_path"), s.get("evidence_clip_artifact_id")]
+        candidates.extend(
+            ev.get("evidence_clip_artifact_id")
+            for ev in s.get("source_evidence") or []
+            if ev.get("source_id") == source_id
+        )
+        clip_path_str = next(
+            (str(path) for path in candidates if path and (run_dir / path).is_file()), None
+        )
 
         conf = s.get("transcript_confidence")
         if conf is not None:
@@ -154,13 +166,17 @@ def load_indexed_turns(run_dir: Path) -> list[IndexedTurn]:
                 tokens=tokens,
                 source_id=source_id,
                 clip_path=clip_path_str,
-                asr_status=str(s.get("asr_status") or "transcribed"),
+                asr_status=asr_status,
                 needs_review=bool(s.get("needs_review")),
                 confidence=conf,
                 meeting_speaker_id=s.get("meeting_speaker_id"),
                 speaker_status=str(s.get("speaker_status") or ""),
                 speaker_count=int(s.get("speaker_count") or 1),
                 overlap_group_id=s.get("overlap_group_id"),
+                clip_artifact_id=s.get("clip_artifact_id"),
+                clock_id=s.get("clock_id"),
+                session_id=s.get("session_id"),
+                speech_region_id=s.get("speech_region_id"),
             )
         )
 
@@ -193,6 +209,7 @@ def retrieve_evidence_for_field(
                 start_sec=turn.start_sec,
                 end_sec=turn.end_sec,
                 clip_path=turn.clip_path,
+                clip_artifact_id=turn.clip_artifact_id,
                 source_kind="transcript",
                 text_snippet=turn.text[:200],
                 confidence=round(score, 4),

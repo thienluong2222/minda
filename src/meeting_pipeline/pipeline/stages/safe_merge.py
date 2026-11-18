@@ -66,6 +66,7 @@ def safe_merge_speaker_turns(
     max_merge_gap_sec: float = 0.6,
     max_core_sec: float = 22.0,
     enabled: bool = True,
+    hard_boundaries: list[float] | None = None,
 ) -> list[MergedSpeakerTurn]:
     """Group consecutive single-speaker turns belonging to the exact same cluster.
 
@@ -235,8 +236,17 @@ def safe_merge_speaker_turns(
         )
         gap = turn.start_sec - last_turn.end_sec
         new_total_duration = turn.end_sec - current_group[0].start_sec
+        crosses_boundary = any(
+            current_group[0].start_sec + 1e-6 < boundary < turn.end_sec - 1e-6
+            for boundary in hard_boundaries or []
+        )
 
-        if same_cluster and 0.0 <= gap <= max_merge_gap_sec and new_total_duration <= max_core_sec:
+        if (
+            same_cluster
+            and 0.0 <= gap <= max_merge_gap_sec
+            and new_total_duration <= max_core_sec
+            and not crosses_boundary
+        ):
             current_group.append(turn)
         else:
             flush_group()

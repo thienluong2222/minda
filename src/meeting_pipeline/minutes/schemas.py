@@ -36,6 +36,7 @@ class PlaceholderType(StrEnum):
     TEXT_PLACEHOLDER = "text_placeholder"
     SIGNATURE_BLOCK = "signature_block"
     REPEATED_ROW = "repeated_row"
+    FIXED_TEXT = "fixed_text"
 
 
 class SemanticFieldType(StrEnum):
@@ -112,6 +113,7 @@ class DocGraph(BaseModel):
     created_at: str = Field(default_factory=get_iso_timestamp)
     blocks: list[DocBlock] = Field(default_factory=list)
     unmapped_warnings: list[str] = Field(default_factory=list)
+    anchor_aliases: dict[str, str] = Field(default_factory=dict)
 
     @property
     def all_anchors(self) -> list[CandidateAnchor]:
@@ -163,6 +165,7 @@ class EvidenceRef(BaseModel):
     start_sec: float = 0.0
     end_sec: float = 0.0
     clip_path: str | None = None
+    clip_artifact_id: str | None = None
     source_kind: Literal["transcript", "meeting_metadata", "user_edit", "computed"] = "transcript"
     text_snippet: str = ""
     confidence: float | None = None
@@ -177,6 +180,11 @@ class FactStatus(StrEnum):
     NEEDS_REVIEW = "needs_review"
 
 
+class PreviousFactEdit(BaseModel):
+    value: Any
+    minutes_version_id: str
+
+
 class MeetingFact(BaseModel):
     """An extracted, validated factual value for a template field."""
 
@@ -188,6 +196,7 @@ class MeetingFact(BaseModel):
     reason: str | None = None
     transcript_revision: int = 1
     user_edited: bool = False
+    previous_edit: PreviousFactEdit | None = None
     updated_at: str = Field(default_factory=get_iso_timestamp)
 
 

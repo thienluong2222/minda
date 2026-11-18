@@ -26,11 +26,10 @@ from meeting_pipeline.domain.speaker_identity import person_identity_key
 from meeting_pipeline.minutes.evidence_retrieval import load_indexed_turns
 from meeting_pipeline.minutes.fact_extractor import M2RuleFactExtractor
 from meeting_pipeline.minutes.model_runtime import ModelRuntimeError, model_status
-from meeting_pipeline.minutes.renderer import render_completed_document
 from meeting_pipeline.minutes.schema_mapper import load_schema
-from meeting_pipeline.minutes.schemas import DocGraph
 from meeting_pipeline.minutes.service import MinutesService
 from meeting_pipeline.minutes.text_engine import MinutesOptions
+from meeting_pipeline.minutes.transactions import minutes_transaction
 from meeting_pipeline.pipeline.multi_source_fusion import MultiSourceFusionPipeline
 
 Job = dict[str, Any]
@@ -453,6 +452,11 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
     store = DemoJobs(config)
     app = FastAPI(title="Demo nhận diện người nói và dung hợp transcript")
     app.state.demo_jobs = store
+
+    @app.exception_handler(ModelRuntimeError)
+    async def busy_handler(_request: Any, exc: ModelRuntimeError) -> JSONResponse:
+        return JSONResponse({"detail": str(exc)}, status_code=503)
+
     app.mount("/static", StaticFiles(directory=WEB_DIR / "static"), name="static")
 
     @app.get("/", response_class=HTMLResponse)
@@ -569,76 +573,82 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
             raise HTTPException(status_code=400, detail="Nhãn quá dài (tối đa 100 ký tự)")
         clean_label = re.sub(r"[\r\n\t]+", " ", new_label).strip()
 
-        timeline_path = run_dir / "timeline.json"
-        timeline_data = _read_json(timeline_path)
-        segments = timeline_data.get("segments") or []
-        if not segments:
-            raise HTTPException(status_code=404, detail="Không tìm thấy timeline")
+        with minutes_transaction(run_dir):
+            timeline_path = run_dir / "timeline.json"
+            timeline_data = _read_json(timeline_path)
+            segments = timeline_data.get("segments") or []
+            if not segments:
+                raise HTTPException(status_code=404, detail="Không tìm thấy timeline")
 
-        target = next(
-            (r for r in segments if r.get("meeting_speaker_id") == meeting_speaker_id), None
-        )
-        target_key = _row_person_key(target) if target else None
-        related_ids = {
-            r.get("meeting_speaker_id")
-            for r in segments
-            if r.get("meeting_speaker_id")
-            and target_key is not None
-            and _row_person_key(r) == target_key
-        }
+            target = next(
+                (r for r in segments if r.get("meeting_speaker_id") == meeting_speaker_id), None
+            )
+            target_key = _row_person_key(target) if target else None
+            related_ids = {
+                r.get("meeting_speaker_id")
+                for r in segments
+                if r.get("meeting_speaker_id")
+                and target_key is not None
+                and _row_person_key(r) == target_key
+            }
 
-        matched = False
-        old_label = ""
-        for seg in segments:
-            if seg.get("meeting_speaker_id") in related_ids:
-                if not old_label:
-                    old_label = str(seg.get("speaker_label", ""))
-                seg["speaker_label"] = clean_label
-                matched = True
+            matched = False
+            old_label = ""
+            for seg in segments:
+                if seg.get("meeting_speaker_id") in related_ids:
+                    if not old_label:
+                        old_label = str(seg.get("speaker_label", ""))
+                    seg["speaker_label"] = clean_label
+                    matched = True
 
-        if not matched:
-            raise HTTPException(
-                status_code=404, detail=f"Không tìm thấy speaker {meeting_speaker_id}"
+            if not matched:
+                raise HTTPException(
+                    status_code=404, detail=f"Không tìm thấy speaker {meeting_speaker_id}"
+                )
+
+            timeline_data["segments"] = segments
+            _write_json(timeline_path, timeline_data)
+
+            labels_path = run_dir / "speaker_labels.json"
+            audit_data = _read_json(labels_path)
+            history = audit_data.get("history") or []
+            labels_map = audit_data.get("labels") or {}
+            for related_id in related_ids:
+                if related_id:
+                    labels_map[related_id] = clean_label
+            history.append(
+                {
+                    "meeting_speaker_id": meeting_speaker_id,
+                    "meeting_speaker_ids": sorted(str(i) for i in related_ids if i),
+                    "old_label": old_label,
+                    "new_label": clean_label,
+                    "updated_at": _now(),
+                }
+            )
+            _write_json(
+                labels_path,
+                {
+                    "schema_version": "2.0",
+                    "updated_at": _now(),
+                    "labels": labels_map,
+                    "history": history,
+                },
             )
 
-        timeline_data["segments"] = segments
-        _write_json(timeline_path, timeline_data)
+            MultiSourceFusionPipeline._write_exports(run_dir, segments)
+            if (run_dir / "minutes/facts.json").is_file():
+                report = _read_json(run_dir / "minutes/model_report.json")
+                report["stale_since_transcript_edit"] = True
+                report["stale_reason"] = "Tên người nói đã thay đổi. Hãy tạo lại biên bản."
+                _write_json(run_dir / "minutes/model_report.json", report)
 
-        labels_path = run_dir / "speaker_labels.json"
-        audit_data = _read_json(labels_path)
-        history = audit_data.get("history") or []
-        labels_map = audit_data.get("labels") or {}
-        for related_id in related_ids:
-            if related_id:
-                labels_map[related_id] = clean_label
-        history.append(
-            {
+            return {
+                "status": "ok",
+                "job_id": job_id,
                 "meeting_speaker_id": meeting_speaker_id,
-                "meeting_speaker_ids": sorted(str(i) for i in related_ids if i),
                 "old_label": old_label,
                 "new_label": clean_label,
-                "updated_at": _now(),
             }
-        )
-        _write_json(
-            labels_path,
-            {
-                "schema_version": "2.0",
-                "updated_at": _now(),
-                "labels": labels_map,
-                "history": history,
-            },
-        )
-
-        MultiSourceFusionPipeline._write_exports(run_dir, segments)
-
-        return {
-            "status": "ok",
-            "job_id": job_id,
-            "meeting_speaker_id": meeting_speaker_id,
-            "old_label": old_label,
-            "new_label": clean_label,
-        }
 
     @app.get("/api/runs/{job_id}/timeline")
     def timeline(job_id: str) -> FileResponse:
@@ -781,6 +791,8 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
         try:
             minutes_svc.update_schema_and_re_extract(run_dir, fields)
             return {"status": "ok", "message": "Đã cập nhật schema và trích xuất lại fact"}
+        except ModelRuntimeError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
         except Exception as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -801,6 +813,8 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
                 "status": "ok",
                 "message": "Đã cập nhật fact và điền lại Word mà không gọi ASR",
             }
+        except ModelRuntimeError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
         except Exception as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -820,62 +834,60 @@ def create_app(config: PipelineConfig | None = None) -> FastAPI:
         except ValueError as exc:
             raise HTTPException(status_code=400, detail="segment_index phải là số nguyên") from exc
 
-        timeline_path = run_dir / "timeline.json"
-        timeline_data = _read_json(timeline_path)
-        segments = timeline_data.get("segments") or []
-        if not (0 <= seg_idx < len(segments)):
-            raise HTTPException(status_code=404, detail="Không tìm thấy đoạn hội thoại")
+        with minutes_transaction(run_dir):
+            timeline_path = run_dir / "timeline.json"
+            timeline_data = _read_json(timeline_path)
+            segments = timeline_data.get("segments") or []
+            if not (0 <= seg_idx < len(segments)):
+                raise HTTPException(status_code=404, detail="Không tìm thấy đoạn hội thoại")
 
-        old_text = segments[seg_idx].get("text", "")
-        segments[seg_idx]["text"] = new_text
-        segments[seg_idx]["user_edited"] = True
-        timeline_data["segments"] = segments
-        _write_json(timeline_path, timeline_data)
+            old_text = segments[seg_idx].get("text", "")
+            segments[seg_idx]["text"] = new_text
+            segments[seg_idx]["user_edited"] = True
+            timeline_data["segments"] = segments
+            _write_json(timeline_path, timeline_data)
 
-        # Update exports (json, csv, txt)
-        MultiSourceFusionPipeline._write_exports(run_dir, segments)
+            # Update exports (json, csv, txt)
+            MultiSourceFusionPipeline._write_exports(run_dir, segments)
 
-        # If template minutes exist, re-extract facts and re-render without calling ASR
-        schema_path = run_dir / "template" / "schema.json"
-        doc_graph_path = run_dir / "template" / "doc_graph.json"
-        normalized_docx = run_dir / "template" / "normalized.docx"
-        completed_docx = run_dir / "exports" / "completed.docx"
-        configuration = _read_json(run_dir / "minutes/configuration.json")
-        if configuration.get("use_model"):
-            report = _read_json(run_dir / "minutes/model_report.json")
-            report["stale_since_transcript_edit"] = True
-            _write_json(run_dir / "minutes/model_report.json", report)
-        elif schema_path.is_file() and doc_graph_path.is_file() and normalized_docx.is_file():
-            schema = load_schema(schema_path)
-            turns = load_indexed_turns(run_dir)
-            extractor = M2RuleFactExtractor()
-            facts = extractor.extract_facts(
-                schema=schema,
-                turns=turns,
-                meeting_metadata={"meeting_name": job.get("meeting_name", ""), "job_id": job_id},
-                run_id=run_dir.name,
-            )
-            minutes_dir = run_dir / "minutes"
-            _write_json(minutes_dir / "facts.json", [f.model_dump() for f in facts])
+            # If template minutes exist, re-extract facts and re-render without calling ASR
+            schema_path = run_dir / "template" / "schema.json"
+            doc_graph_path = run_dir / "template" / "doc_graph.json"
+            normalized_docx = run_dir / "template" / "normalized.docx"
+            configuration = _read_json(run_dir / "minutes/configuration.json")
+            if configuration.get("use_model"):
+                report = _read_json(run_dir / "minutes/model_report.json")
+                report["stale_since_transcript_edit"] = True
+                _write_json(run_dir / "minutes/model_report.json", report)
+            elif schema_path.is_file() and doc_graph_path.is_file() and normalized_docx.is_file():
+                schema = load_schema(schema_path)
+                turns = load_indexed_turns(run_dir)
+                extractor = M2RuleFactExtractor()
+                facts = extractor.extract_facts(
+                    schema=schema,
+                    turns=turns,
+                    meeting_metadata={
+                        "meeting_name": job.get("meeting_name", ""),
+                        "job_id": job_id,
+                    },
+                    run_id=run_dir.name,
+                )
+                current: list[dict[str, Any]] = []
+                facts_path = run_dir / "minutes/facts.json"
+                if facts_path.is_file():
+                    current = json.loads(facts_path.read_text())
+                edited = {f["field_id"]: f for f in current if f.get("user_edited")}
+                MinutesService()._update_facts_and_re_render(
+                    run_dir, [edited.get(f.field_id, f.model_dump()) for f in facts], None, False
+                )
 
-            doc_graph = DocGraph.model_validate(
-                json.loads(doc_graph_path.read_text(encoding="utf-8"))
-            )
-            render_completed_document(
-                normalized_docx_path=normalized_docx,
-                output_docx_path=completed_docx,
-                doc_graph=doc_graph,
-                schema=schema,
-                facts=facts,
-            )
-
-        return {
-            "status": "ok",
-            "job_id": job_id,
-            "segment_index": seg_idx,
-            "old_text": old_text,
-            "new_text": new_text,
-        }
+            return {
+                "status": "ok",
+                "job_id": job_id,
+                "segment_index": seg_idx,
+                "old_text": old_text,
+                "new_text": new_text,
+            }
 
     @app.get("/api/runs/{job_id}/minutes/download")
     def download_minutes(job_id: str, format: str = "docx") -> FileResponse:

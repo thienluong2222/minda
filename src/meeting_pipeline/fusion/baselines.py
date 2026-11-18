@@ -236,6 +236,7 @@ def fuse_f5_rule_weighted_corrected(
     decisions: list[dict[str, Any]] = []
 
     best_source_id: str | None = None
+    pending_deletion_review = False
     if source_hypotheses:
         transcribed_sources = {
             sid: hyp for sid, hyp in source_hypotheses.items() if hyp.asr_status == "transcribed"
@@ -245,6 +246,32 @@ def fuse_f5_rule_weighted_corrected(
                 transcribed_sources.keys(),
                 key=lambda s: transcribed_sources[s].transcript_quality_score,
             )
+            explicitly_unmeasured = all(
+                "mean_confidence" in hyp.asr_features
+                and hyp.asr_features["mean_confidence"] is None
+                and not any(word.asr_confidence is not None for word in hyp.words)
+                for hyp in transcribed_sources.values()
+            )
+            if explicitly_unmeasured:
+                # Multiple microphones share one recognizer and can share errors.
+                # Acoustic/consensus heuristics cannot justify lexical substitution
+                # in place of measured recognition confidence. Keep a complete
+                # source sentence; expose disagreement for review instead.
+                best = transcribed_sources[best_source_id]
+                review = len(transcribed_sources) < 2 or len(
+                    {hyp.text for hyp in transcribed_sources.values()}
+                ) > 1
+                return best.text, [
+                    {
+                        "word": token,
+                        "confidence": 0.5,
+                        "supporting_sources": [best_source_id],
+                        "representative_source_id": best_source_id,
+                        "needs_review": review,
+                        "decision_reason": "primary_source_without_measured_confidence",
+                    }
+                    for token in best.text.split()
+                ]
 
     for b in bins:
         weighted_votes: dict[str, float] = {}
@@ -280,7 +307,9 @@ def fuse_f5_rule_weighted_corrected(
         best_src_token = b.candidates.get(b_best_src, EPSILON_TOKEN)
 
         winner_token = candidate_winner
-        needs_review = False
+        # Disagreement matters even when the primary source wins. Vote share
+        # measures consensus, not the probability that speech is correct.
+        needs_review = len(weighted_votes) > 1 or len(eligible_sources) < 2
         # If candidate_winner disagrees with best source, require strong consensus
         if best_src_token in weighted_votes and candidate_winner != best_src_token:
             best_vote = weighted_votes.get(best_src_token, 0.0)
@@ -331,9 +360,17 @@ def fuse_f5_rule_weighted_corrected(
                     "confidence": round(conf, 3),
                     "supporting_sources": source_support.get(winner_token, [rep_src]),
                     "representative_source_id": rep_src,
-                    "needs_review": needs_review or (winner_token != candidate_winner),
+                    "needs_review": needs_review
+                    or pending_deletion_review
+                    or (winner_token != candidate_winner),
                 }
             )
+            pending_deletion_review = False
+        elif needs_review:
+            # A deleted negation or number must still flag the visible output.
+            pending_deletion_review = True
+            if decisions:
+                decisions[-1]["needs_review"] = True
 
     return " ".join(chosen_words), decisions
 

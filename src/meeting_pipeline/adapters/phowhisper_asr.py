@@ -17,7 +17,7 @@ from meeting_pipeline.config import AsrConfig
 from meeting_pipeline.domain.transcription import AsrChunk, ChunkTranscript, TimedWord
 
 logger = logging.getLogger(__name__)
-ASR_DECODING_POLICY_VERSION = "sampling_retry_v1"
+ASR_DECODING_POLICY_VERSION = "deterministic_beam_retry_v2"
 
 
 class AsrResult(BaseModel):
@@ -185,6 +185,8 @@ class PhoWhisperAsrAdapter(BaseAsrAdapter):
         issues: list[str] = []
 
         runtime = str(getattr(pipe, "device", "cpu"))
+        # This MLX bridge implements one greedy window, not HF beam search.
+        # Repeating it with num_beams=3 would decode the identical request twice.
         attempts = 1 if runtime == "mlx" else self.config.max_decode_attempts
         for attempt in range(attempts):
             decoding = self._decoding_settings(attempt, max_tokens)
@@ -233,6 +235,9 @@ class PhoWhisperAsrAdapter(BaseAsrAdapter):
             for candidate in raw_candidates
         )
         if self.config.runtime == "auto" and str(getattr(pipe, "device", "cpu")) != "cpu":
+            logger.warning(
+                "Accelerated ASR failed quality checks; retrying the same checkpoint on CPU"
+            )
             if self._cpu_fallback is None:
                 self._cpu_fallback = PhoWhisperAsrAdapter(
                     self.config.model_copy(update={"runtime": "cpu"}), self.cache_dir
@@ -261,14 +266,12 @@ class PhoWhisperAsrAdapter(BaseAsrAdapter):
             "language": self.config.language,
             "task": "transcribe",
             "max_new_tokens": max_tokens,
+            "do_sample": False,
         }
         if attempt:
             settings.update(
                 {
-                    "do_sample": True,
-                    "temperature": 0.3,
-                    "no_repeat_ngram_size": 3,
-                    "repetition_penalty": 1.15,
+                    "num_beams": 3,
                 }
             )
         return settings

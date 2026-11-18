@@ -1,0 +1,15 @@
+# Dedicated application configuration. Environment MEETING_APP_* overrides this file.
+mongo_uri: mongodb://127.0.0.1:27017
+mongo_database: meeting_app_dev
+data_dir: data/app
+pipeline_config: configs/default.yaml
+model_cache_dir: data/model_cache
+web_dist: apps/web/dist
+session_hours: 24
+cookie_secure: false
+max_upload_bytes: 1000000000
+max_sources: 8
+lease_seconds: 90
+allowed_origins:
+  - http://127.0.0.1:5173
+  - http://localhost:5173
