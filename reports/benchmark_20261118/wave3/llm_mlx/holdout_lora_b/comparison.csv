@@ -1,0 +1,4 @@
+config,runtime,event_f1,relation_f1,oracle_relation_f1,state_exact,state_correct,case_median_sec
+Qwen3-4B-Instruct-2507 (MLX 4-bit Base),MLX / Apple M4,0.6915,0.0828,0.2708,0.119,5,20.67
+Qwen3 + LoRA B (Colab NF4 L4 reference),NF4 / NVIDIA L4,0.8227,0.4874,0.5446,0.381,16,49.75
+"Qwen3 + LoRA B (Local MLX 4-bit, configs/minutes.yaml)",MLX / Apple M4,0.8148,0.4467,0.4713,0.3333,14,9.44

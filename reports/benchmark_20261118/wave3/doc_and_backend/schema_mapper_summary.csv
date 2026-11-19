@@ -1,0 +1,4 @@
+template,builtin_m1_status,builtin_m1_check_sec,m0_fields,m0_recall,m0_needs_review,qwen3_mlx_schema_sec,qwen3_mlx_mapped_count,qwen3_mlx_recall
+bien_ban_hop_chi_bo.docx,not_run,0.0034,26,0.4737,3,33.415,26,0.7368
+mau_bien_ban_hop_chung.doc,not_run,0.0006,38,0.8947,3,38.852,37,1.0
+bien_ban_ban_giao_thiet_bi.docx,not_run,0.0007,24,,7,,,

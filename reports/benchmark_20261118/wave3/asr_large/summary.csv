@@ -1,0 +1,7 @@
+label,samples,audio_sec,wall_sec,rtf,corpus_wer,corpus_cer,non_transcribed,mean_word_confidence,confidence_coverage
+phowhisper_large_mlx_manifest136,136,479.82,657.68,1.3707,0.0768,0.0456,0,0.9822,1.0
+phowhisper_large_mlx_vivos563,563,1982.21,2755.66,1.3902,0.0473,0.0227,1,0.9894,0.9982
+whisper_turbo_mlx_manifest136,136,479.82,494.58,1.0308,0.2103,0.1454,0,0.9017,1.0
+whisper_turbo_mlx_vivos563,563,1982.21,2020.27,1.0192,0.1344,0.0799,1,0.9333,0.9982
+wav2vec2_vi_cpu_manifest136,136,479.82,14.54,0.0303,0.1752,0.083,0,,0.0
+wav2vec2_vi_cpu_vivos563,563,1982.21,61.49,0.031,0.1061,0.0423,0,,0.0

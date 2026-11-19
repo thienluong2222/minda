@@ -1,0 +1,173 @@
+{
+  "benchmark": "wave1_sync_and_timeline",
+  "elapsed_sec": 6.8,
+  "peak_rss_mb": 1077.02,
+  "short_24_summary": [
+    {
+      "suite": "sim_short_24",
+      "mode": "full_sync",
+      "pairs": 48,
+      "offset_mae_ms": 1.04,
+      "offset_median_ms": 0.0,
+      "offset_p95_ms": 10.0,
+      "drift_mae_ppm": 0.0,
+      "unresolved_rate": 0.0
+    },
+    {
+      "suite": "sim_short_24",
+      "mode": "offset_only",
+      "pairs": 48,
+      "offset_mae_ms": 1.04,
+      "offset_median_ms": 0.0,
+      "offset_p95_ms": 10.0,
+      "drift_mae_ppm": 0.0,
+      "unresolved_rate": 0.0
+    }
+  ],
+  "long_low_drift_12_summary": [
+    {
+      "suite": "vivos_long_low_drift_12",
+      "mode": "full_sync",
+      "pairs": 24,
+      "offset_mae_ms": 2.5,
+      "offset_median_ms": 0.0,
+      "offset_p95_ms": 10.0,
+      "drift_mae_ppm": 59.0,
+      "unresolved_rate": 0.0
+    },
+    {
+      "suite": "vivos_long_low_drift_12",
+      "mode": "no_sync",
+      "pairs": 24,
+      "offset_mae_ms": 6768.75,
+      "offset_median_ms": 5700.0,
+      "offset_p95_ms": 15305.0,
+      "drift_mae_ppm": 64.81,
+      "unresolved_rate": 0.0
+    },
+    {
+      "suite": "vivos_long_low_drift_12",
+      "mode": "offset_only",
+      "pairs": 24,
+      "offset_mae_ms": 2.5,
+      "offset_median_ms": 0.0,
+      "offset_p95_ms": 10.0,
+      "drift_mae_ppm": 64.81,
+      "unresolved_rate": 0.0
+    }
+  ],
+  "high_drift_6_summary": [
+    {
+      "suite": "vivos_high_drift_6",
+      "mode": "full_sync",
+      "pairs": 6,
+      "offset_mae_ms": 33.33,
+      "offset_median_ms": 30.0,
+      "offset_p95_ms": 50.0,
+      "drift_mae_ppm": 18.48,
+      "unresolved_rate": 0.0
+    },
+    {
+      "suite": "vivos_high_drift_6",
+      "mode": "offset_only",
+      "pairs": 6,
+      "offset_mae_ms": 33.33,
+      "offset_median_ms": 30.0,
+      "offset_p95_ms": 50.0,
+      "drift_mae_ppm": 711.67,
+      "unresolved_rate": 0.0
+    }
+  ],
+  "pause_resume_summary": {
+    "shared_acoustics_22db": {
+      "cases": 12,
+      "multi_span_detection_rate": 1.0,
+      "timing_complete_rate": 0.1667,
+      "naive_span2_mae_ms": 34041.67,
+      "timeline_span1_mae_ms": 0.01,
+      "timeline_span2_mae_ms": 0.04
+    },
+    "cross_room_rir": {
+      "cases": 12,
+      "multi_span_detection_rate": 0.0,
+      "timing_complete_rate": 0.0833,
+      "naive_span2_mae_ms": 32461.67,
+      "timeline_span1_mae_ms": 5208.2,
+      "timeline_span2_mae_ms": 19583.46
+    }
+  },
+  "libriwasn_4mic": [
+    {
+      "session": "overlap_ratio_20.0_sil0.1_1.0_session4_actual20.0",
+      "device": "Nexus",
+      "reference": "Soundcard",
+      "offset_sec": 0.0,
+      "drift_ppm": 0.0,
+      "residual_ms": 5.0,
+      "drift_status": "aligned",
+      "env_corr_before": 0.5971,
+      "env_corr_after": 0.5971,
+      "seconds": 0.04
+    },
+    {
+      "session": "overlap_ratio_20.0_sil0.1_1.0_session4_actual20.0",
+      "device": "Pixel6a",
+      "reference": "Soundcard",
+      "offset_sec": 0.0,
+      "drift_ppm": 0.0,
+      "residual_ms": 5.0,
+      "drift_status": "aligned",
+      "env_corr_before": 0.8699,
+      "env_corr_after": 0.8699,
+      "seconds": 0.04
+    },
+    {
+      "session": "overlap_ratio_20.0_sil0.1_1.0_session4_actual20.0",
+      "device": "Pixel7",
+      "reference": "Soundcard",
+      "offset_sec": 0.0,
+      "drift_ppm": 0.0,
+      "residual_ms": 5.0,
+      "drift_status": "aligned",
+      "env_corr_before": 0.644,
+      "env_corr_after": 0.644,
+      "seconds": 0.04
+    },
+    {
+      "session": "overlap_ratio_20.0_sil0.1_1.0_session5_actual19.6",
+      "device": "Nexus",
+      "reference": "Soundcard",
+      "offset_sec": 0.0,
+      "drift_ppm": 0.0,
+      "residual_ms": 5.0,
+      "drift_status": "aligned",
+      "env_corr_before": 0.6404,
+      "env_corr_after": 0.6404,
+      "seconds": 0.04
+    },
+    {
+      "session": "overlap_ratio_20.0_sil0.1_1.0_session5_actual19.6",
+      "device": "Pixel6a",
+      "reference": "Soundcard",
+      "offset_sec": 0.0,
+      "drift_ppm": 0.0,
+      "residual_ms": 5.0,
+      "drift_status": "aligned",
+      "env_corr_before": 0.8971,
+      "env_corr_after": 0.8971,
+      "seconds": 0.04
+    },
+    {
+      "session": "overlap_ratio_20.0_sil0.1_1.0_session5_actual19.6",
+      "device": "Pixel7",
+      "reference": "Soundcard",
+      "offset_sec": 0.0,
+      "drift_ppm": 0.0,
+      "residual_ms": 5.0,
+      "drift_status": "aligned",
+      "env_corr_before": 0.6971,
+      "env_corr_after": 0.6971,
+      "seconds": 0.04
+    }
+  ]
+}

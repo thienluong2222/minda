@@ -1,0 +1,217 @@
+{
+  "benchmark": "wave2_core_e2e_30_meetings",
+  "elapsed_sec": 940.09,
+  "peak_rss_mb": 569.77,
+  "summary": [
+    {
+      "config": "C1_legacy_ecapa_transcript_f5",
+      "subset": "all_30",
+      "meetings": 30,
+      "mean_pairwise_f1": 0.723,
+      "mean_speaker_count_error": 0.733,
+      "corpus_wer": 0.1731,
+      "corpus_cer": 0.1124,
+      "mean_wall_sec": 17.765
+    },
+    {
+      "config": "C1_legacy_ecapa_transcript_f5",
+      "subset": "easy_10",
+      "meetings": 10,
+      "mean_pairwise_f1": 0.7524,
+      "mean_speaker_count_error": 0.7,
+      "corpus_wer": 0.0757,
+      "corpus_cer": 0.0371,
+      "mean_wall_sec": 15.887
+    },
+    {
+      "config": "C1_legacy_ecapa_transcript_f5",
+      "subset": "moderate_10",
+      "meetings": 10,
+      "mean_pairwise_f1": 0.8167,
+      "mean_speaker_count_error": 0.9,
+      "corpus_wer": 0.1152,
+      "corpus_cer": 0.0764,
+      "mean_wall_sec": 16.525
+    },
+    {
+      "config": "C1_legacy_ecapa_transcript_f5",
+      "subset": "stress_10",
+      "meetings": 10,
+      "mean_pairwise_f1": 0.6,
+      "mean_speaker_count_error": 0.6,
+      "corpus_wer": 0.3333,
+      "corpus_cer": 0.2305,
+      "mean_wall_sec": 20.882
+    },
+    {
+      "config": "C1_legacy_ecapa_transcript_f5",
+      "subset": "1mic_10",
+      "meetings": 12,
+      "mean_pairwise_f1": 0.8056,
+      "mean_speaker_count_error": 0.583,
+      "corpus_wer": 0.1768,
+      "corpus_cer": 0.1163,
+      "mean_wall_sec": 11.112
+    },
+    {
+      "config": "C1_legacy_ecapa_transcript_f5",
+      "subset": "2mic_10",
+      "meetings": 9,
+      "mean_pairwise_f1": 0.7619,
+      "mean_speaker_count_error": 1.0,
+      "corpus_wer": 0.1629,
+      "corpus_cer": 0.1074,
+      "mean_wall_sec": 16.215
+    },
+    {
+      "config": "C1_legacy_ecapa_transcript_f5",
+      "subset": "4mic_10",
+      "meetings": 9,
+      "mean_pairwise_f1": 0.5741,
+      "mean_speaker_count_error": 0.667,
+      "corpus_wer": 0.1779,
+      "corpus_cer": 0.1119,
+      "mean_wall_sec": 28.185
+    },
+    {
+      "config": "C2_wespeaker_mlx_transcript_f5",
+      "subset": "all_30",
+      "meetings": 30,
+      "mean_pairwise_f1": 0.8889,
+      "mean_speaker_count_error": 0.4,
+      "corpus_wer": 0.1764,
+      "corpus_cer": 0.1177,
+      "mean_wall_sec": 2.042
+    },
+    {
+      "config": "C2_wespeaker_mlx_transcript_f5",
+      "subset": "easy_10",
+      "meetings": 10,
+      "mean_pairwise_f1": 0.95,
+      "mean_speaker_count_error": 0.2,
+      "corpus_wer": 0.0733,
+      "corpus_cer": 0.0371,
+      "mean_wall_sec": 0.554
+    },
+    {
+      "config": "C2_wespeaker_mlx_transcript_f5",
+      "subset": "moderate_10",
+      "meetings": 10,
+      "mean_pairwise_f1": 0.9167,
+      "mean_speaker_count_error": 0.7,
+      "corpus_wer": 0.1152,
+      "corpus_cer": 0.0764,
+      "mean_wall_sec": 1.794
+    },
+    {
+      "config": "C2_wespeaker_mlx_transcript_f5",
+      "subset": "stress_10",
+      "meetings": 10,
+      "mean_pairwise_f1": 0.8,
+      "mean_speaker_count_error": 0.3,
+      "corpus_wer": 0.3457,
+      "corpus_cer": 0.2468,
+      "mean_wall_sec": 3.779
+    },
+    {
+      "config": "C2_wespeaker_mlx_transcript_f5",
+      "subset": "1mic_10",
+      "meetings": 12,
+      "mean_pairwise_f1": 0.9306,
+      "mean_speaker_count_error": 0.417,
+      "corpus_wer": 0.1768,
+      "corpus_cer": 0.1163,
+      "mean_wall_sec": 0.032
+    },
+    {
+      "config": "C2_wespeaker_mlx_transcript_f5",
+      "subset": "2mic_10",
+      "meetings": 9,
+      "mean_pairwise_f1": 0.8333,
+      "mean_speaker_count_error": 0.778,
+      "corpus_wer": 0.1629,
+      "corpus_cer": 0.1074,
+      "mean_wall_sec": 0.046
+    },
+    {
+      "config": "C2_wespeaker_mlx_transcript_f5",
+      "subset": "4mic_10",
+      "meetings": 9,
+      "mean_pairwise_f1": 0.8889,
+      "mean_speaker_count_error": 0.0,
+      "corpus_wer": 0.1887,
+      "corpus_cer": 0.1296,
+      "mean_wall_sec": 6.719
+    },
+    {
+      "config": "C3_wespeaker_mlx_audio_afftdn",
+      "subset": "all_30",
+      "meetings": 30,
+      "mean_pairwise_f1": 0.8889,
+      "mean_speaker_count_error": 0.4,
+      "corpus_wer": 0.1707,
+      "corpus_cer": 0.1136,
+      "mean_wall_sec": 11.525
+    },
+    {
+      "config": "C3_wespeaker_mlx_audio_afftdn",
+      "subset": "easy_10",
+      "meetings": 10,
+      "mean_pairwise_f1": 0.95,
+      "mean_speaker_count_error": 0.2,
+      "corpus_wer": 0.0733,
+      "corpus_cer": 0.0354,
+      "mean_wall_sec": 10.737
+    },
+    {
+      "config": "C3_wespeaker_mlx_audio_afftdn",
+      "subset": "moderate_10",
+      "meetings": 10,
+      "mean_pairwise_f1": 0.9167,
+      "mean_speaker_count_error": 0.7,
+      "corpus_wer": 0.1127,
+      "corpus_cer": 0.0764,
+      "mean_wall_sec": 11.126
+    },
+    {
+      "config": "C3_wespeaker_mlx_audio_afftdn",
+      "subset": "stress_10",
+      "meetings": 10,
+      "mean_pairwise_f1": 0.8,
+      "mean_speaker_count_error": 0.3,
+      "corpus_wer": 0.3309,
+      "corpus_cer": 0.2357,
+      "mean_wall_sec": 12.713
+    },
+    {
+      "config": "C3_wespeaker_mlx_audio_afftdn",
+      "subset": "1mic_10",
+      "meetings": 12,
+      "mean_pairwise_f1": 0.9306,
+      "mean_speaker_count_error": 0.417,
+      "corpus_wer": 0.1827,
+      "corpus_cer": 0.1195,
+      "mean_wall_sec": 11.52
+    },
+    {
+      "config": "C3_wespeaker_mlx_audio_afftdn",
+      "subset": "2mic_10",
+      "meetings": 9,
+      "mean_pairwise_f1": 0.8333,
+      "mean_speaker_count_error": 0.778,
+      "corpus_wer": 0.1461,
+      "corpus_cer": 0.0884,
+      "mean_wall_sec": 9.847
+    },
+    {
+      "config": "C3_wespeaker_mlx_audio_afftdn",
+      "subset": "4mic_10",
+      "meetings": 9,
+      "mean_pairwise_f1": 0.8889,
+      "mean_speaker_count_error": 0.0,
+      "corpus_wer": 0.1779,
+      "corpus_cer": 0.1296,
+      "mean_wall_sec": 13.211
+    }
+  ]
+}

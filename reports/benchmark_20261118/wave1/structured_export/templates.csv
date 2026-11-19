@@ -1,0 +1,4 @@
+template,format,anchors,expected_anchors,schema_fields,semantic_type_recall,convert_sec,parse_map_sec
+bien_ban_hop_chi_bo.docx,docx,26,22,26,0.4737,0.0086,0.0641
+mau_bien_ban_hop_chung.doc,doc,38,23,38,0.8947,2.0376,0.0046
+bien_ban_ban_giao_thiet_bi.docx,docx,24,,24,,0.0064,0.0105

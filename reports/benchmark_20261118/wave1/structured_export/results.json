@@ -1,0 +1,224 @@
+{
+  "benchmark": "wave1_structured_fields_and_export",
+  "elapsed_sec": 2.18,
+  "peak_rss_mb": 211.3,
+  "templates": [
+    {
+      "template": "bien_ban_hop_chi_bo.docx",
+      "format": "docx",
+      "anchors": 26,
+      "expected_anchors": 22,
+      "schema_fields": 26,
+      "semantic_type_recall": 0.4737,
+      "convert_sec": 0.0086,
+      "parse_map_sec": 0.0641
+    },
+    {
+      "template": "mau_bien_ban_hop_chung.doc",
+      "format": "doc",
+      "anchors": 38,
+      "expected_anchors": 23,
+      "schema_fields": 38,
+      "semantic_type_recall": 0.8947,
+      "convert_sec": 2.0376,
+      "parse_map_sec": 0.0046
+    },
+    {
+      "template": "bien_ban_ban_giao_thiet_bi.docx",
+      "format": "docx",
+      "anchors": 24,
+      "expected_anchors": null,
+      "schema_fields": 24,
+      "semantic_type_recall": null,
+      "convert_sec": 0.0064,
+      "parse_map_sec": 0.0105
+    }
+  ],
+  "render_zip_integrity": true,
+  "rendered_sha256": "7a2a67b0dde307b719589123eb35fcfcd19d0ee6d948f3e98b283fdb91018c38",
+  "nd30_stress": {
+    "cases": 12,
+    "checks_total": 54,
+    "checks_passed": 33,
+    "check_accuracy": 0.6111,
+    "details": [
+      {
+        "case_id": "nd30_01_full_spoken_numbers",
+        "passed": true,
+        "failures": []
+      },
+      {
+        "case_id": "nd30_02_digital_date_afternoon",
+        "passed": false,
+        "failures": [
+          {
+            "key": "end_hour",
+            "expected": "16",
+            "got": null
+          },
+          {
+            "key": "end_minute",
+            "expected": "45",
+            "got": null
+          }
+        ]
+      },
+      {
+        "case_id": "nd30_03_afternoon_chi_chieu_word",
+        "passed": false,
+        "failures": [
+          {
+            "key": "day",
+            "expected": "5",
+            "got": null
+          },
+          {
+            "key": "month",
+            "expected": "9",
+            "got": null
+          },
+          {
+            "key": "year",
+            "expected": "2026",
+            "got": null
+          },
+          {
+            "key": "start_hour",
+            "expected": "14",
+            "got": null
+          },
+          {
+            "key": "start_minute",
+            "expected": "0",
+            "got": null
+          },
+          {
+            "key": "end_hour",
+            "expected": "17",
+            "got": null
+          },
+          {
+            "key": "end_minute",
+            "expected": "30",
+            "got": null
+          }
+        ]
+      },
+      {
+        "case_id": "nd30_04_scoped_part_not_end_meeting",
+        "passed": false,
+        "failures": [
+          {
+            "key": "start_minute",
+            "expected": "0",
+            "got": "00"
+          }
+        ]
+      },
+      {
+        "case_id": "nd30_05_uncertain_proposed_time_rejected",
+        "passed": false,
+        "failures": [
+          {
+            "key": "day",
+            "expected": "21",
+            "got": "20"
+          },
+          {
+            "key": "start_hour",
+            "expected": "8",
+            "got": null
+          },
+          {
+            "key": "start_minute",
+            "expected": "25",
+            "got": null
+          }
+        ]
+      },
+      {
+        "case_id": "nd30_06_vote_uncertain_rejected",
+        "passed": true,
+        "failures": []
+      },
+      {
+        "case_id": "nd30_07_vote_real_with_abstain",
+        "passed": true,
+        "failures": []
+      },
+      {
+        "case_id": "nd30_08_multi_round_vote_ambiguous_unscoped",
+        "passed": true,
+        "failures": []
+      },
+      {
+        "case_id": "nd30_09_signature_unsigned_conflict",
+        "passed": false,
+        "failures": [
+          {
+            "key": "signature_conflict",
+            "expected": true,
+            "got": false
+          }
+        ]
+      },
+      {
+        "case_id": "nd30_10_signature_signed_ok",
+        "passed": true,
+        "failures": []
+      },
+      {
+        "case_id": "nd30_11_spoken_room_code_no_negation",
+        "passed": false,
+        "failures": [
+          {
+            "key": "day",
+            "expected": "12",
+            "got": null
+          },
+          {
+            "key": "month",
+            "expected": "10",
+            "got": null
+          },
+          {
+            "key": "year",
+            "expected": "2026",
+            "got": null
+          },
+          {
+            "key": "start_hour",
+            "expected": "9",
+            "got": null
+          },
+          {
+            "key": "start_minute",
+            "expected": "0",
+            "got": null
+          }
+        ]
+      },
+      {
+        "case_id": "nd30_12_late_year_2026",
+        "passed": false,
+        "failures": [
+          {
+            "key": "start_hour",
+            "expected": "13",
+            "got": null
+          },
+          {
+            "key": "start_minute",
+            "expected": "5",
+            "got": null
+          }
+        ]
+      }
+    ]
+  },
+  "v21_false_positive_audit": {
+    "cases": 60,
+    "spurious_date_clock_hits": 0,
+    "spurious_vote_round_hits": 0
+  }
+}

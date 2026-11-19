@@ -1,0 +1,4 @@
+config,cases,mean_clusters,multi_topic_rate,mean_total_sec,mean_editorial_writer_sec,coverage_complete_rate,mean_source_fallback_rate,total_introduced_numbers,mean_dup_sent_rate,mean_word_ratio,zip_integrity_rate,peak_mlx_gb
+qwen3_base_sil022,12,1.5,0.3333,133.25,96.68,1.0,0.2795,0,0.0,1.124,1.0,4.434
+lora_b_mlx_sil022,12,1.5,0.3333,109.63,87.73,1.0,0.2999,3,0.0,1.047,1.0,4.434
+lora_b_mlx_sil012,12,1.5,0.3333,107.79,86.04,1.0,0.2999,3,0.0,1.047,1.0,4.434

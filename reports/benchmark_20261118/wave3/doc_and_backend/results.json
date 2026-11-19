@@ -1,0 +1,238 @@
+{
+  "benchmark": "wave3_doc_ingest_and_backend",
+  "elapsed_sec": 92.77,
+  "peak_rss_mb": 696.57,
+  "ingest": [
+    {
+      "template": "bien_ban_hop_chi_bo.docx",
+      "input_variant": "native_doc_docx",
+      "engine": "copy",
+      "pages": 2,
+      "anchors": 26,
+      "baseline_anchors": 26,
+      "tables_recovered": 2,
+      "baseline_tables": 2,
+      "schema_fields": 26,
+      "semantic_type_recall": 0.4737,
+      "ingest_sec": 0.031
+    },
+    {
+      "template": "bien_ban_hop_chi_bo.docx",
+      "input_variant": "vector_pdf",
+      "engine": "pdf_text",
+      "pages": 2,
+      "anchors": 24,
+      "baseline_anchors": 26,
+      "tables_recovered": 0,
+      "baseline_tables": 2,
+      "schema_fields": 24,
+      "semantic_type_recall": 0.4211,
+      "ingest_sec": 0.063
+    },
+    {
+      "template": "bien_ban_hop_chi_bo.docx",
+      "input_variant": "scanned_flat_pdf",
+      "engine": "ocr_tesseract",
+      "pages": 2,
+      "anchors": 15,
+      "baseline_anchors": 26,
+      "tables_recovered": 0,
+      "baseline_tables": 2,
+      "schema_fields": 15,
+      "semantic_type_recall": 0.2632,
+      "ingest_sec": 2.931
+    },
+    {
+      "template": "bien_ban_hop_chi_bo.docx",
+      "input_variant": "scanned_skew_1.2deg_pdf",
+      "engine": "ocr_tesseract",
+      "pages": 2,
+      "anchors": 21,
+      "baseline_anchors": 26,
+      "tables_recovered": 0,
+      "baseline_tables": 2,
+      "schema_fields": 21,
+      "semantic_type_recall": 0.3684,
+      "ingest_sec": 2.869
+    },
+    {
+      "template": "mau_bien_ban_hop_chung.doc",
+      "input_variant": "native_doc_docx",
+      "engine": "libreoffice",
+      "pages": 2,
+      "anchors": 38,
+      "baseline_anchors": 38,
+      "tables_recovered": 2,
+      "baseline_tables": 2,
+      "schema_fields": 38,
+      "semantic_type_recall": 0.8947,
+      "ingest_sec": 0.995
+    },
+    {
+      "template": "mau_bien_ban_hop_chung.doc",
+      "input_variant": "vector_pdf",
+      "engine": "pdf_text",
+      "pages": 2,
+      "anchors": 36,
+      "baseline_anchors": 38,
+      "tables_recovered": 0,
+      "baseline_tables": 2,
+      "schema_fields": 36,
+      "semantic_type_recall": 0.8421,
+      "ingest_sec": 0.022
+    },
+    {
+      "template": "mau_bien_ban_hop_chung.doc",
+      "input_variant": "scanned_flat_pdf",
+      "engine": "ocr_tesseract",
+      "pages": 2,
+      "anchors": 23,
+      "baseline_anchors": 38,
+      "tables_recovered": 0,
+      "baseline_tables": 2,
+      "schema_fields": 23,
+      "semantic_type_recall": 0.5789,
+      "ingest_sec": 1.803
+    },
+    {
+      "template": "mau_bien_ban_hop_chung.doc",
+      "input_variant": "scanned_skew_1.2deg_pdf",
+      "engine": "ocr_tesseract",
+      "pages": 2,
+      "anchors": 21,
+      "baseline_anchors": 38,
+      "tables_recovered": 0,
+      "baseline_tables": 2,
+      "schema_fields": 21,
+      "semantic_type_recall": 0.5789,
+      "ingest_sec": 1.687
+    },
+    {
+      "template": "bien_ban_ban_giao_thiet_bi.docx",
+      "input_variant": "native_doc_docx",
+      "engine": "copy",
+      "pages": 1,
+      "anchors": 24,
+      "baseline_anchors": 24,
+      "tables_recovered": 2,
+      "baseline_tables": 2,
+      "schema_fields": 24,
+      "semantic_type_recall": null,
+      "ingest_sec": 0.016
+    },
+    {
+      "template": "bien_ban_ban_giao_thiet_bi.docx",
+      "input_variant": "vector_pdf",
+      "engine": "pdf_text",
+      "pages": 1,
+      "anchors": 20,
+      "baseline_anchors": 24,
+      "tables_recovered": 0,
+      "baseline_tables": 2,
+      "schema_fields": 20,
+      "semantic_type_recall": null,
+      "ingest_sec": 0.02
+    },
+    {
+      "template": "bien_ban_ban_giao_thiet_bi.docx",
+      "input_variant": "scanned_flat_pdf",
+      "engine": "ocr_tesseract",
+      "pages": 1,
+      "anchors": 12,
+      "baseline_anchors": 24,
+      "tables_recovered": 0,
+      "baseline_tables": 2,
+      "schema_fields": 12,
+      "semantic_type_recall": null,
+      "ingest_sec": 1.029
+    },
+    {
+      "template": "bien_ban_ban_giao_thiet_bi.docx",
+      "input_variant": "scanned_skew_1.2deg_pdf",
+      "engine": "ocr_tesseract",
+      "pages": 1,
+      "anchors": 8,
+      "baseline_anchors": 24,
+      "tables_recovered": 0,
+      "baseline_tables": 2,
+      "schema_fields": 8,
+      "semantic_type_recall": null,
+      "ingest_sec": 1.009
+    }
+  ],
+  "previews": [
+    {
+      "template": "bien_ban_hop_chi_bo.docx",
+      "pages_rendered": 2,
+      "render_pages_sec": 1.2
+    },
+    {
+      "template": "mau_bien_ban_hop_chung.doc",
+      "pages_rendered": 2,
+      "render_pages_sec": 1.105
+    },
+    {
+      "template": "bien_ban_ban_giao_thiet_bi.docx",
+      "pages_rendered": 1,
+      "render_pages_sec": 1.078
+    }
+  ],
+  "schema_mappers": [
+    {
+      "template": "bien_ban_hop_chi_bo.docx",
+      "builtin_m1_status": "not_run",
+      "builtin_m1_check_sec": 0.0034,
+      "m0_fields": 26,
+      "m0_recall": 0.4737,
+      "m0_needs_review": 3,
+      "qwen3_mlx_schema_sec": 33.415,
+      "qwen3_mlx_mapped_count": 26,
+      "qwen3_mlx_recall": 0.7368
+    },
+    {
+      "template": "mau_bien_ban_hop_chung.doc",
+      "builtin_m1_status": "not_run",
+      "builtin_m1_check_sec": 0.0006,
+      "m0_fields": 38,
+      "m0_recall": 0.8947,
+      "m0_needs_review": 3,
+      "qwen3_mlx_schema_sec": 38.852,
+      "qwen3_mlx_mapped_count": 37,
+      "qwen3_mlx_recall": 1.0
+    },
+    {
+      "template": "bien_ban_ban_giao_thiet_bi.docx",
+      "builtin_m1_status": "not_run",
+      "builtin_m1_check_sec": 0.0007,
+      "m0_fields": 24,
+      "m0_recall": null,
+      "m0_needs_review": 7
+    }
+  ],
+  "backend": {
+    "live_mongod_available": false,
+    "note": "Host macOS không cài đặt binary mongod nên không chạy benchmark throughput queue MongoDB trực tiếp; chỉ đo các thành phần backend độc lập (ArtifactStore, FastAPI routing/middleware/validation).",
+    "artifact_store": [
+      {
+        "payload_mb": 5.0,
+        "register_sha256_sec": 0.0036,
+        "throughput_mb_per_sec": 1383.0,
+        "resolve_mean_ms": 0.0217
+      },
+      {
+        "payload_mb": 25.0,
+        "register_sha256_sec": 0.01,
+        "throughput_mb_per_sec": 2494.7,
+        "resolve_mean_ms": 0.021
+      }
+    ],
+    "http_overhead": {
+      "origin_guard_403_hits": 25,
+      "origin_guard_mean_ms": 2.638,
+      "pydantic_422_hits": 0,
+      "pydantic_validation_mean_ms": 1.906,
+      "router_404_hits": 25,
+      "router_404_mean_ms": 1.771
+    }
+  }
+}

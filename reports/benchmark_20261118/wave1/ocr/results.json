@@ -1,0 +1,526 @@
+{
+  "benchmark": "wave1_ocr",
+  "elapsed_sec": 130.48,
+  "peak_rss_mb": 1418.35,
+  "line_meta": {
+    "tesseract_fast": {
+      "load_sec": 0.022,
+      "infer_sec": 10.914
+    },
+    "tesseract_best": {
+      "load_sec": 0.0,
+      "infer_sec": 14.287
+    },
+    "easyocr": {
+      "load_sec": 1.116,
+      "infer_sec": 2.294
+    },
+    "vietocr_seq2seq": {
+      "load_sec": 1.48,
+      "infer_sec": 3.69
+    },
+    "vietocr_transformer": {
+      "load_sec": 1.396,
+      "infer_sec": 27.398
+    }
+  },
+  "line_summary": [
+    {
+      "engine": "tesseract_fast",
+      "condition": "all",
+      "samples": 93,
+      "cer": 0.0539,
+      "wer": 0.1783,
+      "raw_cer": 0.0535,
+      "exact_match": 0.4624,
+      "blank_hallucinations": 3,
+      "total_sec": 10.91
+    },
+    {
+      "engine": "tesseract_fast",
+      "condition": "clean",
+      "samples": 30,
+      "cer": 0.0512,
+      "wer": 0.1765,
+      "raw_cer": 0.0506,
+      "exact_match": 0.4333,
+      "blank_hallucinations": 0,
+      "total_sec": 3.69
+    },
+    {
+      "engine": "tesseract_fast",
+      "condition": "moderate",
+      "samples": 30,
+      "cer": 0.0499,
+      "wer": 0.1793,
+      "raw_cer": 0.0493,
+      "exact_match": 0.4333,
+      "blank_hallucinations": 0,
+      "total_sec": 3.53
+    },
+    {
+      "engine": "tesseract_fast",
+      "condition": "stress",
+      "samples": 30,
+      "cer": 0.0519,
+      "wer": 0.1681,
+      "raw_cer": 0.0519,
+      "exact_match": 0.5667,
+      "blank_hallucinations": 0,
+      "total_sec": 3.34
+    },
+    {
+      "engine": "tesseract_fast",
+      "condition": "blank",
+      "samples": 3,
+      "cer": 13.0,
+      "wer": 4.0,
+      "raw_cer": 13.0,
+      "exact_match": 0.0,
+      "blank_hallucinations": 3,
+      "total_sec": 0.35
+    },
+    {
+      "engine": "tesseract_best",
+      "condition": "all",
+      "samples": 93,
+      "cer": 0.0503,
+      "wer": 0.1699,
+      "raw_cer": 0.05,
+      "exact_match": 0.5161,
+      "blank_hallucinations": 2,
+      "total_sec": 14.29
+    },
+    {
+      "engine": "tesseract_best",
+      "condition": "clean",
+      "samples": 30,
+      "cer": 0.0499,
+      "wer": 0.1765,
+      "raw_cer": 0.0493,
+      "exact_match": 0.4667,
+      "blank_hallucinations": 0,
+      "total_sec": 4.72
+    },
+    {
+      "engine": "tesseract_best",
+      "condition": "moderate",
+      "samples": 30,
+      "cer": 0.0459,
+      "wer": 0.1653,
+      "raw_cer": 0.046,
+      "exact_match": 0.5333,
+      "blank_hallucinations": 0,
+      "total_sec": 4.6
+    },
+    {
+      "engine": "tesseract_best",
+      "condition": "stress",
+      "samples": 30,
+      "cer": 0.0486,
+      "wer": 0.1625,
+      "raw_cer": 0.048,
+      "exact_match": 0.5667,
+      "blank_hallucinations": 0,
+      "total_sec": 4.37
+    },
+    {
+      "engine": "tesseract_best",
+      "condition": "blank",
+      "samples": 3,
+      "cer": 10.0,
+      "wer": 2.0,
+      "raw_cer": 10.0,
+      "exact_match": 0.3333,
+      "blank_hallucinations": 2,
+      "total_sec": 0.59
+    },
+    {
+      "engine": "easyocr",
+      "condition": "all",
+      "samples": 93,
+      "cer": 0.0628,
+      "wer": 0.2381,
+      "raw_cer": 0.0701,
+      "exact_match": 0.2903,
+      "blank_hallucinations": 1,
+      "total_sec": 2.29
+    },
+    {
+      "engine": "easyocr",
+      "condition": "clean",
+      "samples": 30,
+      "cer": 0.0499,
+      "wer": 0.1961,
+      "raw_cer": 0.0592,
+      "exact_match": 0.3667,
+      "blank_hallucinations": 0,
+      "total_sec": 0.8
+    },
+    {
+      "engine": "easyocr",
+      "condition": "moderate",
+      "samples": 30,
+      "cer": 0.0486,
+      "wer": 0.1877,
+      "raw_cer": 0.0539,
+      "exact_match": 0.4333,
+      "blank_hallucinations": 0,
+      "total_sec": 0.75
+    },
+    {
+      "engine": "easyocr",
+      "condition": "stress",
+      "samples": 30,
+      "cer": 0.0892,
+      "wer": 0.3277,
+      "raw_cer": 0.0966,
+      "exact_match": 0.0333,
+      "blank_hallucinations": 0,
+      "total_sec": 0.6
+    },
+    {
+      "engine": "easyocr",
+      "condition": "blank",
+      "samples": 3,
+      "cer": 1.0,
+      "wer": 1.0,
+      "raw_cer": 1.0,
+      "exact_match": 0.6667,
+      "blank_hallucinations": 1,
+      "total_sec": 0.15
+    },
+    {
+      "engine": "vietocr_seq2seq",
+      "condition": "all",
+      "samples": 93,
+      "cer": 0.0508,
+      "wer": 0.1485,
+      "raw_cer": 0.0513,
+      "exact_match": 0.4301,
+      "blank_hallucinations": 3,
+      "total_sec": 3.69
+    },
+    {
+      "engine": "vietocr_seq2seq",
+      "condition": "clean",
+      "samples": 30,
+      "cer": 0.0452,
+      "wer": 0.1485,
+      "raw_cer": 0.0473,
+      "exact_match": 0.4333,
+      "blank_hallucinations": 0,
+      "total_sec": 1.23
+    },
+    {
+      "engine": "vietocr_seq2seq",
+      "condition": "moderate",
+      "samples": 30,
+      "cer": 0.0333,
+      "wer": 0.1176,
+      "raw_cer": 0.0329,
+      "exact_match": 0.5,
+      "blank_hallucinations": 0,
+      "total_sec": 1.21
+    },
+    {
+      "engine": "vietocr_seq2seq",
+      "condition": "stress",
+      "samples": 30,
+      "cer": 0.0472,
+      "wer": 0.1709,
+      "raw_cer": 0.0473,
+      "exact_match": 0.4,
+      "blank_hallucinations": 0,
+      "total_sec": 1.16
+    },
+    {
+      "engine": "vietocr_seq2seq",
+      "condition": "blank",
+      "samples": 3,
+      "cer": 40.0,
+      "wer": 3.0,
+      "raw_cer": 40.0,
+      "exact_match": 0.0,
+      "blank_hallucinations": 3,
+      "total_sec": 0.09
+    },
+    {
+      "engine": "vietocr_transformer",
+      "condition": "all",
+      "samples": 93,
+      "cer": 0.0439,
+      "wer": 0.1232,
+      "raw_cer": 0.0447,
+      "exact_match": 0.5054,
+      "blank_hallucinations": 3,
+      "total_sec": 27.4
+    },
+    {
+      "engine": "vietocr_transformer",
+      "condition": "clean",
+      "samples": 30,
+      "cer": 0.0259,
+      "wer": 0.1064,
+      "raw_cer": 0.027,
+      "exact_match": 0.4667,
+      "blank_hallucinations": 0,
+      "total_sec": 9.09
+    },
+    {
+      "engine": "vietocr_transformer",
+      "condition": "moderate",
+      "samples": 30,
+      "cer": 0.0273,
+      "wer": 0.1092,
+      "raw_cer": 0.0283,
+      "exact_match": 0.6,
+      "blank_hallucinations": 0,
+      "total_sec": 9.45
+    },
+    {
+      "engine": "vietocr_transformer",
+      "condition": "stress",
+      "samples": 30,
+      "cer": 0.0419,
+      "wer": 0.1457,
+      "raw_cer": 0.0427,
+      "exact_match": 0.5,
+      "blank_hallucinations": 0,
+      "total_sec": 8.52
+    },
+    {
+      "engine": "vietocr_transformer",
+      "condition": "blank",
+      "samples": 3,
+      "cer": 55.0,
+      "wer": 3.0,
+      "raw_cer": 55.0,
+      "exact_match": 0.0,
+      "blank_hallucinations": 3,
+      "total_sec": 0.34
+    }
+  ],
+  "page_table_summary": [
+    {
+      "mode": "raw_tess_fast_psm3",
+      "condition": "all",
+      "pages": 18,
+      "page_cer": 0.1032,
+      "page_wer": 0.1527,
+      "table_detect_rate": null,
+      "table_cell_cer": null,
+      "table_cell_exact_match": null,
+      "avg_sec_per_page": 0.347
+    },
+    {
+      "mode": "raw_tess_fast_psm3",
+      "condition": "clean",
+      "pages": 6,
+      "page_cer": 0.0091,
+      "page_wer": 0.0354,
+      "table_detect_rate": null,
+      "table_cell_cer": null,
+      "table_cell_exact_match": null,
+      "avg_sec_per_page": 0.331
+    },
+    {
+      "mode": "raw_tess_fast_psm3",
+      "condition": "moderate",
+      "pages": 6,
+      "page_cer": 0.0204,
+      "page_wer": 0.0778,
+      "table_detect_rate": null,
+      "table_cell_cer": null,
+      "table_cell_exact_match": null,
+      "avg_sec_per_page": 0.375
+    },
+    {
+      "mode": "raw_tess_fast_psm3",
+      "condition": "stress",
+      "pages": 6,
+      "page_cer": 0.2802,
+      "page_wer": 0.3451,
+      "table_detect_rate": null,
+      "table_cell_cer": null,
+      "table_cell_exact_match": null,
+      "avg_sec_per_page": 0.335
+    },
+    {
+      "mode": "raw_tess_best_psm3",
+      "condition": "all",
+      "pages": 18,
+      "page_cer": 0.1025,
+      "page_wer": 0.1483,
+      "table_detect_rate": null,
+      "table_cell_cer": null,
+      "table_cell_exact_match": null,
+      "avg_sec_per_page": 0.63
+    },
+    {
+      "mode": "raw_tess_best_psm3",
+      "condition": "clean",
+      "pages": 6,
+      "page_cer": 0.0092,
+      "page_wer": 0.0373,
+      "table_detect_rate": null,
+      "table_cell_cer": null,
+      "table_cell_exact_match": null,
+      "avg_sec_per_page": 0.606
+    },
+    {
+      "mode": "raw_tess_best_psm3",
+      "condition": "moderate",
+      "pages": 6,
+      "page_cer": 0.0188,
+      "page_wer": 0.0682,
+      "table_detect_rate": null,
+      "table_cell_cer": null,
+      "table_cell_exact_match": null,
+      "avg_sec_per_page": 0.674
+    },
+    {
+      "mode": "raw_tess_best_psm3",
+      "condition": "stress",
+      "pages": 6,
+      "page_cer": 0.2793,
+      "page_wer": 0.3395,
+      "table_detect_rate": null,
+      "table_cell_cer": null,
+      "table_cell_exact_match": null,
+      "avg_sec_per_page": 0.609
+    },
+    {
+      "mode": "prod_opencv_tess_fast",
+      "condition": "all",
+      "pages": 18,
+      "page_cer": 0.1221,
+      "page_wer": 0.1711,
+      "table_detect_rate": 0.6667,
+      "table_cell_cer": 0.3815,
+      "table_cell_exact_match": 0.5708,
+      "avg_sec_per_page": 0.331
+    },
+    {
+      "mode": "prod_opencv_tess_fast",
+      "condition": "clean",
+      "pages": 6,
+      "page_cer": 0.0374,
+      "page_wer": 0.0629,
+      "table_detect_rate": 1.0,
+      "table_cell_cer": 0.0667,
+      "table_cell_exact_match": 0.875,
+      "avg_sec_per_page": 0.317
+    },
+    {
+      "mode": "prod_opencv_tess_fast",
+      "condition": "moderate",
+      "pages": 6,
+      "page_cer": 0.0486,
+      "page_wer": 0.1053,
+      "table_detect_rate": 1.0,
+      "table_cell_cer": 0.0778,
+      "table_cell_exact_match": 0.8375,
+      "avg_sec_per_page": 0.353
+    },
+    {
+      "mode": "prod_opencv_tess_fast",
+      "condition": "stress",
+      "pages": 6,
+      "page_cer": 0.2802,
+      "page_wer": 0.3451,
+      "table_detect_rate": 0.0,
+      "table_cell_cer": 1.0,
+      "table_cell_exact_match": 0.0,
+      "avg_sec_per_page": 0.324
+    },
+    {
+      "mode": "prod_opencv_tess_best",
+      "condition": "all",
+      "pages": 18,
+      "page_cer": 0.1209,
+      "page_wer": 0.1658,
+      "table_detect_rate": 0.6667,
+      "table_cell_cer": 0.3831,
+      "table_cell_exact_match": 0.5715,
+      "avg_sec_per_page": 0.611
+    },
+    {
+      "mode": "prod_opencv_tess_best",
+      "condition": "clean",
+      "pages": 6,
+      "page_cer": 0.0375,
+      "page_wer": 0.0648,
+      "table_detect_rate": 1.0,
+      "table_cell_cer": 0.067,
+      "table_cell_exact_match": 0.8917,
+      "avg_sec_per_page": 0.588
+    },
+    {
+      "mode": "prod_opencv_tess_best",
+      "condition": "moderate",
+      "pages": 6,
+      "page_cer": 0.0458,
+      "page_wer": 0.0931,
+      "table_detect_rate": 1.0,
+      "table_cell_cer": 0.0823,
+      "table_cell_exact_match": 0.8229,
+      "avg_sec_per_page": 0.651
+    },
+    {
+      "mode": "prod_opencv_tess_best",
+      "condition": "stress",
+      "pages": 6,
+      "page_cer": 0.2793,
+      "page_wer": 0.3395,
+      "table_detect_rate": 0.0,
+      "table_cell_cer": 1.0,
+      "table_cell_exact_match": 0.0,
+      "avg_sec_per_page": 0.593
+    },
+    {
+      "mode": "opencv_cells_vietocr",
+      "condition": "all",
+      "pages": 18,
+      "page_cer": 0.1029,
+      "page_wer": 0.1539,
+      "table_detect_rate": 0.6667,
+      "table_cell_cer": 0.3495,
+      "table_cell_exact_match": 0.5625,
+      "avg_sec_per_page": 1.613
+    },
+    {
+      "mode": "opencv_cells_vietocr",
+      "condition": "clean",
+      "pages": 6,
+      "page_cer": 0.0176,
+      "page_wer": 0.0742,
+      "table_detect_rate": 1.0,
+      "table_cell_cer": 0.0307,
+      "table_cell_exact_match": 0.8167,
+      "avg_sec_per_page": 1.791
+    },
+    {
+      "mode": "opencv_cells_vietocr",
+      "condition": "moderate",
+      "pages": 6,
+      "page_cer": 0.0117,
+      "page_wer": 0.048,
+      "table_detect_rate": 1.0,
+      "table_cell_cer": 0.0178,
+      "table_cell_exact_match": 0.8708,
+      "avg_sec_per_page": 2.132
+    },
+    {
+      "mode": "opencv_cells_vietocr",
+      "condition": "stress",
+      "pages": 6,
+      "page_cer": 0.2793,
+      "page_wer": 0.3395,
+      "table_detect_rate": 0.0,
+      "table_cell_cer": 1.0,
+      "table_cell_exact_match": 0.0,
+      "avg_sec_per_page": 0.918
+    }
+  ]
+}

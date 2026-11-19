@@ -1,0 +1,13 @@
+template,input_variant,engine,pages,anchors,baseline_anchors,tables_recovered,baseline_tables,schema_fields,semantic_type_recall,ingest_sec
+bien_ban_hop_chi_bo.docx,native_doc_docx,copy,2,26,26,2,2,26,0.4737,0.031
+bien_ban_hop_chi_bo.docx,vector_pdf,pdf_text,2,24,26,0,2,24,0.4211,0.063
+bien_ban_hop_chi_bo.docx,scanned_flat_pdf,ocr_tesseract,2,15,26,0,2,15,0.2632,2.931
+bien_ban_hop_chi_bo.docx,scanned_skew_1.2deg_pdf,ocr_tesseract,2,21,26,0,2,21,0.3684,2.869
+mau_bien_ban_hop_chung.doc,native_doc_docx,libreoffice,2,38,38,2,2,38,0.8947,0.995
+mau_bien_ban_hop_chung.doc,vector_pdf,pdf_text,2,36,38,0,2,36,0.8421,0.022
+mau_bien_ban_hop_chung.doc,scanned_flat_pdf,ocr_tesseract,2,23,38,0,2,23,0.5789,1.803
+mau_bien_ban_hop_chung.doc,scanned_skew_1.2deg_pdf,ocr_tesseract,2,21,38,0,2,21,0.5789,1.687
+bien_ban_ban_giao_thiet_bi.docx,native_doc_docx,copy,1,24,24,2,2,24,,0.016
+bien_ban_ban_giao_thiet_bi.docx,vector_pdf,pdf_text,1,20,24,0,2,20,,0.02
+bien_ban_ban_giao_thiet_bi.docx,scanned_flat_pdf,ocr_tesseract,1,12,24,0,2,12,,1.029
+bien_ban_ban_giao_thiet_bi.docx,scanned_skew_1.2deg_pdf,ocr_tesseract,1,8,24,0,2,8,,1.009

@@ -1,0 +1,10 @@
+label,samples,audio_sec,wall_sec,rtf,corpus_wer,corpus_cer,non_transcribed,mean_word_confidence,confidence_coverage,warnings_count
+phowhisper_medium_mlx_manifest136,136,479.82,347.31,0.7238,0.0716,0.0404,0,0.985,1.0,0
+phowhisper_medium_mlx_vivos563,563,1982.21,1456.89,0.735,0.0503,0.0242,1,0.9901,0.9982,1
+phowhisper_medium_mlx_short80,80,94.9,225.74,2.3788,0.5967,0.5667,7,0.9266,0.9125,7
+phowhisper_small_mlx_manifest136,136,479.82,141.09,0.294,0.1014,0.0546,0,0.9785,1.0,0
+phowhisper_small_mlx_vivos563,563,1982.21,417.54,0.2106,0.0655,0.031,2,0.9868,0.9964,2
+phowhisper_small_mlx_short80,80,94.9,52.47,0.5529,0.6152,0.5721,6,0.908,0.925,6
+phowhisper_medium_mps_syn60,60,213.62,382.64,1.7912,0.2449,0.2313,13,,0.0,14
+phowhisper_medium_mps_short80,80,94.9,628.08,6.6186,0.8786,0.8665,61,,0.0,68
+phowhisper_small_mps_syn60,60,213.62,231.07,1.0817,0.5748,0.5231,26,,0.0,34

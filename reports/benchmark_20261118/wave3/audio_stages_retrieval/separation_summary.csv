@@ -1,0 +1,6 @@
+model,cases,si_sdr_db,si_sdr_improvement_db,pit_mean_wer,best_stream_wer,sep_rtf
+no_separation_mixture,20,-0.941,0.0,1.3098,0.8192,0.0
+sepformer_whamr,20,-5.551,-4.61,0.8761,0.5161,0.491
+sepformer_wham,20,-4.543,-3.602,1.2725,0.9269,0.431
+sepformer_libri2mix,20,4.047,4.989,1.081,0.6249,0.433
+convtasnet,20,-2.375,-1.433,1.4774,1.1172,0.122

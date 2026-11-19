@@ -1,0 +1,15 @@
+suite,method,queries,hit_at_1,hit_at_2,recall_at_3,mrr,elapsed_sec
+text_manifest_120,bm25,120,1.0,1.0,0.6083,1.0,0.004
+text_manifest_120,tfidf,120,1.0,1.0,0.625,1.0,0.046
+text_manifest_120,e5_small,120,1.0,1.0,0.6396,1.0,4.436
+text_manifest_120,e5_base,120,1.0,1.0,0.6396,1.0,7.024
+text_manifest_120,minilm,120,1.0,1.0,0.6542,1.0,2.955
+text_manifest_120,bge_m3,120,1.0,1.0,0.7083,1.0,16.362
+text_manifest_120,hybrid_rrf_e5_small,120,1.0,1.0,0.6625,1.0,4.44
+v21_gold_relations_110,bm25,110,0.9091,0.9818,1.0,0.9515,0.003
+v21_gold_relations_110,tfidf,110,0.9091,0.9818,1.0,0.9515,0.042
+v21_gold_relations_110,e5_small,110,0.8455,0.9818,1.0,0.9197,2.055
+v21_gold_relations_110,e5_base,110,0.8727,0.9727,1.0,0.9318,3.967
+v21_gold_relations_110,minilm,110,0.7909,0.9545,0.9818,0.8864,2.004
+v21_gold_relations_110,bge_m3,110,0.8636,0.9727,1.0,0.9273,10.326
+v21_gold_relations_110,hybrid_rrf_e5_small,110,0.8727,0.9818,1.0,0.9333,2.058

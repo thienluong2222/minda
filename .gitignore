@@ -62,9 +62,18 @@ test-results/
 /recycle_bin/
 /web_app/
 
-# Reports: ignore heavy raw benchmark outputs & WAV caches, keep consolidated summary
-/reports/*
-!/reports/BENCHMARK_TONG_HOP_2026-11-18.md
+# Reports: keep current benchmark results (JSON/CSV/MD/JSONL), ignore old reports & heavy generated media
+/reports/comparative_benchmark/
+/reports/speaker_identification/
+/reports/minutes_graph/20261117/
+/reports/benchmark_20261118/cache/
+/reports/benchmark_20261118/wave1/sync_synthetic/
+/reports/benchmark_20261118/wave1/ocr/pages/
+/reports/**/*.wav
+/reports/**/*.mp3
+/reports/**/*.m4a
+/reports/**/*.aac
+/reports/**/*.flac
 
 # Local thesis reference documents (not redistributed)
 /Tài liệu tham khảo/

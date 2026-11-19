@@ -1,0 +1,452 @@
+{
+  "benchmark": "wave2_multisource_fusion_and_routing",
+  "elapsed_sec": 1002.11,
+  "peak_rss_mb": 600.47,
+  "meetings": 24,
+  "mode_timings_sec": {
+    "transcript_all_source": 653.51,
+    "transcript_adaptive_max2": 2.21,
+    "transcript_adaptive_max3": 1.5,
+    "audio_delay_sum_none": 124.93,
+    "audio_delay_sum_afftdn": 219.15
+  },
+  "mode_asr_calls": {
+    "transcript_all_source": 288,
+    "transcript_adaptive_max2": 0,
+    "transcript_adaptive_max3": 0,
+    "audio_delay_sum_none": 55,
+    "audio_delay_sum_afftdn": 96
+  },
+  "summary": [
+    {
+      "method": "F0_FIXED",
+      "subset": "all_24",
+      "turns": 96,
+      "corpus_wer": 0.1746,
+      "corpus_cer": 0.1164,
+      "avg_scheduled_sources": 3.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F0_FIXED",
+      "subset": "2mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1766,
+      "corpus_cer": 0.1208,
+      "avg_scheduled_sources": 2.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F0_FIXED",
+      "subset": "4mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1727,
+      "corpus_cer": 0.1123,
+      "avg_scheduled_sources": 4.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F0_FIXED",
+      "subset": "stress",
+      "turns": 32,
+      "corpus_wer": 0.3511,
+      "corpus_cer": 0.259,
+      "avg_scheduled_sources": 3.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F1_BEST_SEGMENT",
+      "subset": "all_24",
+      "turns": 96,
+      "corpus_wer": 0.155,
+      "corpus_cer": 0.1067,
+      "avg_scheduled_sources": 3.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F1_BEST_SEGMENT",
+      "subset": "2mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1511,
+      "corpus_cer": 0.1093,
+      "avg_scheduled_sources": 2.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F1_BEST_SEGMENT",
+      "subset": "4mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1586,
+      "corpus_cer": 0.1042,
+      "avg_scheduled_sources": 4.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F1_BEST_SEGMENT",
+      "subset": "stress",
+      "turns": 32,
+      "corpus_wer": 0.3135,
+      "corpus_cer": 0.2395,
+      "avg_scheduled_sources": 3.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F2_ORACLE_BEST",
+      "subset": "all_24",
+      "turns": 96,
+      "corpus_wer": 0.1384,
+      "corpus_cer": 0.0932,
+      "avg_scheduled_sources": 3.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F2_ORACLE_BEST",
+      "subset": "2mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1404,
+      "corpus_cer": 0.1003,
+      "avg_scheduled_sources": 2.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F2_ORACLE_BEST",
+      "subset": "4mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1365,
+      "corpus_cer": 0.0866,
+      "avg_scheduled_sources": 4.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F2_ORACLE_BEST",
+      "subset": "stress",
+      "turns": 32,
+      "corpus_wer": 0.279,
+      "corpus_cer": 0.2088,
+      "avg_scheduled_sources": 3.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F3_ROVER",
+      "subset": "all_24",
+      "turns": 96,
+      "corpus_wer": 0.157,
+      "corpus_cer": 0.1123,
+      "avg_scheduled_sources": 3.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F3_ROVER",
+      "subset": "2mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1532,
+      "corpus_cer": 0.1113,
+      "avg_scheduled_sources": 2.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F3_ROVER",
+      "subset": "4mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1606,
+      "corpus_cer": 0.1132,
+      "avg_scheduled_sources": 4.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F3_ROVER",
+      "subset": "stress",
+      "turns": 32,
+      "corpus_wer": 0.326,
+      "corpus_cer": 0.2575,
+      "avg_scheduled_sources": 3.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F4_ASR_WEIGHTED",
+      "subset": "all_24",
+      "turns": 96,
+      "corpus_wer": 0.156,
+      "corpus_cer": 0.1103,
+      "avg_scheduled_sources": 3.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F4_ASR_WEIGHTED",
+      "subset": "2mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1511,
+      "corpus_cer": 0.1103,
+      "avg_scheduled_sources": 2.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F4_ASR_WEIGHTED",
+      "subset": "4mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1606,
+      "corpus_cer": 0.1104,
+      "avg_scheduled_sources": 4.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F4_ASR_WEIGHTED",
+      "subset": "stress",
+      "turns": 32,
+      "corpus_wer": 0.3166,
+      "corpus_cer": 0.25,
+      "avg_scheduled_sources": 3.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_RULE_WEIGHTED",
+      "subset": "all_24",
+      "turns": 96,
+      "corpus_wer": 0.1539,
+      "corpus_cer": 0.1089,
+      "avg_scheduled_sources": 3.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_RULE_WEIGHTED",
+      "subset": "2mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1489,
+      "corpus_cer": 0.1088,
+      "avg_scheduled_sources": 2.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_RULE_WEIGHTED",
+      "subset": "4mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1586,
+      "corpus_cer": 0.1089,
+      "avg_scheduled_sources": 4.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_RULE_WEIGHTED",
+      "subset": "stress",
+      "turns": 32,
+      "corpus_wer": 0.3103,
+      "corpus_cer": 0.2455,
+      "avg_scheduled_sources": 3.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_RULE_WEIGHTED_CORRECTED_ALL",
+      "subset": "all_24",
+      "turns": 96,
+      "corpus_wer": 0.1519,
+      "corpus_cer": 0.1086,
+      "avg_scheduled_sources": 3.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_RULE_WEIGHTED_CORRECTED_ALL",
+      "subset": "2mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1511,
+      "corpus_cer": 0.1093,
+      "avg_scheduled_sources": 2.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_RULE_WEIGHTED_CORRECTED_ALL",
+      "subset": "4mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1526,
+      "corpus_cer": 0.108,
+      "avg_scheduled_sources": 4.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_RULE_WEIGHTED_CORRECTED_ALL",
+      "subset": "stress",
+      "turns": 32,
+      "corpus_wer": 0.3103,
+      "corpus_cer": 0.2455,
+      "avg_scheduled_sources": 3.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_CORRECTED_ADAPTIVE_MAX2",
+      "subset": "all_24",
+      "turns": 96,
+      "corpus_wer": 0.1663,
+      "corpus_cer": 0.114,
+      "avg_scheduled_sources": 1.719,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_CORRECTED_ADAPTIVE_MAX2",
+      "subset": "2mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1511,
+      "corpus_cer": 0.1093,
+      "avg_scheduled_sources": 1.708,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_CORRECTED_ADAPTIVE_MAX2",
+      "subset": "4mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1807,
+      "corpus_cer": 0.1185,
+      "avg_scheduled_sources": 1.729,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_CORRECTED_ADAPTIVE_MAX2",
+      "subset": "stress",
+      "turns": 32,
+      "corpus_wer": 0.3511,
+      "corpus_cer": 0.2657,
+      "avg_scheduled_sources": 2.0,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_CORRECTED_ADAPTIVE_MAX3",
+      "subset": "all_24",
+      "turns": 96,
+      "corpus_wer": 0.155,
+      "corpus_cer": 0.1093,
+      "avg_scheduled_sources": 1.938,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_CORRECTED_ADAPTIVE_MAX3",
+      "subset": "2mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1511,
+      "corpus_cer": 0.1093,
+      "avg_scheduled_sources": 1.708,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_CORRECTED_ADAPTIVE_MAX3",
+      "subset": "4mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1586,
+      "corpus_cer": 0.1094,
+      "avg_scheduled_sources": 2.167,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "F5_CORRECTED_ADAPTIVE_MAX3",
+      "subset": "stress",
+      "turns": 32,
+      "corpus_wer": 0.3166,
+      "corpus_cer": 0.2493,
+      "avg_scheduled_sources": 2.469,
+      "audio_fallback_count": 0
+    },
+    {
+      "method": "AUDIO_DELAY_SUM_RAW",
+      "subset": "all_24",
+      "turns": 96,
+      "corpus_wer": 0.1767,
+      "corpus_cer": 0.1223,
+      "avg_scheduled_sources": 1.0,
+      "audio_fallback_count": 41
+    },
+    {
+      "method": "AUDIO_DELAY_SUM_RAW",
+      "subset": "2mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1553,
+      "corpus_cer": 0.1128,
+      "avg_scheduled_sources": 1.0,
+      "audio_fallback_count": 19
+    },
+    {
+      "method": "AUDIO_DELAY_SUM_RAW",
+      "subset": "4mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1968,
+      "corpus_cer": 0.1313,
+      "avg_scheduled_sources": 1.0,
+      "audio_fallback_count": 22
+    },
+    {
+      "method": "AUDIO_DELAY_SUM_RAW",
+      "subset": "stress",
+      "turns": 32,
+      "corpus_wer": 0.3699,
+      "corpus_cer": 0.2807,
+      "avg_scheduled_sources": 1.0,
+      "audio_fallback_count": 25
+    },
+    {
+      "method": "AUDIO_DELAY_SUM_AFFTDN",
+      "subset": "all_24",
+      "turns": 96,
+      "corpus_wer": 0.1787,
+      "corpus_cer": 0.1237,
+      "avg_scheduled_sources": 1.0,
+      "audio_fallback_count": 41
+    },
+    {
+      "method": "AUDIO_DELAY_SUM_AFFTDN",
+      "subset": "2mic_12",
+      "turns": 48,
+      "corpus_wer": 0.1532,
+      "corpus_cer": 0.1128,
+      "avg_scheduled_sources": 1.0,
+      "audio_fallback_count": 19
+    },
+    {
+      "method": "AUDIO_DELAY_SUM_AFFTDN",
+      "subset": "4mic_12",
+      "turns": 48,
+      "corpus_wer": 0.2028,
+      "corpus_cer": 0.1342,
+      "avg_scheduled_sources": 1.0,
+      "audio_fallback_count": 22
+    },
+    {
+      "method": "AUDIO_DELAY_SUM_AFFTDN",
+      "subset": "stress",
+      "turns": 32,
+      "corpus_wer": 0.3699,
+      "corpus_cer": 0.2807,
+      "avg_scheduled_sources": 1.0,
+      "audio_fallback_count": 25
+    }
+  ],
+  "paired_bootstrap": {
+    "F5_corr_vs_F0_wer": {
+      "n": 96,
+      "mean_a": 0.17768036361786363,
+      "mean_b": 0.15688538891663892,
+      "mean_diff": -0.0207949747012247,
+      "ci95_low": -0.03647640698421948,
+      "ci95_high": -0.006298920263764035
+    },
+    "Audio_afftdn_vs_F0_wer": {
+      "n": 96,
+      "mean_a": 0.17768036361786363,
+      "mean_b": 0.18843974312724313,
+      "mean_diff": 0.010759379509379503,
+      "ci95_low": -0.01254938420954046,
+      "ci95_high": 0.03701882102272727
+    },
+    "Audio_afftdn_vs_Audio_raw_wer": {
+      "n": 96,
+      "mean_a": 0.1832314097939098,
+      "mean_b": 0.18843974312724313,
+      "mean_diff": 0.005208333333333333,
+      "ci95_low": -0.001388888888888889,
+      "ci95_high": 0.017013888888888887
+    },
+    "Audio_afftdn_vs_F5_corr_wer": {
+      "n": 96,
+      "mean_a": 0.15688538891663892,
+      "mean_b": 0.18843974312724313,
+      "mean_diff": 0.03155435421060421,
+      "ci95_low": 0.009930867743367745,
+      "ci95_high": 0.057409618015086754
+    }
+  }
+}

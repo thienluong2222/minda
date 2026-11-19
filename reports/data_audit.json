@@ -1,0 +1,35 @@
+{
+  "status": "PASSED",
+  "passed": true,
+  "violations_count": 0,
+  "violations": [],
+  "total_records": 12420,
+  "splits": {
+    "development": {
+      "speakers": 32,
+      "utterances": 8097,
+      "enrollment_utterances": 298,
+      "meeting_utterances": 7799,
+      "total_duration_hours": 10.74632706597198
+    },
+    "validation": {
+      "speakers": 14,
+      "utterances": 3563,
+      "enrollment_utterances": 143,
+      "meeting_utterances": 3420,
+      "total_duration_hours": 4.1747597916665695
+    },
+    "test": {
+      "speakers": 19,
+      "utterances": 760,
+      "enrollment_utterances": 197,
+      "meeting_utterances": 563,
+      "total_duration_hours": 0.7459846006944425
+    }
+  },
+  "text_statistics": {
+    "distinct_normalized_texts": 10895,
+    "repeated_text_count": 856,
+    "repetition_ratio": 0.19170692431561998
+  }
+}

@@ -1,0 +1,3 @@
+scenario,sources,audio_duration_sec,audio_pipeline_sec,minutes_graph_docx_sec,total_e2e_sec,total_rtf,segments_count,asr_wer_vs_ref,zip_integrity_ok
+pilot_1mic_clean_uncached,1,119.72,50.17,443.02,493.18,4.12,12,0.0305,True
+pilot_3mic_phones_uncached,3,119.59,103.03,319.95,422.98,3.537,16,0.0668,True

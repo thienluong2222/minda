@@ -1,0 +1,564 @@
+id,split,condition,duration_sec,ref_norm,hyp_norm,wer,cer,status,warnings,mean_word_conf,seconds
+VIVOSDEV01_R058,vivos_test_563,clean,3.781,giám đốc sở giáo dục đào tạo ninh thuận cho biết,giám đốc sở giáo dục đào tạo ninh thuận cho biết,0.0,0.0,transcribed,[],0.9965181818181819,3.1296
+VIVOSDEV01_R069,vivos_test_563,clean,2.188,đèn bị hư rồi ba,đèn bị hư gò ba,0.2,0.1875,transcribed,[],0.9997400000000001,3.1372
+VIVOSDEV01_R071,vivos_test_563,clean,4.562,trưởng công an xã chạy sang can ngăn cũng bị tuyến đánh tiếp,trưởng công an xã chạy sang can ngăn cũng bị tuyến đánh tiếp,0.0,0.0,transcribed,[],0.999223076923077,4.4628
+VIVOSDEV01_R078,vivos_test_563,clean,3.75,nghe chúng tôi hỏi điều này chị ngát rân rấn nước mắt,nghe chúng tôi hỏi điều này chị ngát gân gấn nước mắt,0.16666666666666666,0.03773584905660377,transcribed,[],0.9974500000000001,3.055
+VIVOSDEV01_R086,vivos_test_563,clean,4.125,công văn đề nghị tỉnh con tum xây dựng cửa khẩu,công văn đề nghị tỉnh con tum xây dựng cửa khẩu,0.0,0.0,transcribed,[],0.9650636363636363,3.1163
+VIVOSDEV01_R089,vivos_test_563,clean,4.062,nhưng tình yêu vẫn nồng nàn và say đắm như buổi ban đầu,nhưng tình yêu vẫn nồng nàn và say đắm như buổi ban đầu,0.0,0.0,transcribed,[],0.9999384615384617,2.5243
+VIVOSDEV01_R092,vivos_test_563,clean,3.031,do chính phủ mỹ tiến hành ở việt nam,do chính phủ mỹ tiến hành ở việt nam,0.0,0.0,transcribed,[],0.9999222222222222,2.2673
+VIVOSDEV01_R098,vivos_test_563,clean,2.875,tỉnh quảng trị đã phê duyệt,tỉnh quảng trị đã phê duyệt,0.0,0.0,transcribed,[],0.9994500000000001,2.8089
+VIVOSDEV01_R099,vivos_test_563,clean,3.875,nhưng tôi thích xem bộ phim truyện phát ngay sau chương trình này,nhưng tôi thích xem bộ phim truyện phát ngay sau chương trình này,0.0,0.0,transcribed,[],0.9987615384615385,2.6599
+VIVOSDEV01_R108,vivos_test_563,clean,3.438,khi trẫm khỏi bệnh thì sẽ chém đầu,khi chẩm khỏi bệnh thì sẽ chém đầu,0.125,0.08823529411764706,transcribed,[],0.9883375000000001,2.3448
+VIVOSDEV01_R117,vivos_test_563,clean,2.75,việc một quyển tiểu thuyết như thế,việc một quyển tiểu huyết như thế,0.14285714285714285,0.029411764705882353,transcribed,[],0.9247142857142857,2.3103
+VIVOSDEV01_R130,vivos_test_563,clean,3.719,não bộ chúng ta phát triển những rung động yêu thương,não bộ chúng ta phát triển những rung động yêu hương,0.09090909090909091,0.018867924528301886,transcribed,[],0.9727454545454546,2.4123
+VIVOSDEV01_R139,vivos_test_563,clean,3.188,trừ khi bạn biết tôn trọng bản thân mình,trừ khi bạn biết tôn trọng bản thân mình,0.0,0.0,transcribed,[],0.9995444444444446,2.3899
+VIVOSDEV01_R141,vivos_test_563,clean,3.281,những con đường ngắn ngủn như những nhát cắt,những con đường ngắn ngủng như những nhát cắt,0.1111111111111111,0.022727272727272728,transcribed,[],0.9892777777777777,2.5366
+VIVOSDEV01_R146,vivos_test_563,clean,2.031,hiện ra tận phía xa,hiện ra tận phía xa,0.0,0.0,transcribed,[],0.9232400000000001,3.4403
+VIVOSDEV01_R150,vivos_test_563,clean,2.062,xin được chân khuân vác,xin được chân khuân vác,0.0,0.0,transcribed,[],0.9693400000000001,3.5311
+VIVOSDEV01_R151,vivos_test_563,clean,3.656,nhưng khi tiến gần vào vịnh thì mặt biển bị rạn vỡ,nhưng khi tiến gần vào vịnh thì mặt biển bị rạn vỡ,0.0,0.0,transcribed,[],0.9887250000000001,2.4779
+VIVOSDEV01_R164,vivos_test_563,clean,2.5,một bà ngoại giặt đồ thuê,một bà ngoại giật đồ hôi,0.3333333333333333,0.16,transcribed,[],0.9273666666666666,2.6678
+VIVOSDEV01_R170,vivos_test_563,clean,3.281,đôi bàn tay em không được mềm mại và nõn nà,đôi bàn tay em không được mềm mại và nõn nà,0.0,0.0,transcribed,[],0.9962272727272729,2.5818
+VIVOSDEV01_R172,vivos_test_563,clean,3.719,tây giang vẫn còn khắc khoải không thể vào xã a nông,tây giang vẫn còn khắc khoải không thể vào xã a nông,0.0,0.0,transcribed,[],0.997725,2.5456
+VIVOSDEV01_R174,vivos_test_563,clean,3.125,những dự định cần phải được biến thành hiện thực,những dự định cần phải được biến thành hiện thực,0.0,0.0,transcribed,[],0.99771,2.3577
+VIVOSDEV01_R176,vivos_test_563,clean,3.438,để tàu không phải cưỡi cầu tàu,để tàu không phải cưỡi cầu tàu,0.0,0.0,transcribed,[],0.9991142857142857,2.4154
+VIVOSDEV01_R180,vivos_test_563,clean,3.938,bàn chổi sơn bằng bông mềm rất phổ biến,bàn chổi sơn bằng bông mềm rất phổ biến,0.0,0.0,transcribed,[],0.9900666666666668,2.8091
+VIVOSDEV01_R187,vivos_test_563,clean,2.75,thật sự mà là bởi lòng hận thù,thực sự mà là bởi lòng hận hù,0.25,0.1,transcribed,[],0.9990625000000001,2.541
+VIVOSDEV01_R188,vivos_test_563,clean,3.438,việc quy tội để bùng nổ loại sách này là do,việc quy tội để bùng nổ loại sách này là do,0.0,0.0,transcribed,[],0.9994636363636363,2.396
+VIVOSDEV01_T002,vivos_test_563,clean,1.969,cũng chưa biết nữa,cũng chưa biết nữa,0.0,0.0,transcribed,[],0.9999750000000001,2.0932
+VIVOSDEV01_T030,vivos_test_563,clean,1.938,xuân này em không về,xuân này em không về,0.0,0.0,transcribed,[],0.99986,2.2623
+VIVOSDEV01_T038,vivos_test_563,clean,2.5,chắc sắp tới thu xếp đi du lịch thôi,chắc sắp tới hua xếp đi du lịch thôi,0.1111111111111111,0.05555555555555555,transcribed,[],0.9863444444444445,2.7289
+VIVOSDEV01_T043,vivos_test_563,clean,2.438,nó trốn mất tiêu rồi còn đâu,nó trốn mất tiêu rồi còn đâu,0.0,0.0,transcribed,[],0.9993,2.5036
+VIVOSDEV01_T048,vivos_test_563,clean,2.375,thằng đó có cái miệng như đàn bà,thằng đó có cái miệng như đàn bà,0.0,0.0,transcribed,[],0.9999625000000001,2.2117
+VIVOSDEV02_R076,vivos_test_563,clean,2.969,thay vì bốn giờ như trước đây,thay vì bốn giờ như trước đây,0.0,0.0,transcribed,[],0.9931285714285715,2.4488
+VIVOSDEV02_R079,vivos_test_563,clean,4.031,hầu hết nang này có nguồn gốc từ gân cơ chân ngỗng,hầu hết chai này có nguồn gốc từ gân cơ chân ngỗng,0.08333333333333333,0.08,transcribed,[],0.9655583333333334,2.5414
+VIVOSDEV02_R087,vivos_test_563,clean,4.688,tiếng mã tấu sắc lạnh chạm nhau và cả tiếng rên rỉ,tuyến mã đối sách lặn chạm nhau và cả tuyến lên rỉ,0.5,0.28,transcribed,[],0.8932000000000001,2.6458
+VIVOSDEV02_R089,vivos_test_563,clean,4.75,có hẳn một loạt bài viết chuyên đề về quản trị thương hiệu,có hẳn một là bài viết chuyên đề về quản trị thương hiệu,0.07692307692307693,0.05172413793103448,transcribed,[],0.978376923076923,2.7052
+VIVOSDEV02_R091,vivos_test_563,clean,3.0,hợp với hương vị đầu xuân,hợp với hương vị đầu xuân,0.0,0.0,transcribed,[],0.9992333333333333,3.5552
+VIVOSDEV02_R099,vivos_test_563,clean,5.062,ổng nói ở sài gòn ổng đã làm ông hội đồng như thế nào,ổng nói ở sài gòn ổng đã làm ông hội đồng như thế nào,0.0,0.0,transcribed,[],0.9917642857142858,3.0417
+VIVOSDEV02_R106,vivos_test_563,clean,2.625,trở nên thụ động,trở nên thụ động,0.0,0.0,transcribed,[],0.9996750000000001,3.8796
+VIVOSDEV02_R122,vivos_test_563,clean,2.562,cũng khiến cho họ dè dặt,cũng khiến cho họ dè dặt,0.0,0.0,transcribed,[],0.9998999999999999,2.4426
+VIVOSDEV02_R130,vivos_test_563,clean,4.406,chị gặn hỏi anh thề sống thề chết là không có,chị cảnh hỏi anh thề sống thề chết là không có,0.09090909090909091,0.06666666666666667,transcribed,[],0.9835727272727272,2.553
+VIVOSDEV02_R132,vivos_test_563,clean,3.875,điện thoại reng nhưng ta cũng phải nhấc máy đúng không,tiện thoại ren nhưng ta cũng phải nhấc máy đúng không,0.18181818181818182,0.037037037037037035,transcribed,[],0.9482818181818182,2.286
+VIVOSDEV02_R135,vivos_test_563,clean,3.719,cũng thuộc loại dày đặc nhất trong hệ mặt trời,cũng thuộc loại giày đặc nhất trong hệ mặt trời,0.1,0.043478260869565216,transcribed,[],0.9858800000000001,2.4167
+VIVOSDEV02_R137,vivos_test_563,clean,3.562,các vụ tham nhũng và bê bối kinh tế,các vụ tham nhũng và bê bối kinh tế,0.0,0.0,transcribed,[],0.9999777777777779,2.3506
+VIVOSDEV02_R149,vivos_test_563,clean,4.75,chúng cứ cố lùi lại mặc dù vướng víu gông xiềng,chúng cứ có lùi lại mặc dù vướng phiếu gông xuyền,0.2727272727272727,0.1702127659574468,transcribed,[],0.9372272727272727,2.3492
+VIVOSDEV02_R154,vivos_test_563,clean,5.188,bọn buôn dự án chạy chọt bày ra các dự án để kiếm chác,bọn buôn dự án chạy chọt bày ra các dự án để kiểm tra,0.14285714285714285,0.09259259259259259,transcribed,[],0.98395,2.5813
+VIVOSDEV02_R164,vivos_test_563,clean,3.656,các chương trình ca nhạc phần lớn đều không đột phá,các chương trình ca nhạc phần lớn đều không đột phá,0.0,0.0,transcribed,[],0.9998363636363637,2.2746
+VIVOSDEV02_R170,vivos_test_563,clean,4.938,rồi chạy sang gõ cửa phòng ba le hai dấm dúi,rồi chạy sang gõ cửa phòng ba lên hai dấm dúi,0.09090909090909091,0.045454545454545456,transcribed,[],0.9822636363636363,2.4348
+VIVOSDEV02_R173,vivos_test_563,clean,3.219,để trả trở lại đại dương,để chả trở lại đại dương,0.16666666666666666,0.08333333333333333,transcribed,[],0.9934833333333334,2.2378
+VIVOSDEV02_R181,vivos_test_563,clean,4.125,nàng có đôi mắt to sâu và vầng trán rộng mênh mông,nàng có đôi mắt to sâu và bình trán rộng mênh mông,0.08333333333333333,0.06,transcribed,[],0.9748833333333334,2.7951
+VIVOSDEV02_R192,vivos_test_563,clean,4.938,tôi tự hỏi phải chăng đó là do dan còn quá trẻ,tôi tự hỏi phải tranh toán là do yang còn quá trẻ,0.25,0.21739130434782608,transcribed,[],0.9318333333333334,2.4728
+VIVOSDEV02_R195,vivos_test_563,clean,4.062,ủy ban châu âu kêu gọi những quốc gia phát triển còn lại,ủy ban châu âu kêu gọi những quốc gia phát triển còn lại,0.0,0.0,transcribed,[],0.9850461538461539,2.3401
+VIVOSDEV02_R200,vivos_test_563,clean,3.344,và khi chúng ta sao nhãng công việc của mình,và khi chúng ta sa nhãn công việc của mình,0.2,0.045454545454545456,transcribed,[],0.95339,3.129
+VIVOSDEV02_T004,vivos_test_563,clean,2.938,hôm nay em có tới năm khách,hôm nay em có tới năm khác,0.14285714285714285,0.037037037037037035,transcribed,[],0.992657142857143,3.0647
+VIVOSDEV02_T012,vivos_test_563,clean,3.375,mày dám chơi vợ tao tao phải giết mày,mày dám chê vợ tao tao sẽ giết mày,0.2222222222222222,0.16216216216216217,transcribed,[],0.9969777777777777,2.4703
+VIVOSDEV02_T013,vivos_test_563,clean,3.688,tống cổ hắn đi không được để hắn vào đây nữa,đóng cổ hắn đi không được để hắn vào đây nữa,0.09090909090909091,0.045454545454545456,transcribed,[],0.9954999999999999,2.1957
+VIVOSDEV02_T015,vivos_test_563,clean,3.375,hắn chơi vợ anh thì sao anh không chơi vợ hắn,hắn chê vợ anh thì sao anh không chê vợ anh,0.2727272727272727,0.15555555555555556,transcribed,[],0.9860727272727273,2.4263
+VIVOSDEV02_T022,vivos_test_563,clean,4.25,tháng trước chồng về mấy ngày mình nằm ngủ thấy ấm kinh khủng,tháng trưa trộm về mấy ngày mình nằm ngủ thấy ấm kinh khủng,0.15384615384615385,0.11475409836065574,transcribed,[],0.9752384615384616,2.5038
+VIVOSDEV02_T031,vivos_test_563,clean,2.25,cho em góp một viên gạch,cho em góp một viên gạc,0.16666666666666666,0.041666666666666664,transcribed,[],0.9964,2.2098
+VIVOSDEV02_T043,vivos_test_563,clean,3.781,đi kiểm tra lại bác sĩ khuyên nên mổ nội soi,đi kiểm tra lại bác sĩ khuyên nên mổ nội soi,0.0,0.0,transcribed,[],0.9813999999999999,2.3377
+VIVOSDEV02_T050,vivos_test_563,clean,3.312,anh bị đẩy từ hà nội vào sài gòn,anh bị đẩy từ hà nội và sài gòn,0.1111111111111111,0.03125,transcribed,[],0.9449111111111113,2.3298
+VIVOSDEV03_R092,vivos_test_563,clean,2.5,để chọn máy in cho phù hợp,để chọn máy in cho phù hợp,0.0,0.0,transcribed,[],1.0,2.2996
+VIVOSDEV03_R109,vivos_test_563,clean,1.656,phù hợp cho mọi cân nặng,phù hợp cho mọi cân nặng,0.0,0.0,transcribed,[],0.9934,2.2431
+VIVOSDEV03_R113,vivos_test_563,clean,2.625,vì bạn có thể lảy cò từng phát một,vì bạn có thể lẫy cò từng phát một,0.1111111111111111,0.029411764705882353,transcribed,[],0.9848555555555555,2.316
+VIVOSDEV03_R117,vivos_test_563,clean,1.781,vai trò của chế độ dinh dưỡng,vai trò của chế độ dinh dưỡng,0.0,0.0,transcribed,[],0.9999857142857144,2.2657
+VIVOSDEV03_R119,vivos_test_563,clean,1.406,không hiểu sao,không hiểu sao,0.0,0.0,transcribed,[],0.9998333333333335,2.0844
+VIVOSDEV03_R120,vivos_test_563,clean,2.062,khiến phụ huynh hiểu nhầm,khiến phụ huynh hiểu nhầm,0.0,0.0,transcribed,[],0.9999399999999999,2.1453
+VIVOSDEV03_R125,vivos_test_563,clean,1.844,mỗi khi cơn gió đến,mỗi khi cơn gió đến,0.0,0.0,transcribed,[],0.9999,2.1662
+VIVOSDEV03_R136,vivos_test_563,clean,3.438,này bón cho con thương đỡ yếu đau còi cọc,này bón cho con thương đỡ yếu đau còi cọc,0.0,0.0,transcribed,[],0.99802,2.2373
+VIVOSDEV03_R142,vivos_test_563,clean,2.5,trong tư thế phi ngựa chồm lên,trong tư thế phi ngựa chồm lên,0.0,0.0,transcribed,[],0.9887714285714286,2.3585
+VIVOSDEV03_R144,vivos_test_563,clean,1.625,mà cũng đầy thanh khiết,mà cũng đầy thân thiết,0.4,0.13043478260869565,transcribed,[],0.9995200000000001,2.1877
+VIVOSDEV03_R148,vivos_test_563,clean,3.0,một vụ chập điện đã khiến ngọn lửa bùng lên,một vụ chập điện đã khiến ngọn lửa buồn lên,0.1,0.06976744186046512,transcribed,[],0.9958200000000001,2.2491
+VIVOSDEV03_R149,vivos_test_563,clean,1.562,bà con chòm xóm,bà con chòm sớm,0.25,0.13333333333333333,transcribed,[],0.9604750000000001,2.2193
+VIVOSDEV03_R156,vivos_test_563,clean,2.875,đây là mức lãi suất thấp nhất qua các phiên đấu thầu,đây là mức lãi suất thấp nhất qua các phiên đấu thầu,0.0,0.0,transcribed,[],0.9999833333333333,2.2662
+VIVOSDEV03_R160,vivos_test_563,clean,2.156,dọc hai bên sông ngàn sâu,dọc hai bên sông ngàn sâu,0.0,0.0,transcribed,[],0.9997666666666668,2.4753
+VIVOSDEV03_R163,vivos_test_563,clean,1.625,nhưng oái ăm thay,nhưng oái oăm thay,0.25,0.058823529411764705,transcribed,[],0.977,2.2076
+VIVOSDEV03_R180,vivos_test_563,clean,1.562,sau cải cách,sao cải cách,0.3333333333333333,0.08333333333333333,transcribed,[],0.9448,2.078
+VIVOSDEV03_R182,vivos_test_563,clean,2.75,một kế hoạch tương tự được áp dụng ở anh,một kế hoạch tương tự được áp dụng ở anh,0.0,0.0,transcribed,[],1.0,2.2732
+VIVOSDEV03_R191,vivos_test_563,clean,1.688,cỡi ngựa đi thi,cởi ngựa đi thi,0.25,0.06666666666666667,transcribed,[],0.953175,2.1873
+VIVOSDEV03_R193,vivos_test_563,clean,1.438,ôi dào,ôi dào,0.0,0.0,transcribed,[],0.8866499999999999,2.1317
+VIVOSDEV03_R195,vivos_test_563,clean,3.062,không một chiếc xe lạ nào có thể mon men vào được,không một chiếc xe lạ nào có thể mong men vào được,0.08333333333333333,0.02040816326530612,transcribed,[],0.9925833333333333,2.199
+VIVOSDEV03_R198,vivos_test_563,clean,2.562,rồi đi khắp nơi tìm thầy chữa bệnh cho anh,rồi đi khắp nơi tìm thầy chữa bệnh cho anh,0.0,0.0,transcribed,[],0.9999800000000001,2.5425
+VIVOSDEV03_T009,vivos_test_563,clean,1.906,bác đang suy nghĩ gì thế,bà đang suy nghĩ gì thế,0.16666666666666666,0.08333333333333333,transcribed,[],0.947,2.2689
+VIVOSDEV03_T017,vivos_test_563,clean,2.406,bác vẫn chưa trả tiền cho tôi đây nhé,bác vẫn chưa trả tiền cho tôi đấy nhé,0.1111111111111111,0.02702702702702703,transcribed,[],0.9646444444444443,2.185
+VIVOSDEV03_T018,vivos_test_563,clean,1.75,tôi đang bận họp,tôi đang bận họp,0.0,0.0,transcribed,[],0.9996750000000001,2.1562
+VIVOSDEV03_T023,vivos_test_563,clean,2.812,cướp đầy đường công an chỉ lo hạch sách,cướp đầy đường công an chỉ lo hạch sách,0.0,0.0,transcribed,[],0.9892777777777779,2.2842
+VIVOSDEV03_T035,vivos_test_563,clean,2.312,mẹ ơi có mua đồ cho con không,mẹ ơi có mua đồ cho con không,0.0,0.0,transcribed,[],0.9999875,2.1404
+VIVOSDEV03_T041,vivos_test_563,clean,2.531,con chó lủi thủi đi theo chủ nó,con chó lưỡi thủi đi theo chủ nó,0.125,0.06451612903225806,transcribed,[],0.98535,2.3094
+VIVOSDEV03_T047,vivos_test_563,clean,2.281,trong phim có nhiều cảnh chém giết,trong phim có nhiều cảnh chém giết,0.0,0.0,transcribed,[],0.9999428571428571,2.2817
+VIVOSDEV03_T048,vivos_test_563,clean,2.25,diễn viên chính đứng như khúc gỗ,diễn viên chính đứng như khúc gỗ,0.0,0.0,transcribed,[],0.9999714285714286,2.182
+VIVOSDEV04_R056,vivos_test_563,clean,3.094,gí hòn than vào rơm,ghí hoàng thân vào rơm,0.6,0.2631578947368421,transcribed,[],0.9440999999999999,2.7516
+VIVOSDEV04_R063,vivos_test_563,clean,3.875,cháu sốt nên rẹo rọc suốt đêm,cháu sốc năn rẻo rọc suốt đêm,0.42857142857142855,0.10344827586206896,transcribed,[],0.9082,2.9425
+VIVOSDEV04_R081,vivos_test_563,clean,3.188,và tôi thấy hoa vạn thọ vàng ươm,và tôi thấy hoa vạn thọ vàng ươm,0.0,0.0,transcribed,[],0.9902625,2.6874
+VIVOSDEV04_R086,vivos_test_563,clean,5.125,tay kia xách một tay gióng mang chiếc vịm lớn,tay kia xách một tay giống mang chiếc vệ lớn,0.2,0.06666666666666667,transcribed,[],0.9377699999999999,2.4801
+VIVOSDEV04_R089,vivos_test_563,clean,2.312,ngủ trên nệm không phù hợp,lũ tranh nệm không phù hợp,0.3333333333333333,0.19230769230769232,transcribed,[],0.9837833333333332,3.5029
+VIVOSDEV04_R092,vivos_test_563,clean,3.062,bị các cô gái bao vây ráo riết,bị cất cô gái bao vây ráo riết,0.125,0.06666666666666667,transcribed,[],0.9939874999999999,3.2993
+VIVOSDEV04_R095,vivos_test_563,clean,4.25,trơ trọi giữa đồng cái nhìn khắc khoải,trơ trại giữa đồng cái nhìn khoắc khoải,0.25,0.05263157894736842,transcribed,[],0.865275,2.3192
+VIVOSDEV04_R097,vivos_test_563,clean,2.375,ngoài việc phát hiện kẻ thù,ngoài việc phát hiện kẻ thù,0.0,0.0,transcribed,[],0.9994999999999999,2.2474
+VIVOSDEV04_R100,vivos_test_563,clean,1.375,bà nói,bà nói,0.0,0.0,transcribed,[],0.9999,2.1165
+VIVOSDEV04_R114,vivos_test_563,clean,2.812,cũng chẳng còn xúng xính quần áo mới,cũng chẳng còn xúng xính quần áo mới,0.0,0.0,transcribed,[],0.9994500000000001,2.7752
+VIVOSDEV04_R118,vivos_test_563,clean,2.406,trẻ em đâu có chướng ngại vật,trẻ em đâu có chướng ngại vật,0.0,0.0,transcribed,[],0.9960000000000001,2.2684
+VIVOSDEV04_R126,vivos_test_563,clean,2.406,tôi không nỡ làm cô bé thất vọng,tôi không nỡ làm cô bé thất vọng,0.0,0.0,transcribed,[],0.9856125,2.2275
+VIVOSDEV04_R127,vivos_test_563,clean,3.469,rất nhiều gửi gắm và kỳ vọng vào ông,rất nhiều gửi gắm và kỳ vọng vào ông,0.0,0.0,transcribed,[],0.9979,2.2498
+VIVOSDEV04_R129,vivos_test_563,clean,2.188,đang thảo luận về đề xuất,đang thảo luận về đề xuất,0.0,0.0,transcribed,[],0.9996666666666667,2.5599
+VIVOSDEV04_R132,vivos_test_563,clean,3.375,chủ tịch nước đã đến kiểm tra tiến độ thi công,chủ tịch nước đã đến kiểm tra tiến độ thi công,0.0,0.0,transcribed,[],0.996490909090909,2.9894
+VIVOSDEV04_R149,vivos_test_563,clean,4.722,một cô gái váy ngắn cũn cỡn chạy lên hỏi,một cô gái váy ngắn cũng cẩn chạy lên hỏa,0.3,0.075,transcribed,[],0.93842,2.3419
+VIVOSDEV04_R152,vivos_test_563,clean,4.531,sẽ không khiến bạn trông gầy như những trang phục một màu,sẽ không khiến bạn trông gầy như những trang phục một màu,0.0,0.0,transcribed,[],0.9928333333333335,2.3024
+VIVOSDEV04_R162,vivos_test_563,clean,2.688,cô chỉ mới vào lưới nhặt bóng hai lần,cô chỉ mới vào lưới nhặt bóng hai lần,0.0,0.0,transcribed,[],0.9829666666666667,2.3481
+VIVOSDEV04_R182,vivos_test_563,clean,3.562,hoặc chỉ biểu hiện bằng các rối loạn co bóp,hạt chỉ biểu hiện bằng các rối loạn co bóp,0.1,0.06976744186046512,transcribed,[],0.90816,2.2955
+VIVOSDEV04_R186,vivos_test_563,clean,1.938,nhằm tạo ra sự hấp dẫn,nhằm tạo ra sự hấp dẫn,0.0,0.0,transcribed,[],0.9998999999999999,2.193
+VIVOSDEV04_R187,vivos_test_563,clean,3.25,thứ âm thanh không chỉ cảm nhận bằng thính giác,thứ âm thanh không chỉ cảm nhận bằng thính giác,0.0,0.0,transcribed,[],0.96933,2.3041
+VIVOSDEV04_R189,vivos_test_563,clean,3.375,từ nỗi cô đơn của một cô bé bị cha mẹ bỏ quên,đường nữ cô đơn của một cô bé bị cha mẹ bỏ quên,0.15384615384615385,0.15555555555555556,transcribed,[],0.9720769230769231,2.3208
+VIVOSDEV04_T002,vivos_test_563,clean,3.0,có trả tiền cho bố không thì bảo,có trả tiền cho bố không thì bảo,0.0,0.0,transcribed,[],0.9913124999999999,2.5423
+VIVOSDEV04_T003,vivos_test_563,clean,2.969,nhận được tin này gọi lại cho tôi gấp,nhận được tin này gọi lại cho tôi gấp,0.0,0.0,transcribed,[],0.9997999999999999,2.3759
+VIVOSDEV04_T009,vivos_test_563,clean,2.562,cho tôi nhắn đại tin nào cũng được,cho tôi nhấn đậy tin nào cũng được,0.25,0.08823529411764706,transcribed,[],0.964925,2.2539
+VIVOSDEV04_T015,vivos_test_563,clean,3.344,một là gặp lại tất cả các em phò,một là gặp lại tất cả các em phò,0.0,0.0,transcribed,[],0.9829555555555556,2.2018
+VIVOSDEV04_T018,vivos_test_563,clean,2.594,những sai lầm khi đi chọn khách sạn,những sai lầm khi đi chọn khách sạn,0.0,0.0,transcribed,[],0.9999375,2.1796
+VIVOSDEV04_T029,vivos_test_563,clean,3.062,anh đi công tác cần thơ tuần sau mới về,anh đi công tác cần thơ tuần sau mới về,0.0,0.0,transcribed,[],0.9995800000000001,2.3124
+VIVOSDEV04_T032,vivos_test_563,clean,2.0,cam sành lột vỏ còn chua,căm sành lột vỏ còn chua,0.16666666666666666,0.041666666666666664,transcribed,[],0.9484333333333334,2.2502
+VIVOSDEV04_T035,vivos_test_563,clean,2.688,anh khen em đẹp em chê anh già,anh khen em đẹp em chia anh già,0.125,0.06666666666666667,transcribed,[],0.9779125000000001,2.1245
+VIVOSDEV04_T044,vivos_test_563,clean,2.688,ba này chỉ giỏi bốc phét,ba này chìa giỏ bốc phát,0.5,0.16666666666666666,transcribed,[],0.9610833333333333,2.2867
+VIVOSDEV05_119,vivos_test_563,clean,3.938,mà còn bị những bộ mặt lạnh te kia hoạnh họe,mà còn bị những bộ mặt lạnh te kia hoạnh họa,0.09090909090909091,0.022727272727272728,transcribed,[],0.9445090909090909,2.2983
+VIVOSDEV05_120,vivos_test_563,clean,3.031,nhưng mùi hôi vẫn xộc vào tận óc,nhưng mùi hôi vẫn sọc vào tận óc,0.125,0.0625,transcribed,[],0.9774624999999999,2.4414
+VIVOSDEV05_125,vivos_test_563,clean,2.25,đang làm việc không ngừng nghỉ,đang làm việc không ngừng nghỉ,0.0,0.0,transcribed,[],0.9999833333333333,2.2019
+VIVOSDEV05_129,vivos_test_563,clean,2.344,thu hút rất là nhiều loài chim,thu hút rất là nhiều loài chim,0.0,0.0,transcribed,[],0.999957142857143,2.1728
+VIVOSDEV05_135,vivos_test_563,clean,3.5,khi cô thể hiện không mấy thành công ở lễ khai mạc,khi cô thể hiện không mấy thành công ở lễ khai mạc,0.0,0.0,transcribed,[],1.0,2.5794
+VIVOSDEV05_136,vivos_test_563,clean,2.125,ra hiệu cho tôi im lặng,ra hiệu cho tôi im lặng,0.0,0.0,transcribed,[],0.9995166666666666,2.1664
+VIVOSDEV05_143,vivos_test_563,clean,4.344,nhỏ đưa tay ra cào hết bùn khô trên cổ tớ,nhỏ đưa tay ra cào hết bùn khô trên cổ tớ,0.0,0.0,transcribed,[],0.9885000000000002,2.4983
+VIVOSDEV05_150,vivos_test_563,clean,2.688,ngồi chồm chồm cách chỉ mấy mét,ngồi chồm chồm cách chỉ mấy mét,0.0,0.0,transcribed,[],0.9977571428571429,2.2562
+VIVOSDEV05_155,vivos_test_563,clean,2.375,nửa vòng trái đất hơn bảy năm,nửa vòng trái đất hơn bảy năm,0.0,0.0,transcribed,[],0.9979142857142858,2.1496
+VIVOSDEV05_170,vivos_test_563,clean,3.875,chậm nắm bắt xu hướng phát triển công nghệ mới,chậm nắm bắt xu hướng phát triển công nghệ mới,0.0,0.0,transcribed,[],0.9999800000000001,2.4232
+VIVOSDEV05_185,vivos_test_563,clean,2.562,mà mường tượng ra hình bóng mẹ,mà mường tượng ra hình bóng mẹ,0.0,0.0,transcribed,[],0.9935571428571429,2.3641
+VIVOSDEV05_189,vivos_test_563,clean,2.438,mỗi người một số phận em à,mỗi người một số phận em à,0.0,0.0,transcribed,[],0.9999285714285715,2.1096
+VIVOSDEV05_199,vivos_test_563,clean,2.938,lần lữa mãi mới gặp được tuyên,lần nữa mải mới gặp được tuyên,0.2857142857142857,0.06666666666666667,transcribed,[],0.9691714285714286,2.2344
+VIVOSDEV05_200,vivos_test_563,clean,2.75,làm đường dây để nối các mảnh đời,làm đường dây để nối các mảnh đời,0.0,0.0,transcribed,[],0.9999375000000001,2.2687
+VIVOSDEV05_202,vivos_test_563,clean,3.844,chị hai chủ quán nghe bàn tán rôm rả cũng ra góp chuyện,chị hai chủ quán nghe bàn tán rôm rả cũng ra góp chuyện,0.0,0.0,transcribed,[],0.9993769230769232,2.4019
+VIVOSDEV05_206,vivos_test_563,clean,4.562,tức khắc ập về kéo mọi người thứ trở lại thời hoang sơ,tức khắc ập về kéo mọi người thứ trở lại thời hoang sơ,0.0,0.0,transcribed,[],0.9997153846153846,2.5123
+VIVOSDEV05_209,vivos_test_563,clean,3.188,tên gọi tại địa phương là trắc thối,tên gọi tại địa phương là trắc thoái,0.125,0.05714285714285714,transcribed,[],0.992475,2.1944
+VIVOSDEV05_212,vivos_test_563,clean,2.625,bốn chiếc trống đại phèng la,bốn chiếc trống đại phèn la,0.16666666666666666,0.03571428571428571,transcribed,[],0.9983333333333334,2.2472
+VIVOSDEV05_226,vivos_test_563,clean,2.062,một cú ngoặt không chính xác,một cú ngoặt không chính xác,0.0,0.0,transcribed,[],0.9765666666666667,2.2004
+VIVOSDEV05_231,vivos_test_563,clean,3.625,mới đây nhất là các tiểu vương quốc ả rập thống nhất,mới đây nhất là các tiểu vương quốc ả rập thống nhất,0.0,0.0,transcribed,[],0.9998916666666666,2.2184
+VIVOSDEV05_238,vivos_test_563,clean,3.062,cộng đồng người mê toán học trên toàn thế giới,cộng đồng người mê toán học trên toàn thế giới,0.0,0.0,transcribed,[],0.99997,2.467
+VIVOSDEV05_249,vivos_test_563,clean,4.125,tôi nghĩ thủ tướng sẽ không né tránh bất cứ câu hỏi nào,tôi nghĩ thủ tướng sẽ không né tránh bất cứ câu hỏi nào,0.0,0.0,transcribed,[],0.9999692307692308,2.3824
+VIVOSDEV05_251,vivos_test_563,clean,2.5,bọn buôn lậu ma túy và vũ khí,bọn buôn lậu ma tuý và vũ khí,0.125,0.06896551724137931,transcribed,[],0.9991,2.2319
+VIVOSDEV05_261,vivos_test_563,clean,3.562,lại quay ra tập viết báo rồi gửi vu vơ,lại quay ra tập viết báo rồi gửi vu vơ,0.0,0.0,transcribed,[],0.99627,2.5229
+VIVOSDEV05_263,vivos_test_563,clean,4.438,nghe tiếng xình xịch xa xa thì đoán trúng phóc là hút hầm cầu,nghe tiếng xình xịch xa xa thì đoán trúng phóc là hút hầm cầu,0.0,0.0,transcribed,[],0.9878357142857144,2.4034
+VIVOSDEV05_270,vivos_test_563,clean,2.188,chưa rục rịch gì,chưa rục rịch gì,0.0,0.0,transcribed,[],0.9728749999999999,2.2117
+VIVOSDEV05_286,vivos_test_563,clean,3.625,thế nhưng khi giá phôi thép thế giới cao dần,thế nhưng khi giá phôi thép thế giới cao dần,0.0,0.0,transcribed,[],0.99907,2.3424
+VIVOSDEV05_295,vivos_test_563,clean,2.812,làm hỏng các thiết bị của tên lửa,làm hỏng các thiết bị của tên lửa,0.0,0.0,transcribed,[],0.9999625,2.2903
+VIVOSDEV06_070,vivos_test_563,clean,3.812,rồi khề khà đôi câu vọng cổ với chân chuột,rồi khề khà đôi câu vọng cổ với chân chuột,0.0,0.0,transcribed,[],0.9981100000000002,2.2593
+VIVOSDEV06_078,vivos_test_563,clean,2.906,ở lớp nấu ăn gia đình,ở lớp nấu ăn gia đình,0.0,0.0,transcribed,[],0.9999833333333333,2.224
+VIVOSDEV06_079,vivos_test_563,clean,4.438,mà bạn có thể tham khảo để làm đẹp gian bếp,mà bạn có thể tham khảo để làm đẹp gian bếp,0.0,0.0,transcribed,[],0.9999727272727273,2.9149
+VIVOSDEV06_098,vivos_test_563,clean,4.531,cái vị chát chát và đắng ngắt của cà phê nguyên chất,cái vị chát chát và đắng ngắt của cà phê nguyên chất,0.0,0.0,transcribed,[],0.9991333333333333,2.3083
+VIVOSDEV06_103,vivos_test_563,clean,4.812,các em nhỏ sẽ không còn phải đi trên những chuyến đò nguy hiểm,các em nhỏ sẽ không còn phải đi trên những chuyến đò nguy hiểm,0.0,0.0,transcribed,[],0.9961,2.3387
+VIVOSDEV06_108,vivos_test_563,clean,3.875,làm cô nàng rọ rạy thức trắng cả đêm,làm cô nàng rọ ray thức trắng cả đêm,0.1111111111111111,0.027777777777777776,transcribed,[],0.9590888888888889,2.2219
+VIVOSDEV06_117,vivos_test_563,clean,4.719,giải quyết khối ung nhọt này phải cần đến một cuộc đại phẫu nghiêm túc,giải quyết khối un nhọt này phải cần đến một cuộc đại phẫu nghiêm túc,0.06666666666666667,0.014285714285714285,transcribed,[],0.9556600000000001,2.4581
+VIVOSDEV06_126,vivos_test_563,clean,3.938,thậm chí càng giống áo quí nàng càng mốt,thậm chí càng giống áo quý nàng càng mốt,0.1111111111111111,0.025,transcribed,[],0.9970333333333333,2.3329
+VIVOSDEV06_139,vivos_test_563,clean,3.062,còn bộ khang hi từ điển,còn bộ khang thi từ điển,0.16666666666666666,0.043478260869565216,transcribed,[],0.9879833333333335,2.1798
+VIVOSDEV06_143,vivos_test_563,clean,4.438,đôi môi mẹ phai son mấp máy một lời ca hoang hoải,đôi môi mẹ phai son mấp máy một lời ca hoang hoải,0.0,0.0,transcribed,[],0.9835083333333335,2.1899
+VIVOSDEV06_157,vivos_test_563,clean,4.719,số khác suy đoán rằng anh ta hành động ác tâm vậy,số khác suy đoán rằng anh ta hành động ác tâm vậy,0.0,0.0,transcribed,[],0.9999750000000001,2.7773
+VIVOSDEV06_168,vivos_test_563,clean,1.625,làm khung,làm khung,0.0,0.0,transcribed,[],0.99995,2.3362
+VIVOSDEV06_184,vivos_test_563,clean,4.812,hoặc bạn sẽ đến đấy với một tâm trạng chán ngán vô cùng,hoặc bạn sẽ đến đấy với một tâm trạng chán ngán vô cùng,0.0,0.0,transcribed,[],0.992446153846154,2.202
+VIVOSDEV06_195,vivos_test_563,clean,3.0,phải được thực hiện trên cơ sở,phải được thực hiện trên cơ sở,0.0,0.0,transcribed,[],0.9999571428571429,2.2464
+VIVOSDEV06_210,vivos_test_563,clean,2.844,hai mươi sáu hai mươi bảy,hai mươi sáu hai mươi bảy,0.0,0.0,transcribed,[],0.99985,2.2115
+VIVOSDEV06_212,vivos_test_563,clean,2.25,ba mươi ba mươi mốt,ba mươi ba mươi mốt,0.0,0.0,transcribed,[],0.9999600000000001,2.0736
+VIVOSDEV06_222,vivos_test_563,clean,2.75,năm mươi năm mươi mốt,năm mươi năm mươi mốt,0.0,0.0,transcribed,[],1.0,2.1811
+VIVOSDEV06_240,vivos_test_563,clean,3.375,tám mươi sáu tám mươi bảy,tám mươi sáu tám mươi bảy,0.0,0.0,transcribed,[],0.9999666666666668,2.183
+VIVOSDEV06_241,vivos_test_563,clean,2.812,tám mươi tám tám mươi chín,tám mươi tám tám mươi chín,0.0,0.0,transcribed,[],1.0,2.439
+VIVOSDEV06_247,vivos_test_563,clean,3.062,một trăm một hai ba,một trăm một hai ba,0.0,0.0,transcribed,[],0.99986,2.1322
+VIVOSDEV06_248,vivos_test_563,clean,3.062,một ba năm bảy chín,một ba năm bảy chín,0.0,0.0,transcribed,[],0.99978,2.2477
+VIVOSDEV06_252,vivos_test_563,clean,3.031,nói trước bước không qua,nói trước bước không qua,0.0,0.0,transcribed,[],0.9995200000000001,2.3234
+VIVOSDEV06_253,vivos_test_563,clean,3.375,chẳng là mấy hôm nay tôi đau bụng quá,chẳng là mấy hôm nay tôi đau bụng quá,0.0,0.0,transcribed,[],0.9999444444444445,2.45
+VIVOSDEV06_261,vivos_test_563,clean,3.375,sao kết quả ra tệ vậy,sao kết quả ra tệ vậy,0.0,0.0,transcribed,[],0.9997999999999999,2.208
+VIVOSDEV06_272,vivos_test_563,clean,4.188,tôi chỉ muốn xem những đoạn hay mà thôi,tôi chỉ muốn xem những đoạn hay mà thôi,0.0,0.0,transcribed,[],1.0,2.3518
+VIVOSDEV06_285,vivos_test_563,clean,3.562,công ty trách nhiệm hữu hạn ăn uống,công ty trách nhiệm hữu hạn ăn uống,0.0,0.0,transcribed,[],0.998275,2.2413
+VIVOSDEV06_286,vivos_test_563,clean,3.844,phí chuyển giao công nghệ là ba chục ngàn đồng,phí chuyển giao công nghệ là ba chục ngàn đồng,0.0,0.0,transcribed,[],0.9998900000000001,2.2555
+VIVOSDEV06_287,vivos_test_563,clean,3.562,lương ba cọc ba đồng thì nuôi được ai,lương ba cọc ba đồng thì nuôi được ai,0.0,0.0,transcribed,[],0.9999666666666668,2.4482
+VIVOSDEV06_296,vivos_test_563,clean,2.562,cô ấy đã quá chén,cô ấy đã quá chén,0.0,0.0,transcribed,[],0.9999800000000001,2.3271
+VIVOSDEV07_093,vivos_test_563,clean,3.312,phục vụ cho mùa thi đại học đang đến sát sạt,phục vụ cho mùa thi đại học đang đến sát sạt,0.0,0.0,transcribed,[],0.9984909090909092,2.1871
+VIVOSDEV07_098,vivos_test_563,clean,3.375,trận chiến xích bích,trận chiến xích bích,0.0,0.0,transcribed,[],0.9831,2.0968
+VIVOSDEV07_107,vivos_test_563,clean,3.938,nguyên thứ trưởng bộ đại học và giáo dục chuyên nghiệp cũ,nguyên thứ trưởng bộ đại học và giáo dục chuyên nghiệp cũ,0.0,0.0,transcribed,[],0.9996666666666667,2.4408
+VIVOSDEV07_115,vivos_test_563,clean,3.781,vào cơ quan là anh hót giống hệt nhồng mới lột lưỡi vậy,vào cơ quan là anh hót giống hệt nhồng với lột lưỡi vậy,0.07692307692307693,0.01818181818181818,transcribed,[],0.9818846153846154,2.3236
+VIVOSDEV07_125,vivos_test_563,clean,3.562,áng chừng đã ngoại bảy mươi,án chừng đã ngoại bảy mươi,0.16666666666666666,0.037037037037037035,transcribed,[],0.9973833333333334,2.2409
+VIVOSDEV07_127,vivos_test_563,clean,2.125,có hai tác dụng tích cực,có hai tác dụng tích cực,0.0,0.0,transcribed,[],1.0,2.2436
+VIVOSDEV07_134,vivos_test_563,clean,2.844,tham gia giảng dạy là lực lượng đoàn viên,tham gia giảng dạy là lực lượng đoàn viên,0.0,0.0,transcribed,[],0.9999888888888889,2.3777
+VIVOSDEV07_138,vivos_test_563,clean,2.375,đó hẳn là một món quà,đó hẳn là một món quà,0.0,0.0,transcribed,[],1.0,2.2005
+VIVOSDEV07_141,vivos_test_563,clean,3.438,và khi thấy tôi vẫn kiên định trả lời trớt quớt,và khi thấy tôi vẫn kiên định trả lời trước guốc,0.18181818181818182,0.10638297872340426,transcribed,[],0.9502545454545455,2.3846
+VIVOSDEV07_151,vivos_test_563,clean,2.0,rô bót thông minh,robot thông minh,0.5,0.17647058823529413,transcribed,[],0.9739666666666666,2.153
+VIVOSDEV07_156,vivos_test_563,clean,2.875,đầu tiên là bà con mình vật vã làm ăn,đầu tiên là bà con mình vật vã làm ăn,0.0,0.0,transcribed,[],0.99976,2.2637
+VIVOSDEV07_168,vivos_test_563,clean,3.5,mà cho đến lúc đó được xem là của tư nhân,mà cho đến lúc đó được xem là của tư nhân,0.0,0.0,transcribed,[],0.999890909090909,2.3124
+VIVOSDEV07_170,vivos_test_563,clean,4.281,như lần này được nếm món giò thủ hoàn toàn làm từ tai heo,như lần này được đếm món giò thủ hoàn toàn làm từ tai heo,0.07142857142857142,0.017543859649122806,transcribed,[],0.9992285714285715,2.4618
+VIVOSDEV07_182,vivos_test_563,clean,4.031,những người hoài nghi nói rằng giữ được vật treo lủng lẳng trên người,những người hoài nghi nói rằng giữ được vật treo lủng lẳng trên người,0.0,0.0,transcribed,[],0.9979785714285716,2.6238
+VIVOSDEV07_185,vivos_test_563,clean,2.562,chíu chít gợi tình mẹ con sum họp,chiếu chít gợi tình mẹ con sum họp,0.125,0.06060606060606061,transcribed,[],0.9847375,2.2995
+VIVOSDEV07_190,vivos_test_563,clean,2.438,nơi có mấy tên trông rất gấu,nơi có mấy tên trông rất gấu,0.0,0.0,transcribed,[],0.9998571428571428,2.1737
+VIVOSDEV07_192,vivos_test_563,clean,1.906,nhiều người cho biết,nhiều người cho biết,0.0,0.0,transcribed,[],1.0,2.1707
+VIVOSDEV07_194,vivos_test_563,clean,2.938,nhiều trụ đá di tích nằm nghiêng ngả và vỡ nát,nhiều trụ đá di tích nằm nghiêng ngả và vỡ nát,0.0,0.0,transcribed,[],0.9998,2.3075
+VIVOSDEV07_195,vivos_test_563,clean,3.875,họ cũng luôn tránh xa những tình huống có thể gây hại cho họ,họ cũng luôn tránh xa những tình huống có thể gây hại cho họ,0.0,0.0,transcribed,[],0.9997642857142858,2.4456
+VIVOSDEV07_197,vivos_test_563,clean,4.062,trong cuộc sống của tôi chúng không dùng để kiếm ra lợi nhuận,trong cuộc sống của tôi chúng không dùng để kiếm ra lợi nhuận,0.0,0.0,transcribed,[],0.9999846153846155,2.3724
+VIVOSDEV07_209,vivos_test_563,clean,2.469,hai mươi bốn hai mươi lăm,hai mươi bốn hai mươi lăm,0.0,0.0,transcribed,[],0.9947499999999999,2.1967
+VIVOSDEV07_211,vivos_test_563,clean,2.375,hai mươi tám hai mươi chín,hai mươi tám hai mươi chín,0.0,0.0,transcribed,[],0.9958666666666666,2.213
+VIVOSDEV07_223,vivos_test_563,clean,2.562,năm mươi hai năm mươi ba,năm mươi hai năm mươi ba,0.0,0.0,transcribed,[],0.9999666666666668,2.215
+VIVOSDEV07_231,vivos_test_563,clean,2.562,sáu mươi tám sáu mươi chín,sáu mươi tám sáu mươi chín,0.0,0.0,transcribed,[],0.9996333333333333,2.265
+VIVOSDEV07_236,vivos_test_563,clean,2.281,bảy mươi tám bảy mươi chín,bảy mươi tám bảy mươi chín,0.0,0.0,transcribed,[],0.9993,2.4231
+VIVOSDEV07_246,vivos_test_563,clean,2.562,chín mươi tám chín mươi chín,chín mươi tám chín mươi chín,0.0,0.0,transcribed,[],0.9999833333333333,2.251
+VIVOSDEV07_264,vivos_test_563,clean,2.812,buổi sáng thành phố ô nhiễm hơn buổi trưa,buổi sáng thành phố ô nhiễm hơn buổi trưa,0.0,0.0,transcribed,[],0.9999888888888889,2.3263
+VIVOSDEV07_266,vivos_test_563,clean,2.562,nóng giận tôi đã lăng mạ anh,nóng giận tôi đã lăng mạ anh,0.0,0.0,transcribed,[],0.9656428571428571,2.2187
+VIVOSDEV07_295,vivos_test_563,clean,3.75,chủ tàu cho biết sẽ tiếp tục thương thuyết về số chi phí này,chủ tàu cho biết sẽ tiếp tục thương thuyết về số chi phí này,0.0,0.0,transcribed,[],0.9998928571428572,2.3859
+VIVOSDEV08_085,vivos_test_563,clean,4.156,việc đưa tín hiệu truyền hình trực tiếp bằng hệ thống cáp quang,việc đưa tín hiệu truyền hình trực tiếp bằng hệ thống cấp quan,0.15384615384615385,0.031746031746031744,transcribed,[],0.9997615384615385,2.5337
+VIVOSDEV08_090,vivos_test_563,clean,2.375,vì không có tiền đóng học phí,vì không có tiền đóng học phí,0.0,0.0,transcribed,[],0.9995571428571429,2.3154
+VIVOSDEV08_093,vivos_test_563,clean,4.25,thì bỗng nghe mấy tiếng oác oác từ vạt rừng phi lao,thì bỗng nghe mấy tiếng oác oác từ vặt rừng phi lao,0.08333333333333333,0.0196078431372549,transcribed,[],0.9570416666666666,2.4148
+VIVOSDEV08_100,vivos_test_563,clean,3.75,hay đảm bảo rằng ngày nào chúng cũng được đi những đôi tất sạch,hãy đảm bảo rằng ngày nào chúng cũng được đi những nơi tất sạch,0.14285714285714285,0.047619047619047616,transcribed,[],0.9910285714285714,2.3108
+VIVOSDEV08_127,vivos_test_563,clean,3.188,về việc mang đến cho các em niềm vui học,về việc mang đến cho các em niềm vui học,0.0,0.0,transcribed,[],0.9990600000000001,2.3175
+VIVOSDEV08_128,vivos_test_563,clean,2.625,có lẽ phải mất nhiều thời gian,có lẽ phải mất nhiều thời gian,0.0,0.0,transcribed,[],0.9995142857142857,2.18
+VIVOSDEV08_129,vivos_test_563,clean,3.875,nước gỗ trên chiếc đồng hồ đã bắt lên màu gụ bóng loáng,nước gỗ trên chiếc đồng hồ đã bắt lên màu gỗ bóng loáng,0.07692307692307693,0.01818181818181818,transcribed,[],0.9541769230769231,2.4611
+VIVOSDEV08_141,vivos_test_563,clean,4.812,khi sức ép biến mất chúng trở lại tình trạng mềm dẻo bình thường,khi sức ép biến mất chúng trở lại tình trạng mềm dẻo bình thường,0.0,0.0,transcribed,[],0.9989571428571428,3.3909
+VIVOSDEV08_143,vivos_test_563,clean,3.062,tham gia giảng dạy là lực lượng đoàn viên,tham gia giảng dạy là lực lượng đoàn viên,0.0,0.0,transcribed,[],0.9998888888888889,2.0214
+VIVOSDEV08_145,vivos_test_563,clean,2.688,và vải hoặc cói nhiều màu,và vải hoặc có nhiều màu,0.16666666666666666,0.04,transcribed,[],0.9985666666666666,2.2727
+VIVOSDEV08_159,vivos_test_563,clean,2.812,với người mẹ ở xóm chài long biên,với người mẹ ở xóm chài long biên,0.0,0.0,transcribed,[],0.9997875,2.1469
+VIVOSDEV08_163,vivos_test_563,clean,4.594,chương trình đã tạo được hiệu ứng tốt từ phía khán giả nhí,chương trình đã tạo được hiệu ứng tốt từ phía khán giả nhí,0.0,0.0,transcribed,[],0.9993923076923076,2.9461
+VIVOSDEV08_166,vivos_test_563,clean,3.625,dịch vụ kiểm tra sức khỏe định kỳ là một ý kiến hay,dịch vụ kiểm tra sức khoẻ định kỳ là một ý kiến hay,0.07692307692307693,0.0392156862745098,transcribed,[],0.9899076923076925,2.2053
+VIVOSDEV08_180,vivos_test_563,clean,3.125,chính sự lên sàn ồ ạt đó,chính sự lên sàn ồ ạt đó,0.0,0.0,transcribed,[],0.9996999999999999,2.2252
+VIVOSDEV08_182,vivos_test_563,clean,3.375,kết quả chỉ có vỏn vẹn ba người còn biết dệt,kết quả chỉ có vỏn vẹn ba người còn biết dẹp,0.09090909090909091,0.045454545454545456,transcribed,[],0.9953454545454545,2.2654
+VIVOSDEV08_193,vivos_test_563,clean,2.188,là tương đối có hiệu quả,là tương đối có hiệu quả,0.0,0.0,transcribed,[],0.9998333333333335,2.1873
+VIVOSDEV08_196,vivos_test_563,clean,2.812,phần lớn học sinh giàu có người nước ngoài,phần lớn học sinh giàu có người nước ngoài,0.0,0.0,transcribed,[],0.9999888888888889,2.4689
+VIVOSDEV08_201,vivos_test_563,clean,2.25,không một hai ba bốn,không một hai ba bốn,0.0,0.0,transcribed,[],0.9999600000000001,2.1256
+VIVOSDEV08_208,vivos_test_563,clean,2.25,hai mươi hai hai mươi ba,hai mươi hai hai mươi ba,0.0,0.0,transcribed,[],0.9970833333333333,2.0747
+VIVOSDEV08_210,vivos_test_563,clean,2.375,hai mươi sáu hai mươi bảy,hai mươi sáu hai mươi bảy,0.0,0.0,transcribed,[],0.99925,2.2247
+VIVOSDEV08_214,vivos_test_563,clean,2.812,ba mươi bốn ba mươi lăm,ba mươi bốn ba mươi lăm,0.0,0.0,transcribed,[],0.9997833333333334,4.0642
+VIVOSDEV08_222,vivos_test_563,clean,2.375,năm mươi năm mươi mốt,năm mươi năm mươi mốt,0.0,0.0,transcribed,[],0.9999600000000001,3.1213
+VIVOSDEV08_224,vivos_test_563,clean,2.375,năm mươi bốn năm mươi lăm,năm mươi bốn năm mươi lăm,0.0,0.0,transcribed,[],0.9999000000000001,2.5414
+VIVOSDEV08_233,vivos_test_563,clean,3.25,bảy mươi hai bảy mươi ba,bảy mươi hai bảy mươi ba,0.0,0.0,transcribed,[],0.9993833333333333,2.2618
+VIVOSDEV08_270,vivos_test_563,clean,1.875,nói thật đấy à,nói thật đấy à,0.0,0.0,transcribed,[],0.999025,2.181
+VIVOSDEV08_271,vivos_test_563,clean,2.375,quá tốt rồi,quá tốt rồi,0.0,0.0,transcribed,[],1.0,2.0593
+VIVOSDEV08_274,vivos_test_563,clean,1.812,tôi chết cùng với ánh trăng,tôi chết cùng với ánh trăng,0.0,0.0,transcribed,[],0.9988333333333334,2.185
+VIVOSDEV08_277,vivos_test_563,clean,2.5,đàn ông có hai thứ để buồn,đàn ông có hai thứ để buồn,0.0,0.0,transcribed,[],0.999957142857143,2.2348
+VIVOSDEV08_295,vivos_test_563,clean,2.875,giàu đổi bạn sang đổi vợ,giàu đổi bạn sang đổi vợ,0.0,0.0,transcribed,[],0.9929333333333333,2.1996
+VIVOSDEV08_300,vivos_test_563,clean,3.0,án mạng trên toa tàu tốc hành,án mạn trên toa tàu tốc hành,0.14285714285714285,0.034482758620689655,transcribed,[],0.9673142857142858,2.5754
+VIVOSDEV09_091,vivos_test_563,clean,1.906,nước chảy quá mạnh,nước chảy quá mạnh,0.0,0.0,transcribed,[],1.0,2.0664
+VIVOSDEV09_098,vivos_test_563,clean,3.688,khiến cả hai phải giận hờn vô lý,khiến cả hai phải giận hờn vô lý,0.0,0.0,transcribed,[],0.998725,2.3635
+VIVOSDEV09_106,vivos_test_563,clean,2.0,rồi chìm lỉm một thời gian,rồi chìm lỉm một thời gian,0.0,0.0,transcribed,[],0.9832333333333333,2.204
+VIVOSDEV09_110,vivos_test_563,clean,3.625,khi miệng vẫn ngậm bầu vú quắt queo,khi miệng vẫn ngậm bầu vú quắc queo,0.125,0.02857142857142857,transcribed,[],0.945225,2.2517
+VIVOSDEV09_134,vivos_test_563,clean,3.188,câu trả lời của ông ta rất khiếm nhã,câu trả lời của cổ ông ta rất hiếm nhã,0.2222222222222222,0.1111111111111111,transcribed,[],0.9768399999999999,2.2746
+VIVOSDEV09_139,vivos_test_563,clean,3.5,nếu chủ đầu tư không tự phá dỡ thì bị cưỡng chế,nếu chủ đầu tư không tự phái dở thì bị cưỡng chế,0.16666666666666666,0.0425531914893617,transcribed,[],0.9957916666666667,2.4398
+VIVOSDEV09_142,vivos_test_563,clean,3.875,về chuyện đang theo dõi bọn gián điệp nước ngoài,về chuyện đang theo dõi bọn gián điệp nước ngoài,0.0,0.0,transcribed,[],0.9974500000000001,2.3045
+VIVOSDEV09_144,vivos_test_563,clean,3.938,được cắt từ vỏ chăn bộ đội cũ của các ông bố ra,được cắt từ vỏ chân bộ đội cũ của các ông bố ra,0.07692307692307693,0.02127659574468085,transcribed,[],0.971576923076923,2.5067
+VIVOSDEV09_158,vivos_test_563,clean,3.562,sợ nhất là mùa mưa sấm sét đùng đoàng trên núi,sợ nhất là mùa mưa sấm sét đùng đoàn trên núi,0.09090909090909091,0.021739130434782608,transcribed,[],0.9727727272727272,2.3288
+VIVOSDEV09_159,vivos_test_563,clean,4.312,tức lấy sụn lành từ nơi không phải chịu lực ghép vào nơi hư,tức lấy sụn lành từ nơi không phải chịu lực ghép vào nơi hư,0.0,0.0,transcribed,[],0.988607142857143,2.3999
+VIVOSDEV09_163,vivos_test_563,clean,4.312,điều vô cùng quan trọng trong thời đại có quá nhiều hoạt động,điều vô cùng quan trọng trong thời đại có nhiều hoạt động,0.07692307692307693,0.06557377049180328,transcribed,[],0.99925,2.4593
+VIVOSDEV09_166,vivos_test_563,clean,4.25,thí sinh tự do cần quan tâm đến độ vênh kiến thức các môn,thí sinh tự do cần quan tâm đến độ vênh kiến thức các môn,0.0,0.0,transcribed,[],0.9878785714285715,2.4064
+VIVOSDEV09_168,vivos_test_563,clean,4.125,mỗi người chúng ta sẽ có những thứ khác nhau,mỗi người chúng ta sẽ có những thứ khác nhau,0.0,0.0,transcribed,[],0.9999600000000001,2.2664
+VIVOSDEV09_178,vivos_test_563,clean,3.0,và thậm chí bạn cũng không nên cố gắng,và thậm chí bạn cũng không nên cố gắng,0.0,0.0,transcribed,[],0.9999888888888889,2.2613
+VIVOSDEV09_194,vivos_test_563,clean,3.281,trên bầu trời ánh trăng sáng vằng vặc,trên bầu trời ánh trăng sáng vằng vặc,0.0,0.0,transcribed,[],0.9915750000000001,3.2133
+VIVOSDEV09_198,vivos_test_563,clean,3.469,là tổ tiên của ông đặng lên đảm trách việc dẫn đường,là tổ tiên của ông đặng nên đảm trách việc dẫn đường,0.08333333333333333,0.019230769230769232,transcribed,[],0.9910333333333332,3.1345
+VIVOSDEV09_203,vivos_test_563,clean,2.75,tám chín mười mười một,tám chín mười mười một,0.0,0.0,transcribed,[],0.9999600000000001,2.2046
+VIVOSDEV09_204,vivos_test_563,clean,3.031,mười một mười hai mười ba,mười một mười hai mười ba,0.0,0.0,transcribed,[],0.9998333333333335,2.2159
+VIVOSDEV09_222,vivos_test_563,clean,3.188,năm mươi năm mươi mốt,năm mươi năm mươi mốt,0.0,0.0,transcribed,[],0.9990600000000001,2.0956
+VIVOSDEV09_246,vivos_test_563,clean,2.031,chín mươi tám chín mươi chín,chín mươi tám chín mươi chín,0.0,0.0,transcribed,[],0.9999666666666668,2.2452
+VIVOSDEV09_267,vivos_test_563,clean,3.188,căn nhà đằng kia nghe nói có ma,căn nhà đằng kia nghe nói cố ma,0.125,0.03225806451612903,transcribed,[],0.972975,2.281
+VIVOSDEV09_268,vivos_test_563,clean,3.594,thú thật tui chưa từng chơi gái,thú thật tôi chưa từng chơi gái,0.14285714285714285,0.03225806451612903,transcribed,[],0.9873571428571429,2.3941
+VIVOSDEV09_280,vivos_test_563,clean,3.188,xuân này em không về,xuân này em không về,0.0,0.0,transcribed,[],0.9998400000000001,2.1172
+VIVOSDEV09_286,vivos_test_563,clean,1.5,có còn hơn không,có còn hơn không,0.0,0.0,transcribed,[],0.999325,2.2027
+VIVOSDEV09_288,vivos_test_563,clean,3.125,chắc sắp tới thu xếp đi du lịch thôi,chắc sắp tới thu xếp đi du lịch thôi,0.0,0.0,transcribed,[],0.9997222222222223,2.5079
+VIVOSDEV09_289,vivos_test_563,clean,4.25,phương châm sống của tôi là người không vì mình trời tru đất diệt,phương châm sống của tôi là người không vì mình trời tru đất diệt,0.0,0.0,transcribed,[],0.9891571428571428,3.6431
+VIVOSDEV09_293,vivos_test_563,clean,2.25,nó trốn mất tiêu rồi còn đâu,nó trốn mất tiêu rồi còn đâu,0.0,0.0,transcribed,[],0.9989285714285714,2.2461
+VIVOSDEV09_297,vivos_test_563,clean,2.188,thế nào là hoàn hảo,thế nào là hoàn hảo,0.0,0.0,transcribed,[],0.9999,2.4351
+VIVOSDEV10_068,vivos_test_563,clean,4.312,với một tốc độ mà chúng ta không thể đi đến tận cùng của nó,với một cấp độ mà chúng ta không thể đi đến cận cùng của nó,0.13333333333333333,0.06779661016949153,transcribed,[],0.9624533333333335,2.4751
+VIVOSDEV10_072,vivos_test_563,clean,4.469,tôi thấy đồng lương của mình năm năm rồi vẫn đứng nguyên,cô thấy đồng lương của mình ngăm năm rồi vẫn đứng nguyên,0.16666666666666666,0.05357142857142857,transcribed,[],0.9858166666666667,2.4807
+VIVOSDEV10_073,vivos_test_563,clean,2.938,để chấm dứt nạn bạo hành trong gia đình,để cấm dứt ngạn bạo hành trong gia đình,0.2222222222222222,0.05128205128205128,transcribed,[],0.990488888888889,2.3233
+VIVOSDEV10_076,vivos_test_563,clean,3.75,làm đường sá ngập xắp xắp quanh năm suốt tháng,làm đường xá ngập sắp sắp quanh năm suốt tháng,0.3,0.06521739130434782,transcribed,[],0.97446,2.451
+VIVOSDEV10_090,vivos_test_563,clean,2.719,vừa được trao tặng giải thưởng nhà nước,vừa ở cao trạnh giải thưởng nhà nước,0.375,0.23076923076923078,transcribed,[],0.9806750000000001,2.5834
+VIVOSDEV10_117,vivos_test_563,clean,1.375,cái khó là,cái khó dạ,0.3333333333333333,0.2,transcribed,[],0.9449333333333333,2.0811
+VIVOSDEV10_129,vivos_test_563,clean,4.812,điều này đúng với mọi cấp độ và trong mọi lĩnh vực của đời sống,điều này đúng với mọi cấp độ và trong mọi lĩnh vực của đời sống,0.0,0.0,transcribed,[],0.9993,2.8377
+VIVOSDEV10_130,vivos_test_563,clean,1.375,cao ngồng ngồng,cao ngọng ngọng,0.6666666666666666,0.13333333333333333,transcribed,[],0.9796333333333335,2.1431
+VIVOSDEV10_140,vivos_test_563,clean,6.281,chàng trai lồm cồm bò dậy mặt mày xanh lét như tàu lá chuối,chàng trai đòm còm bồi dạy mạch mày xanh đẹp như cào áo chuối,0.5714285714285714,0.2711864406779661,transcribed,[],0.9053214285714286,2.4458
+VIVOSDEV10_156,vivos_test_563,clean,5.5,chính phủ đồng thời cũng lập thêm cục xúc tiến tiêu thụ dầu cọ,chính phủ đồng thời cũng gặp thêm cục xúc kiến khiêu hữu dầu cọ,0.2857142857142857,0.12903225806451613,transcribed,[],0.9563285714285715,2.5688
+VIVOSDEV10_162,vivos_test_563,clean,3.156,cũng là tin vui cho tất cả những ai,cũng là kinh vui cho tất cả những ai,0.1111111111111111,0.05714285714285714,transcribed,[],0.9990444444444443,2.2053
+VIVOSDEV10_172,vivos_test_563,clean,2.531,hượm đã còn phải điều chỉnh,hậu mã còn phải điều chỉnh,0.3333333333333333,0.14814814814814814,transcribed,[],0.9475666666666668,2.3767
+VIVOSDEV10_176,vivos_test_563,clean,3.062,trong tình thế ấy chỉ đám trẻ ven sông,trong kỳ thế ấy chỉ đám trẻ quen xong,0.3333333333333333,0.21052631578947367,transcribed,[],0.9327777777777777,2.6279
+VIVOSDEV10_189,vivos_test_563,clean,1.75,nếu đi tiếp nha trang,nghĩ quy tiếp nha trang,0.4,0.2857142857142857,transcribed,[],0.90546,2.1495
+VIVOSDEV10_194,vivos_test_563,clean,3.375,tức chanh có thể trị được bệnh,tức chanh có thể trị được bệnh,0.0,0.0,transcribed,[],0.9658714285714287,2.3522
+VIVOSDEV10_196,vivos_test_563,clean,2.875,chỉ muốn làm một hơi cho đã cái miệng,chỉ muốn àm một hơi cho ả cái miệng,0.2222222222222222,0.08108108108108109,transcribed,[],0.9739888888888889,2.3245
+VIVOSDEV10_211,vivos_test_563,clean,2.312,hai mươi tám hai mươi chín,hai mươi tám hai mươi chín,0.0,0.0,transcribed,[],0.9985666666666667,2.1379
+VIVOSDEV10_212,vivos_test_563,clean,2.0,ba mươi ba mươi mốt,ba mươi ba mươi mốt,0.0,0.0,transcribed,[],0.99986,2.2297
+VIVOSDEV10_227,vivos_test_563,clean,1.594,sáu mươi sáu mươi mốt,sáu mươi sáu mươi mốt,0.0,0.0,transcribed,[],0.99982,2.2966
+VIVOSDEV10_234,vivos_test_563,clean,1.938,bảy mươi bốn bảy mươi lăm,bảy mươi bốn bảy mươi lăm,0.0,0.0,transcribed,[],0.9996666666666667,2.2503
+VIVOSDEV10_239,vivos_test_563,clean,1.875,tám mươi bốn tám mươi lăm,cám mươi bốn cám mươi lăm,0.3333333333333333,0.08,transcribed,[],0.9566500000000001,2.2443
+VIVOSDEV10_245,vivos_test_563,clean,1.656,chín mươi sáu chín mươi bảy,chín mươi sáu chín mươi bảy,0.0,0.0,transcribed,[],0.99925,2.3333
+VIVOSDEV10_247,vivos_test_563,clean,1.812,một trăm một hai ba,một trăm một hai ba,0.0,0.0,transcribed,[],0.99978,2.1342
+VIVOSDEV10_249,vivos_test_563,clean,2.156,không hai bốn sáu tám,hồng hai bốn sáu tám,0.2,0.09523809523809523,transcribed,[],0.99878,2.1302
+VIVOSDEV10_257,vivos_test_563,clean,2.188,tiền điện tháng này bao nhiêu,tiền yện tháng ngày bao nhiêu,0.3333333333333333,0.10344827586206896,transcribed,[],0.9523666666666667,2.2112
+VIVOSDEV10_262,vivos_test_563,clean,2.75,thua xa tiệm tạp hoá nhà tao,khu xe kiểm cập hóa nhà cao,0.8571428571428571,0.35714285714285715,transcribed,[],0.9618428571428571,2.1393
+VIVOSDEV10_266,vivos_test_563,clean,2.688,từ trên nóc nhà nhìn xuống có khác,từ trên ngóc ngàn nhìn xuống có khác,0.25,0.08823529411764706,transcribed,[],0.9707625,2.325
+VIVOSDEV10_278,vivos_test_563,clean,2.438,tội nghiệp đứa nhỏ không ai chăm sóc,cội nghiệp đứa nhỏ không ai chăm sóc,0.125,0.027777777777777776,transcribed,[],0.992075,2.1463
+VIVOSDEV10_294,vivos_test_563,clean,5.781,em sợ có một ngày anh gặp người con gái khác tốt hơn em rồi anh bỏ em,em sợ có một ngày anh gặp người con gái khác cốt hơn em rồi anh bỏ em,0.05555555555555555,0.014492753623188406,transcribed,[],0.9739277777777777,2.467
+VIVOSDEV11_079,vivos_test_563,clean,3.562,nét mặt họ không ngời lên hạnh phúc của người mẹ,nét mặt họ không ngời lên hạnh phúc của người mẹ,0.0,0.0,transcribed,[],0.9955454545454546,3.998
+VIVOSDEV11_081,vivos_test_563,clean,2.375,một số người cho rằng,một số người cho rằng,0.0,0.0,transcribed,[],1.0,2.4769
+VIVOSDEV11_083,vivos_test_563,clean,3.625,một sinh viên được vay vốn tín dụng học tập,một sinh viên được vay vốn tín dụng học tập,0.0,0.0,transcribed,[],0.99999,3.1948
+VIVOSDEV11_095,vivos_test_563,clean,3.25,mọi thứ đều được mổ xẻ lại,mọi thứ đều được mổ xẻ lại,0.0,0.0,transcribed,[],0.9952285714285714,4.283
+VIVOSDEV11_122,vivos_test_563,clean,1.875,không phải nắp khum,không phải nắp khum,0.0,0.0,transcribed,[],0.994525,2.9659
+VIVOSDEV11_123,vivos_test_563,clean,2.875,các công ty du lịch phải xác định,các công ty du lịch phải xác định,0.0,0.0,transcribed,[],0.9999875,3.1119
+VIVOSDEV11_129,vivos_test_563,clean,2.875,đi bộ leo núi đến nhừ chân,đi bộ leo núi đến nhừ chân,0.0,0.0,transcribed,[],0.9989142857142855,3.2228
+VIVOSDEV11_131,vivos_test_563,clean,5.375,thì chủ đầu tư phải tự phá dỡ phần nội dung sai phép đó,thì chủ đầu tư phải tự phá dở phần nội dung sai phép đó,0.07142857142857142,0.01818181818181818,transcribed,[],0.982507142857143,3.3438
+VIVOSDEV11_136,vivos_test_563,clean,4.688,khi nhân viên cứu hộ cố gắng đưa nó lên sà lan,khi nhân viên cứu hộ cố gắng đưa nó lên sà lan,0.0,0.0,transcribed,[],0.9978916666666667,3.2648
+VIVOSDEV11_137,vivos_test_563,clean,3.562,những người này đều được đào tạo về hội họa,những người này đều được đào tạo về hội họa,0.0,0.0,transcribed,[],0.9992700000000001,3.2367
+VIVOSDEV11_147,vivos_test_563,clean,6.219,gắn lông chim hột đá lóng lánh hay bèo dún tùa lua đầy cổ,gắn lông chim hột đá lóng lánh hay bèo dốn tùa lua đầy cổ,0.07142857142857142,0.017543859649122806,transcribed,[],0.9506357142857143,4.1804
+VIVOSDEV11_160,vivos_test_563,clean,2.5,ngụ ấp hòn ngang,ngũ ắp hòn nhan,0.75,0.25,transcribed,[],0.8386,2.8579
+VIVOSDEV11_164,vivos_test_563,clean,5.375,ít nhất ở hơn ba mươi trường thuộc các địa phương nói trên,ít nhất ở hơn ba mươi trường thuộc các địa phương nói trên,0.0,0.0,transcribed,[],0.9999538461538463,2.9696
+VIVOSDEV11_182,vivos_test_563,clean,2.75,đặc điểm của phẩy trùng tả,đặc điểm của phầy trồng tã,0.5,0.11538461538461539,transcribed,[],0.9266833333333334,3.0281
+VIVOSDEV11_193,vivos_test_563,clean,2.688,vì ban đêm chị ngủ không ngon,vì ban đêm chị ngủ không ngon,0.0,0.0,transcribed,[],0.9999,3.0355
+VIVOSDEV11_198,vivos_test_563,clean,4.812,lơ lửng trên đầu là những chiếc bẫy đá hàng trăm khối,lơ lửng trên đầu là những chiếc bẫy đá hàng trăm khối,0.0,0.0,transcribed,[],0.99925,3.2751
+VIVOSDEV11_200,vivos_test_563,clean,2.219,năm đầu tiên,năm đầu tiên,0.0,0.0,transcribed,[],0.9998,2.9955
+VIVOSDEV11_234,vivos_test_563,clean,3.062,bảy mươi bốn bảy mươi lăm,bảy mươi bốn bảy mươi lăm,0.0,0.0,transcribed,[],0.9993500000000001,3.1605
+VIVOSDEV11_242,vivos_test_563,clean,2.875,chín mươi chín mươi mốt,chín mươi chín mươi mốt,0.0,0.0,transcribed,[],0.9857199999999999,3.1003
+VIVOSDEV11_246,vivos_test_563,clean,2.688,chín mươi tám chín mươi chín,chín mươi tám chín mươi chín,0.0,0.0,transcribed,[],1.0,3.3466
+VIVOSDEV11_252,vivos_test_563,clean,4.344,bây giờ cướp nhiều quá đi đường cũng thấy sợ,bây giờ cướp nhiều quá đi đường cũng thấy sợ,0.0,0.0,transcribed,[],0.99986,3.7121
+VIVOSDEV11_262,vivos_test_563,clean,3.812,tìm hung thủ hiếp dâm bằng nước bọt nạn nhân,tìm hung thủ hiếp dâm bằng nước bọt nạn nhân,0.0,0.0,transcribed,[],0.9998000000000001,3.1775
+VIVOSDEV11_269,vivos_test_563,clean,4.656,chúng tôi yêu nhau được hai năm thì gia đình tôi xảy ra chuyện,chúng tôi yêu nhau được hai năm thì gia đình tôi xảy ra chuyện,0.0,0.0,transcribed,[],0.9999857142857144,3.447
+VIVOSDEV11_273,vivos_test_563,clean,2.688,trọng tài phạt thẻ đỏ,trọng tài phạt thẻ đỏ,0.0,0.0,transcribed,[],0.9999600000000001,2.8429
+VIVOSDEV11_274,vivos_test_563,clean,3.031,kiểu này chắc phải cắt giảm biên chế,kiểu này chắc phải cắt giảm biên chế,0.0,0.0,transcribed,[],0.9999,2.28
+VIVOSDEV11_282,vivos_test_563,clean,3.062,thôi thì cứ sắp xếp như vậy,thôi thì cứ sắp xếp như vậy,0.0,0.0,transcribed,[],0.9999714285714286,2.7649
+VIVOSDEV11_289,vivos_test_563,clean,4.844,theo phó chủ tịch ủy ban an toàn giao thông quốc gia,theo phó chủ tịch ủy ban an toàn giao thông quốc gia,0.0,0.0,transcribed,[],0.9999500000000001,2.6918
+VIVOSDEV11_298,vivos_test_563,clean,3.906,chuẩn bị cho ngày khai trương cửa hàng đầu tiên,chuẩn bị cho ngày khai trương cửa hàng đầu tiên,0.0,0.0,transcribed,[],0.9999600000000001,2.3375
+VIVOSDEV12_071,vivos_test_563,clean,3.938,nó được đặt trong một hộp đựng trang sức bọc da đỏ,nó được đặt trong một hộp đựng trang sức bọc da đỏ,0.0,0.0,transcribed,[],0.9998833333333333,3.6152
+VIVOSDEV12_075,vivos_test_563,clean,4.906,nhóm thanh long trẻ diễn tiểu phẩm hài hắc bạch tranh hùng,nhóm thanh long trẻ diễn tiểu phẩm hài hắc bạch tranh hùng,0.0,0.0,transcribed,[],0.9896583333333333,3.6341
+VIVOSDEV12_076,vivos_test_563,clean,3.562,tớ đi kiếm nhà trọ rồi nhưng khó quá,tớ đi kiếm nhà trọ rồi nhưng khó quá,0.0,0.0,transcribed,[],0.998411111111111,2.8462
+VIVOSDEV12_079,vivos_test_563,clean,3.312,xanh cỏ mượt mà ven đường,xanh cỏ mượt mà ven đường,0.0,0.0,transcribed,[],0.9843333333333333,2.3178
+VIVOSDEV12_080,vivos_test_563,clean,3.531,chính thức đã lây lan ra bên ngoài,chính thức đã lây lan ra bên ngoài,0.0,0.0,transcribed,[],0.999725,2.1696
+VIVOSDEV12_100,vivos_test_563,clean,4.812,phụ huynh và học sinh đang phải è cổ vì sách giá cao,phụ huynh và học sinh đang phải è cỏ vì sách giá cao,0.07692307692307693,0.019230769230769232,transcribed,[],0.9900692307692307,2.7283
+VIVOSDEV12_101,vivos_test_563,clean,4.875,khi chính phủ lúc đầu đề nghị ân xá cho những người nổi dậy,khi chính phủ lúc đầu đề nghị ân xá cho những người nổi dậy,0.0,0.0,transcribed,[],0.9999714285714286,4.3352
+VIVOSDEV12_116,vivos_test_563,clean,2.844,dưới ánh đèn mờ mờ ảo ảo,dưới ánh đèn mờ mờ ảo ảo,0.0,0.0,transcribed,[],0.9997571428571428,2.4406
+VIVOSDEV12_128,vivos_test_563,clean,3.969,trong cuộc bỏ phiếu tại hội đồng bảo an hai ngày trước đó,trong cuộc bỏ phiếu tại hội đồng bảo an hai ngày trước đó,0.0,0.0,transcribed,[],0.9999846153846155,2.409
+VIVOSDEV12_132,vivos_test_563,clean,3.312,hầu hết những vấn đề xảy ra trên thế giới,hầu hết những vấn đề xảy ra trên thế giới,0.0,0.0,transcribed,[],0.99969,2.4853
+VIVOSDEV12_135,vivos_test_563,clean,2.5,ông được nhiều người biết đến,ông được nhiều người biết đến,0.0,0.0,transcribed,[],1.0,2.4948
+VIVOSDEV12_144,vivos_test_563,clean,2.062,trả lời tôi biết,trả lời tôi biết,0.0,0.0,transcribed,[],1.0,2.2772
+VIVOSDEV12_166,vivos_test_563,clean,2.688,ịch gã to béo ục ịch,ịch gã to béo ục ịch,0.0,0.0,transcribed,[],0.9113666666666668,2.2619
+VIVOSDEV12_169,vivos_test_563,clean,2.312,áo rách lươm bươm,áo rách lươm bươm,0.0,0.0,transcribed,[],0.95035,2.5219
+VIVOSDEV12_173,vivos_test_563,clean,2.781,đối với những phản ứng khác biệt đó,đối với những phản ứng khác biệt đó,0.0,0.0,transcribed,[],0.9999750000000001,2.3674
+VIVOSDEV12_182,vivos_test_563,clean,2.562,và đã hiến máu ba lần,và đã hiến máu ba lần,0.0,0.0,transcribed,[],0.9999333333333333,2.5733
+VIVOSDEV12_186,vivos_test_563,clean,3.312,tiếng hét đồng thanh của mấy chục con người,tiếng hét đồng thanh của mấy chục con người,0.0,0.0,transcribed,[],0.9999111111111111,2.6306
+VIVOSDEV12_192,vivos_test_563,clean,2.75,trang thứ hai của tờ báo,trang thứ hai của tờ báo,0.0,0.0,transcribed,[],0.9999833333333333,2.2369
+VIVOSDEV12_197,vivos_test_563,clean,4.688,sau đó bà hàng xóm tính tình xởi lởi chạy qua kể với tôi,sau đó bà hàng xóm tính tình xởi lởi chạy qua kể với tôi,0.0,0.0,transcribed,[],0.988592857142857,3.4238
+VIVOSDEV12_213,vivos_test_563,clean,2.844,ba mươi hai ba mươi ba,ba mươi hai ba mươi ba,0.0,0.0,transcribed,[],0.9998166666666668,2.3139
+VIVOSDEV12_223,vivos_test_563,clean,2.812,năm mươi hai năm mươi ba,năm mươi hai năm mươi ba,0.0,0.0,transcribed,[],0.9996333333333333,2.2021
+VIVOSDEV12_224,vivos_test_563,clean,2.812,năm mươi bốn năm mươi lăm,năm mươi bốn năm mươi lăm,0.0,0.0,transcribed,[],0.9979166666666667,2.2836
+VIVOSDEV12_227,vivos_test_563,clean,2.531,sáu mươi sáu mươi mốt,sáu mươi sáu mươi mốt,0.0,0.0,transcribed,[],0.99992,2.3208
+VIVOSDEV12_232,vivos_test_563,clean,2.438,bảy mươi bảy mươi mốt,bảy mươi bảy mươi mốt,0.0,0.0,transcribed,[],0.9986,2.1966
+VIVOSDEV12_244,vivos_test_563,clean,2.688,chín mươi bốn chín mươi lăm,chín mươi bốn chín mươi lăm,0.0,0.0,transcribed,[],0.9999666666666668,2.3519
+VIVOSDEV12_248,vivos_test_563,clean,4.625,một ba năm bảy chín,một ba năm bảy chín,0.0,0.0,transcribed,[],0.99816,2.2292
+VIVOSDEV12_271,vivos_test_563,clean,3.969,bà con rang trí cành đào để chuẩn bị đón tết,bà con trang trí cành đào để chuẩn bị đón tết,0.09090909090909091,0.022727272727272728,transcribed,[],1.0,2.4878
+VIVOSDEV12_275,vivos_test_563,clean,4.594,tôi không thấy gì là đúng khi tăng giá xe vào các dịp tết,tôi không thấy gì là đúng khi tăng giá xe vào các dịp tết,0.0,0.0,transcribed,[],0.9999357142857143,2.4342
+VIVOSDEV12_280,vivos_test_563,clean,3.125,du lịch sẽ trở thành ngành kinh tế mũi nhọn,du lịch sẽ trở thành ngành kinh tế mũi nhọn,0.0,0.0,transcribed,[],0.9999500000000001,2.4665
+VIVOSDEV12_290,vivos_test_563,clean,3.75,từ khi chồng qua đời vì bệnh tật,từ khi chồng qua đời vì bệnh tật,0.0,0.0,transcribed,[],0.9999875,2.5059
+VIVOSDEV13_088,vivos_test_563,clean,5.031,những chiếc lồng đèn đồ chơi việt vẫn lặng lẽ mang hồn việt xuống phố,những chiếc lồng đèn đồ chơi việt vẫn lặng lẽ mang hồn việt xuống phố,0.0,0.0,transcribed,[],0.9936,2.9325
+VIVOSDEV13_089,vivos_test_563,clean,6.437,nhà văn nguyên ngọc sinh viên có quyền hoài nghi và tranh cãi,nhà văn nguyễn ngọc sinh viên có quyền hoài nghi và tranh cãi,0.07692307692307693,0.01639344262295082,transcribed,[],0.9990461538461539,2.4925
+VIVOSDEV13_097,vivos_test_563,clean,7.374,cuộc thi còn có hai giải nhì ba giải ba và bốn giải khuyến khích,cuộc thi còn có hai giải nhì ba giải ba và bốn giải khuyến khích,0.0,0.0,transcribed,[],0.9968,2.5554
+VIVOSDEV13_098,vivos_test_563,clean,4.249,hầu như các phản ứng phụ nặng nề là rất hiếm gặp,hầu như các phản ứng phụ nặng nề là rất hiếm gặp,0.0,0.0,transcribed,[],0.9880416666666667,2.3455
+VIVOSDEV13_104,vivos_test_563,clean,4.374,số tiền quá lớn khiến gia đình hương phạm và lê choáng váng,số tiền quá lớn khiến gia đình hương phạm và lê choáng váng,0.0,0.0,transcribed,[],0.9997846153846155,2.4562
+VIVOSDEV13_105,vivos_test_563,clean,7.843,nhóc đỏ mặt tía tai nhóc thua chị một tuổi thôi đấy,nhóc đỏ mặt tía tay nhóc thua chị một tuổi thôi đấy,0.08333333333333333,0.0196078431372549,transcribed,[],0.9932250000000001,2.6905
+VIVOSDEV13_106,vivos_test_563,clean,4.562,cảm giác được chia sẻ với bạn đời cùng sở thích thú vị lắm,cảm giác được chia sẻ với bạn đời cùng sở thích thú vị lắm,0.0,0.0,transcribed,[],0.9776642857142858,2.4728
+VIVOSDEV13_136,vivos_test_563,clean,4.249,tôi vào quầy giải khát đầu tiên và gọi một cốc nước cam,tôi vào quầy giải thát đầu tiên và gọi một cốc nước cam,0.07692307692307693,0.01818181818181818,transcribed,[],0.9768769230769231,2.7763
+VIVOSDEV13_137,vivos_test_563,clean,3.249,mẹ lần tay trong ví và lấy ra chiếc phong bì,mẹ lần tay trong ví và lấy ra chiếc phong bì,0.0,0.0,transcribed,[],0.9970909090909091,2.6271
+VIVOSDEV13_139,vivos_test_563,clean,4.124,tiêu như phong chạy trốn khỏi kinh thành để tìm hung thủ thật sự,tiêu như phong chạy trốn khỏi kinh thành để tìm hung thủ thật sự,0.0,0.0,transcribed,[],0.9996857142857144,2.5738
+VIVOSDEV13_146,vivos_test_563,clean,5.124,có ngày các bác sĩ điều dưỡng mổ mắt cho hàng trăm người mù nghèo,có ngày các bác sĩ điều dưỡng mổ mắt cho hàng trăm người mù nghèo,0.0,0.0,transcribed,[],0.9952733333333333,2.8137
+VIVOSDEV13_147,vivos_test_563,clean,4.593,không ai muốn có tiêu cực cả và cũng đừng tuyệt đối hóa vấn đề,không ai muốn có tiêu cực cả và cũng đừng tuyệt đối hóa vấn đề,0.0,0.0,transcribed,[],0.9961066666666667,2.3139
+VIVOSDEV13_150,vivos_test_563,clean,4.124,vợ hắn thị ngần mang lưới ra vá để chiều thả,vợ hắn thị ngần mang lưới ra vá để chiều thả,0.0,0.0,transcribed,[],0.9986545454545456,2.511
+VIVOSDEV13_164,vivos_test_563,clean,3.656,hiện cơ quan chức năng đang tiếp tục điều tra vụ việc,hiện cơ quan chức năng đang tiếp tục điều tra vụ việc,0.0,0.0,transcribed,[],1.0,2.4032
+VIVOSDEV13_167,vivos_test_563,clean,3.843,khi bị phát hiện họ đã trả lời như thế nào,khi bị phát hiện họ đã trả lời như thế,0.09090909090909091,0.09523809523809523,transcribed,[],0.99999,2.4543
+VIVOSDEV13_210,vivos_test_563,clean,3.312,rà soát chất lượng công trình xây dựng trên cả nước,rà soát chất lượng công trình xây dựng trên cả nước,0.0,0.0,transcribed,[],0.9796727272727271,2.3958
+VIVOSDEV13_211,vivos_test_563,clean,3.687,không nản nghĩa tin rằng sẽ có một giải pháp nào đó,không nản nghĩa tin rằng sẽ có một giải pháp nào đó,0.0,0.0,transcribed,[],0.9992583333333332,2.3938
+VIVOSDEV13_222,vivos_test_563,clean,3.718,mẹ cũng đã từng thống khổ tuyệt vọng và cô đơn như vậy,mẹ cũng đã từng thấm khổ tuyệt vọng và cô đơn như vậy,0.07692307692307693,0.05555555555555555,transcribed,[],0.9974461538461538,2.3186
+VIVOSDEV13_225,vivos_test_563,clean,3.687,hai loại văn này nên được coi trọng như nhau trong các kỳ thi,hai loại văn này nên được coi trọng như nhau trong các kỳ thi,0.0,0.0,transcribed,[],0.9994142857142857,2.4425
+VIVOSDEV13_226,vivos_test_563,clean,3.593,vậy mới có mục tiêu để mà phấn đấu nên người có ý thức,vậy mới có mục tiêu để mà phấn đấu nên người có ý thức,0.0,0.0,transcribed,[],0.9997714285714286,2.6048
+VIVOSDEV13_227,vivos_test_563,clean,3.249,tại đây có một ông trưởng phòng nhân sự công ty,tại đây có một ông trưởng phòng nhân sự công ty,0.0,0.0,transcribed,[],0.9998818181818181,2.2368
+VIVOSDEV13_230,vivos_test_563,clean,4.187,chỉ một điều đơn giản vậy mà anh ấy không bao giờ thực hiện được,chỉ một điều đơn giản vậy mà anh ấy không bao giờ thực hiện được,0.0,0.0,transcribed,[],0.9999800000000001,2.3782
+VIVOSDEV13_239,vivos_test_563,clean,3.124,chẳng cần nhìn về phương tây quê hương của hàng hiệu,chẳng cần nhìn về phương tây quê hương của hàng hiệu,0.0,0.0,transcribed,[],0.9999272727272728,2.3804
+VIVOSDEV13_241,vivos_test_563,clean,2.624,mùa đông cả cánh đồng chuyển sang một màu vàng rực,độ đông cả cánh đồng chuyển sang một màu vàng rực,0.09090909090909091,0.06,transcribed,[],0.9910727272727272,2.2925
+VIVOSDEV13_252,vivos_test_563,clean,3.937,tôi học cùng với các anh chị làm việc chuyên về sản xuất phần mềm,tôi học cùng với các anh chị làm việc chuyên về sản xuất phần mềm,0.0,0.0,transcribed,[],0.9999600000000001,2.3086
+VIVOSDEV13_255,vivos_test_563,clean,4.124,có lẽ đây là lời quảng cáo không công hay nhất cho du lịch lào,có lẽ đây là lời quảng cáo không công hay nhất cho du lịch nào,0.06666666666666667,0.016129032258064516,transcribed,[],0.9999333333333333,2.4334
+VIVOSDEV13_257,vivos_test_563,clean,3.562,từ đó đến nay gia đình chị vẫn sống trong căn nhà lụp xụp,từ đó đến nay gia đình chị vẫn sống trong căn nhà lụp xụp,0.0,0.0,transcribed,[],0.9983857142857142,2.4001
+VIVOSDEV13_258,vivos_test_563,clean,3.187,bạn cần trung thực với nhân viên của mình trong mọi hoàn cảnh,bạn cần trung thực với nhân viên của mình trong mọi hoàn cảnh,0.0,0.0,transcribed,[],0.9954692307692308,2.6291
+VIVOSDEV13_263,vivos_test_563,clean,3.187,một số điểm nước phun đến đâu bay hơi hết đến đó,một số điểm nước phun đến đâu bay hơi hết đến đó,0.0,0.0,transcribed,[],0.9938166666666667,2.2842
+VIVOSDEV13_267,vivos_test_563,clean,3.937,do vậy vấn đề khu trú khống chế bệnh tả hiện nay rất khó,do vậy vấn đề khu trú khống chế bệnh tả hiện nay rất khó,0.0,0.0,transcribed,[],0.9680642857142857,2.392
+VIVOSDEV13_276,vivos_test_563,clean,3.124,đó là câu hỏi mà đến nay vẫn chưa có câu trả lời,đó là câu hỏi mà đến nay vẫn chưa có câu trả lời,0.0,0.0,transcribed,[],0.9999692307692308,2.3594
+VIVOSDEV13_277,vivos_test_563,clean,3.968,hà nội mở rộng khu vực hồ tây sông hồng nên là khu vực tĩnh,hà nội mở rộng khu vực hồ tây sông hồng nên là khu vực tỉnh,0.06666666666666667,0.01694915254237288,transcribed,[],0.9999533333333334,2.5345
+VIVOSDEV14_108,vivos_test_563,clean,2.906,người pháp đã đồng ý với cách quản lý lĩnh vực dành riêng,người pháp đã đồng ý với cách quản lý lĩnh vực dành riêng,0.0,0.0,transcribed,[],0.9956461538461537,2.4126
+VIVOSDEV14_113,vivos_test_563,clean,3.343,hắn thay đổi lầm lì sau khi theo gia đình đến xứ người,hắn thay đổi làm lì sau khi theo gia đình đến xứ người,0.07692307692307693,0.018518518518518517,transcribed,[],0.9987153846153846,2.3924
+VIVOSDEV14_114,vivos_test_563,clean,3.437,yếu tố hấp dẫn mới thu hút đầu tư nước ngoài vào việt nam,yếu tố hấp dẫn mới thu hút đầu tư nước ngoài vào việt nam,0.0,0.0,transcribed,[],0.9999571428571429,2.461
+VIVOSDEV14_115,vivos_test_563,clean,4.124,vậy mà giờ đây nó không đợi được đến lúc huy về,vậy mà giờ đây nó không đợi được đến lúc huy về,0.0,0.0,transcribed,[],0.9999583333333334,2.3146
+VIVOSDEV14_116,vivos_test_563,clean,2.874,một góc câu cá trên cầu sài gòn ảnh mai vinh,một góc câu cá trên cầu sài gòn ảnh mai vinh,0.0,0.0,transcribed,[],0.9996909090909092,2.3906
+VIVOSDEV14_123,vivos_test_563,clean,3.124,một vài người trong bọn họ đưa mắt nhìn mảnh giấy,một vài người trong bọn họ đưa mắt nhìn mảnh giấy,0.0,0.0,transcribed,[],0.9996818181818182,2.4258
+VIVOSDEV14_134,vivos_test_563,clean,3.874,nhưng trước đây nhìn từ bên ngoài nơi này không khác một căn nhà hoang,trước đây nhìn từ bên ngoài nơi này không khác gì một căn nhà hoang,0.13333333333333333,0.12857142857142856,transcribed,[],0.9999933333333334,2.4162
+VIVOSDEV14_140,vivos_test_563,clean,3.499,có nhưng phải là thuốc đặc trị của pháp hiếm và cực kỳ đắt,có nhưng phải là thuốc đặc trị của pháp hiếm và cực kỳ đắt,0.0,0.0,transcribed,[],0.997257142857143,2.5635
+VIVOSDEV14_145,vivos_test_563,clean,2.687,một số bạn trẻ cũng có ý nghĩ như cao cường,một số bạn trẻ cũng có ý nghĩ như cao cường,0.0,0.0,transcribed,[],0.9999272727272728,2.4387
+VIVOSDEV14_151,vivos_test_563,clean,3.093,tôi đã có thời gian tuyệt vời khi chơi cho đội tuyển,tôi đã có thời gian tuyệt vời khi chơi cho đội tuyển,0.0,0.0,transcribed,[],1.0,2.4564
+VIVOSDEV14_156,vivos_test_563,clean,3.093,thỉnh thoảng con đi qua dừng lại dựng xe ngồi hút thuốc,thỉnh thoảng con đi qua dừng lại dựng xe ngồi hút thuốc,0.0,0.0,transcribed,[],0.9991666666666669,2.3766
+VIVOSDEV14_163,vivos_test_563,clean,3.124,chú bộ đội qua những câu chuyện của ông mới gần gũi làm sao,chưa bộ đội qua những câu chuyện của ông mới gần gũi làm sao,0.07142857142857142,0.03389830508474576,transcribed,[],0.9742214285714287,2.6956
+VIVOSDEV14_180,vivos_test_563,clean,2.874,ăn cá ngừ cá thu và cá mòi với rau trộn,ăn cá ngừ cá thu và cá mòi với rau trộn,0.0,0.0,transcribed,[],0.9994636363636364,2.4363
+VIVOSDEV14_186,vivos_test_563,clean,2.812,có bằng thạc sĩ những ngành trên là một lợi thế,có bằng thạc sĩ nhưng ngành trên là một lợi thế,0.09090909090909091,0.02127659574468085,transcribed,[],0.9982545454545455,2.3914
+VIVOSDEV14_191,vivos_test_563,clean,4.499,minh nhật hồng quân vũ công thành sưu tầm từ báo nước ngoài,minh quân hồng quân vũ công thành sưu tập từ báo nước ngoài,0.15384615384615385,0.1016949152542373,transcribed,[],0.9999615384615386,2.4091
+VIVOSDEV14_194,vivos_test_563,clean,2.749,muốn có bằng lái phải qua một đợt thi rất khắt khe,muốn có bằng lái phải qua một đợt thi rất khắt khe,0.0,0.0,transcribed,[],0.9908666666666668,2.571
+VIVOSDEV14_195,vivos_test_563,clean,5.437,yêu nhau khoảng vài tháng thì chúng tôi đã có quan hệ tình dục,yêu nhau khoảng vài tháng thì chúng tôi đã có quan hệ,0.14285714285714285,0.14516129032258066,transcribed,[],0.9993416666666667,2.3356
+VIVOSDEV14_199,vivos_test_563,clean,3.062,khó sao duyên dám cho anh uống rượu trong đám cưới,khó sao duyên dám chanh uống rượu trong đám cưới,0.18181818181818182,0.04,transcribed,[],0.9678699999999999,2.6347
+VIVOSDEV14_225,vivos_test_563,clean,4.249,ông dương đức lân phó tổng cục trưởng tổng cục dạy nghề,ông dương đức lân phó tổng cục trưởng tộc cục dạy nghề,0.08333333333333333,0.05454545454545454,transcribed,[],0.9942666666666667,2.4347
+VIVOSDEV14_227,vivos_test_563,clean,3.187,đối xử với bạn như người yêu cũ của bạn đã từng làm,đối xử với bạn như người yêu cũ của bạn đã từng làm,0.0,0.0,transcribed,[],0.9999923076923077,2.3973
+VIVOSDEV14_235,vivos_test_563,clean,3.374,tham gia thiết kế lăng chủ tịch hồ chí minh thì có nhiều người,tham gia thiết kế lăng chủ tịch hồ chí minh thì có nhiều người,0.0,0.0,transcribed,[],0.9989142857142859,2.5822
+VIVOSDEV14_236,vivos_test_563,clean,3.062,vì vậy công ty b phải có trách nhiệm bồi thường,vì vậy công ty b phải có trách nhiệm bồi thường,0.0,0.0,transcribed,[],0.9998,2.3845
+VIVOSDEV14_256,vivos_test_563,clean,3.874,nông dân trồng mía than cứ một vụ được lại ba vụ thất,nông dân trồng mía than cứ một vụ lại được ba vụ thức,0.23076923076923078,0.18867924528301888,transcribed,[],0.9988076923076922,2.3814
+VIVOSDEV14_280,vivos_test_563,clean,2.999,thì người xem cũng được nâng cao kiến thức về địa lý,thì người xem cũng được nâng cao kiến thức về địa lý,0.0,0.0,transcribed,[],0.9992416666666668,2.325
+VIVOSDEV14_283,vivos_test_563,clean,3.906,ngày xưa các cụ làm bìa sách là minh hoạ cho cuốn sách đó,ngày xưa các cụ làm bìa sách là minh họa cho cuốn sách đó,0.07142857142857142,0.03508771929824561,transcribed,[],0.9970142857142857,2.3967
+VIVOSDEV14_285,vivos_test_563,clean,3.374,tôi đã nhiều lần phản đối quyết liệt việc nước thải tuồn ra ngoài,tôi đã nhiều lần phản đối quyết liệt việc nước thải tuồng ra ngoài,0.07142857142857142,0.015384615384615385,transcribed,[],0.9910214285714286,2.4122
+VIVOSDEV14_286,vivos_test_563,clean,2.906,nhiều gia đình hiện nay thích tự giới thiệu chương trình,nhiều gia đình hiện nay thích tự giới thiệu chương trình,0.0,0.0,transcribed,[],1.0,2.4318
+VIVOSDEV14_289,vivos_test_563,clean,3.687,tôi là một người miền tây đang là nghiên cứu sinh ở mỹ,tôi là một người miền tây đang là nghiên cứu sinh ở mỹ,0.0,0.0,transcribed,[],0.9999692307692308,2.5815
+VIVOSDEV14_291,vivos_test_563,clean,3.562,càng đi sâu vào bên trong cảnh trí thiên nhiên càng hùng vĩ,càng đi sâu vào bên trong cảnh trí thiên nhiên càng hùng vĩ,0.0,0.0,transcribed,[],0.9999923076923077,2.4806
+VIVOSDEV14_294,vivos_test_563,clean,3.312,mong bạn bình tâm suy nghĩ và chọn được cách giải quyết tốt nhất,mong bạn bình tâm suy nghĩ và chọn được cách giải quyết tốt nhất,0.0,0.0,transcribed,[],0.9998285714285714,2.3788
+VIVOSDEV15_062,vivos_test_563,clean,4.031,nghĩa là nếu bạn đang làm việc dưới quyền một giám sát viên,nghĩa là nếu bạn đang làm việc dưới quyền một giám sát viên,0.0,0.0,transcribed,[],0.9998846153846154,2.3223
+VIVOSDEV15_066,vivos_test_563,clean,4.374,kẽm có nhiều trong gan sò thịt đỏ cá óc trứng,kẽm có nhiều trong gan sò thịt đỏ cá óc trứng,0.0,0.0,transcribed,[],0.9917636363636365,2.5563
+VIVOSDEV15_092,vivos_test_563,clean,4.374,ung thư từ một cơ quan khác di căn vào hệ thống hạch bạch huyết,ung thư từ một cơ quan khác di căn vào hệ thống hạch bạch huyết,0.0,0.0,transcribed,[],0.9988333333333334,2.646
+VIVOSDEV15_109,vivos_test_563,clean,3.031,cuộc thi tự hào sử việt đã hết giai đoạn i,cuộc thi tự hào sử việt đã hết giai đoạn,0.09090909090909091,0.047619047619047616,transcribed,[],0.9968199999999999,2.6776
+VIVOSDEV15_111,vivos_test_563,clean,3.406,cuộc biểu tình của áo đỏ có thể sẽ biến thành bạo lực,cuộc biểu tình của áo đỏ có thể sẽ biến thành bạo lực,0.0,0.0,transcribed,[],0.9998384615384615,2.8628
+VIVOSDEV15_117,vivos_test_563,clean,3.687,trên thực tế một cuộc điều tra đã được tiến hành,trên thực tế một cuộc điều tra đã được tiến hành,0.0,0.0,transcribed,[],0.9999909090909092,2.3889
+VIVOSDEV15_121,vivos_test_563,clean,3.999,trải dài hàng chục cây số đều thu gọn vào tầm mắt,trải dài hàng chục cây số đều thu gọn vào tầm mắt,0.0,0.0,transcribed,[],0.9839500000000001,2.5659
+VIVOSDEV15_137,vivos_test_563,clean,3.999,thản nhiên giá đó thì chỉ có thể làm vậy thôi,thản nhiên giá đó thì chỉ có thể làm vậy thôi,0.0,0.0,transcribed,[],0.9846909090909091,2.3365
+VIVOSDEV15_147,vivos_test_563,clean,4.249,bắt đầu cuộc chạy đua mùa kinh doanh tết giữa bánh nội và bánh ngoại,bắt đầu cuộc chạy đua mùa kinh doanh tết giữa bánh nội và bánh ngoại,0.0,0.0,transcribed,[],0.9999533333333334,2.7205
+VIVOSDEV15_154,vivos_test_563,clean,3.749,cái nhà hát bị đập tan tành ông khoái lắm à,cái nhà hát bị đập tan tình ông khoái lắm à,0.09090909090909091,0.023255813953488372,transcribed,[],0.9953181818181818,2.8786
+VIVOSDEV15_168,vivos_test_563,clean,5.562,mâm cơm vẫn thanh đạm tủ áo của vợ cũng chỉ vài bộ đơn sơ,mâm cơm vẫn thanh đạm tổ áo của vợ cũng chỉ vài bộ đơn sơ,0.06666666666666667,0.017543859649122806,transcribed,[],0.9678266666666667,2.5583
+VIVOSDEV15_173,vivos_test_563,clean,4.749,hình thức kỷ luật nào cũng chỉ có tính định hướng răn đe,hình thức kỷ luật nào cũng chỉ có tính định hướng răn đe,0.0,0.0,transcribed,[],0.9999846153846155,2.62
+VIVOSDEV15_180,vivos_test_563,clean,4.093,hiện nay bà đang bị nhiều bệnh và sống dưới mức nghèo khổ,hiện nay bà đang bị nhiều bệnh và sống dưới mức nghèo khổ,0.0,0.0,transcribed,[],0.9999076923076924,2.4559
+VIVOSDEV15_194,vivos_test_563,clean,4.374,nằm trên giường gần cả tháng bất giác tôi cảm thấy mình thật cô độc,nằm trên giường gần cả tháng bất chợt tôi cảm thấy mình thật cô độc,0.06666666666666667,0.05970149253731343,transcribed,[],0.9999733333333334,2.897
+VIVOSDEV15_198,vivos_test_563,clean,4.874,nhảm nhí khi giờ học chán phèo buồn ngủ quá ờ buồn ngủ,nhảm nhí khi giờ học chán phèo buồn ngủ quá ờ buồn ngủ,0.0,0.0,transcribed,[],0.9971076923076924,2.4253
+VIVOSDEV15_200,vivos_test_563,clean,4.874,nói chuyện một hồi ông làm bộ để tay lên tay em trên cần số,nói chuyện một hồi ông làm bộ đẻ tay lên tay em trên cần số,0.06666666666666667,0.01694915254237288,transcribed,[],0.9858133333333332,2.5083
+VIVOSDEV15_203,vivos_test_563,clean,4.187,còn anh trai tôi trong nhật ký của mình cũng linh cảm điều đó,còn anh trai tôi trong nhật ký của mình cũng linh cảm điều đó,0.0,0.0,transcribed,[],0.9999214285714286,2.4061
+VIVOSDEV15_204,vivos_test_563,clean,4.343,sáng chúng tôi tạm biệt thung nai và những chủ nhân mến khách mộc mạc,sáng chúng tôi tạm biệt hôm nay và những chủ nhân mến khách mộc mạc,0.13333333333333333,0.07246376811594203,transcribed,[],0.9911133333333334,2.4772
+VIVOSDEV15_208,vivos_test_563,clean,4.187,mấy ngày đầu thúy hà phải nhờ kim dẫn đi giới thiệu trường,mấy ngày đầu thúy hà phải nhờ kim dẫn đi giới thiệu trường,0.0,0.0,transcribed,[],0.9999076923076923,2.4861
+VIVOSDEV15_209,vivos_test_563,clean,3.187,họ thích nghi với văn hóa công ty như thế nào,họ thích nghi với văn hoá công ty như thế nào,0.09090909090909091,0.044444444444444446,transcribed,[],0.9972727272727272,4.2679
+VIVOSDEV15_213,vivos_test_563,clean,4.562,mô hình cấu trúc chức năng và khoa học xã hội mang tính giáo dục,mô hình cấu trúc chức năng và khoa học xã hội mang tính giáo dục,0.0,0.0,transcribed,[],1.0,2.9056
+VIVOSDEV15_216,vivos_test_563,clean,3.249,và bạn cần có việc làm ổn định với thu nhập cao,và bạn cần có việc làm ổn định với thu nhập cao,0.0,0.0,transcribed,[],0.9999916666666667,4.0847
+VIVOSDEV15_220,vivos_test_563,clean,3.749,đây là tháng có số đăng ký thấp nhất từ đầu năm đến nay,đây là tháng có số đăng ký thấp nhất từ đầu năm đến nay,0.0,0.0,transcribed,[],0.9997999999999999,3.3481
+VIVOSDEV15_239,vivos_test_563,clean,4.374,thật ra thì cũng không thể làm cầu kì như ở nhà được,thật ra thì cũng không thể làm cầu kỳ như ở nhà được,0.07692307692307693,0.019230769230769232,transcribed,[],0.9974846153846154,3.309
+VIVOSDEV15_253,vivos_test_563,clean,3.562,vả lại theo quy chế đây là trách nhiệm của mỗi thí sinh,vả lại theo quy chế đây là trách nhiệm của mỗi thí sinh,0.0,0.0,transcribed,[],0.9957769230769231,2.4422
+VIVOSDEV15_255,vivos_test_563,clean,4.562,công nhân đang thi công hai nhánh cầu rạch chiếc ảnh thuận thắng,công nhân đang thi công hai nhánh cầu rạch trước ảnh thuận thắng,0.07692307692307693,0.0625,transcribed,[],0.9997923076923078,2.6139
+VIVOSDEV15_265,vivos_test_563,clean,4.374,họ không biết chơi phòng ngự là gì trừ khi bị đối thủ vây ép,họ không biết chơi phòng ngự là gì trừ khi bị đối thủ vây ép,0.0,0.0,transcribed,[],0.9998400000000001,2.3929
+VIVOSDEV15_267,vivos_test_563,clean,3.499,cuối cùng họ dẫn nhau về nhà với thúng làn không,cuối cùng họ dẫn nhau về nhà với thúng làn không,0.0,0.0,transcribed,[],0.9999181818181818,2.4915
+VIVOSDEV15_271,vivos_test_563,clean,4.593,phim mới của trương nghệ mưu sự trở lại dòng phim nghệ thuật,phim mới của trương nghệ mưu sự trở lại dòng phim nghệ thuật,0.0,0.0,transcribed,[],0.992223076923077,2.7854
+VIVOSDEV15_299,vivos_test_563,clean,3.874,còn hàng trăm chiếc khác đã bán thì ông không nhớ hết,còn hàng trăm chiếc khác đã bán thì ông không nhớ hết,0.0,0.0,transcribed,[],0.9999833333333333,2.8481
+VIVOSDEV16_064,vivos_test_563,clean,3.624,từng là chủ tế hàng trăm lễ an táng mộ gió,từng là chủ tế hàng trăm lễ an táng mũi gió,0.09090909090909091,0.047619047619047616,transcribed,[],0.9844363636363638,2.7126
+VIVOSDEV16_067,vivos_test_563,clean,3.562,hình như không có cả một trong hai tài và đức,hình như không có cả một trong hai tài và đức,0.0,0.0,transcribed,[],0.9991454545454546,2.6635
+VIVOSDEV16_068,vivos_test_563,clean,4.249,bên cạnh đó chúng tôi còn làm hàng loạt việc khác như,bên cạnh đó chúng tôi còn làm hàng loạt việc khác như,0.0,0.0,transcribed,[],0.9996333333333333,2.3379
+VIVOSDEV16_074,vivos_test_563,clean,3.999,chúng nó yêu nhau rất tự nhiên ghét nhau cũng rất tự nhiên,chúng nói yêu nhau rất tự nhiên ghét nhau cũng rất tự nhiên,0.07692307692307693,0.017241379310344827,transcribed,[],0.9841076923076923,2.3772
+VIVOSDEV16_079,vivos_test_563,clean,4.999,tất cả để cho người bệnh và thân nhân hài lòng khi đến bệnh viện,tất cả để cho người bệnh và thân nhân hài lòng khi đến bệnh viện,0.0,0.0,transcribed,[],0.9999533333333334,2.7665
+VIVOSDEV16_101,vivos_test_563,clean,3.937,tôi khẽ chớp mắt và thầm cầu nguyện xin chúa giúp con,tôi khẽ chớp mắt và thầm cầu nguyện xin chú giúp con,0.08333333333333333,0.018867924528301886,transcribed,[],0.9996666666666667,2.6075
+VIVOSDEV16_112,vivos_test_563,clean,3.812,lúc hưng phấn nói chuyện phóng lao chẳng có chi phức tạp,lúc hưng phấn nói chuyện phóng lao chẳng có chi phức tạp,0.0,0.0,transcribed,[],0.9980166666666667,3.1727
+VIVOSDEV16_120,vivos_test_563,clean,3.781,sẽ làm chúng ta ngủ không đủ không đúng quy luật,sẽ làm chúng ta ngủ không đủ không đúng quy luật,0.0,0.0,transcribed,[],0.9992636363636365,2.5836
+VIVOSDEV16_149,vivos_test_563,clean,4.374,có bao giờ ông gặp tình huống không trả lời được câu hỏi của dân,có bao giờ ông gặp tình huống không trả lời được câu hỏi của dân,0.0,0.0,transcribed,[],0.9999933333333334,2.4813
+VIVOSDEV16_153,vivos_test_563,clean,3.749,cả đời chưa bao giờ tôi có cảm giác sung sướng như vậy,cả đời chưa bao giờ tôi có cảm giác sung sướng như vậy,0.0,0.0,transcribed,[],0.999676923076923,2.4997
+VIVOSDEV16_154,vivos_test_563,clean,3.968,ít có cơ hội sống sót cho các hành khách trên máy bay,ít có cơ hội sống sót cho các hành khách trên máy bay,0.0,0.0,transcribed,[],0.9999615384615386,2.4218
+VIVOSDEV16_161,vivos_test_563,clean,4.656,trung quốc đưa ra hình phạt cụ thể đối với tội tham nhũng,trung quốc đưa ra hình phạt cụ thể đối với tội tham nhũng,0.0,0.0,transcribed,[],1.0,2.5531
+VIVOSDEV16_168,vivos_test_563,clean,4.062,hai cháu ngạc nhiên đón khách lạ sung sướng ôm cặp mới,hai cháu ngạc nhiên đón khách lạ sung sướng ôm cặp mới,0.0,0.0,transcribed,[],0.9992666666666667,2.5279
+VIVOSDEV16_173,vivos_test_563,clean,4.374,nhưng cô quyết chứng minh người mù không phải vô dụng,nhưng cô quyết chứng minh người mù không phải vô dụng,0.0,0.0,transcribed,[],0.9999454545454547,2.3391
+VIVOSDEV16_175,vivos_test_563,clean,3.812,họ đã trao nhau lời hẹn ước nên duyên chồng vợ,họ đã trao nhau lời hẹn ước nên duyên chồng vợ,0.0,0.0,transcribed,[],0.9998090909090909,2.4674
+VIVOSDEV16_177,vivos_test_563,clean,5.249,nếu thỉnh thoảng có vài ngày nghỉ người thụy điển thường ra đảo chơi,nếu thỉnh thoảng có vài ngày nghỉ người thụy điển thường ra đảo chơi,0.0,0.0,transcribed,[],0.9999571428571429,2.518
+VIVOSDEV16_182,vivos_test_563,clean,4.906,những người cô lập mình có thể gặp phải chứng trầm cảm hoặc lo lắng,những người cô lập mình có thể gặp phải chứng trầm cảm hoặc lo lắng,0.0,0.0,transcribed,[],0.9999533333333334,2.602
+VIVOSDEV16_193,vivos_test_563,clean,4.343,thực tế vai trò của bạn và người phỏng vấn đối chiếu nhau,thực tế vai trò của bạn và người phỏng vấn đối chiếu nhau,0.0,0.0,transcribed,[],0.9999692307692308,2.4731
+VIVOSDEV16_196,vivos_test_563,clean,4.124,sự giúp đỡ của bà là vô cùng quí báu cho chúng tôi,sự giúp đỡ của bà là vô cùng quý báu cho chúng tôi,0.07692307692307693,0.02,transcribed,[],0.9901846153846154,2.5503
+VIVOSDEV16_197,vivos_test_563,clean,4.562,nhà trường đột ngột hủy đề tài khiến tôi mất phương hướng,nhà trường đột ngột hủy đề tài khiến tôi mất phương hướng,0.0,0.0,transcribed,[],0.9999666666666668,2.4581
+VIVOSDEV16_198,vivos_test_563,clean,5.187,các phật tử hưởng ứng lời kêu gọi của thầy như thế nào,các phật tử hưởng ứng lời kêu gọi của thầy như thế nào,0.0,0.0,transcribed,[],0.9999692307692308,2.566
+VIVOSDEV16_203,vivos_test_563,clean,3.843,vậy những đối tượng này sẽ được giải quyết như thế nào,vậy những đối tượng này sẽ được giải quyết như thế nào,0.0,0.0,transcribed,[],0.9998083333333333,2.3535
+VIVOSDEV16_228,vivos_test_563,clean,4.812,xen kẽ giữa những màn biểu diễn là những phút vui chơi tập thể,xen kẽ giữa những màn biểu diễn là những phút vui chơi tập thể,0.0,0.0,transcribed,[],0.9624499999999999,2.5425
+VIVOSDEV16_233,vivos_test_563,clean,5.437,sáng ra thấy dân tình xúm quanh con tê giác khổng lồ đã chết,sáng ra thấy dân tình súm quanh con tê giác khổng lồ đã chết,0.07142857142857142,0.016666666666666666,transcribed,[],0.9699571428571429,2.6796
+VIVOSDEV16_239,vivos_test_563,clean,4.249,và một điều sâu xa là mình đã thật sự yêu bạn,và một điều sâu xa là mình đã thực sự yêu bạn,0.08333333333333333,0.044444444444444446,transcribed,[],0.9954333333333333,2.3964
+VIVOSDEV16_247,vivos_test_563,clean,5.187,nhiều hôm mưa gió bán ế gánh chè nặng trĩu trên vai mẹ,nhiều hơn mưa gió bán ế gánh chè nặng trĩu trên vai mẹ,0.07692307692307693,0.037037037037037035,transcribed,[],0.9998538461538462,2.5208
+VIVOSDEV16_266,vivos_test_563,clean,5.062,phía dưới và xung quanh kệ là nước bẩn lênh láng chảy qua,phía dưới và xung quanh kệ là nước bẩn lên láng chảy qua,0.07692307692307693,0.017543859649122806,transcribed,[],0.9848615384615385,2.5688
+VIVOSDEV16_267,vivos_test_563,clean,4.999,tôi đứng trước hai lối rẽ và tôi chọn con đường ít người đi hơn,tôi đứng trước hai lối rẽ và tôi chọn con đường ít người đi hơn,0.0,0.0,transcribed,[],0.9996666666666667,2.5778
+VIVOSDEV16_273,vivos_test_563,clean,4.468,chúng tôi đã điều tra những trường hợp có nghi vấn gian dối,chúng tôi đã điều tra những trường hợp có nghi vấn gian dối,0.0,0.0,transcribed,[],0.9999769230769231,2.3385
+VIVOSDEV16_279,vivos_test_563,clean,4.187,vậy chừng nào mới tới xin lỗi nhân dân tập cuối,vậy chừng nào mới tới xin lỗi nhân dân tập cuối,0.0,0.0,transcribed,[],0.9998,3.0279
+VIVOSDEV16_298,vivos_test_563,clean,5.249,hôm nào tan ca sớm hạnh được giao nhiệm vụ đi chợ cho bữa tối,hôm nào tan ca sớm hạnh được giao nhiệm vụ đi chợ cho buổi tối,0.06666666666666667,0.04918032786885246,transcribed,[],0.9854666666666667,2.6317
+VIVOSDEV16_299,vivos_test_563,clean,4.437,vào được nhà anh đấy sửa cửa đi nguy hiểm đấy,vào được nhà anh đấy xử cửa đi nguy hiểm đấy,0.09090909090909091,0.044444444444444446,transcribed,[],0.9781181818181818,2.3811
+VIVOSDEV17_077,vivos_test_563,clean,4.249,hôm sau mở máy thấy cái truyện đã tự hoàn chỉnh rồi,hôm sau mở máy thấy cái chuyện đã tự hoàn chỉnh rồi,0.08333333333333333,0.0392156862745098,transcribed,[],0.9999916666666667,2.4163
+VIVOSDEV17_090,vivos_test_563,clean,3.531,bây giờ thì đáng được khen là thông minh chứ hả,bây giờ thì đáng được khen là thông minh chứ hả,0.0,0.0,transcribed,[],0.9995999999999999,2.3409
+VIVOSDEV17_099,vivos_test_563,clean,4.593,chị tìm nhà cho em ở trọ ngay cổng trường chị học,chị tìm nhà cho em ở chỗ ngay cổng trường chị học,0.08333333333333333,0.061224489795918366,transcribed,[],0.9985083333333332,3.1626
+VIVOSDEV17_100,vivos_test_563,clean,3.968,đến đà lạt bạn phải chuẩn bị đôi chân để đi bộ,đến đà lạt bạn phải chuẩn bị đôi chân để đi bộ,0.0,0.0,transcribed,[],0.9999750000000001,3.9572
+VIVOSDEV17_107,vivos_test_563,clean,4.906,họ được bọn đầu nậu những tay trùm thuê với giá rẻ mạt,họ được bọn đầu nậu những tay chùm thuê với giá rẻ mạt,0.07692307692307693,0.037037037037037035,transcribed,[],0.9912615384615386,3.9639
+VIVOSDEV17_109,vivos_test_563,clean,3.812,một bà sang trọng đến gặp bác sĩ trẻ khám bệnh bác sĩ hỏi,một bà sang trọng đến gặp bác sĩ trẻ khám bệnh bác sĩ họ,0.07142857142857142,0.03508771929824561,transcribed,[],0.9843928571428572,3.2584
+VIVOSDEV17_114,vivos_test_563,clean,3.374,nhân lực ngành thiết kế đồ họa đắt giá và khan hiếm,nhưng lực ngành thiết kế đồ họa đắt giá và khan hiếm,0.08333333333333333,0.0392156862745098,transcribed,[],0.9733083333333332,2.725
+VIVOSDEV17_120,vivos_test_563,clean,3.781,sau đó bản thân học sinh phải làm đơn xin học bổng,sau đó bản thân học sinh phải làm đơn xin học bổng,0.0,0.0,transcribed,[],0.9998999999999999,2.6783
+VIVOSDEV17_133,vivos_test_563,clean,3.624,chỉ có thực phẩm mới giúp bạn làm được việc này,chỉ có thực phẩm mới giúp bạn làm được việc này,0.0,0.0,transcribed,[],0.9999727272727273,2.5558
+VIVOSDEV17_147,vivos_test_563,clean,3.687,với các dát màu cà phê sữa không cần điều trị,với các giác màu cà phê sữa không cần điều trị,0.09090909090909091,0.06666666666666667,transcribed,[],0.9822818181818181,2.6603
+VIVOSDEV17_169,vivos_test_563,clean,4.874,họ bảo tôi giống người hàn thì tôi lại thấy họ giống người việt,họ bảo tôi giống như người hàn thì tôi lại thấy họ giống người việt,0.07142857142857142,0.06349206349206349,transcribed,[],0.9999933333333334,2.6798
+VIVOSDEV17_170,vivos_test_563,clean,3.843,và đội tuyển pháp đang là đội chiếm ưu thế hơn so với thụy sĩ,và đội tuyển pháp đang là đội chiếm ưu thế hơn so với thủy sĩ,0.06666666666666667,0.01639344262295082,transcribed,[],0.9971200000000001,2.6548
+VIVOSDEV17_173,vivos_test_563,clean,3.249,trình độ chuyên môn của cô khiến cô quá thừa tư cách,trình độ chuyên môn của cô khiến cô quá thừa tư cách,0.0,0.0,transcribed,[],0.9930500000000001,2.5812
+VIVOSDEV17_181,vivos_test_563,clean,3.874,những câu hỏi trên sẽ giúp bạn làm được điều này,những câu hỏi trên sẽ giúp bạn làm được điều này,0.0,0.0,transcribed,[],1.0,2.4705
+VIVOSDEV17_189,vivos_test_563,clean,4.999,vẫn còn nhưng bạn không dám chắc họ có hạnh phúc hay không,vẫn còn nhưng bạn không dám chắc họ có hạnh phúc hay không,0.0,0.0,transcribed,[],0.9995384615384615,2.6964
+VIVOSDEV17_192,vivos_test_563,clean,4.062,đó cũng là sự tiếp xúc gần gũi nhất của bọn em,đó cũng là sự tiếp xúc gần gũi nhất của bọn em,0.0,0.0,transcribed,[],0.9999916666666667,2.538
+VIVOSDEV17_204,vivos_test_563,clean,4.624,em hãy tỉnh táo mà tìm những định hướng tốt hơn cho tương lai,em hãy tỉnh táo mà tìm những định hướng tốt hơn cho tương lai,0.0,0.0,transcribed,[],0.9961857142857143,2.861
+VIVOSDEV17_208,vivos_test_563,clean,5.124,nhưng chẳng có điểm sản xuất nào dùng bạt phủ che chắn,nhưng chẳng có điểm sản xuất nào dùng bạc phủ che chắn,0.08333333333333333,0.018518518518518517,transcribed,[],0.9891083333333334,3.0481
+VIVOSDEV17_212,vivos_test_563,clean,4.687,có mấy người đụng phải nó suýt ngã chúi xuống đường,có mấy người đụng phải nó suýt ngã chuối xuống đường,0.09090909090909091,0.0392156862745098,transcribed,[],0.9971545454545455,2.723
+VIVOSDEV17_213,vivos_test_563,clean,4.031,đoàn đi thuyền đến một khu làng dân tộc thiểu số,đoàn đi thuyền đến một khu làng dân tộc thiểu số,0.0,0.0,transcribed,[],0.9996545454545455,2.6472
+VIVOSDEV17_217,vivos_test_563,clean,5.937,thì hợp đồng thế chấp này cũng không có giá trị pháp lý,thì hợp đồng thế chấp này cũng không có giá trị pháp lý,0.0,0.0,transcribed,[],0.9999153846153847,2.4015
+VIVOSDEV17_239,vivos_test_563,clean,5.187,ba tôi hãnh diện nói chuyện với số học sinh cùng lên xe đò,ba tôi hãnh diện nói chuyện với số học sinh cùng lên xe đò,0.0,0.0,transcribed,[],0.9941571428571431,2.4783
+VIVOSDEV17_241,vivos_test_563,clean,3.906,một anh trai tuấn đang ngồi tù vì tội giết người,một anh trai tuấn đang ngồi tù vì tội giết người,0.0,0.0,transcribed,[],0.9999000000000001,2.2704
+VIVOSDEV17_245,vivos_test_563,clean,5.312,được bày trên những bệ thờ bên cạnh những bó sen huệ thơm nức,được bày trên những bệ thờ bên cạnh những bó sen huệ thơm phức,0.07142857142857142,0.03278688524590164,transcribed,[],0.9816571428571429,2.532
+VIVOSDEV17_254,vivos_test_563,clean,4.812,các bước sau đây sẽ giúp bạn tìm ra ứng cử viên thích hợp,các bước sau đây sẽ giúp bạn tìm ra ứng cử viên thích hợp,0.0,0.0,transcribed,[],0.9999785714285715,2.4792
+VIVOSDEV17_268,vivos_test_563,clean,4.093,vì chúng có thể làm răng của bạn dễ bị ố vàng,vì chúng có thể làm răng của bạn dễ bị ố vàng,0.0,0.0,transcribed,[],0.9964833333333334,2.3859
+VIVOSDEV17_271,vivos_test_563,clean,5.468,giải nhất huy chương vàng thuộc về nhà nhiếp ảnh của cộng hòa séc,giải nhất huy chương vàng thuộc về nhà nhiếp ảnh của cộng hòa séc,0.0,0.0,transcribed,[],0.9871571428571428,4.5174
+VIVOSDEV17_285,vivos_test_563,clean,4.249,để xin thị thực công tác về cơ bản bạn phải có,để xin thị thực công tác về cơ bản bạn phải có,0.0,0.0,transcribed,[],0.9999333333333333,3.6382
+VIVOSDEV17_288,vivos_test_563,clean,5.281,tôi nắm bàn tay xưa ba tôi từng thương yêu đau xót cầm giữ,tôi nắm bàn tay xưa ba tôi từng thương tôi đau xót cầm giữ,0.07142857142857142,0.05172413793103448,transcribed,[],0.9998214285714286,3.9898
+VIVOSDEV17_297,vivos_test_563,clean,4.312,trong dòng thác người chỉ nhìn được mắt kính và khẩu trang,trong vòng thác người chỉ nhìn được mắt kính và khẩu trang,0.08333333333333333,0.017241379310344827,transcribed,[],0.9837333333333333,3.3628
+VIVOSDEV17_299,vivos_test_563,clean,3.624,khai mạc triển lãm quy mô lớn về tranh sơn mài việt nam,khai mạc triển lãm quy mô lớn về tranh sơn mài việt nam,0.0,0.0,transcribed,[],0.9999,3.4645
+VIVOSDEV18_120,vivos_test_563,clean,2.437,bạn không bao giờ ra ngoài mà không dùng kem lót,bạn không bao giờ ra ngoài mà không dùng kem lót,0.0,0.0,transcribed,[],0.9999909090909092,2.5263
+VIVOSDEV18_126,vivos_test_563,clean,4.437,vài lần triển lãm tranh tượng không lời như thế hắn sẽ nhận ra,vài lần triển lãm tranh tượng không lời như thế hẳn sẽ nhận ra,0.07142857142857142,0.016129032258064516,transcribed,[],0.9858285714285715,2.5928
+VIVOSDEV18_155,vivos_test_563,clean,3.937,người đàn ông trên giường thình lình rên lên một tiếng rồi mở mắt,người đàn ông trên giường thịt lình rên lên một tiếng rồi mở mắt,0.07142857142857142,0.046153846153846156,transcribed,[],0.9711428571428573,3.0933
+VIVOSDEV18_171,vivos_test_563,clean,3.499,tối qua người ta đến bắt tôi giữa đêm hôm khuya khoắt,tối qua người ta đến bắt tôi rửa đêm hôm khuya khoắt,0.08333333333333333,0.05660377358490566,transcribed,[],0.9996,3.1356
+VIVOSDEV18_183,vivos_test_563,clean,2.937,bảo thằng quyết nó bắt con gà sống nâu mà thịt,bảo thằng thắng quyết nó bắt con gà sống nâu mà thịt,0.09090909090909091,0.13043478260869565,transcribed,[],0.9820666666666668,2.7225
+VIVOSDEV18_191,vivos_test_563,clean,3.999,vị bác sĩ hiền lành ấy có những lý thuyết trồng cây thật thú vị,vị bác sĩ hiền lành ấy có những lí thuyết trồng cây thật thú vị,0.06666666666666667,0.015873015873015872,transcribed,[],0.9821799999999999,2.6862
+VIVOSDEV18_192,vivos_test_563,clean,3.187,những kiểu vết thương mà trẻ thường mang theo có thể là gì,,1.0,1.0,unreliable,['asr_unknown_token'],,2.5286
+VIVOSDEV18_194,vivos_test_563,clean,3.468,xin với mẹ cho đi cai tập trung sau một năm bạn trở về nhà,xin với mẹ cho đi cai tập trung sau một năm bạn trở về nhà,0.0,0.0,transcribed,[],0.9976000000000002,2.5918
+VIVOSDEV18_195,vivos_test_563,clean,2.749,đầu tiên là một tấm âm bản sau đó mới đến dương bản,trước tiên là một tấm âm bản sau đó mới đến dương bản,0.07692307692307693,0.09803921568627451,transcribed,[],0.9890307692307693,3.7776
+VIVOSDEV18_198,vivos_test_563,clean,2.812,mấy ngày nay chúng tôi đã tịch thu được khá nhiều gà chết,ngày nay chúng tôi đã tịch thu được khá nhiều gà chết,0.07692307692307693,0.07017543859649122,transcribed,[],0.9977916666666666,3.4387
+VIVOSDEV18_199,vivos_test_563,clean,2.906,hiển nhiên không ai muốn xuất hiện bên cạnh một người như vậy,tuy nhiên không ai muốn xuất hiện bên cạnh một người như vậy,0.07692307692307693,0.06557377049180328,transcribed,[],0.9949,3.4024
+VIVOSDEV18_211,vivos_test_563,clean,4.093,hình ảnh quảng cáo điếu thuốc điện tử được công ty t,hình ảnh quảng cáo điếu thuốc điện tử được công ty,0.08333333333333333,0.038461538461538464,transcribed,[],0.9887363636363637,3.6077
+VIVOSDEV18_214,vivos_test_563,clean,3.749,kiểu hài dung tục vẫn cứ lềnh khênh ở một số tụ điểm,kiểu hài dung tục vẫn cứ lẩn khẩn ở một số tổ điểm,0.23076923076923078,0.09615384615384616,transcribed,[],0.9810307692307693,3.7745
+VIVOSDEV18_240,vivos_test_563,clean,3.499,mời tham dự cuộc thi viết ngắn một giờ không điện,mời tham dự cuộc thi viết ngắn một giờ không điện,0.0,0.0,transcribed,[],0.9999818181818182,3.1752
+VIVOSDEV18_250,vivos_test_563,clean,4.531,lần đầu tiên một nhân viên người việt thách thức việc tác nghiệp của tôi,lần đầu tiên một nhân viên người việt thách thức việc tác nghiệp của tôi,0.0,0.0,transcribed,[],0.9999733333333334,2.5594
+VIVOSDEV18_252,vivos_test_563,clean,3.156,lúc đó chị tưởng làm như vậy cũng làm má vui,lúc đó chị tưởng làm như vậy cũng là má vui,0.09090909090909091,0.022727272727272728,transcribed,[],0.9881363636363637,3.6909
+VIVOSDEV18_257,vivos_test_563,clean,3.499,ngồi nghe tiếng biển và thư thả đếm từng giọt đen rơi,người nghe tiếng biển và thư thả đếm từng giọt đèn rơi,0.16666666666666666,0.05660377358490566,transcribed,[],0.971275,3.4483
+VIVOSDEV18_259,vivos_test_563,clean,3.437,muốn công nhận ngay pha bóng ấy thì phải sửa luật,muốn công nhận ngay pha bóng ấy thì phải sửa luật,0.0,0.0,transcribed,[],0.9999909090909092,3.2903
+VIVOSDEV18_263,vivos_test_563,clean,3.374,quản lý nhà nước về giao thông vận tải đô thị,quản lý nhà nước về giao thông vận tải đô thị,0.0,0.0,transcribed,[],0.9998999999999999,3.5294
+VIVOSDEV18_265,vivos_test_563,clean,3.999,sau đó họ lân la sang chơi rồi đánh cắp đứa bé,sau đó họ lân la sàn chơi rồi đánh cắp đứa bé,0.08333333333333333,0.043478260869565216,transcribed,[],0.9688,3.4202
+VIVOSDEV18_272,vivos_test_563,clean,3.124,anh nhơn bảo tôi về trước còn anh đi theo cô gái,anh nhơn bảo tôi về trước còn anh đi theo cô gái,0.0,0.0,transcribed,[],0.9987583333333333,3.5526
+VIVOSDEV18_273,vivos_test_563,clean,3.343,trước hết bạn cần tìm hiểu thông tin quy hoạch khu đất,trước hết bạn cần tìm hiểu thông tin quy hoạch khu đất,0.0,0.0,transcribed,[],0.9995750000000001,3.0127
+VIVOSDEV18_279,vivos_test_563,clean,4.093,những sản phẩm giúp nở ngực và tan mỡ cấp tốc ảnh yến trinh,những sản phẩm giúp nở ngực và tan mỡ cấp tốc ảnh hưởng đến yến trinh,0.14285714285714285,0.1694915254237288,transcribed,[],0.9955812500000001,2.9253
+VIVOSDEV18_280,vivos_test_563,clean,2.937,phóng sự ảnh những màn biểu diễn ngoạn mục trên bầu trời,phóng sự ảnh những màn biểu diễn ngoạn mục trên bầu trời,0.0,0.0,transcribed,[],0.9999416666666668,2.9827
+VIVOSDEV18_282,vivos_test_563,clean,3.249,nhưng cuối cùng chẳng ai chịu nổi cái tính ham vui của tôi,cuối cùng chẳng ai chịu nổi cái tính ham vui của tôi,0.07692307692307693,0.10344827586206896,transcribed,[],0.9964416666666667,3.1487
+VIVOSDEV18_293,vivos_test_563,clean,2.468,kiểm tra trung tâm này công an đã bắt giữ tới,điểm tra trung tâm này công an đã bắt giữ tới,0.09090909090909091,0.022222222222222223,transcribed,[],0.9909727272727273,3.5468
+VIVOSDEV18_297,vivos_test_563,clean,3.281,hoa phượng vẫn nở đỏ trời trong tiếng ve xao xác khôn nguôi,hoa phượng vẫn nở trời trong tiếng ve sào sắc khôn nguôi,0.23076923076923078,0.11864406779661017,transcribed,[],0.9783083333333334,4.1137
+VIVOSDEV19_056,vivos_test_563,clean,4.062,về nguyên tắc vào học là sinh viên phải đóng học phí,về nguyên tắc vào học là sinh viên phải đóng học phí,0.0,0.0,transcribed,[],0.99985,3.1752
+VIVOSDEV19_061,vivos_test_563,clean,4.062,để những khó khăn và mâu thuẫn dần dần sẽ bị đẩy lui,để những khó khăn và mâu thuẫn dần dần sẽ bị đẩy lui,0.0,0.0,transcribed,[],0.9990000000000001,3.179
+VIVOSDEV19_064,vivos_test_563,clean,6.624,chóng mặt còn có thể do tình trạng rối loạn nhịp tim nặng gây ra,chóng mặt còn có thể do tình trạng rối loạn nhịp tim nặng gây ra,0.0,0.0,transcribed,[],0.99798,2.957
+VIVOSDEV19_071,vivos_test_563,clean,6.062,trong ngắn hạn thị trường vận hành như một cỗ máy bầu cử,trong ngắn hạn thị trường vận hành như một cỗ máy bầu cử,0.0,0.0,transcribed,[],0.9998,3.3892
+VIVOSDEV19_072,vivos_test_563,clean,3.374,chương trình học bổng thanh niên châu á của nhật bản,chương trình học bổng thanh niên châu á của nhật bản,0.0,0.0,transcribed,[],0.9999818181818182,2.7598
+VIVOSDEV19_083,vivos_test_563,clean,5.749,nhưng rồi cái tình với bà con cứ nắm níu không dứt ra được,nhưng rồi cái tình với bà con cứ nắm níu không dứt ra được,0.0,0.0,transcribed,[],0.9991285714285715,3.2526
+VIVOSDEV19_091,vivos_test_563,clean,5.781,số đơn vị tham gia hội chợ việc làm tăng đáng kể qua các năm,số đơn vị tham gia hội chợ việc làm tăng đáng kể qua các năm,0.0,0.0,transcribed,[],0.9999199999999999,3.1184
+VIVOSDEV19_094,vivos_test_563,clean,3.937,trang viết của họ hơn hẳn thời tuổi trẻ của tôi,trang viết của họ hơn hẳn thời tuổi trẻ của tôi,0.0,0.0,transcribed,[],0.9999727272727273,3.1038
+VIVOSDEV19_111,vivos_test_563,clean,4.437,khuyết điểm lớn của chúng ta là chưa có dân chủ thật sự,khuyết điểm lớn của chúng ta là chưa có dân chủ thực sự,0.07692307692307693,0.03636363636363636,transcribed,[],0.9937615384615385,3.034
+VIVOSDEV19_133,vivos_test_563,clean,4.312,em có suy nghĩ thêm về việc tham dự hội chợ khoa học không,em có suy nghĩ thêm về việc tham dự hội chợ khoa học không,0.0,0.0,transcribed,[],0.999957142857143,2.7074
+VIVOSDEV19_142,vivos_test_563,clean,4.749,họ chỉ thích những môn gì mạnh bạo bạo lực và kiếm ra tiền thôi,họ chỉ thích những môn gì mạnh bạo lực và kiếm ra tiền thôi,0.06666666666666667,0.06349206349206349,transcribed,[],0.9995071428571428,2.6647
+VIVOSDEV19_158,vivos_test_563,clean,4.812,những người trẻ ấy thật đáng phê phán đáng lên án,những người trẻ ấy thật đáng phê phán đáng lên án,0.0,0.0,transcribed,[],0.991809090909091,2.4703
+VIVOSDEV19_161,vivos_test_563,clean,5.749,thông thường án kỷ luật nếu có thường ban hành vào cuối tuần,thông thường án kỷ luật nếu có thường ban hành vào cuối tuần,0.0,0.0,transcribed,[],0.9998769230769231,2.3665
+VIVOSDEV19_163,vivos_test_563,clean,4.374,điều lạ là tôi vẫn không từ bỏ ý định trở thành tu sĩ,điều lạ là tôi vẫn không từ bỏ ý định trở thành tu sĩ,0.0,0.0,transcribed,[],0.9997357142857144,2.6217
+VIVOSDEV19_167,vivos_test_563,clean,5.749,các qui định của pháp luật không thể được ban hành theo kiểu đánh lén,các quy định của pháp luật không thể được ban hành theo kiểu đánh lén,0.06666666666666667,0.014492753623188406,transcribed,[],0.9996533333333334,2.3268
+VIVOSDEV19_169,vivos_test_563,clean,4.062,nhanh quá đã là lần thứ ba xa nhà rồi đấy,nhanh quá đã là lần thứ ba xa nhà rồi đấy,0.0,0.0,transcribed,[],0.9999545454545455,3.1318
+VIVOSDEV19_179,vivos_test_563,clean,4.406,đỗ đức thuần nguyên kế toán trưởng công ty tiếp thị đầu tư,đỗ đức thuần nguyên kế toán trưởng công ty tiếp thị đầu tư,0.0,0.0,transcribed,[],0.9997,3.4321
+VIVOSDEV19_196,vivos_test_563,clean,5.718,người anh sau đó được phép thầu xây kênh này nhưng không tiến hành,người anh sau đó được phép thầu xây kênh này nhưng không tiến hành,0.0,0.0,transcribed,[],0.9999285714285715,2.461
+VIVOSDEV19_218,vivos_test_563,clean,5.312,nói cách khác cái được của châu á là cái mất của châu phi,nói cách khác cái được của châu á là cái mất của châu phi,0.0,0.0,transcribed,[],0.9999285714285715,2.8396
+VIVOSDEV19_222,vivos_test_563,clean,6.062,mắt tự nhiên hoa lên trí chụp một cái ly quật mạnh xuống sàn,mắt tự nhiên hoa lên trí chụp một cái ly quật mạnh xuống sàn,0.0,0.0,transcribed,[],0.9961,3.0251
+VIVOSDEV19_227,vivos_test_563,clean,6.781,từ đấy ông càng thông cảm sâu sắc tâm trạng của nguyễn thiếp,từ đấy ông càng thông cảm sâu sắc tâm trạng của nguyễn thiếp,0.0,0.0,transcribed,[],0.9981230769230769,3.1062
+VIVOSDEV19_244,vivos_test_563,clean,4.187,em hãy tìm cách tiếp cận để bày tỏ với mẹ,em hãy tìm cách tiếp cận để bày tỏ với mẹ,0.0,0.0,transcribed,[],0.9984909090909091,2.9865
+VIVOSDEV19_245,vivos_test_563,clean,4.374,lúc đó nạn kẹt xe chắc sẽ kinh khủng gấp nhiều lần hôm nay,lúc đó nạn kẹt xe chắc sẽ kinh khủng gấp nhiều lần hôm nay,0.0,0.0,transcribed,[],0.9997285714285715,3.9631
+VIVOSDEV19_246,vivos_test_563,clean,5.093,vợ lỡ có tật thế anh nên thay đổi cách tiếp cận,vợ lỡ có tật thế anh nên thay đổi cách tiếp cận,0.0,0.0,transcribed,[],0.9998833333333333,3.2459
+VIVOSDEV19_249,vivos_test_563,clean,4.499,đây được xem là vai diễn thành công nhất của vương từ trước đến nay,đây được xem là vai diễn thành công nhất của vương từ trước đến nay,0.0,0.0,transcribed,[],0.9999266666666667,2.9047
+VIVOSDEV19_257,vivos_test_563,clean,5.281,nhưng nếu chỉ nói cái giỏi không thôi thì thật chưa đủ về chú tư,nhưng nếu chỉ nói cái giỏi không thôi thì thật sự chưa đủ về chú tư,0.06666666666666667,0.046875,transcribed,[],0.9999625000000001,3.014
+VIVOSDEV19_259,vivos_test_563,clean,4.187,tích cực hơn với vấn đề liên quan đến kiều bào,tích cực hơn với vấn đề liên quan đến kiều bào,0.0,0.0,transcribed,[],0.9999636363636365,2.8073
+VIVOSDEV19_262,vivos_test_563,clean,4.656,để rồi chúng ta khao khát mãi trong vòng luân hồi nhân gian,để rồi chúng ta khao khát mãi trong vòng luân hồi nhân gian,0.0,0.0,transcribed,[],0.9985307692307693,3.2315
+VIVOSDEV19_266,vivos_test_563,clean,3.999,vấn đề nảy sinh từ cái câu hỏi dinh cu ấy,vấn đề nảy sinh từ cái câu hỏi dinh cu ấy,0.0,0.0,transcribed,[],0.9934545454545455,2.8957
+VIVOSDEV19_274,vivos_test_563,clean,3.656,chị nên đi khám bác sĩ và chọn phương pháp ngừa thai hiệu quả,chị nên đi khám bác sĩ và chọn phương pháp ngừa thai hiệu quả,0.0,0.0,transcribed,[],0.9993357142857143,4.0307
+VIVOSDEV19_279,vivos_test_563,clean,3.624,nợ một cuộc chiến chống tham nhũng vẫn chưa vào đâu,nợ một cuộc chiến chống tham nhũng vẫn chưa vào đâu,0.0,0.0,transcribed,[],0.9989090909090909,3.8268
