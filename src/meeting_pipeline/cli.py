@@ -249,12 +249,12 @@ def evaluate_run(
 @app.command()
 def serve(
     host: Annotated[str, typer.Option()] = "127.0.0.1",
-    port: Annotated[int, typer.Option(min=1, max=65535)] = 8000,
+    port: Annotated[int, typer.Option(min=1, max=65535)] = 8010,
 ) -> None:
-    """Run the local web process; ML work remains in the separate worker."""
+    """Run the Minda FastAPI web server; ML jobs run in the separate meeting_backend worker."""
     import uvicorn
 
-    uvicorn.run("meeting_pipeline.web.app:create_app", factory=True, host=host, port=port)
+    uvicorn.run("meeting_backend.main:create_app", factory=True, host=host, port=port)
 
 
 @app.command("run-files")

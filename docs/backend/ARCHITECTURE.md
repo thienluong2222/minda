@@ -1,7 +1,6 @@
 # Kiến trúc backend cho bản web MongoDB
 
-**Vị trí mã hiện tại:** toàn bộ cây dưới đây nằm trong `web_app/` ở thư mục
-gốc dự án. Đây là worktree của nhánh `codex/web-mongodb-upgrade`.
+**Vị trí mã hiện tại:** toàn bộ cây dưới đây đã được hợp nhất trực tiếp tại thư mục gốc dự án trên nhánh `main`.
 
 Ngày: 17/10/2026. **Trạng thái: đã triển khai trên `codex/web-mongodb-upgrade`.**
 Người dùng đã đồng ý lộ trình web user/admin, MongoDB và PDF/scan–OCR; app mobile

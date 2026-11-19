@@ -3,7 +3,7 @@ runtime_python: .venv-llm/bin/python
 cache_dir: data/model_cache/minutes/hub
 model_id: mlx-community/Qwen3-4B-Instruct-2507-4bit
 model_revision: 50d427756c6b1b2fe0c0a10f67fbda1fc8e82c1b
-adapter_path: web_app/artifacts/minda-colab-v21/LLMTraining/runs/B/checkpoint-132
+adapter_path: artifacts/minda-colab-v21/LLMTraining/runs/B/checkpoint-132
 adapter_sha256: 225903836f4e2780b685ec85e80c3f3226b3b05d92767d15fce291f6d2cb949c
 adapter_config_sha256: 550fb062048da5942c6424726aefd3b5003ae090536bdc7c102e1541195d6a55
 adapter_scopes:

@@ -21,7 +21,7 @@ def load_single_line_recognizer(name: str):
     model_dir = CB_DATA / "ocr/models"
     if name.startswith("tesseract_"):
         directory = (
-            (ROOT / "web_app/data/ocr_cache") if name == "tesseract_fast" else (model_dir / "tessdata_best")
+            (ROOT / "data/ocr_cache") if name == "tesseract_fast" else (model_dir / "tessdata_best")
         )
 
         def recognize(path: Path) -> str:
@@ -136,7 +136,7 @@ def render_full_page_table_dataset(out_dir: Path) -> list[dict]:
 
     v21_cases = [
         _json.loads(l)
-        for l in (ROOT / "web_app/artifacts/graph-synthetic-v2.1/test/references/cases.jsonl").read_text().splitlines()
+        for l in (ROOT / "artifacts/graph-synthetic-v2.1/test/references/cases.jsonl").read_text().splitlines()
         if l.strip()
     ][:6]
 
@@ -236,7 +236,7 @@ def benchmark_full_page_and_table(pages: list[dict]) -> list[dict]:
     from meeting_pipeline.data.vivos import normalize_vietnamese_text
     from vietocr.tool.predictor import Predictor
 
-    tess_fast = ROOT / "web_app/data/ocr_cache"
+    tess_fast = ROOT / "data/ocr_cache"
     tess_best = CB_DATA / "ocr/models/tessdata_best"
     v_cfg = read_json(CB_DATA / "ocr/models/vgg_transformer.json")
     v_cfg["device"] = "cpu"

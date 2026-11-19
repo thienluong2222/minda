@@ -99,7 +99,7 @@ def run_part1_holdout_v21_lora_b_mlx() -> dict:
     from meeting_pipeline.minutes.graph_topics import discover_topics, refine_topics
     from meeting_pipeline.minutes.model_runtime import ModelRuntimeError, ModelSession, load_model_settings
 
-    proj_dir = ROOT / "web_app/artifacts/minda-colab-v21/LLMTraining"
+    proj_dir = ROOT / "artifacts/minda-colab-v21/LLMTraining"
     if str(proj_dir) not in sys.path:
         sys.path.insert(0, str(proj_dir))
     from minda_colab.common import experiment, read_jsonl, unpack_holdout
@@ -114,7 +114,7 @@ def run_part1_holdout_v21_lora_b_mlx() -> dict:
 
     # Reuse exact bootstrap & paths from existing 20261118 holdout benchmark
     holdout_dir = ROOT / "reports/minutes_graph/20261118/llm_holdout_comparison"
-    bundle = ROOT / "web_app/artifacts/minda-colab-v21"
+    bundle = ROOT / "artifacts/minda-colab-v21"
     cfg_exp = experiment()
     protocol = read_json(holdout_dir / "protocol.json")
 
@@ -321,7 +321,7 @@ def run_part2_downstream_writer_and_editorial() -> dict:
 
     v21_test = [
         json.loads(l)
-        for l in (ROOT / "web_app/artifacts/graph-synthetic-v2.1/test/inputs/transcripts.jsonl").read_text().splitlines()
+        for l in (ROOT / "artifacts/graph-synthetic-v2.1/test/inputs/transcripts.jsonl").read_text().splitlines()
         if l.strip()
     ]
     # Pick 2 longest cases from each of the 6 meeting modes -> 12 realistic cases

@@ -541,7 +541,7 @@ def benchmark_retrieval_and_context() -> dict:
             suite_a_queries.append({"doc_id": d["id"], "units": units, "query": q["text"], "cand_idxs": list(range(len(units))), "gold_idxs": gold_idx})
 
     # Suite B: Hard multi-turn v2.1/test gold-relation retrieval (retrieve earlier target turn from source utterance!)
-    v21_cases = [json.loads(l) for l in (ROOT / "web_app/artifacts/graph-synthetic-v2.1/test/references/cases.jsonl").read_text().splitlines() if l.strip()]
+    v21_cases = [json.loads(l) for l in (ROOT / "artifacts/graph-synthetic-v2.1/test/references/cases.jsonl").read_text().splitlines() if l.strip()]
     suite_b_queries = []
     span_stats = {"cases": len(v21_cases), "total_turns": 0, "total_spans": 0}
     for c in v21_cases:

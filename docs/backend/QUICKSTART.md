@@ -3,16 +3,7 @@
 Hướng dẫn thao tác từng màn hình, quy trình tạo biên bản và các chức năng quản trị:
 [Báo cáo hướng dẫn sử dụng web mới](../BAO_CAO_HUONG_DAN_SU_DUNG_WEB_MOI_2026-10-17.md).
 
-**Thư mục hiện tại:** `web_app/` ngay trong thư mục gốc dự án. Mở trực tiếp
-thư mục này để kiểm tra/sửa bản web. Trước khi chạy lệnh bên dưới:
-
-```bash
-cd "/Users/thien/Documents/School/Luận văn/web_app"
-```
-
-Frontend ở `apps/web`, backend ở `src/meeting_backend`, pipeline AI/Word ở
-`src/meeting_pipeline`. Database và file đã được cập nhật đường dẫn sau khi
-di chuyển; môi trường/model cache đang có tiếp tục được sử dụng.
+**Thư mục hiện tại:** thư mục gốc của repository (đã hợp nhất toàn bộ frontend `apps/web`, backend `src/meeting_backend` và pipeline `src/meeting_pipeline` vào nhánh `main`). Chạy mọi lệnh bên dưới từ thư mục gốc dự án.
 
 ## 1. Môi trường và cài đặt
 

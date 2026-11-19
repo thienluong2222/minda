@@ -89,8 +89,7 @@ Các tham số thực thi được quản lý tập trung tại [`configs/defaul
 │   │   ├── fusion/             # Word alignment, confusion network, F0–F6, word provenance
 │   │   ├── pipeline/           # MultiSourceFusionPipeline, speaker_turns, stages
 │   │   ├── minutes/            # Parser DOCX, structured_fields, graph_*, FCM, renderer, NĐ30/HD05
-│   │   ├── simulation/         # Bộ sinh phòng họp đa thiết bị mô phỏng (pyroomacoustics + VIVOS)
-│   │   └── web/                # Giao diện demo cũ (cổng 8000, SQLite)
+│   │   └── simulation/         # Bộ sinh phòng họp đa thiết bị mô phỏng (pyroomacoustics + VIVOS)
 │   └── meeting_backend/        # Backend FastAPI + MongoDB + Worker nền + Ingest PDF/OCR
 │       ├── core/               # Settings, bảo mật/session, mã lỗi, logging
 │       ├── modules/            # auth, users, meetings, transcripts, speakers, templates, minutes, jobs, system
@@ -111,7 +110,6 @@ Các tham số thực thi được quản lý tập trung tại [`configs/defaul
 │   └── minutes_graph/20261118/            # Kết quả holdout LLM (Qwen3 / Qwen3.5 / Gemma4)
 ├── docs/                       # Tài liệu kiến trúc, hướng dẫn web, chuẩn thể thức DOCX, kiểm toán dữ liệu
 ├── manifests/                  # Manifest tải có ngân sách cho VIVOS, LibriWASN, VoxVietnam
-├── app/streamlit_app.py        # Giao diện demo Streamlit nhỏ gọn (tùy chọn)
 ├── references.md               # Tổng hợp toàn bộ nguồn tham khảo học thuật & kỹ thuật
 └── pyproject.toml              # Khai báo package, extras (backend/ml/evaluation/dev) và CLI entry points
 ```
@@ -277,19 +275,7 @@ Phù hợp khi cần xử lý nhanh file âm thanh từ dòng lệnh hoặc tíc
 
 ---
 
-### 5.4. Chạy Demo Web SQLite cũ (Cổng `8000`) & Demo Streamlit
-
-```bash
-# Demo web độc lập cũ dùng SQLite (giữ để đối chiếu hồi quy, không dùng chung DB với cổng 8010)
-.venv-backend/bin/meeting-pipeline serve --host 127.0.0.1 --port 8000
-
-# (Tùy chọn) Demo Streamlit tương tác cho luồng mô phỏng đa thiết bị
-.venv-backend/bin/streamlit run app/streamlit_app.py
-```
-
----
-
-### 5.5. Tái lập Bộ Benchmark Thực nghiệm (Đợt 1–3)
+### 5.4. Tái lập Bộ Benchmark Thực nghiệm (Đợt 1–3)
 
 Các script tái lập trong [`experiments/benchmark_20261118/`](experiments/benchmark_20261118/) xuất kết quả JSON/CSV về `reports/benchmark_20261118/`:
 
@@ -317,7 +303,7 @@ Các script tái lập trong [`experiments/benchmark_20261118/`](experiments/ben
 
 ---
 
-### 5.6. Lệnh Vận hành & Khắc phục Sự cố Thường gặp
+### 5.5. Lệnh Vận hành & Khắc phục Sự cố Thường gặp
 
 ```bash
 # Kiểm tra đầy đủ trạng thái MongoDB, model cache, OCR và công cụ preview DOCX
@@ -362,13 +348,10 @@ Hệ thống đã được đánh giá toàn diện trên Apple MacBook Air M4 (
 ## 7. Kiểm thử & Kiểm tra Chất lượng Mã
 
 ```bash
-# Unit tests (454 bài kiểm thử gồm cả pipeline và backend)
-PYTHONPATH=src .venv-backend/bin/python -m pytest tests/unit -q
+# Unit & Integration tests (480 bài kiểm thử pipeline + tích hợp)
+PYTHONPATH=src .venv-backend/bin/python -m pytest tests/unit tests/integration -q
 
-# Integration tests (45 bài kiểm thử luồng tích hợp)
-.venv/bin/python -m pytest tests/integration -q
-
-# Backend tests (yêu cầu MongoDB local đang chạy; tự tạo & dọn DB test riêng)
+# Backend tests (57 bài kiểm thử FastAPI/MongoDB/Worker/OCR; tự tạo & dọn DB test riêng)
 PYTHONPATH=src .venv-backend/bin/python -m pytest tests/backend -q
 
 # Lint, Format & Type-check

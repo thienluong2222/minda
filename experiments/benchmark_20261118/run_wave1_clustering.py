@@ -166,13 +166,13 @@ def main() -> None:
     # Dataset 2: 60 graph-synthetic-v2.1 test transcripts (turn counts variable)
     v21_rows = [
         json.loads(line)
-        for line in (ROOT / "web_app/artifacts/graph-synthetic-v2.1/test/inputs/transcripts.jsonl").read_text().splitlines()
+        for line in (ROOT / "artifacts/graph-synthetic-v2.1/test/inputs/transcripts.jsonl").read_text().splitlines()
         if line.strip()
     ]
     # Dataset 3: 84 llm-next-round-v2 test transcripts
     nrv2_rows = [
         json.loads(line)
-        for line in (ROOT / "web_app/artifacts/llm-next-round-v2-20261026/data/test.jsonl").read_text().splitlines()
+        for line in (ROOT / "artifacts/llm-next-round-v2-20261026/data/test.jsonl").read_text().splitlines()
         if line.strip()
     ]
     nrv2_docs = []

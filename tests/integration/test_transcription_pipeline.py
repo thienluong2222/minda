@@ -9,7 +9,6 @@ from pathlib import Path
 
 import numpy as np
 import soundfile as sf
-from fastapi.testclient import TestClient
 
 from meeting_pipeline.adapters.phowhisper_asr import AsrResult, FakeAsrAdapter
 from meeting_pipeline.config import PipelineConfig, load_config
@@ -22,7 +21,6 @@ from meeting_pipeline.domain.transcription import (
 )
 from meeting_pipeline.pipeline.prototype import PreparedSource, PrototypePipeline
 from meeting_pipeline.pipeline.stages.activity_detection import ActivityDetector
-from meeting_pipeline.web.app import create_app
 
 
 class FakeActivityDetector(ActivityDetector):
@@ -269,30 +267,6 @@ def test_transcription_pipeline_end_to_end(tmp_path: Path) -> None:
         assert "coverage.json" in namelist
         assert any(name.startswith("clips/evidence/") for name in namelist)
         assert any(name.startswith("clips/asr-input/") for name in namelist)
-
-    # 13. Web demo backward and forward compatibility
-    client = TestClient(create_app(config))
-    store = client.app.state.demo_jobs
-    job_id = "job-transcription-test"
-    store.write(
-        {
-            "job_id": job_id,
-            "meeting_name": "Integration Test Meeting",
-            "status": "succeeded",
-            "created_at": "2026-09-24T00:00:00+00:00",
-            "run_dir": str(run_dir),
-        }
-    )
-
-    page = client.get(f"/runs/{job_id}")
-    assert page.status_code == 200
-    # Ensure evidence audio player loads the evidence clip
-    first_ev_clip = segments[0]["evidence_clip_artifact_id"]
-    assert first_ev_clip in page.text
-    # Verify file endpoint can serve the evidence clip
-    res = client.get(f"/api/runs/{job_id}/files/{first_ev_clip}")
-    assert res.status_code == 200
-    assert len(res.content) > 0
 
 
 def test_transcription_pipeline_silence(tmp_path: Path) -> None:

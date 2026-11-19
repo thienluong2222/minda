@@ -277,7 +277,7 @@ def main() -> None:
         # 4. False-positive check on all 60 v2.1 test transcripts (stylized dialogues without formal dates/votes)
         v21_rows = [
             json.loads(l)
-            for l in (ROOT / "web_app/artifacts/graph-synthetic-v2.1/test/inputs/transcripts.jsonl").read_text().splitlines()
+            for l in (ROOT / "artifacts/graph-synthetic-v2.1/test/inputs/transcripts.jsonl").read_text().splitlines()
             if l.strip()
         ]
         v21_scalar_hits = 0
