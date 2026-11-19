@@ -1,8 +1,0 @@
-{
-  "fixture": "exact existing test_known_positive_source_start_offset",
-  "reference_event_start_sec": 0,
-  "source_event_start_sec": 1,
-  "correct_meeting_mapping_offset_sec": -1.0,
-  "current_estimated_offset_sec": 1.0,
-  "event_disagreement_after_current_mapping_sec": 2.0
-}

@@ -1,6 +1,0 @@
-{
-  "input_seconds": 40,
-  "feature_frames": 3000,
-  "processor_chunk_seconds": 30,
-  "configured_max_chunk_seconds": 25
-}

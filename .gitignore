@@ -1,36 +1,73 @@
+# OS & editor files
 .DS_Store
+._*
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+
+# Environment & secrets (never commit real tokens or credentials)
 .env
 .env.*
 !.env.example
-/.venv/
-/.venv-llm/
+*.pem
+*.key
+*credentials*.json
+
+# Python virtual environments & caches
+.venv/
+.venv-*/
+venv/
+ENV/
 __pycache__/
 *.py[cod]
-/.pytest_cache/
-/.mypy_cache/
-/.ruff_cache/
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .coverage
+coverage.xml
 htmlcov/
+
+# Frontend / Node
+node_modules/
+/apps/web/dist/
+*.tsbuildinfo
+
+# Test & browser artifacts
 playwright-report/
 test-results/
 *.log
+
+# Local databases
 *.sqlite
 *.sqlite3
-/dataset/
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite3-shm
+*.sqlite3-wal
+*.db
+
+# Local data, datasets, model weights, archives & runtime artifacts
 /data/
+/dataset/
 /artifacts/
-/reports/
+/outputs/
 /scratch/
+/recycle_bin/
+/web_app/
+
+# Reports: ignore heavy raw benchmark outputs & WAV caches, keep consolidated summary
+/reports/*
+!/reports/BENCHMARK_TONG_HOP_2026-11-18.md
+
+# Local thesis reference documents (not redistributed)
 /Tài liệu tham khảo/
 /Tài liệu tham khảo/
 *Ta*lie*u*tham*kha*o*
 /docs/references/
-
-/.venv-backend/
-/.venv
-/.venv-llm
-/apps/web/node_modules/
-/apps/web/dist/
-/apps/web/*.tsbuildinfo
-
-/.venv-asr-mlx/

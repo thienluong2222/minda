@@ -1,156 +1,277 @@
-# Meeting Pipeline
+# MINDA — Hệ thống Chép lời & Lập Biên bản Cuộc họp Tiếng Việt Đa nguồn Offline
 
-## Vị trí bản web mới
+**MINDA** (*Multi-source Intelligent Meeting Documentation Assistant*) là hệ thống xử lý âm thanh cuộc họp tiếng Việt thu từ **1–8 thiết bị ghi âm độc lập** (điện thoại/máy ghi âm không đồng bộ), chạy **hoàn toàn offline trên Apple Silicon (macOS `arm64`)** để tạo:
 
-Toàn bộ bản web user/admin nằm tại **`web_app/` trong thư mục gốc dự án**:
+1. **Bản chép lời (transcript) hợp nhất đa nguồn** kèm nhãn người nói, độ tin cậy từng từ (*word provenance*) và clip âm thanh đối chiếu cho từng thiết bị.
+2. **Biên bản cuộc họp có cấu trúc** sinh từ đồ thị diễn biến hội thoại (*event–relation–state graph*) bằng LLM cục bộ (`Qwen3-4B-Instruct-2507-4bit` + `LoRA B` trên MLX), xuất file Word (`.docx`) chỉnh sửa được theo **Nghị định 30/2020/NĐ-CP** hoặc **Hướng dẫn 05-HD/VPTW (2026)**.
+3. **Ứng dụng web Minda (User/Admin)** tích hợp MongoDB, hàng đợi xử lý nền đơn luồng, quản lý hồ sơ giọng nói, nạp mẫu Word/PDF/ảnh scan, rà soát biên bản, xem trước từng trang DOCX và sao lưu/khôi phục dữ liệu.
+
+---
+
+## 1. Kiến trúc Tổng thể & Luồng Xử lý
+
+Toàn bộ mã nguồn đã được hợp nhất tại thư mục gốc gồm hai package Python độc lập (`meeting_pipeline` và `meeting_backend`) cùng giao diện React (`apps/web`):
 
 ```text
-Luận văn/
-├── src/, configs/, ...            # Checkout gốc
-└── web_app/                       # Mở thư mục này để kiểm tra bản web mới
-    ├── apps/web/                  # Frontend React
-    ├── src/meeting_backend/       # API, MongoDB, worker và OCR
-    ├── src/meeting_pipeline/      # Pipeline AI/Word dùng cho bản web
-    ├── configs/backend.yaml
-    ├── data/app/
-    └── docs/backend/
+                        ┌──────────────────────────────────────────────┐
+                        │        Ứng dụng Web Minda (apps/web)         │
+                        │    React 19 · Vite · Tailwind · Cytoscape    │
+                        └──────────────────────┬───────────────────────┘
+                                               │ REST API (/api/v1)
+                        ┌──────────────────────▼───────────────────────┐
+                        │     Backend & Worker (src/meeting_backend)   │
+                        │  FastAPI · MongoDB · ArtifactStore · Worker  │
+                        │  PDF/Scan Ingest (pypdf + Tesseract + OpenCV)│
+                        └──────────────┬───────────────┬───────────────┘
+                                       │               │
+         ┌─────────────────────────────▼───┐       ┌───▼────────────────────────────────────┐
+         │  LUỒNG 1: AUDIO → TRANSCRIPT    │       │  LUỒNG 2: TRANSCRIPT → BIÊN BẢN DOCX   │
+         │  (src/meeting_pipeline/)        │       │  (src/meeting_pipeline/minutes/)       │
+         ├─────────────────────────────────┤       ├────────────────────────────────────────┤
+         │ 1. Chuẩn hóa 16 kHz mono        │       │ 1. Nạp mẫu DOC/DOCX/PDF/Scan           │
+         │    (ffmpeg/ffprobe, giữ gốc)    │       │    → doc_parser + SchemaMapper         │
+         │ 2. Đồng bộ đa nguồn & Timeline  │       │ 2. Trích xuất trường cấu trúc NĐ 30    │
+         │    - Offset & drift (100 Hz)    │       │    (ngày/giờ/biểu quyết deterministic) │
+         │    - Pause/Resume landmarks     │       │ 3. Hiểu hội thoại bằng Đồ thị (MLX)    │
+         │ 3. Phân đoạn & Chồng lấn        │       │    - Qwen3-4B 4-bit + LoRA B:          │
+         │    - pyannote/segmentation-3.0  │       │      extract (sự kiện) → relations     │
+         │    - silero_vad (guard biên)    │       │    - Suy luận trạng thái (graph_state) │
+         │    - sepformer-whamr (cấu hình) │       │ 4. Gom chủ đề (tùy chọn tổng quát)     │
+         │ 4. Nhận diện & Gom người nói    │       │    - multilingual-e5-small + FCM       │
+         │    - WeSpeaker ResNet34-LM      │       │ 5. Biên tập & Kiểm chứng thực tế       │
+         │    - P2_EMBEDDING_FUSION        │       │    - graph_editorial / graph_writer    │
+         │ 5. ASR tiếng Việt (MLX Worker)  │       │    - Kiểm ID nguồn, số liệu, phủ định  │
+         │    - PhoWhisper-medium MLX      │       │ 6. Render DOCX & Chuẩn hóa thể thức    │
+         │    - Adaptive max=3, guard<0.8s │       │    - NĐ 30/2020 hoặc HD 05-HD/VPTW     │
+         │ 6. Dung hợp & Truy vết          │       │    - Preview (LibreOffice + Poppler)   │
+         │    - F5_RULE_WEIGHTED_CORRECTED │       │    - Đóng gói ZIP + kiểm toàn vẹn hash │
+         │    - Tùy chọn Audio Delay&Sum   │       └────────────────────────────────────────┘
+         └─────────────────────────────────┘
 ```
 
-`web_app` giữ nhánh Git `codex/web-mongodb-upgrade` riêng. Chạy các lệnh trong
-tài liệu này **từ bên trong `web_app`**. Vị trí cũ dưới `.codex/worktrees` chỉ
-còn liên kết tương thích cho phiên làm việc; mã và dữ liệu thực nằm ở đây.
+### Nguyên tắc tách biệt runtime
+- **API web (`meeting_backend`)** không import Torch/MLX/Transformers khi khởi động; mọi tác vụ nặng (nhận dạng giọng, ASR, LLM, OCR) được đẩy qua hàng đợi MongoDB cho **worker đơn luồng** xử lý tuần tự với khóa `flock` và cơ chế lease/heartbeat.
+- **ASR MLX (`.venv-asr-mlx`)** và **LLM MLX (`.venv-llm`)** chạy qua tiến trình worker con riêng (`scripts/asr_mlx_worker.py`, `scripts/minutes_model_worker.py`) để không xung đột phiên bản thư viện với môi trường PyTorch/Pyannote và giải phóng bộ nhớ sau khi hoàn tất.
+- **Không tự tải model ngầm lúc suy luận:** toàn bộ trọng số được ghim `revision`/SHA-256 và chuẩn bị trước vào `data/model_cache/`; quá trình chạy thực tế hoàn toàn offline.
 
-Pipeline offline nhận diện người nói và chép lời cuộc họp tiếng Việt từ nhiều điện thoại,
-triển khai theo `PIPELINE_IMPLEMENTATION_SPEC.md`.
+---
 
-## Cấu trúc dự án
+## 2. Cấu hình & Mô hình Mặc định Hiện tại
 
-- [Mã pipeline](src/meeting_pipeline/), [cấu hình](configs/), [script](scripts/) và [kiểm thử](tests/).
-- [Demo Streamlit](app/) và [hướng dẫn chạy ứng dụng web](web_app/README.md).
-- [Tài liệu dự án](docs/), [bàn giao kỹ thuật](docs/handoff/PROJECT_CONTEXT_HANDOFF_2026-10-22.md)
-  và [tài liệu tham khảo trên máy](docs/references/).
-- [Bản ghi gốc](dataset/voices/), [dữ liệu chạy](data/) và [manifest bộ dữ liệu](manifests/).
-- [Mã thí nghiệm](experiments/), [báo cáo phân tích](docs/reports/) và [kết quả benchmark](reports/).
-- [Đầu ra demo](artifacts/) và [bảng tính, tệp xuất](outputs/).
+Các tham số thực thi được quản lý tập trung tại [`configs/default.yaml`](configs/default.yaml), [`configs/minutes.yaml`](configs/minutes.yaml) và [`configs/backend.yaml`](configs/backend.yaml):
 
-## Trạng thái
+| Giai đoạn | Mô hình / Thuật toán mặc định | Cấu hình chính |
+| :--- | :--- | :--- |
+| **Đồng bộ âm thanh** | Envelope 100 Hz + hồi quy drift + STFT landmark | `max_offset_seconds: 120`, `allow_drift: true`, `minimum_drift_inliers: 3` |
+| **VAD & Phân đoạn** | `pyannote/segmentation-3.0` + `silero_vad` | `vad_threshold: 0.5`, `context_seconds: 10`, `step_seconds: 2.5` |
+| **Tách giọng chồng lấn** | `speechbrain/sepformer-whamr` (8 kHz) | `chunk_seconds: 8`, `overlap_seconds: 1` |
+| **Nhận diện người nói** | `pyannote/wespeaker-voxceleb-resnet34-LM` | `fusion_policy: P2_EMBEDDING_FUSION`, `identity_threshold: 0.4143`, `cluster_threshold: 0.50` |
+| **ASR tiếng Việt** | `vinai/PhoWhisper-medium` (MLX worker; hỗ trợ `small`) | `auto_backend: mlx`, `fusion_mode: transcript`, `max_verification_sources: 3`, `audio_denoise: afftdn` |
+| **Dung hợp đa nguồn** | `F5_RULE_WEIGHTED_CORRECTED` (confusion network) | Kết hợp chất lượng âm học + word confidence từ MLX; có nhánh nhanh `audio` (Delay-and-Sum + `afftdn`) |
+| **LLM Đồ thị & Biên bản** | `mlx-community/Qwen3-4B-Instruct-2507-4bit` + `LoRA B` | Adapter `checkpoint-132` áp cho `extract` & `relations`; `input_token_budget: 6144`, `output_token_budget: 2048` |
+| **Embedding & Gom chủ đề** | `intfloat/multilingual-e5-small` + Fuzzy C-Means | `max_clusters: 4`, `minimum_silhouette: 0.22`, `fuzziness: 1.3` |
+| **OCR biểu mẫu** | `Tesseract` (`tessdata_fast` `vie+eng`) + OpenCV | Hỗ trợ `.docx`, `.doc`, PDF văn bản, PDF scan và ảnh |
+| **Thể thức xuất Word** | `nd30_2020` (mặc định) / `hd05_2026` | Bảo toàn OOXML, kiểm toàn vẹn ZIP, preview ảnh bằng LibreOffice + Poppler |
 
-### Prototype web user/admin + MongoDB
+---
 
-Bản web mới có đăng nhập/phân quyền, worker riêng, quản lý cuộc họp/mẫu/giọng,
-rà soát transcript và biên bản, preview DOCX, lịch sử, quản trị và backup/restore.
-Hỗ trợ DOC/DOCX, PDF văn bản, PDF scan và ảnh; PDF/ảnh qua bước duyệt trước khi dùng.
+## 3. Cấu trúc Thư mục Dự án
+
+```text
+.
+├── apps/web/                   # Frontend React 19 + TypeScript + Vite (giao diện Minda User/Admin)
+├── src/
+│   ├── meeting_pipeline/       # Lõi pipeline AI: sync, VAD, speaker, ASR, fusion, graph minutes, DOCX
+│   │   ├── adapters/           # Giao tiếp FFmpeg, MLX ASR, PhoWhisper, model registry
+│   │   ├── audio/              # Đồng bộ offset/drift, acoustic fingerprint, timeline, signal fusion
+│   │   ├── speaker/            # WeSpeaker/ECAPA encoder, enrollment, P0–P3 fusion, clustering
+│   │   ├── asr/                # Segment ASR, adaptive routing, cache, guard biên/chất lượng
+│   │   ├── fusion/             # Word alignment, confusion network, F0–F6, word provenance
+│   │   ├── pipeline/           # MultiSourceFusionPipeline, speaker_turns, stages
+│   │   ├── minutes/            # Parser DOCX, structured_fields, graph_*, FCM, renderer, NĐ30/HD05
+│   │   ├── simulation/         # Bộ sinh phòng họp đa thiết bị mô phỏng (pyroomacoustics + VIVOS)
+│   │   └── web/                # Giao diện demo cũ (cổng 8000, SQLite)
+│   └── meeting_backend/        # Backend FastAPI + MongoDB + Worker nền + Ingest PDF/OCR
+│       ├── core/               # Settings, bảo mật/session, mã lỗi, logging
+│       ├── modules/            # auth, users, meetings, transcripts, speakers, templates, minutes, jobs, system
+│       ├── infrastructure/     # MongoDB client/indexes/validators, ArtifactStore, backup/restore
+│       ├── integrations/       # Adapter nối sang MultiSourceFusionPipeline & MinutesService
+│       ├── processing/         # Ingest DOC/DOCX/PDF/ảnh, OCR bảng OpenCV, render preview
+│       └── worker/             # Worker claim/heartbeat/lease/cancellation
+├── configs/                    # default.yaml, minutes.yaml, backend.yaml, cấu hình simulation/eval
+├── scripts/                    # Worker MLX, script tải/chuyển model, launcher web, script benchmark cũ
+├── experiments/
+│   ├── benchmark_20261118/     # 13 script tái lập đầy đủ bộ benchmark Đợt 1–3
+│   ├── comparative_benchmark/  # Bộ benchmark so sánh nền
+│   ├── minutes_graph/          # Đánh giá đồ thị hội thoại & tốc độ sinh biên bản
+│   └── speaker_identification/ # Đánh giá bộ mã hóa & hiệu chuẩn ngưỡng người nói
+├── tests/                      # unit/, integration/, backend/, model_smoke/
+├── reports/
+│   ├── BENCHMARK_TONG_HOP_2026-11-18.md   # Báo cáo tổng hợp thực nghiệm Đợt 1–3
+│   └── minutes_graph/20261118/            # Kết quả holdout LLM (Qwen3 / Qwen3.5 / Gemma4)
+├── docs/                       # Tài liệu kiến trúc, hướng dẫn web, chuẩn thể thức DOCX, kiểm toán dữ liệu
+├── manifests/                  # Manifest tải có ngân sách cho VIVOS, LibriWASN, VoxVietnam
+├── app/streamlit_app.py        # Giao diện demo Streamlit nhỏ gọn (tùy chọn)
+├── references.md               # Tổng hợp toàn bộ nguồn tham khảo học thuật & kỹ thuật
+└── pyproject.toml              # Khai báo package, extras (backend/ml/evaluation/dev) và CLI entry points
+```
+
+---
+
+## 4. Cài đặt & Chuẩn bị Môi trường
+
+### Yêu cầu hệ thống
+- **Phần cứng/HĐH:** macOS Apple Silicon (`arm64`, khuyến nghị ≥ 16 GB Unified Memory).
+- **Công cụ hệ thống:** Python `3.11`, [`uv`](https://docs.astral.sh/uv/), Node.js `22.12+` / `24`, MongoDB local (`mongodb://127.0.0.1:27017`), `ffmpeg`/`ffprobe`, `tesseract`, `poppler`, `LibreOffice`.
 
 ```bash
+brew install ffmpeg tesseract poppler
+brew install --cask libreoffice
+```
+
+### Bước 1 — Cài đặt các môi trường Python & build Frontend
+
+```bash
+# 1. Môi trường chính cho backend + pipeline + kiểm thử
+UV_PROJECT_ENVIRONMENT=.venv-backend uv sync --locked --extra backend --extra ml --extra evaluation --extra dev
+
+# (Tùy chọn) Hoặc môi trường mặc định .venv cho CLI pipeline
+uv sync --locked --all-extras
+
+# 2. Môi trường MLX tách biệt cho ASR (PhoWhisper MLX)
+uv venv .venv-asr-mlx --python 3.11
+uv pip install --python .venv-asr-mlx/bin/python -r requirements-asr-mlx.txt
+
+# 3. Môi trường MLX tách biệt cho LLM biên bản (Qwen3-4B + LoRA B)
+uv venv .venv-llm --python 3.11
+uv pip install --python .venv-llm/bin/python -r requirements-minutes-mlx.txt
+
+# 4. Build giao diện web React (apps/web/dist)
 npm --prefix apps/web ci
 npm --prefix apps/web run build
-.venv-backend/bin/python scripts/backend/run_local.py
 ```
 
-Mở `http://127.0.0.1:8010` và tạo tài khoản admin lần đầu. Xem
-[báo cáo hướng dẫn mở web và các chức năng người dùng/admin](docs/BAO_CAO_HUONG_DAN_SU_DUNG_WEB_MOI_2026-10-17.md),
-[cài đặt và nhập dữ liệu cũ](docs/backend/QUICKSTART.md),
-[bố trí backend](docs/backend/ARCHITECTURE.md) và
-[phạm vi kiểm thử](docs/backend/VALIDATION_2026-10-17.md).
-Demo cũ ở cổng 8000 có entry point độc lập bên dưới.
- 
-CLI và web demo dùng backend dung hợp transcript đa nguồn và chạy end-to-end bằng model thật.
- 
-### VIVOS Synthetic Multi-Device Pipeline
-Hệ thống xử lý cuộc họp tiếng Việt đa nguồn dựa hoàn toàn trên corpus âm thanh VIVOS theo đặc tả `docs/PLAN_VIVOS_SYNTHETIC_PIPELINE.md`.
-- **Milestone 0 (Preflight & Inventory)**: ĐẠT. Kiểm kê môi trường, ffmpeg, VIVOS corpus (65 speakers, 12,420 files, 15.4h audio), model cache ngoại tuyến (PhoWhisper-small, ECAPA-TDNN, Silero VAD). Báo cáo tại `reports/preflight.md`.
-- **Milestone 1 (Foundations, Configs & Contracts)**: ĐẠT. Thiết lập cây thư mục phân tầng, Pydantic contracts (`domain/contracts.py`) cho Utterance, Recipe, Segment, Hypothesis, Timeline, Provenance, cùng hệ thống YAML configs (`configs/data/`, `configs/simulation/`, `configs/models/`, `configs/fusion/`, `configs/experiment/`, `configs/demo.yaml`).
-- **Milestone 2 (VIVOS Manifest, Split & Leakage Audit)**: ĐẠT. Quét 12,420 file VIVOS, chuẩn hóa tiếng Việt NFC, chia speaker-disjoint (32 dev, 14 val, 19 test) và tách riêng enrollment utterances. Lệnh `meeting-pipeline data audit` đạt 100% không vi phạm rò rỉ. Báo cáo tại `reports/data_audit.json` và `reports/data_audit.md`.
-- **Milestone 3 (Synthetic Multi-Device Generator)**: ĐẠT. Xây dựng phòng 3D ShoeBox và RIR bằng `pyroomacoustics`, mô phỏng thiết bị (gain, offset, drift ppm, clipping, dropout), nhiễu chuẩn quy tắc VIVOS (white, pink, brown, hum 50Hz, room tone, VIVOS babble). Lệnh `meeting-pipeline simulate generate` sinh âm thanh đa thiết bị chuẩn 16kHz mono.
-- **Milestone 4 (Multi-Source Synchronization & VAD)**: ĐẠT. Tự động chọn nguồn tham chiếu chất lượng cao, căn chỉnh coarse offset bằng tương quan vỏ năng lượng (envelope correlation) và bù drift. Fused Silero VAD tạo timeline hoạt động thống nhất với Frame F1 > 0.90 trên smoke/moderate.
-- **Milestone 5 (Speaker Identification & Segment ASR)**: ĐẠT. Trích xuất prototype người nói (ECAPA-TDNN), nhận diện danh tính đa nguồn (4 baseline: fixed, best-quality, unweighted mean, quality-weighted). PhoWhisper trích xuất text, word timestamps, confidence và các đặc trưng âm học không rò rỉ (RMS, SNR ước lượng, clipping, dropout).
-- **Milestone 6 (Transcript Fusion F0-F6 & Provenance)**: ĐẠT. Căn chỉnh từ qua dynamic programming, confusion network hỗ trợ insertion/deletion/substitution. Hoàn thiện 7 baseline F0–F6 (Fixed, Best-Segment, Oracle-Best, ROVER, ASR-Weighted, Rule-Weighted, Learned-Logistic). Truy vết nguồn gốc từ (WordProvenance) và trích xuất audio evidence clip cho từng thiết bị.
+### Bước 2 — Chuẩn bị trọng số Model & OCR Offline
 
-## Cài đặt
-
-Yêu cầu macOS arm64, Python 3.11, `uv`, FFmpeg/ffprobe và đủ dung lượng cho model/dữ liệu.
+Chấp nhận điều khoản `pyannote/segmentation-3.0` trên Hugging Face, sao chép `.env.example` thành `.env` (hoặc đặt biến môi trường `HF_TOKEN`), tuyệt đối không commit token thật:
 
 ```bash
-uv sync --locked --all-extras
-uv run meeting-pipeline doctor
+export HF_TOKEN='<your-hf-read-token>'
+
+# 1. Tải model Audio/Speaker/ASR vào data/model_cache/
+.venv-backend/bin/meeting-pipeline models prepare --config configs/default.yaml
+
+# 2. Chuyển đổi PhoWhisper-medium sang định dạng MLX float16 cục bộ
+.venv-asr-mlx/bin/python scripts/prepare_asr_mlx.py --download-converter
+
+# 3. Tải LLM Qwen3-4B-Instruct-2507-4bit & embedding multilingual-e5-small
+.venv-backend/bin/python scripts/prepare_minutes_models.py
+
+# 4. Tải dữ liệu OCR Tesseract vie+eng
+.venv-backend/bin/python -m meeting_backend.cli prepare-ocr
+
+# 5. Kiểm tra tổng thể môi trường (không tải mạng)
+.venv-backend/bin/meeting-pipeline doctor
+.venv-backend/bin/python -m meeting_backend.cli doctor
 ```
 
-Chấp nhận điều khoản của `pyannote/segmentation-3.0` bằng tài khoản Hugging Face của bạn,
-sau đó chỉ đặt token trong environment:
+> **Lưu ý về LoRA B adapter:** `configs/minutes.yaml` trỏ `adapter_path` tới trọng số fine-tune `LoRA B (checkpoint-132)` cùng mã kiểm SHA-256. Trọng số nhị phân (`~205 MB`) không lưu trên Git; nếu chưa có tệp adapter cục bộ, đặt `adapter_path: null` để chạy trực tiếp bằng mô hình nền `Qwen3-4B-Instruct-2507-4bit`.
+
+---
+
+## 5. Cách Chạy Hệ thống
+
+### 5.1. Ứng dụng Web Minda (FastAPI + MongoDB + Worker — Khuyến nghị)
+
+Đảm bảo dịch vụ MongoDB cục bộ đang chạy, sau đó khởi động đồng thời API và worker từ thư mục gốc dự án:
 
 ```bash
-export HF_TOKEN='<read token>'
-uv run meeting-pipeline models prepare --config configs/default.yaml
+.venv-backend/bin/python scripts/backend/run_local.py --port 8010
 ```
 
-Không đặt token trong YAML, SQLite, manifest hoặc log. `models prepare` tải weights vào
-`data/model_cache`; lệnh `doctor` không tải mạng.
-
-## Chạy local
-
-Mở web demo trên máy local:
+Hoặc chạy tách 2 terminal:
 
 ```bash
-uv run meeting-pipeline serve --host 127.0.0.1 --port 8000
+# Terminal 1: API + Frontend đã build
+.venv-backend/bin/python -m meeting_backend.cli serve --host 127.0.0.1 --port 8010
+
+# Terminal 2: Worker xử lý nền
+.venv-backend/bin/python -m meeting_backend.cli worker
 ```
 
-Truy cập `http://127.0.0.1:8000`. Có thể đăng ký tên và một hoặc nhiều mẫu giọng riêng bằng
-ECAPA, sau đó chọn những người tham gia khi tạo cuộc họp và tải 1-8 bản ghi. Backend đồng bộ
-các nguồn, tạo VAD timeline chung, chạy PhoWhisper cho từng `segment x source`, căn chỉnh từ và
-dung hợp transcript bằng F1/F3/F4/F5/F6. Kết quả hiển thị transcript từng nguồn, trọng số,
-word provenance, audio đã đồng bộ và evidence clip cùng timestamp của mọi thiết bị. Web chạy job
-nền đơn luồng và cho tải JSON/CSV/TXT/ZIP.
+Mở trình duyệt tại `http://127.0.0.1:8010` và tạo tài khoản quản trị lần đầu. Có thể ghi đè cấu hình [`configs/backend.yaml`](configs/backend.yaml) bằng biến môi trường `MEETING_APP_*` (ví dụ `MEETING_APP_MONGO_DATABASE`, `MEETING_APP_DATA_DIR`). Khi phát triển frontend, chạy thêm `npm --prefix apps/web run dev` (cổng `5173` proxy `/api` sang `8010`).
 
-Vùng được phát hiện có hai người nói đồng thời hiện được giữ thành một dòng timeline cần
-kiểm tra, kèm clip gốc của từng nguồn. Demo tạm bỏ qua tách giọng, nhận diện người nói
-và ASR cho vùng này; văn bản để trống thay vì đoán một người đang nói gì.
-
-Hoặc chạy trực tiếp bằng CLI:
+### 5.2. Chạy nhanh qua CLI (Không cần MongoDB)
 
 ```bash
-uv run meeting-pipeline run-files \
-  --meeting-name demo \
+# Chép lời & dung hợp 1–8 file ghi âm cuộc họp
+.venv-backend/bin/meeting-pipeline run-files \
+  --meeting-name hop_giao_ban \
   --fusion-method F5_RULE_WEIGHTED \
-  recording-1.aac recording-2.aac
+  path/to/phone1.m4a path/to/phone2.m4a
 ```
 
-Kết quả nằm trong `data/meetings/demo/runs/<run-id>/`. Người khớp hồ sơ đủ ngưỡng được hiện tên;
-người chưa đăng ký hoặc chưa đủ bằng chứng được giữ `unknown` nhưng mang nhãn ổn định
-`Speaker 1`, `Speaker 2`,… Dữ liệu sinh ra ở `data/`; audio gốc trong `dataset/voices/` được giữ
-nguyên.
+Kết quả (transcript JSON/CSV/TXT, timeline, word provenance và evidence clips) được lưu tại `data/meetings/<meeting-name>/runs/<run-id>/`.
 
-## Biên bản Word với LLM và Fuzzy C-Means
-
-Demo hỗ trợ Qwen3-4B 4-bit qua MLX, embedding multilingual-e5-small và FCM.
-Có chế độ chi tiết giữ đề mục mẫu, tổng quát sinh chủ đề trong vùng nội dung,
-và tạo lại DOCX từ transcript hiện có. Xem
-[hướng dẫn cài đặt, sử dụng và giới hạn](docs/LLM_FCM_MINUTES.md).
-PDF/scan đã được bổ sung ở **bản web MongoDB mới**; demo cũ giữ luồng Word.
-Fine-tuning chưa thực hiện trong đợt này.
-
-DOC/DOCX có thể xuất DOCX theo **Nghị định 30/2020/NĐ-CP** hoặc
-**Hướng dẫn 05-HD/VPTW ngày 27/5/2026**. Có thể áp dụng lại thể thức cho
-nội dung đã điền mà không chạy ASR/LLM. Xem [cách sử dụng và kiểm tra thể thức](docs/DOCX_FORMAT_STANDARDS.md).
-
-## Dữ liệu
-
-Kiểm tra kế hoạch trước khi tải:
+### 5.3. Demo Web cũ (SQLite, cổng 8000 — Giữ để đối chiếu)
 
 ```bash
-uv run meeting-pipeline data plan --config configs/evaluation.yaml
+.venv-backend/bin/meeting-pipeline serve --host 127.0.0.1 --port 8000
 ```
 
-Ngân sách mạng mặc định: VIVOS 1,5 GB, LibriWASN 1 GB, VoxVietnam 1 GB, tổng 3,5 GB
-(GB thập phân). Đây không phải dung lượng đĩa cuối cùng. VoxVietnam cần quyền truy cập riêng.
-Downloader không được tải archive LibriWASN 4–5 GB rồi xóa bớt để đạt ngân sách.
+---
 
-## Kiểm tra
+## 6. Tóm tắt Kết quả Thực nghiệm (Benchmark Đợt 1–3)
+
+Hệ thống đã được đánh giá toàn diện trên Apple MacBook Air M4 (16 GB) qua **12 hạng mục thực nghiệm** (tất cả script tái lập tại [`experiments/benchmark_20261118/`](experiments/benchmark_20261118/)). Báo cáo chi tiết đầy đủ bảng số liệu và kiểm định Bootstrap 95% CI nằm tại **[`reports/BENCHMARK_TONG_HOP_2026-11-18.md`](reports/BENCHMARK_TONG_HOP_2026-11-18.md)**.
+
+| Thành phần | Cấu hình chọn | Kết quả nổi bật & Đối chiếu chính |
+| :--- | :--- | :--- |
+| **Đồng bộ đa nguồn** | `full_sync` (100 Hz env) + `resolve_clocks` | Offset MAE **`1,04–2,50 ms`** (từ `6.769 ms` no-sync); drift lớn giảm **`711,7 → 18,5 ppm`**; tách pause/resume cùng âm học **`12/12`** dưới `0,05 ms`. |
+| **VAD** | `pyannote3_prod` + `silero_vad` | Frame F1 **`0,9372`** (`RTF 0,008`) và **`0,9350`** (`RTF 0,003`), FA thấp (`0,08–0,09`). |
+| **Tách giọng chồng lấn** | `sepformer_whamr` | Đạt **`PIT WER = 87,61%`**, **`Best Stream = 51,61%`** với PhoWhisper-medium MLX (tốt hơn nhiều không tách `130,98%` và `libri2mix` `108,10%`). |
+| **Nhận diện người nói** | `WeSpeaker` + `P2_EMBEDDING_FUSION` | Pairwise F1 **`0,8889`** (30 ca) / **`0,8611`** (20 ca đa mic), vượt `+16,6%` so với `ECAPA` (`0,7230`), đếm đúng **100%** số người ở nhóm 4-mic. |
+| **ASR tiếng Việt** | `PhoWhisper-medium` (MLX) | Trên 563 câu VIVOS: **WER `5,03%`**, **CER `2,42%`**, `RTF 0,735`, word confidence `99,82%`. Nhanh gấp **`1,89×`** `PhoWhisper-large` (`4,73%`, khác biệt `-0,37%` không có ý nghĩa thống kê) và vượt xa `whisper-large-v3-turbo` (`13,44%`) hay `wav2vec2-vi` (`10,61%`). |
+| **Dung hợp đa nguồn** | `F5_RULE_WEIGHTED_CORRECTED` + `Adaptive max=3` | Trên 24 ca đa mic: WER **`15,19%`** (giảm `-2,08%` có ý nghĩa thống kê so với `F0_FIXED` `17,46%`); `Adaptive max=3` tiết kiệm **`35,4%`** lượt ASR mà giữ WER `15,50%`. |
+| **LLM Đồ thị Biên bản** | `Qwen3-4B MLX 4-bit` + `LoRA B` | Trên 60 ca Holdout `v2.1`: **Event F1 `0,8148`**, **Relation F1 `0,4467`**, **State Exact `0,3333` (`14/42`)**, median **`9,44 s/ca`** (`peak 3,68 GB`) — vượt Base MLX `+0,3639 Relation F1`, tương đương thống kê GPU NVIDIA L4 NF4 nhưng **nhanh gấp `5,27×`**. |
+| **OCR & Xuất Word** | `Tesseract` + `OpenCV` / `DOCX Renderer` | Xuất DOCX đạt `zip_integrity = 100%`, `0/60` false positive ngày/giờ trên `v2.1`; OCR bảng OpenCV nhận `100%` trên trang phẳng (`Cell CER 1,78%` khi kết hợp VietOCR). |
+
+---
+
+## 7. Kiểm thử & Kiểm tra Chất lượng Mã
 
 ```bash
-uv run pytest tests/unit tests/integration
-uv run ruff check .
-uv run ruff format --check .
-uv run mypy src/meeting_pipeline
+# Unit tests (454 bài kiểm thử gồm cả pipeline và backend)
+PYTHONPATH=src .venv-backend/bin/python -m pytest tests/unit -q
+
+# Integration tests (45 bài kiểm thử luồng tích hợp)
+.venv/bin/python -m pytest tests/integration -q
+
+# Backend tests (yêu cầu MongoDB local đang chạy; tự tạo & dọn DB test riêng)
+PYTHONPATH=src .venv-backend/bin/python -m pytest tests/backend -q
+
+# Lint, Format & Type-check
+.venv-backend/bin/python -m ruff check .
+.venv-backend/bin/python -m mypy src/meeting_pipeline
+npm --prefix apps/web run check
+npm --prefix apps/web run format:check
 ```
 
-Model smoke, browser Playwright và dataset tests là các bước riêng, không tự tải trong test nhanh.
+---
+
+## 8. Giới hạn Hiện tại & Hướng phát triển
+
+- **Nhập mẫu PDF/ảnh scan:** Luồng `ingest.py` cho PDF/scan hiện tái dựng theo từng đoạn văn nên chưa bảo toàn cấu trúc bảng (`0/2` tables so với nạp `.docx`/`.doc` trực tiếp); bộ tách bảng OpenCV nhạy với góc nghiêng nhỏ (`~1,2°`) và cần bổ sung bước nắn thẳng ảnh (*deskew*).
+- **Gom cụm chủ đề (`minimum_silhouette = 0,22`):** Ngưỡng hiện tại bảo vệ tốt khi các chủ đề tách biệt nhưng có xu hướng fallback về 1 cụm trên hội thoại ngắn liên mạch.
+- **Tốc độ E2E biên bản:** Trên phiên họp 2 phút chạy lạnh (*uncached*), bước Audio Pipeline chỉ chiếm `~10–24%` (`50–103 s`), phần lớn thời gian nằm ở các lượt sinh/kiểm chứng biên tập của LLM (`320–443 s`).
+- **Đánh giá thực địa:** Bộ benchmark hiện tại phủ đầy đủ dữ liệu chuẩn hóa/mô phỏng (`VIVOS`, `LibriWASN`, `Holdout v2.1`); đánh giá trên tập **cuộc họp tiếng Việt ghi âm thực tế** và tải hàng đợi MongoDB trực tiếp sẽ được thực hiện ở bước tiếp theo.
+
+---
+
+## 9. Tài liệu Tham khảo & Chi tiết
+
+- **Báo cáo thực nghiệm tổng hợp (Đợt 1–3):** [`reports/BENCHMARK_TONG_HOP_2026-11-18.md`](reports/BENCHMARK_TONG_HOP_2026-11-18.md)
+- **Danh mục tài liệu tham khảo toàn hệ thống:** [`references.md`](references.md)
+- **Kiến trúc & vận hành Web Minda:** [`docs/backend/ARCHITECTURE.md`](docs/backend/ARCHITECTURE.md) · [`docs/backend/QUICKSTART.md`](docs/backend/QUICKSTART.md) · [`docs/BAO_CAO_HUONG_DAN_SU_DUNG_WEB_MOI_2026-10-17.md`](docs/BAO_CAO_HUONG_DAN_SU_DUNG_WEB_MOI_2026-10-17.md)
+- **Chi tiết pipeline, LLM/FCM & Thể thức văn bản:** [`docs/pipeline.md`](docs/pipeline.md) · [`docs/LLM_FCM_MINUTES.md`](docs/LLM_FCM_MINUTES.md) · [`docs/DOCX_FORMAT_STANDARDS.md`](docs/DOCX_FORMAT_STANDARDS.md)
+- **Sinh dữ liệu đồ thị & nhận diện thương hiệu:** [`docs/HUONG_DAN_SINH_DU_LIEU_DO_THI_MINDA.md`](docs/HUONG_DAN_SINH_DU_LIEU_DO_THI_MINDA.md) · [`docs/BRANDING.md`](docs/BRANDING.md)
