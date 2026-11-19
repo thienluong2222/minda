@@ -1,4 +1,4 @@
-# BẢN TỔNG HỌC BENCHMARK HỆ THỐNG
+# BẢN TỔNG HỌP BENCHMARK HỆ THỐNG
 
 **Phạm vi thực nghiệm:** Đánh giá toàn bộ các giai đoạn ngoài-LLM, pipeline cốt lõi, thành phần còn thiếu và tầng LLM `LoRA B` trên MLX trên mã nguồn hiện hành tại thư mục gốc (`HEAD 38204e16` kèm các chỉnh sửa mới nhất trong `src/` và `configs/`). Ngoại lệ duy nhất chưa đo là bộ **audio cuộc họp tiếng Việt thực tế** (người dùng tách sang bước sau) và throughput **`MongoDB queue` trực tiếp** (máy host chưa cài `mongod`).
 
