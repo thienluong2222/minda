@@ -183,9 +183,12 @@ class MinutesService:
             raise ValueError("Lề in hai mặt hiện áp dụng cho thể thức Đảng theo Hướng dẫn 05.")
         if options.use_model:
             availability = model_status()
+            adapter_bad = availability.get("adapter_configured") and not availability.get(
+                "adapter_cached"
+            )
             if not all(
                 availability[k] for k in ("runtime_available", "model_cached", "embedding_cached")
-            ):
+            ) or adapter_bad:
                 raise ModelRuntimeError("Runtime/model chưa sẵn sàng. Xem docs/LLM_FCM_MINUTES.md.")
         elif options.mode == "general":
             raise ValueError("Chế độ tổng quát cần bật LLM để phân nhóm và biên tập nội dung.")
@@ -477,8 +480,26 @@ class MinutesService:
         )
 
         if (minutes_dir / "meeting_graph.json").is_file():
+            snapshot_path = minutes_dir / "input_snapshot.json"
+            snapshot_metadata = (
+                json.loads(snapshot_path.read_text(encoding="utf-8")).get("metadata") or {}
+                if snapshot_path.is_file()
+                else {}
+            )
+            if not snapshot_metadata:
+                cfg_path = minutes_dir / "configuration.json"
+                if cfg_path.is_file():
+                    snapshot_metadata = (
+                        json.loads(cfg_path.read_text(encoding="utf-8")).get("meeting_metadata")
+                        or {}
+                    )
             facts = guard_graph_export(
-                run_dir, schema, doc_graph, facts, load_indexed_turns(run_dir)
+                run_dir,
+                schema,
+                doc_graph,
+                facts,
+                load_indexed_turns(run_dir),
+                snapshot_metadata,
             )
         _write_json(minutes_dir / "facts.json", [f.model_dump() for f in facts])
 

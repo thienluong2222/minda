@@ -153,7 +153,7 @@ def test_render_completed_doc_binary(tmp_path: Path) -> None:
     ]
 
     output_docx = tmp_path / "completed_chung.docx"
-    rendered_path, docx_sha = render_completed_document(
+    rendered_path, _docx_sha = render_completed_document(
         normalized_docx_path=converted.normalized_docx_path,
         output_docx_path=output_docx,
         doc_graph=doc_graph,

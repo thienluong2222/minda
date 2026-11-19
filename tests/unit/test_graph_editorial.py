@@ -194,7 +194,6 @@ def test_sentence_repair_keeps_good_sentence_and_room_identity():
 
 def test_fallback_punctuation_and_neutral_attribution():
     from meeting_pipeline.minutes.graph_editorial import readable_source
-    from meeting_pipeline.minutes.graph_writer import deterministic_risks
 
     assert readable_source("Đúng, chưa chốt ngày tập hợp;") == "Đúng, chưa chốt ngày tập hợp."
     assert readable_source("Bao giờ họp lại?") == "Bao giờ họp lại?"

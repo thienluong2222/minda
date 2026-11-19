@@ -234,7 +234,12 @@ class PhoWhisperAsrAdapter(BaseAsrAdapter):
             candidate.get("quality", {}).get("issues") == ["asr_empty"]
             for candidate in raw_candidates
         )
-        if self.config.runtime == "auto" and str(getattr(pipe, "device", "cpu")) != "cpu":
+        if (
+            self.config.runtime == "auto"
+            and runtime != "cpu"
+            and not empty_all_generations
+            and duration_sec >= 0.8
+        ):
             logger.warning(
                 "Accelerated ASR failed quality checks; retrying the same checkpoint on CPU"
             )
@@ -293,7 +298,13 @@ class PhoWhisperAsrAdapter(BaseAsrAdapter):
                 start, end = float(timestamps[0]), float(timestamps[1])
                 if not math.isfinite(start) or not math.isfinite(end) or end < start:
                     raise ValueError("invalid word timestamp")
-                words.append(TimedWord(text=text, start_sec=start, end_sec=end))
+                conf_raw = chunk.get("confidence")
+                conf: float | None = None
+                if conf_raw is not None:
+                    parsed_conf = float(conf_raw)
+                    if math.isfinite(parsed_conf):
+                        conf = min(1.0, max(0.0, parsed_conf))
+                words.append(TimedWord(text=text, start_sec=start, end_sec=end, confidence=conf))
             except (TypeError, ValueError):
                 warnings.append("word_timestamp_invalid")
         return raw_text, words, warnings

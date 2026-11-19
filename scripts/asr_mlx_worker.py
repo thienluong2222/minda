@@ -3,6 +3,7 @@
 import argparse
 import contextlib
 import json
+import math
 import sys
 
 
@@ -69,13 +70,20 @@ def main():
                     num_frames=min(N_FRAMES, len(audio) // HOP_LENGTH),
                     last_speech_timestamp=0,
                 )
-            chunks = [
-                {"text": w["word"], "timestamp": [w["start"], w["end"]]}
-                for s in segments
-                for w in s.get("words", [])
-            ]
+            chunks = []
+            for s in segments:
+                for w in s.get("words", []):
+                    item = {"text": w["word"], "timestamp": [w["start"], w["end"]]}
+                    prob = w.get("probability")
+                    if prob is not None and math.isfinite(float(prob)):
+                        item["confidence"] = round(min(1.0, max(0.0, float(prob))), 4)
+                    chunks.append(item)
+            payload = {"text": result.text, "chunks": chunks}
+            avg_lp = getattr(result, "avg_logprob", None)
+            if avg_lp is not None and math.isfinite(float(avg_lp)):
+                payload["avg_logprob"] = round(float(avg_lp), 4)
             print(
-                json.dumps({"text": result.text, "chunks": chunks}, ensure_ascii=False),
+                json.dumps(payload, ensure_ascii=False),
                 flush=True,
             )
         except Exception as exc:

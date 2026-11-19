@@ -549,3 +549,92 @@ def test_reformat_roundtrip_preserves_graph_engine_in_saved_options(client):
     response.raise_for_status()
     job = mongo.db.jobs.find_one({"_id": response.json()["id"]})
     assert job["payload"]["options"]["graph_enabled"] is True
+
+
+def test_title_only_outline_edit_enqueues_job_and_skips_llm_rewrite(client, tmp_path):
+    from meeting_pipeline.minutes.graph_contracts import Paragraph
+    from meeting_pipeline.minutes.graph_plan import ContentPlan
+    from meeting_pipeline.minutes.graph_writer import plan_sections
+
+    mongo = client.app.state.mongo
+    m, _ = ready_meeting(client)
+    units, _ = make_graph_units([SimpleNamespace(
+        turn_id="t0",
+        speaker_label="An",
+        speaker_id="An",
+        text="An đề nghị hạn 15/11.",
+        start_sec=0.0,
+        end_sec=4.0,
+        tokens=[],
+        source_id="mic",
+        clip_path=None,
+        asr_status="transcribed",
+        needs_review=False,
+        confidence=0.9,
+    )])
+    graph = build_graph(
+        m["_id"],
+        units,
+        [fallback_event(units[0])],
+        {"cluster_count": 1, "primary": [0], "membership": [[1.0]], "titles": ["Hồ sơ"]},
+        [],
+        metadata={"transcript_version_id": m["active_transcript_id"]},
+    )
+    sections, ledger = plan_sections(graph)
+    sections[0].paragraphs = [
+        Paragraph(text="An đề nghị hạn 15/11.", claim_ids=[graph.events[0].event_id])
+    ]
+    plan = ContentPlan(
+        graph_id=graph.graph_id,
+        transcript_version_id=m["active_transcript_id"],
+        phase="written",
+        sections=sections,
+        ledger=ledger,
+    )
+    plan.seal()
+
+    run_dir = tmp_path / "run_outline"
+    minutes_dir = run_dir / "minutes"
+    minutes_dir.mkdir(parents=True)
+    (minutes_dir / "meeting_graph.json").write_text(json.dumps(graph.model_dump()))
+    (minutes_dir / "content_plan.json").write_text(json.dumps(plan.model_dump()))
+    version_id = uuid4().hex
+    mongo.db.minutes_versions.insert_one(
+        {
+            "_id": version_id,
+            "meeting_id": m["_id"],
+            "owner_id": m["owner_id"],
+            "graph_id": graph.graph_id,
+            "transcript_version_id": m["active_transcript_id"],
+            "input_content_revision": m["content_revision"],
+            "outline": {"schema_version": "3.0", "plan_id": plan.plan_id},
+            "run_path": str(run_dir),
+        }
+    )
+    mongo.db.meetings.update_one({"_id": m["_id"]}, {"$set": {"active_minutes_id": version_id}})
+
+    resp = client.patch(
+        f"/api/v1/meetings/{m['_id']}/minutes/outline",
+        json={
+            "revision": m["revision"],
+            "version_id": version_id,
+            "plan_id": plan.plan_id,
+            "sections": [
+                {
+                    "section_id": sections[0].section_id,
+                    "title": "Hồ sơ (đổi tên)",
+                    "items": [
+                        {
+                            "item_id": item.item_id,
+                            "priority": item.priority,
+                            "included": item.included,
+                        }
+                        for item in sections[0].outline
+                    ],
+                }
+            ],
+        },
+    )
+    assert resp.status_code == 202
+    assert resp.json().get("state") != "unchanged"
+    assert mongo.db.jobs.find_one({"_id": resp.json()["id"]})["kind"] == "revise_minutes_outline"

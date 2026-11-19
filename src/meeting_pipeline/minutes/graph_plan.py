@@ -100,7 +100,7 @@ def revise_plan(
             )
             for item in edit.items
         ]
-        if title != prior.title or section.outline != prior.outline:
+        if section.outline != prior.outline or not prior.paragraphs:
             changed.add(section.section_id)
             section.paragraphs = []
         section.claim_ids = [item.item_id for item in section.outline if item.included]

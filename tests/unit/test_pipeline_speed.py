@@ -142,8 +142,9 @@ def test_compact_writer_still_rejects_semantic_omission():
             return {"text": "An gửi hồ sơ."}
 
     written, _audit = write_sections(Session(), graph, sections)
-    assert written[0].paragraphs[0].verification == "source_fallback"
-    assert "Bình" in written[0].paragraphs[0].text
+    assert written[0].paragraphs
+    assert all(p.verification == "source_fallback" for p in written[0].paragraphs)
+    assert "Bình" in " ".join(p.text for p in written[0].paragraphs)
 
 
 def test_mixed_json_batch_isolates_bad_output_and_keeps_order(tmp_path):

@@ -60,7 +60,9 @@ def cluster_topics(
                 )
                 labels = np.argmax(membership, axis=0).astype(np.int64)
                 sizes = np.bincount(labels, minlength=c)
-                if len(set(labels)) != c or min(sizes) < (1 if fixed_clusters else 2):
+                if len(set(labels)) != c or min(sizes) < (
+                    1 if fixed_clusters else (3 if n >= 12 else 2)
+                ):
                     continue
                 silhouette = (
                     float(

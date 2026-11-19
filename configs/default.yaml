@@ -89,6 +89,9 @@ asr:
   max_consecutive_punctuation: 6
   min_compression_ratio: 0.12
   timestamp_tolerance_seconds: 0.1
+  fusion_mode: transcript
+  audio_denoise: afftdn
+  max_verification_sources: 3
   target_core_seconds: 22
   max_chunk_seconds: 25
   chunk_context_seconds: 0.75

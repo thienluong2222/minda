@@ -48,7 +48,37 @@ STOP.update({"mười", "mươi", "trăm", "nghìn", "ngàn", "triệu", "linh",
 
 def editorial_role(text: str) -> str:
     lower = text.casefold().strip(" .!?…")
-    if len(lower.split()) <= 2 and lower in {"những", "không", "có", "chưa", "đó", "này"}:
+    words = lower.split()
+    if len(words) <= 2 and lower in {
+        "những",
+        "không",
+        "có",
+        "chưa",
+        "đó",
+        "này",
+        "nếu",
+        "nếu là",
+        "nếu mà",
+        "tức là",
+        "vì là",
+        "hay là",
+        "thì là",
+        "mà là",
+        "hoặc là",
+        "vậy là",
+        "nhưng mà",
+        "vì vậy",
+        "cho nên",
+        "vâng",
+        "vâng ạ",
+        "dạ",
+        "dạ vâng",
+        "à",
+        "ờ",
+        "ừ",
+    }:
+        return "review"
+    if len(words) <= 3 and lower in {"như vậy là", "nếu như là", "cũng như là"}:
         return "review"
     if re.fullmatch(r"(?:tôi\s+)?không\s+(?:có\s+)?bổ sung(?:\s+gì)?(?:\s+thêm)?", lower):
         return "confirmation"

@@ -218,9 +218,10 @@ def edit_outline(
         revised, changed = revise_plan(plan, graph, payload.sections)
     except ValueError as exc:
         raise AppError("INVALID_OUTLINE", str(exc), 422) from exc
-    if not changed and [s.section_id for s in revised.sections] == [
-        s.section_id for s in plan.sections
-    ]:
+    has_edits = bool(changed) or [
+        (s.section_id, s.title) for s in revised.sections
+    ] != [(s.section_id, s.title) for s in plan.sections]
+    if not has_edits:
         return {"state": "unchanged"}
     return enqueue(
         mongo,

@@ -1,4 +1,4 @@
-"""Unit tests for Phase F1: Document normalization, OOXML parsing, anchor extraction, and visual QA."""
+"""Unit tests for Phase F1: OOXML parsing, anchor extraction, and visual QA."""
 
 from __future__ import annotations
 
@@ -71,10 +71,10 @@ def test_parse_mau_bien_ban_hop_chung(tmp_path: Path) -> None:
 
     # Verify specific key placeholders are detected
     labels = [a.nearby_label.lower() for a in anchors]
-    assert any("chủ trì" in l for l in labels)
-    assert any("chức vụ" in l for l in labels)
-    assert any("thư ký" in l for l in labels)
-    assert any("tán thành" in l for l in labels)
+    assert any("chủ trì" in lbl for lbl in labels)
+    assert any("chức vụ" in lbl for lbl in labels)
+    assert any("thư ký" in lbl for lbl in labels)
+    assert any("tán thành" in lbl for lbl in labels)
 
 
 def test_parse_bien_ban_hop_chi_bo(tmp_path: Path) -> None:
@@ -93,8 +93,8 @@ def test_parse_bien_ban_hop_chi_bo(tmp_path: Path) -> None:
     tbl_anchors = [a for a in anchors if "table" in a.element_path]
     assert len(tbl_anchors) >= 2  # Table 0 has Đảng ủy and Chi bộ anchors
     tbl_labels = [a.nearby_label.upper() for a in tbl_anchors]
-    assert any("ĐẢNG ỦY" in l for l in tbl_labels)
-    assert any("CHI BỘ" in l for l in tbl_labels)
+    assert any("ĐẢNG ỦY" in lbl for lbl in tbl_labels)
+    assert any("CHI BỘ" in lbl for lbl in tbl_labels)
 
 
 def test_visual_qa_rendering(tmp_path: Path) -> None:

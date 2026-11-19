@@ -27,7 +27,7 @@ from meeting_pipeline.asr.router import (
     evaluate_source_pre_quality_for_asr,
 )
 from meeting_pipeline.audio.coverage import covers, interval_metadata
-from meeting_pipeline.audio.signal_fusion import ASR_AUDIO_INPUT_ID, afftdn, fuse_pair
+from meeting_pipeline.audio.signal_fusion import ASR_AUDIO_INPUT_ID, afftdn, fuse_sources
 from meeting_pipeline.config import AsrConfig
 from meeting_pipeline.data.vivos import normalize_vietnamese_text
 from meeting_pipeline.domain.contracts import MeetingSegment, SourceHypothesis, WordHypothesis
@@ -241,24 +241,29 @@ def transcribe_turn_adaptive(
                 "reference_source_id": ref_id,
                 "fallback_reason": "no_eligible_secondary",
             }
-            if reference.is_eligible and len(ranked) >= 2 and ranked[1].is_eligible:
-                secondary = ranked[1]
-                secondary_id = secondary.source_id
-                weight = secondary.pre_score / max(reference.pre_score + secondary.pre_score, 1e-8)
-                clip, details = fuse_pair(
-                    clip,
-                    sliced_clips[secondary_id],
+            eligible_secondaries = [q for q in ranked[1:] if q.is_eligible]
+            if reference.is_eligible and eligible_secondaries:
+                secondary_id = eligible_secondaries[0].source_id
+                source_specs = [
+                    (
+                        q.source_id,
+                        sliced_clips[q.source_id],
+                        sync_metadata.get(q.source_id, {}),
+                        max(q.pre_score, 1e-4),
+                    )
+                    for q in (reference, *eligible_secondaries)
+                ]
+                clip, details = fuse_sources(
+                    source_specs,
                     clip_start=round(clip_start_sec * sample_rate),
                     core=(round(core_start_sec * sample_rate), round(core_end_sec * sample_rate)),
                     sample_rate=sample_rate,
-                    reference_coverage=sync_metadata.get(ref_id, {}),
-                    secondary_coverage=sync_metadata.get(secondary_id, {}),
-                    secondary_weight=weight,
                 )
+                fused_contributors = details.pop("contributors", None)
                 preparation.update(details, secondary_candidate_id=secondary_id)
-                if "fallback_reason" not in details:
+                if "fallback_reason" not in details and fused_contributors:
                     preparation.pop("fallback_reason")
-                    contributors = {ref_id: 1.0 - weight, secondary_id: weight}
+                    contributors = fused_contributors
             preparation["source_weights"] = contributors
             preparation["method"] = "delay_and_sum" if len(contributors) > 1 else "best_mic"
             preparation["denoise_requested"] = asr_config.audio_denoise

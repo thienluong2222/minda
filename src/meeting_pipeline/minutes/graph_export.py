@@ -17,7 +17,6 @@ def guard_graph_export(run_dir, schema, document_graph, facts, turns, metadata=N
     if not graph_file.is_file():
         return facts
     graph = json.loads(graph_file.read_text())
-    projected = graph.get("schema_version") == "2.0"
     plan_file = path / "content_plan.json"
     plan = json.loads(plan_file.read_text()) if plan_file.is_file() else {}
     result = {fact.field_id: fact for fact in facts}
@@ -84,7 +83,7 @@ def guard_graph_export(run_dir, schema, document_graph, facts, turns, metadata=N
         else:
             value = (
                 conclusion
-                if field.semantic_type == SemanticFieldType.DECISION_LIST and not projected
+                if field.semantic_type == SemanticFieldType.DECISION_LIST
                 else (prior.value if prior else None)
             )
             reason = "Kết luận lấy từ nội dung có nguồn; loại lời mời biểu quyết."

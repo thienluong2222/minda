@@ -438,3 +438,23 @@ def test_review_context_never_leaks_other_sources_or_fabricates_missing_mapping(
     else:
         row["data"]["selected_recording_evidence"][0].pop("source_start_sec")
     assert review_context(mongo, meeting, row) is None
+
+
+def test_view_row_populates_speaker_and_audio_fallback_review_reasons():
+    row = {
+        "_id": "s1",
+        "needs_review": True,
+        "text": "xin chào",
+        "data": {
+            "warnings": ["speaker_identity_inconsistent_with_track"],
+            "speaker": {"warnings": ["speaker_track_unresolved"], "needs_review": True},
+            "fusion_method": "AUDIO_DELAY_AND_SUM",
+            "routing_metadata": {"audio_fusion": {"fallback_reason": "uncertain_local_delay"}},
+        },
+    }
+    reasons = view_row(row)["review_reasons"]
+    assert len(reasons) == 3
+    assert any("không nhất quán" in r or "chưa nhất quán" in r for r in reasons)
+    assert any("người nói" in r for r in reasons)
+    assert any("micro" in r for r in reasons)
+

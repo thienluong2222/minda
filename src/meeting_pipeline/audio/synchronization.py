@@ -65,10 +65,18 @@ def _estimate_windowed_drift(
     base_samples = round(base_offset_sec * sample_rate)
     source_start = max(0, -base_samples)
     source_end = min(len(source_signal), len(ref_signal) - base_samples)
-    if window_samples < 1 or (source_end - source_start) / sample_rate < max(
-        window_sec, minimum_common_speech_seconds
-    ):
+    overlap_sec = (source_end - source_start) / sample_rate
+    if window_samples < 1 or overlap_sec < max(window_sec, minimum_common_speech_seconds):
         return 0.0, 999.0, "drift_unresolved"
+
+    # Adapt stride on short/medium audio so quantized 10ms bins still resolve drift.
+    target_windows = max(minimum_drift_inliers + 2, 12)
+    available_span = source_end - source_start - window_samples
+    if available_span > 0 and target_windows > 1:
+        step_samples = min(
+            step_samples,
+            max(min(available_span, sample_rate), available_span // (target_windows - 1)),
+        )
 
     time_points: list[float] = []
     measured_offsets: list[float] = []

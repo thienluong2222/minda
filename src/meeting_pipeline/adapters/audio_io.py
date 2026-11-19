@@ -45,7 +45,7 @@ def probe_audio(path: Path, timeout_sec: float = 30) -> AudioMetadata:
         "-select_streams",
         "a:0",
         "-show_entries",
-        "stream=codec_name,sample_rate,channels,duration,duration_ts,time_base:format=duration",
+        "stream=codec_name,sample_rate,channels,duration,duration_ts,time_base,nb_frames:format=duration,format_name",
         "-of",
         "json",
         str(path),
@@ -72,13 +72,21 @@ def probe_audio(path: Path, timeout_sec: float = 30) -> AudioMetadata:
         rate, channels = int(stream["sample_rate"]), int(stream["channels"])
         if rate <= 0 or channels <= 0:
             raise ValueError("Invalid audio stream shape")
+        format_info = data.get("format", {})
+        format_names = {
+            part.strip().lower()
+            for part in str(format_info.get("format_name", "")).split(",")
+            if part.strip()
+        }
+        # Raw ADTS .aac lacks sample-exact frame tables; ffprobe duration is bitrate-estimated.
+        is_unindexed_adts = "aac" in format_names and not stream.get("nb_frames")
         return AudioMetadata(
             codec_name=str(stream["codec_name"]),
             sample_rate=rate,
             channels=channels,
             duration_sec=duration,
             duration_source=duration_source,
-            duration_is_estimate=duration_source != "stream",
+            duration_is_estimate=duration_source != "stream" or is_unindexed_adts,
         )
     except (
         subprocess.SubprocessError,

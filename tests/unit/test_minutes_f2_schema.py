@@ -70,7 +70,7 @@ def test_schema_validator_catches_hallucinated_anchor(tmp_path: Path) -> None:
         semantic_type=SemanticFieldType.CUSTOM,
     )
 
-    validated, unmapped, issues = SchemaValidator.validate(graph, [bad_field])
+    validated, _unmapped, issues = SchemaValidator.validate(graph, [bad_field])
     assert len(validated) == 0
     assert any("tham chiếu đến anchor không tồn tại" in iss for iss in issues)
 
@@ -85,7 +85,7 @@ def test_schema_validator_catches_duplicate_anchor(tmp_path: Path) -> None:
     field1 = TemplateField(field_id="f1", anchor_id=real_anc, raw_label="L1")
     field2 = TemplateField(field_id="f2", anchor_id=real_anc, raw_label="L2")
 
-    validated, unmapped, issues = SchemaValidator.validate(graph, [field1, field2])
+    validated, _unmapped, issues = SchemaValidator.validate(graph, [field1, field2])
     assert len(validated) == 2
     assert any("bị trùng lặp" in iss for iss in issues)
     assert validated[1].mapper_status == "needs_review"

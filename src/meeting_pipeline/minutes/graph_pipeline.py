@@ -186,6 +186,9 @@ def generate_graph_minutes(
         "plan_id": plan.plan_id,
         "model_id": session.settings.model_id,
         "model_revision": session.settings.model_revision,
+        "adapter_path": getattr(session.settings, "adapter_path", None),
+        "adapter_sha256": getattr(session.settings, "adapter_sha256", None),
+        "adapter_scopes": list(getattr(session.settings, "adapter_scopes", [])),
         "embedding_id": session.settings.embedding_id,
         "embedding_revision": session.settings.embedding_revision,
         "calls": session.calls[start_calls:],
@@ -394,7 +397,7 @@ def graph_narrative_values(
     }
     for field in schema.fields:
         if field.semantic_type == SemanticFieldType.DECISION_LIST:
-            kinds = {"decision", "vote"}
+            kinds = {"decision"}
         elif field.semantic_type == SemanticFieldType.ACTION_ITEM:
             kinds = {"task"}
         else:

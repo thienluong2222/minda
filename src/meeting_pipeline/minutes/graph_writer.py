@@ -454,14 +454,28 @@ def deterministic_risks(text: str, source: str) -> list[str]:
     # Diarisation labels are identifiers, not numeric facts in the meeting.
     text = re.sub(r"\b(?:Người lạ|Speaker)\s+\d+\b", "người tham dự", text, flags=re.I)
     source = re.sub(r"\b(?:Người lạ|Speaker)\s+\d+\b", "người tham dự", source, flags=re.I)
-    if canonical_values(text) - canonical_values(source):
+    source_vals = canonical_values(source)
+    if canonical_values(text) - source_vals:
         risks.append("introduced_or_duplicated_numeric_value")
+    if any(key[0] == "date" for key in source_vals) and re.search(
+        r"\bngày\s+tháng\b", text, re.I
+    ):
+        risks.append("dropped_date_day")
+    lower_text = text.casefold()
+    lower_source = source.casefold()
+    for match in re.finditer(
+        r"\b(?:mỗi|hằng|hàng)\s+(?:ngày|tuần|tháng|năm)\b", lower_text
+    ):
+        cue = match.group(0)
+        if cue not in lower_source:
+            risks.append("introduced_recurrence:" + cue)
+            break
     if re.search(r"\bphản bác\b", text, re.I) and not re.search(
         r"\b(?:phản bác|phản đối|bác bỏ|không đồng ý)\b", source, re.I
     ):
         risks.append("unsupported_objection")
     for marker in ("đã hoàn thành", "đã thống nhất", "đã thông qua", "cam kết"):
-        if marker in text.casefold() and marker not in source.casefold():
+        if marker in lower_text and marker not in lower_source:
             if marker in {"đã thống nhất", "đã thông qua"} and affirmed_decision(
                 source, marker[3:]
             ):
@@ -672,7 +686,14 @@ def repair_sentences(
 
 def event_source_text(event, units, events) -> str:
     unit = units[event.unit_ids[0]]
-    text = readable_source(event.anchor.quote if event.anchor else unit.original, unit.speaker)
+    use_corrected = unit.text != unit.original and (
+        not event.anchor
+        or event.anchor.quote.strip() == unit.original.strip()
+        or sum(1 for row in events.values() if row.unit_ids and row.unit_ids[0] == unit.unit_id)
+        == 1
+    )
+    raw_quote = unit.text if use_corrected else (event.anchor.quote if event.anchor else unit.text)
+    text = readable_source(raw_quote, unit.speaker)
     if event.lifecycle in INACTIVE_STATES:
         prefix = (
             "Nội dung đã rút. " if event.lifecycle == "withdrawn" else "Nội dung đã được thay thế. "
@@ -842,14 +863,18 @@ def write_sections(
     prompt = COMPACT_WRITE_PROMPT if compact else WRITE_PROMPT
     batch_size = getattr(session.settings, "writer_batch_size", 8)
     for section in sections:
-        rows = [
-            {"claim_id": cid}
-            for cid in (
-                [item.item_id for item in section.outline if item.included]
-                if section.outline
-                else section.claim_ids
-            )
-        ]
+        outline_ids = (
+            [item.item_id for item in section.outline if item.included]
+            if section.outline
+            else []
+        )
+        # Honor direct section.claim_ids overrides when outline wasn't synced.
+        claim_source = (
+            outline_ids
+            if section.outline and set(outline_ids) == set(section.claim_ids)
+            else section.claim_ids
+        )
+        rows = [{"claim_id": cid} for cid in claim_source]
         # Bound both generation and verification inputs. A source unit is never truncated.
         batches = [rows[i : i + batch_size] for i in range(0, len(rows), batch_size)]
         pending = [([r["claim_id"] for r in batch]) for batch in batches]

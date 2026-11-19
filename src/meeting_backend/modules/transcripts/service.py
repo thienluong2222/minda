@@ -62,6 +62,24 @@ def view_row(row):
     issues = set(data.get("warnings") or [])
     for source in data.get("source_evidence") or []:
         issues.update(source.get("asr_warnings") or [])
+    speaker_meta = data.get("speaker") or row.get("speaker") or {}
+    if isinstance(speaker_meta, dict):
+        issues.update(speaker_meta.get("warnings") or [])
+        if speaker_meta.get("needs_review") and not (
+            issues
+            & {
+                "speaker_identity_inconsistent_with_track",
+                "speaker_track_unresolved",
+                "speaker_low_confidence",
+                "speaker_ambiguous_match",
+                "speaker_conflict_with_overlap",
+                "speaker_cluster_disagreement",
+            }
+        ):
+            issues.add("speaker_track_unresolved")
+    audio_fusion = (data.get("routing_metadata") or {}).get("audio_fusion") or {}
+    if data.get("fusion_method") == "AUDIO_DELAY_AND_SUM" and audio_fusion.get("fallback_reason"):
+        issues.add("audio_fusion_fallback")
     if "asr_single_source_unverified" in issues:
         issues.discard("unverified_fusion_consensus")
     if "asr_unverified_short_fragment" in issues:
@@ -82,6 +100,24 @@ def view_row(row):
         ({"asr_short_context"}, "Đoạn âm thanh ngắn, cần nghe lại trong ngữ cảnh."),
         ({"unverified_fusion_consensus"}, "Các nguồn ghi có lời nhận dạng khác nhau."),
         ({"asr_single_source_unverified"}, "Lời chép mới có một nguồn ghi để đối chiếu."),
+        (
+            {"speaker_identity_inconsistent_with_track"},
+            "Nhãn người nói trên cùng đường tiếng chưa nhất quán.",
+        ),
+        (
+            {
+                "speaker_track_unresolved",
+                "speaker_low_confidence",
+                "speaker_ambiguous_match",
+                "speaker_conflict_with_overlap",
+                "speaker_cluster_disagreement",
+            },
+            "Chưa xác định chắc chắn người nói cho đoạn này.",
+        ),
+        (
+            {"audio_fusion_fallback"},
+            "Chưa ghép được nhiều micro theo pha, đã dùng micro tốt nhất.",
+        ),
         ({"empty_fused_transcript"}, "Chưa nhận dạng được lời chép hợp lệ."),
         (
             {"asr_invalid_word_timestamp", "asr_word_time_uncertain"},
@@ -89,7 +125,10 @@ def view_row(row):
         ),
         ({"asr_retry_succeeded"}, "Đoạn này đã phải nhận dạng lại."),
     )
-    result["review_reasons"] = [text for codes, text in descriptions if issues & codes][:3]
+    reasons = [text for codes, text in descriptions if issues & codes][:3]
+    if not reasons and row.get("needs_review"):
+        reasons = ["Đoạn này có chỉ số tin cậy chưa chắc chắn, cần nghe lại."]
+    result["review_reasons"] = reasons
     candidates, seen = [], {row.get("text", "").strip()}
     for source in data.get("source_evidence") or []:
         text = (source.get("candidate_scores", {}).get("transcript") or "").strip()

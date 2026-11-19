@@ -58,6 +58,14 @@ def _replace_text_in_paragraph(
     end = start + len(placeholder)
     if full_text[start:end] != placeholder:
         return False
+    need_leading_space = (
+        start > 0
+        and full_text[start - 1] in "),;!"
+        and bool(replacement)
+        and not replacement[0].isspace()
+        and replacement[0].isalnum()
+    )
+    text_to_insert = (" " + replacement) if need_leading_space else replacement
     offset = 0
     inserted = False
     for run in paragraph.runs:
@@ -66,7 +74,7 @@ def _replace_text_in_paragraph(
         if offset < end and run_end > start:
             left = max(0, start - offset)
             right = min(len(text), end - offset)
-            run.text = text[:left] + (replacement if not inserted else "") + text[right:]
+            run.text = text[:left] + (text_to_insert if not inserted else "") + text[right:]
             inserted = True
         offset = run_end
     if not inserted:
