@@ -174,7 +174,7 @@ export HF_TOKEN='<your-hf-read-token>'
 .venv-backend/bin/python -m meeting_backend.cli doctor
 ```
 
-> **Lưu ý về LoRA B adapter:** `configs/minutes.yaml` ghim SHA-256 cho đúng 2 file inference của `LoRA B (checkpoint-132)` (`adapter_config.json` `1,1 KB` + `adapter_model.safetensors` `63 MB`, không cần `optimizer.pt`). Lệnh `scripts/prepare_minutes_models.py` tự động tải từ GitHub Release tag `lora-b-v21-ckpt132` (có thể ghi đè nguồn bằng `--adapter-base-url` hoặc `MINDA_ADAPTER_BASE_URL`) và đối chiếu checksum. Nếu chỉ chạy demo bằng mô hình nền, chạy kèm `--skip-adapter` và đặt `adapter_path: null` trong [`configs/minutes.yaml`](configs/minutes.yaml).
+> **Lưu ý về LoRA B adapter:** `configs/minutes.yaml` ghim SHA-256 cho đúng 2 file inference của `LoRA B (checkpoint-132)` (`adapter_config.json` `1,1 KB` + `adapter_model.safetensors` `63 MB`, đóng gói trong `lora-b-v21-ckpt132.zip` `58,3 MB`, không gồm `optimizer.pt`). Lệnh `scripts/prepare_minutes_models.py` tự động tải `lora-b-v21-ckpt132.zip` từ GitHub Release tag `lora-b-v21-ckpt132` (hoặc cài offline qua `--adapter-archive <file.zip>`, ghi đè URL bằng `--adapter-url` / `MINDA_ADAPTER_URL`) và đối chiếu checksum. Nếu chỉ chạy demo bằng mô hình nền, chạy kèm `--skip-adapter` và đặt `adapter_path: null` trong [`configs/minutes.yaml`](configs/minutes.yaml).
 
 ---
 
