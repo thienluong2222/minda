@@ -61,7 +61,8 @@ test-results/
 /recycle_bin/
 /web_app/
 
-# Artifacts: ignore heavy local weights/checkpoints, keep tiny pure-text benchmark inputs (~630 KB)
+# Artifacts: ignore heavy training state/checkpoints (e.g. optimizer.pt 126 MB),
+# keep tiny pure-text benchmark inputs (~630 KB) and LoRA B inference weights (63 MB)
 /artifacts/*
 !/artifacts/graph-synthetic-v2.1/
 /artifacts/graph-synthetic-v2.1/*
@@ -78,6 +79,18 @@ test-results/
 !/artifacts/llm-next-round-v2-20261026/data/
 /artifacts/llm-next-round-v2-20261026/data/*
 !/artifacts/llm-next-round-v2-20261026/data/test.jsonl
+!/artifacts/minda-colab-v21/
+/artifacts/minda-colab-v21/*
+!/artifacts/minda-colab-v21/LLMTraining/
+/artifacts/minda-colab-v21/LLMTraining/*
+!/artifacts/minda-colab-v21/LLMTraining/runs/
+/artifacts/minda-colab-v21/LLMTraining/runs/*
+!/artifacts/minda-colab-v21/LLMTraining/runs/B/
+/artifacts/minda-colab-v21/LLMTraining/runs/B/*
+!/artifacts/minda-colab-v21/LLMTraining/runs/B/checkpoint-132/
+/artifacts/minda-colab-v21/LLMTraining/runs/B/checkpoint-132/*
+!/artifacts/minda-colab-v21/LLMTraining/runs/B/checkpoint-132/adapter_config.json
+!/artifacts/minda-colab-v21/LLMTraining/runs/B/checkpoint-132/adapter_model.safetensors
 
 # Reports: keep current benchmark results (JSON/CSV/MD/JSONL) & tiny text manifest, ignore old reports & heavy media
 /reports/comparative_benchmark/*

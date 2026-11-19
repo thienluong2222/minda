@@ -108,8 +108,8 @@ def _wave_requirements() -> dict[str, list[tuple[str, Path, str]]]:
             (
                 "LoRA B checkpoint-132 inference weights",
                 LORA_B_WEIGHTS,
-                "Run: .venv-backend/bin/python scripts/prepare_minutes_models.py "
-                "(downloads from GitHub Release)",
+                "Tracked in git; verify with: .venv-backend/bin/python "
+                "scripts/prepare_minutes_models.py --check-only",
             ),
         ],
     }

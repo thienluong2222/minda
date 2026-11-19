@@ -162,9 +162,8 @@ export HF_TOKEN='<your-hf-read-token>'
 # 2. Chuyển đổi PhoWhisper-medium sang định dạng MLX float16 cục bộ
 .venv-asr-mlx/bin/python scripts/prepare_asr_mlx.py --download-converter
 
-# 3. Tải LLM Qwen3-4B-Instruct-2507-4bit, embedding multilingual-e5-small và adapter LoRA B (kiểm SHA-256 từ GitHub Release)
+# 3. Tải LLM Qwen3-4B-Instruct-2507-4bit, embedding multilingual-e5-small và xác thực SHA-256 adapter LoRA B đi kèm repo
 .venv-backend/bin/python scripts/prepare_minutes_models.py
-# (Hoặc bỏ qua adapter để chạy bằng mô hình nền Qwen3-4B: thêm --skip-adapter và đặt adapter_path: null trong configs/minutes.yaml)
 
 # 4. Tải dữ liệu OCR Tesseract vie+eng
 .venv-backend/bin/python -m meeting_backend.cli prepare-ocr
@@ -174,7 +173,7 @@ export HF_TOKEN='<your-hf-read-token>'
 .venv-backend/bin/python -m meeting_backend.cli doctor
 ```
 
-> **Lưu ý về LoRA B adapter:** `configs/minutes.yaml` ghim SHA-256 cho đúng 2 file inference của `LoRA B (checkpoint-132)` (`adapter_config.json` `1,1 KB` + `adapter_model.safetensors` `63 MB`, đóng gói trong `lora-b-v21-ckpt132.zip` `58,3 MB`, không gồm `optimizer.pt`). Lệnh `scripts/prepare_minutes_models.py` tự động tải `lora-b-v21-ckpt132.zip` từ GitHub Release tag `lora-b-v21-ckpt132` (hoặc cài offline qua `--adapter-archive <file.zip>`, ghi đè URL bằng `--adapter-url` / `MINDA_ADAPTER_URL`) và đối chiếu checksum. Nếu chỉ chạy demo bằng mô hình nền, chạy kèm `--skip-adapter` và đặt `adapter_path: null` trong [`configs/minutes.yaml`](configs/minutes.yaml).
+> **Lưu ý về LoRA B adapter:** Đúng 2 file inference của `LoRA B (checkpoint-132)` (`adapter_config.json` `1,1 KB` + `adapter_model.safetensors` `63 MB`, không gồm `optimizer.pt`) đã được theo dõi trực tiếp trong repo tại `artifacts/minda-colab-v21/LLMTraining/runs/B/checkpoint-132/` và được kiểm SHA-256 tự động bởi `configs/minutes.yaml` và `scripts/prepare_minutes_models.py`. Nếu muốn chạy so sánh với mô hình nền `Qwen3-4B-Instruct-2507-4bit`, chỉ cần đặt `adapter_path: null` trong [`configs/minutes.yaml`](configs/minutes.yaml).
 
 ---
 
