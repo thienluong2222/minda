@@ -179,45 +179,166 @@ export HF_TOKEN='<your-hf-read-token>'
 
 ---
 
-## 5. Cách Chạy Hệ thống
+## 5. Hướng dẫn Chạy Hệ thống
 
-### 5.1. Ứng dụng Web Minda (FastAPI + MongoDB + Worker — Khuyến nghị)
+> Mọi lệnh dưới đây đều chạy từ **thư mục gốc của repository**.
 
-Đảm bảo dịch vụ MongoDB cục bộ đang chạy, sau đó khởi động đồng thời API và worker từ thư mục gốc dự án:
+### 5.1. Chạy Ứng dụng Web Minda (FastAPI + MongoDB + Worker — Khuyến nghị)
+
+#### Bước 1 — Khởi động MongoDB cục bộ
+Đảm bảo MongoDB đang lắng nghe tại `127.0.0.1:27017` (ví dụ trên macOS dùng Homebrew):
+
+```bash
+brew services start mongodb-community
+# Kiểm tra cổng 27017 đã mở chưa
+nc -z 127.0.0.1 27017 && echo "MongoDB OK"
+```
+
+#### Bước 2 — Build giao diện web (chỉ cần chạy lần đầu hoặc khi sửa `apps/web/`)
+
+```bash
+npm --prefix apps/web ci
+npm --prefix apps/web run build
+```
+
+#### Bước 3 — Khởi động đồng thời API và Worker nền
 
 ```bash
 .venv-backend/bin/python scripts/backend/run_local.py --port 8010
 ```
 
-Hoặc chạy tách 2 terminal:
+Hoặc chạy tách trên 2 cửa sổ terminal để dễ theo dõi log riêng:
 
 ```bash
-# Terminal 1: API + Frontend đã build
+# Terminal 1: FastAPI server + phục vụ giao diện apps/web/dist
 .venv-backend/bin/python -m meeting_backend.cli serve --host 127.0.0.1 --port 8010
 
-# Terminal 2: Worker xử lý nền
+# Terminal 2: Worker xử lý nền đơn luồng (ASR, Speaker, LLM, OCR)
 .venv-backend/bin/python -m meeting_backend.cli worker
 ```
 
-Mở trình duyệt tại `http://127.0.0.1:8010` và tạo tài khoản quản trị lần đầu. Có thể ghi đè cấu hình [`configs/backend.yaml`](configs/backend.yaml) bằng biến môi trường `MEETING_APP_*` (ví dụ `MEETING_APP_MONGO_DATABASE`, `MEETING_APP_DATA_DIR`). Khi phát triển frontend, chạy thêm `npm --prefix apps/web run dev` (cổng `5173` proxy `/api` sang `8010`).
+#### Bước 4 — Sử dụng trên trình duyệt
+Mở `http://127.0.0.1:8010` và thực hiện luồng cơ bản:
+1. **Khởi tạo tài khoản quản trị** ở lần truy cập đầu tiên (không có mật khẩu mặc định).
+2. *(Tùy chọn)* Tạo **Hồ sơ giọng nói** từ các mẫu thu âm sạch (hệ thống vẫn chép lời và gom nhãn `Speaker 1, 2,...` bình thường nếu chưa có hồ sơ).
+3. Tải **Biểu mẫu biên bản** (`.docx`, `.doc`, PDF hoặc ảnh scan; riêng PDF/ảnh sẽ hiển thị màn hình đối chiếu & duyệt trước khi dùng).
+4. **Tạo cuộc họp mới**: nhập thông tin, tải **1–8 file âm thanh** từ nhiều thiết bị, chọn thành viên tham gia và biểu mẫu → chạy tác vụ chép lời.
+5. **Rà soát Transcript**: nghe lại evidence clip của từng thiết bị, kiểm tra độ tin cậy từ và đổi nhãn người nói nếu cần.
+6. **Tạo & xuất Biên bản Word**: chuyển sang tab **Biên bản**, chọn chế độ chi tiết/tổng quát, chọn thể thức **NĐ 30/2020** (`nd30_2020`) hoặc **HD 05-HD/VPTW** (`hd05_2026`), xem trước từng trang DOCX và tải file `.docx`/`.zip`. Có thể **đổi thể thức** trên nội dung đã sinh mà không cần chạy lại ASR/LLM.
 
-### 5.2. Chạy nhanh qua CLI (Không cần MongoDB)
+#### Tùy chỉnh biến môi trường (tùy chọn)
+Có thể ghi đè [`configs/backend.yaml`](configs/backend.yaml) bằng biến `MEETING_APP_*` (tên database bắt buộc có tiền tố `meeting_app_`):
 
 ```bash
-# Chép lời & dung hợp 1–8 file ghi âm cuộc họp
+export MEETING_APP_MONGO_URI=mongodb://127.0.0.1:27017
+export MEETING_APP_MONGO_DATABASE=meeting_app_demo
+export MEETING_APP_DATA_DIR=data/app_demo
+```
+
+---
+
+### 5.2. Chạy Chế độ Phát triển Frontend + Backend (Hot Reload)
+
+Mở 3 terminal tại thư mục gốc:
+
+```bash
+# Terminal 1: Backend API (cổng 8010)
+.venv-backend/bin/python -m meeting_backend.cli serve --host 127.0.0.1 --port 8010
+
+# Terminal 2: Worker nền
+.venv-backend/bin/python -m meeting_backend.cli worker
+
+# Terminal 3: Vite dev server (cổng 5173, tự proxy /api sang 8010)
+npm --prefix apps/web run dev
+```
+
+Truy cập `http://127.0.0.1:5173`.
+
+---
+
+### 5.3. Chạy Pipeline trực tiếp qua CLI (Không cần MongoDB)
+
+Phù hợp khi cần xử lý nhanh file âm thanh từ dòng lệnh hoặc tích hợp script:
+
+```bash
+# 1. Kiểm tra nhanh môi trường & model cache (không tải mạng)
+.venv-backend/bin/meeting-pipeline doctor --config configs/default.yaml
+
+# 2. Chép lời & dung hợp 1–8 bản ghi âm cuộc họp
 .venv-backend/bin/meeting-pipeline run-files \
   --meeting-name hop_giao_ban \
   --fusion-method F5_RULE_WEIGHTED \
+  --config configs/default.yaml \
   path/to/phone1.m4a path/to/phone2.m4a
 ```
 
-Kết quả (transcript JSON/CSV/TXT, timeline, word provenance và evidence clips) được lưu tại `data/meetings/<meeting-name>/runs/<run-id>/`.
+* Các chế độ `--fusion-method` hỗ trợ gồm `F0_FIXED`, `F1_BEST_SEGMENT`, `F3_ROVER`, `F4_ASR_WEIGHTED`, `F5_RULE_WEIGHTED` (mặc định).
+* Toàn bộ đầu ra (transcript JSON/CSV/TXT, timeline, word provenance, audio đã đồng bộ và evidence clips) nằm trong `data/meetings/<meeting-name>/runs/<run-id>/`.
 
-### 5.3. Demo Web cũ (SQLite, cổng 8000 — Giữ để đối chiếu)
+---
+
+### 5.4. Chạy Demo Web SQLite cũ (Cổng `8000`) & Demo Streamlit
 
 ```bash
+# Demo web độc lập cũ dùng SQLite (giữ để đối chiếu hồi quy, không dùng chung DB với cổng 8010)
 .venv-backend/bin/meeting-pipeline serve --host 127.0.0.1 --port 8000
+
+# (Tùy chọn) Demo Streamlit tương tác cho luồng mô phỏng đa thiết bị
+.venv-backend/bin/streamlit run app/streamlit_app.py
 ```
+
+---
+
+### 5.5. Tái lập Bộ Benchmark Thực nghiệm (Đợt 1–3)
+
+Các script tái lập trong [`experiments/benchmark_20261118/`](experiments/benchmark_20261118/) xuất kết quả JSON/CSV về `reports/benchmark_20261118/`:
+
+```bash
+# Đợt 1 — 5 bài chạy nhanh (~5 phút)
+.venv-backend/bin/python experiments/benchmark_20261118/run_wave1_sync_timeline.py
+.venv-backend/bin/python experiments/benchmark_20261118/run_wave1_speaker_multisource.py
+.venv-backend/bin/python experiments/benchmark_20261118/run_wave1_clustering.py
+.venv-backend/bin/python experiments/benchmark_20261118/run_wave1_structured_export.py
+.venv-backend/bin/python experiments/benchmark_20261118/run_wave1_ocr.py
+
+# Đợt 2 — ASR MLX, Multi-source Fusion & Core E2E Replay
+.venv-backend/bin/python experiments/benchmark_20261118/run_wave2_asr.py
+.venv-backend/bin/python experiments/benchmark_20261118/run_wave2_fusion.py
+.venv-backend/bin/python experiments/benchmark_20261118/run_wave2_core_e2e.py
+
+# Đợt 3 — VAD/Separation/Retrieval, PDF/Backend, LLM LoRA B MLX & ASR đối chiếu lớn
+.venv-backend/bin/python experiments/benchmark_20261118/run_wave3_audio_stages_and_retrieval.py
+.venv-backend/bin/python experiments/benchmark_20261118/run_wave3_doc_and_backend.py
+.venv-backend/bin/python experiments/benchmark_20261118/run_wave3_llm_mlx.py
+.venv-backend/bin/python experiments/benchmark_20261118/run_wave3_asr_large.py
+```
+
+*(Một số bài đối chiếu Đợt 1/3 có so sánh thêm các engine phụ như `easyocr`, `vietocr`, `funasr` hoặc checkpoint đối chứng ngoài `configs/default.yaml`.)*
+
+---
+
+### 5.6. Lệnh Vận hành & Khắc phục Sự cố Thường gặp
+
+```bash
+# Kiểm tra đầy đủ trạng thái MongoDB, model cache, OCR và công cụ preview DOCX
+.venv-backend/bin/python -m meeting_backend.cli doctor
+
+# Khôi phục ảnh xem trước DOCX bị thiếu (chạy không --apply để xem trước danh sách)
+.venv-backend/bin/python -m meeting_backend.cli repair-previews
+.venv-backend/bin/python -m meeting_backend.cli repair-previews --apply
+
+# Nhập kết quả từ bản pipeline/SQLite cũ vào Web Minda (khuyến nghị chạy --dry-run trước)
+.venv-backend/bin/python -m meeting_backend.cli import-run /duong/dan/run --username admin --dry-run
+.venv-backend/bin/python -m meeting_backend.cli import-legacy data/meetings --username admin --sqlite data/app.sqlite --dry-run
+```
+
+| Tình huống | Cách kiểm tra & xử lý |
+| :--- | :--- |
+| Báo thiếu `apps/web/dist/index.html` khi chạy `run_local.py` | Chạy `npm --prefix apps/web ci && npm --prefix apps/web run build`. |
+| Không kết nối được MongoDB | Kiểm tra `brew services list` hoặc khởi động `mongod` trên cổng `27017`. |
+| Xuất được DOCX nhưng không có ảnh xem trước | Cài `brew install poppler && brew install --cask libreoffice`, kiểm tra lại bằng `meeting_backend.cli doctor`, rồi chạy `repair-previews --apply`. |
+| Lỗi không tìm thấy `LoRA B` adapter khi chạy LLM biên bản | Nếu chưa tải bộ weights adapter cục bộ, đặt `adapter_path: null` trong [`configs/minutes.yaml`](configs/minutes.yaml) để chạy mô hình nền `Qwen3-4B-Instruct-2507-4bit`. |
+| Tra lỗi API hoặc tác vụ worker bị dừng | Xem `data/app/logs/api.log` (theo `X-Request-ID`) và `data/app/logs/jobs/<job-id>/worker.log`. |
 
 ---
 
