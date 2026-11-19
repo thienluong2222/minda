@@ -31,7 +31,7 @@
 # PHẦN I — CHI TIẾT ĐỢT 1 (5 BÀI CHẠY NHANH)
 
 ## 1. Đồng bộ Đa nguồn & Timeline Pause/Resume
-**Script:** [`run_wave1_sync_timeline.py`](file:///Users/thien/Documents/School/Luận%20văn/experiments/benchmark_20261118/run_wave1_sync_timeline.py) · **Dữ liệu chi tiết:** [`wave1/sync_timeline/results.json`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave1/sync_timeline/results.json)
+**Script:** [`run_wave1_sync_timeline.py`](../experiments/benchmark_20261118/run_wave1_sync_timeline.py) · **Dữ liệu chi tiết:** [`wave1/sync_timeline/results.json`](benchmark_20261118/wave1/sync_timeline/results.json)
 
 ### 1.1. Đồng bộ liên tục (`synchronize_multi_source_audio`) trên tập ngắn và tập dài có offset/drift lớn
 > *Lưu ý quy ước dấu:* Trong `simulation/device.py`, hàm `apply_start_offset(+X)` chèn `X` giây im lặng vào đầu file; hàm đồng bộ `synchronize_multi_source_audio` trả về `offset_sec = -X` để dịch ngược về gốc tham chiếu. Số liệu sai số dưới đây so sánh trực tiếp `-pred_offset_sec` với ground-truth offset đã chèn.
@@ -62,7 +62,7 @@ Thử nghiệm trên 12 kịch bản `90s`, thiết bị thứ hai ngắt ghi h�
 ---
 
 ## 2. Multi-source Speaker Fusion (`P0–P3`) với WeSpeaker vs ECAPA vs WavLM
-**Script:** [`run_wave1_speaker_multisource.py`](file:///Users/thien/Documents/School/Luận%20văn/experiments/benchmark_20261118/run_wave1_speaker_multisource.py) · **Dữ liệu chi tiết:** [`wave1/speaker_multisource/summary.csv`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave1/speaker_multisource/summary.csv)
+**Script:** [`run_wave1_speaker_multisource.py`](../experiments/benchmark_20261118/run_wave1_speaker_multisource.py) · **Dữ liệu chi tiết:** [`wave1/speaker_multisource/summary.csv`](benchmark_20261118/wave1/speaker_multisource/summary.csv)
 
 Đánh giá trên toàn bộ **30 cuộc họp `test`** (`12 × 1-mic`, `9 × 2-mic`, `9 × 4-mic`) từ `simulation/manifest.json`, dùng Pyannote `segmentation-3.0` + `SpeakerTurnDetector` + ngưỡng calibration của từng encoder (`E3`: `0,50 / 0,4143 / 0,1085`; `E1`: `0,40 / 0,5076 / 0,0232`; `E4`: `0,15 / 0,8511 / 0,0`), với `k=3` mẫu enrollment sạch từ `VIVOS test` (+ 2 người ngoài đóng vai distractor):
 
@@ -79,13 +79,13 @@ Thử nghiệm trên 12 kịch bản `90s`, thiết bị thứ hai ngắt ghi h�
 | `E4_WavLM` | `P2_EMBEDDING_FUSION` | 0,3813 | 0,4000 | 2,000 | 0,2308 | 0,3750 | 0,1765 | 0,1240 |
 | `E4_WavLM` | `P3_WEIGHTED_SCORE_FUSION` | 0,3813 | 0,4000 | 2,000 | 0,0000 | 0,9688 | 0,0000 | 0,2507 |
 
-*(Đầy đủ 36 dòng cấu hình gồm cả `P0/P1` của `E4_WavLM` và chế độ `none` được lưu trong [`wave1/speaker_multisource/summary.csv`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave1/speaker_multisource/summary.csv).)*
+*(Đầy đủ 36 dòng cấu hình gồm cả `P0/P1` của `E4_WavLM` và chế độ `none` được lưu trong [`wave1/speaker_multisource/summary.csv`](benchmark_20261118/wave1/speaker_multisource/summary.csv).)*
 * **Kết luận:** Trên 20 ca đa mic, **`P2_EMBEDDING_FUSION` cùng `E3_WeSpeaker`** cải thiện rõ rệt cả Pairwise F1 gom cụm (`0,7500 → 0,8611`, `+11,1%` so với P0/P1) lẫn độ chính xác nhận danh tính (`0,6538` partial, `0,6103` full) và giảm sai số đếm số lượng người nói xuống thấp nhất (`0,400`).
 
 ---
 
 ## 3. Topic Clustering (`minimum_silhouette = 0,22` vs `0,08`)
-**Script:** [`run_wave1_clustering.py`](file:///Users/thien/Documents/School/Luận%20văn/experiments/benchmark_20261118/run_wave1_clustering.py) · **Dữ liệu chi tiết:** [`wave1/clustering/topic_summary.csv`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave1/clustering/topic_summary.csv), [`realistic_collapse_summary.csv`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave1/clustering/realistic_collapse_summary.csv)
+**Script:** [`run_wave1_clustering.py`](../experiments/benchmark_20261118/run_wave1_clustering.py) · **Dữ liệu chi tiết:** [`wave1/clustering/topic_summary.csv`](benchmark_20261118/wave1/clustering/topic_summary.csv), [`realistic_collapse_summary.csv`](benchmark_20261118/wave1/clustering/realistic_collapse_summary.csv)
 
 ### 3.1. Trên 30 tài liệu `text/manifest.json` (split `test`, 16 đơn vị/ca, 4 chủ đề chuẩn)
 
@@ -109,7 +109,7 @@ Với `e5_small` đang bật ở `configs/minutes.yaml`:
 ---
 
 ## 4. Structured Fields (NĐ 30/2020), Parser Biểu mẫu & Graph Export Guard
-**Script:** [`run_wave1_structured_export.py`](file:///Users/thien/Documents/School/Luận%20văn/experiments/benchmark_20261118/run_wave1_structured_export.py) · **Dữ liệu chi tiết:** [`wave1/structured_export/results.json`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave1/structured_export/results.json)
+**Script:** [`run_wave1_structured_export.py`](../experiments/benchmark_20261118/run_wave1_structured_export.py) · **Dữ liệu chi tiết:** [`wave1/structured_export/results.json`](benchmark_20261118/wave1/structured_export/results.json)
 
 * **Chuẩn hóa & ánh xạ 3 mẫu Word thực tế (`doc_parser` + `M0RuleSchemaMapper`):**
   * `bien_ban_hop_chi_bo.docx` (`.docx`): `26` anchors (gold `22`), `26` schema fields, recall nhóm `semantic_type` = `0,4737`, convert `0,009s` + parse/map `0,064s`.
@@ -127,7 +127,7 @@ Với `e5_small` đang bật ở `configs/minutes.yaml`:
 ---
 
 ## 5. OCR Dòng đơn (`--psm 7`) & Trang A4 Bảng biểu (`--psm 3` + OpenCV)
-**Script:** [`run_wave1_ocr.py`](file:///Users/thien/Documents/School/Luận%20văn/experiments/benchmark_20261118/run_wave1_ocr.py) · **Dữ liệu chi tiết:** [`wave1/ocr/line_summary.csv`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave1/ocr/line_summary.csv), [`page_table_summary.csv`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave1/ocr/page_table_summary.csv)
+**Script:** [`run_wave1_ocr.py`](../experiments/benchmark_20261118/run_wave1_ocr.py) · **Dữ liệu chi tiết:** [`wave1/ocr/line_summary.csv`](benchmark_20261118/wave1/ocr/line_summary.csv), [`page_table_summary.csv`](benchmark_20261118/wave1/ocr/page_table_summary.csv)
 
 ### 5.1. Nhận dạng Dòng đơn (`93` ảnh test = `30 clean + 30 moderate + 30 stress + 3 blank`)
 *(Đối chiếu 5 engine chạy ổn định trên tập kiểm thử: Tesseract Fast/Best, EasyOCR, VietOCR Seq2Seq/Transformer).*
@@ -157,7 +157,7 @@ Với `e5_small` đang bật ở `configs/minutes.yaml`:
 # PHẦN II — CHI TIẾT ĐỢT 2 (3 BÀI TRUNG BÌNH TRÊN MLX + WESPEAKER + FUSION MỚI)
 
 ## 6. ASR tiếng Việt trên MLX Runtime (`PhoWhisper-medium` vs `small` & Guard `< 0,8s`)
-**Script:** [`run_wave2_asr.py`](file:///Users/thien/Documents/School/Luận%20văn/experiments/benchmark_20261118/run_wave2_asr.py) · **Dữ liệu chi tiết:** [`wave2/asr_mlx/results.json`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave2/asr_mlx/results.json)
+**Script:** [`run_wave2_asr.py`](../experiments/benchmark_20261118/run_wave2_asr.py) · **Dữ liệu chi tiết:** [`wave2/asr_mlx/results.json`](benchmark_20261118/wave2/asr_mlx/results.json)
 
 ### 6.1. So sánh Tổng hợp trên Tập lớn (`vivos_test_563`, `manifest136`, `short80`, và đối chiếu `MPS`)
 
@@ -185,7 +185,7 @@ Với `e5_small` đang bật ở `configs/minutes.yaml`:
 ---
 
 ## 7. Multi-source Fusion (`F0–F5` vs `AUDIO_DELAY_AND_SUM` & `Adaptive Routing`)
-**Script:** [`run_wave2_fusion.py`](file:///Users/thien/Documents/School/Luận%20văn/experiments/benchmark_20261118/run_wave2_fusion.py) · **Dữ liệu chi tiết:** [`wave2/fusion/results.json`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave2/fusion/results.json)
+**Script:** [`run_wave2_fusion.py`](../experiments/benchmark_20261118/run_wave2_fusion.py) · **Dữ liệu chi tiết:** [`wave2/fusion/results.json`](benchmark_20261118/wave2/fusion/results.json)
 
 Chạy bằng **`PhoWhisper-medium MLX`** (đã có word `confidence` thật) trên **toàn bộ `24` cuộc họp đa mic (`12 × 2-mic` + `12 × 4-mic`, `96` lượt nói vàng)**:
 
@@ -211,7 +211,7 @@ Chạy bằng **`PhoWhisper-medium MLX`** (đã có word `confidence` thật) tr
 ---
 
 ## 8. Core End-to-End Replay trên toàn bộ 30 ca `test`
-**Script:** [`run_wave2_core_e2e.py`](file:///Users/thien/Documents/School/Luận%20văn/experiments/benchmark_20261118/run_wave2_core_e2e.py) · **Dữ liệu chi tiết:** [`wave2/core_e2e/results.json`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave2/core_e2e/results.json)
+**Script:** [`run_wave2_core_e2e.py`](../experiments/benchmark_20261118/run_wave2_core_e2e.py) · **Dữ liệu chi tiết:** [`wave2/core_e2e/results.json`](benchmark_20261118/wave2/core_e2e/results.json)
 
 Đánh giá cả chuỗi **Aligned Audio → Pyannote Shared Segmentation → SpeakerTurnDetector → GlobalSpeakerClusterer (`P2`) → Adaptive ASR (`PhoWhisper-medium MLX`) → Fusion** trên đủ **30 ca `test`** (`12 × 1-mic`, `9 × 2-mic`, `9 × 4-mic`):
 
@@ -233,7 +233,7 @@ Chạy bằng **`PhoWhisper-medium MLX`** (đã có word `confidence` thật) tr
 # PHẦN III — CHI TIẾT ĐỢT 3 (4 BÀI ĐÁNH GIÁ CÁC PHẦN CÒN THIẾU)
 
 ## 9. Đợt 3A — VAD/Overlap, Overlap Separation, `safe_merge` & Evidence Retrieval
-**Script:** [`run_wave3_audio_stages_and_retrieval.py`](file:///Users/thien/Documents/School/Luận%20văn/experiments/benchmark_20261118/run_wave3_audio_stages_and_retrieval.py) · **Dữ liệu chi tiết:** [`wave3/audio_stages_retrieval/results.json`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave3/audio_stages_retrieval/results.json) (`1.319,97 s`, `peak_rss = 3.818,32 MB`).
+**Script:** [`run_wave3_audio_stages_and_retrieval.py`](../experiments/benchmark_20261118/run_wave3_audio_stages_and_retrieval.py) · **Dữ liệu chi tiết:** [`wave3/audio_stages_retrieval/results.json`](benchmark_20261118/wave3/audio_stages_retrieval/results.json) (`1.319,97 s`, `peak_rss = 3.818,32 MB`).
 
 ### 9.1. VAD & Frame-level Overlap Detection (30 cuộc họp `test`, `485,6 s`)
 | Nhiệm vụ | Mô hình | Số đoạn (`<0,8s`) | Precision ↑ | Recall ↑ | F1 ↑ | Miss Rate ↓ | False Alarm ↓ | RTF ↓ |
@@ -279,7 +279,7 @@ Chạy bằng **`PhoWhisper-medium MLX`** (đã có word `confidence` thật) tr
 ---
 
 ## 10. Đợt 3B — Document Ingest PDF/Scan, Preview Render, Schema Mapper M1 & Backend
-**Script:** [`run_wave3_doc_and_backend.py`](file:///Users/thien/Documents/School/Luận%20văn/experiments/benchmark_20261118/run_wave3_doc_and_backend.py) · **Dữ liệu chi tiết:** [`wave3/doc_and_backend/results.json`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave3/doc_and_backend/results.json) (`92,77 s`, `peak_rss = 696,57 MB`).
+**Script:** [`run_wave3_doc_and_backend.py`](../experiments/benchmark_20261118/run_wave3_doc_and_backend.py) · **Dữ liệu chi tiết:** [`wave3/doc_and_backend/results.json`](benchmark_20261118/wave3/doc_and_backend/results.json) (`92,77 s`, `peak_rss = 696,57 MB`).
 
 | Mẫu biểu mẫu | `native_doc_docx` (Anchors / Tables / Recall) | `vector_pdf` (`pdf_text`) | `scanned_flat_pdf` (`ocr_tesseract`) | `scanned_skew_1.2deg_pdf` (`ocr_tesseract`) | Preview (`render_document_pages`) |
 | :--- | :--- | :--- | :--- | :--- | ---: |
@@ -296,7 +296,7 @@ Chạy bằng **`PhoWhisper-medium MLX`** (đã có word `confidence` thật) tr
 ---
 
 ## 11. Đợt 3C — LLM `LoRA B` trên MLX 4-bit, Downstream `generate_graph_minutes` & Full Cold E2E
-**Script:** [`run_wave3_llm_mlx.py`](file:///Users/thien/Documents/School/Luận%20văn/experiments/benchmark_20261118/run_wave3_llm_mlx.py) · **Dữ liệu chi tiết:** [`wave3/llm_mlx/results.json`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave3/llm_mlx/results.json) · [`holdout_lora_b/comparison.csv`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave3/llm_mlx/holdout_lora_b/comparison.csv) (`5.132,94 s`, `peak_rss = 2.269,74 MB`).
+**Script:** [`run_wave3_llm_mlx.py`](../experiments/benchmark_20261118/run_wave3_llm_mlx.py) · **Dữ liệu chi tiết:** [`wave3/llm_mlx/results.json`](benchmark_20261118/wave3/llm_mlx/results.json) · [`holdout_lora_b/comparison.csv`](benchmark_20261118/wave3/llm_mlx/holdout_lora_b/comparison.csv) (`5.132,94 s`, `peak_rss = 2.269,74 MB`).
 
 ### 11.1. Holdout `v2.1` (`60` test cases, `30` families, `70` oracle packets)
 | Cấu hình mô hình | Runtime / Phần cứng | Event F1 ↑ | Relation F1 ↑ | Oracle Relation F1 ↑ | State Exact ↑ | Correct (/42) | Median (s/ca) ↓ |
@@ -328,7 +328,7 @@ Chạy bằng **`PhoWhisper-medium MLX`** (đã có word `confidence` thật) tr
 ---
 
 ## 12. Đợt 3D — Đối chiếu ASR Khối lượng lớn (`PhoWhisper-large`, `Turbo`, `Wav2Vec2`)
-**Script:** [`run_wave3_asr_large.py`](file:///Users/thien/Documents/School/Luận%20văn/experiments/benchmark_20261118/run_wave3_asr_large.py) · **Dữ liệu chi tiết:** [`wave3/asr_large/results.json`](file:///Users/thien/Documents/School/Luận%20văn/reports/benchmark_20261118/wave3/asr_large/results.json) (`6.111,64 s`, `peak_rss = 1.247,44 MB`, convert & xóa weight MLX tạm lần lượt từng model).
+**Script:** [`run_wave3_asr_large.py`](../experiments/benchmark_20261118/run_wave3_asr_large.py) · **Dữ liệu chi tiết:** [`wave3/asr_large/results.json`](benchmark_20261118/wave3/asr_large/results.json) (`6.111,64 s`, `peak_rss = 1.247,44 MB`, convert & xóa weight MLX tạm lần lượt từng model).
 
 | Mô hình (Runtime) | Tập kiểm thử (Mẫu / Audio) | Wall (s) ↓ | RTF ↓ | Corpus WER ↓ | Corpus CER ↓ | Non-transcribed | Mean Word Conf | Conf Cov |
 | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |

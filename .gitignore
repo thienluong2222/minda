@@ -56,14 +56,36 @@ test-results/
 # Local data, datasets, model weights, archives & runtime artifacts
 /data/
 /dataset/
-/artifacts/
 /outputs/
 /scratch/
 /recycle_bin/
 /web_app/
 
-# Reports: keep current benchmark results (JSON/CSV/MD/JSONL), ignore old reports & heavy generated media
-/reports/comparative_benchmark/
+# Artifacts: ignore heavy local weights/checkpoints, keep tiny pure-text benchmark inputs (~630 KB)
+/artifacts/*
+!/artifacts/graph-synthetic-v2.1/
+/artifacts/graph-synthetic-v2.1/*
+!/artifacts/graph-synthetic-v2.1/test/
+/artifacts/graph-synthetic-v2.1/test/*
+!/artifacts/graph-synthetic-v2.1/test/inputs/
+/artifacts/graph-synthetic-v2.1/test/inputs/*
+!/artifacts/graph-synthetic-v2.1/test/inputs/transcripts.jsonl
+!/artifacts/graph-synthetic-v2.1/test/references/
+/artifacts/graph-synthetic-v2.1/test/references/*
+!/artifacts/graph-synthetic-v2.1/test/references/cases.jsonl
+!/artifacts/llm-next-round-v2-20261026/
+/artifacts/llm-next-round-v2-20261026/*
+!/artifacts/llm-next-round-v2-20261026/data/
+/artifacts/llm-next-round-v2-20261026/data/*
+!/artifacts/llm-next-round-v2-20261026/data/test.jsonl
+
+# Reports: keep current benchmark results (JSON/CSV/MD/JSONL) & tiny text manifest, ignore old reports & heavy media
+/reports/comparative_benchmark/*
+!/reports/comparative_benchmark/20261104/
+/reports/comparative_benchmark/20261104/*
+!/reports/comparative_benchmark/20261104/text/
+/reports/comparative_benchmark/20261104/text/*
+!/reports/comparative_benchmark/20261104/text/manifest.json
 /reports/speaker_identification/
 /reports/minutes_graph/20261117/
 /reports/benchmark_20261118/cache/

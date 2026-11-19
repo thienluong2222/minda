@@ -139,10 +139,10 @@ dict tùy ý và thay toàn bộ bản ghi chỉ vì người dùng sửa một 
 
 | Chức năng | Mã hiện có | Điểm tích hợp mới |
 | --- | --- | --- |
-| Xử lý audio đa nguồn | [MultiSourceFusionPipeline](/Users/thien/Documents/School/Luận văn/src/meeting_pipeline/pipeline/multi_source_fusion.py:256) | integrations/audio_pipeline.py và worker |
-| Biên bản/định dạng/xuất | [MinutesService](/Users/thien/Documents/School/Luận văn/src/meeting_pipeline/minutes/service.py:105) | integrations/minutes_pipeline.py, version publisher |
-| Đăng ký và tải hồ sơ giọng | [SpeakerRegistry](/Users/thien/Documents/School/Luận văn/src/meeting_pipeline/application/speakers.py:80) | adapter với quyền sở hữu và namespace riêng |
-| Web/CLI demo cũ | [create_app](/Users/thien/Documents/School/Luận văn/src/meeting_pipeline/web/app.py:450), [CLI serve](/Users/thien/Documents/School/Luận văn/src/meeting_pipeline/cli.py:250) | Giữ để đối chiếu hồi quy; app mới đăng ký route riêng |
+| Xử lý audio đa nguồn | [MultiSourceFusionPipeline](../../src/meeting_pipeline/pipeline/multi_source_fusion.py) | integrations/audio_pipeline.py và worker |
+| Biên bản/định dạng/xuất | [MinutesService](../../src/meeting_pipeline/minutes/service.py) | integrations/minutes_pipeline.py, version publisher |
+| Đăng ký và tải hồ sơ giọng | [SpeakerRegistry](../../src/meeting_pipeline/application/speakers.py) | adapter với quyền sở hữu và namespace riêng |
+| CLI chạy web & pipeline | [CLI serve](../../src/meeting_pipeline/cli.py) | Điều hướng `meeting-pipeline serve` sang `meeting_backend.main:create_app` (cổng 8010) |
 
 `meeting_pipeline` không phụ thuộc ngược vào MongoDB, auth hoặc frontend mới.
 Các sửa lỗi đã duyệt vẫn cần sửa tại `web/app.py` và `minutes/service.py` cùng

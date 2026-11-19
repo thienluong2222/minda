@@ -45,20 +45,13 @@ Xác nhận đã rà soát → tải DOCX / gói bằng chứng
 
 ### 2.1. Vị trí cần mở
 
-Toàn bộ bản web mới nằm tại:
-
-```text
-/Users/thien/Documents/School/Luận văn/web_app
-```
-
-Mở thư mục `web_app` trong trình soạn thảo để xem frontend, backend, cấu hình và tài liệu của bản web mới. Các lệnh trong báo cáo này đều chạy **bên trong `web_app`**.
+Toàn bộ mã nguồn ứng dụng web Minda hiện đã được hợp nhất tại **thư mục gốc của repository** (`apps/web`, `src/meeting_backend`, `src/meeting_pipeline`, `configs`). Các lệnh trong báo cáo này đều chạy trực tiếp từ thư mục gốc dự án.
 
 ### 2.2. Mở nhanh trên máy hiện tại
 
-Máy phát triển hiện tại đã có môi trường và bản build giao diện. Mở Terminal và chạy:
+Máy phát triển đã có môi trường và bản build giao diện. Mở Terminal tại thư mục gốc dự án và chạy:
 
 ```bash
-cd "/Users/thien/Documents/School/Luận văn/web_app"
 .venv-backend/bin/python scripts/backend/run_local.py
 ```
 
@@ -83,10 +76,9 @@ Tại Terminal đang chạy `run_local.py`, nhấn **Ctrl+C**. Launcher sẽ d�
 
 ### 2.4. Kiểm tra môi trường khi không mở được
 
-Chạy:
+Chạy tại thư mục gốc dự án:
 
 ```bash
-cd "/Users/thien/Documents/School/Luận văn/web_app"
 .venv-backend/bin/python -m meeting_backend.cli doctor
 ```
 
@@ -447,7 +439,7 @@ Với phần trình diễn dùng LLM/OCR, chuẩn bị cache mô hình trước 
 
 ## 9. Bố trí mã nguồn và dữ liệu
 
-Các đường dẫn dưới đây tính từ `web_app`:
+Các đường dẫn dưới đây tính từ thư mục gốc dự án:
 
 | Vị trí | Nội dung |
 | --- | --- |
@@ -464,13 +456,12 @@ Các đường dẫn dưới đây tính từ `web_app`:
 | `data/app/` | File dữ liệu của ứng dụng mặc định: đầu vào, kết quả, phiên bản và log. |
 | `docs/backend/` | Tài liệu cài đặt, kiến trúc và kiểm thử backend/web. |
 
-MongoDB lưu metadata; các file lớn như âm thanh, tài liệu và preview nằm trong thư mục dữ liệu. Bản web hiện giữ nhánh Git `codex/web-mongodb-upgrade` riêng trong `web_app`; thực hiện thao tác Git cho bản web tại thư mục này.
+MongoDB lưu metadata; các file lớn như âm thanh, tài liệu và preview nằm trong thư mục `data/app/`. Toàn bộ mã nguồn ứng dụng web và pipeline hiện nằm chung trên nhánh `main`.
 
 Tài liệu tham khảo nội bộ:
 
 - [Hướng dẫn kỹ thuật, cài đặt và nhập dữ liệu cũ](backend/QUICKSTART.md).
 - [Kiến trúc và cách bố trí backend](backend/ARCHITECTURE.md).
-- [Phạm vi và kết quả kiểm thử bản web](backend/VALIDATION_2026-10-17.md).
 - [LLM, embedding E5 và Fuzzy C-Means](LLM_FCM_MINUTES.md).
 - [Cấu hình và kiểm tra thể thức DOCX](DOCX_FORMAT_STANDARDS.md).
 

@@ -162,8 +162,9 @@ export HF_TOKEN='<your-hf-read-token>'
 # 2. Chuyển đổi PhoWhisper-medium sang định dạng MLX float16 cục bộ
 .venv-asr-mlx/bin/python scripts/prepare_asr_mlx.py --download-converter
 
-# 3. Tải LLM Qwen3-4B-Instruct-2507-4bit & embedding multilingual-e5-small
+# 3. Tải LLM Qwen3-4B-Instruct-2507-4bit, embedding multilingual-e5-small và adapter LoRA B (kiểm SHA-256 từ GitHub Release)
 .venv-backend/bin/python scripts/prepare_minutes_models.py
+# (Hoặc bỏ qua adapter để chạy bằng mô hình nền Qwen3-4B: thêm --skip-adapter và đặt adapter_path: null trong configs/minutes.yaml)
 
 # 4. Tải dữ liệu OCR Tesseract vie+eng
 .venv-backend/bin/python -m meeting_backend.cli prepare-ocr
@@ -173,7 +174,7 @@ export HF_TOKEN='<your-hf-read-token>'
 .venv-backend/bin/python -m meeting_backend.cli doctor
 ```
 
-> **Lưu ý về LoRA B adapter:** `configs/minutes.yaml` trỏ `adapter_path` tới trọng số fine-tune `LoRA B (checkpoint-132)` cùng mã kiểm SHA-256. Trọng số nhị phân (`~205 MB`) không lưu trên Git; nếu chưa có tệp adapter cục bộ, đặt `adapter_path: null` để chạy trực tiếp bằng mô hình nền `Qwen3-4B-Instruct-2507-4bit`.
+> **Lưu ý về LoRA B adapter:** `configs/minutes.yaml` ghim SHA-256 cho đúng 2 file inference của `LoRA B (checkpoint-132)` (`adapter_config.json` `1,1 KB` + `adapter_model.safetensors` `63 MB`, không cần `optimizer.pt`). Lệnh `scripts/prepare_minutes_models.py` tự động tải từ GitHub Release tag `lora-b-v21-ckpt132` (có thể ghi đè nguồn bằng `--adapter-base-url` hoặc `MINDA_ADAPTER_BASE_URL`) và đối chiếu checksum. Nếu chỉ chạy demo bằng mô hình nền, chạy kèm `--skip-adapter` và đặt `adapter_path: null` trong [`configs/minutes.yaml`](configs/minutes.yaml).
 
 ---
 
@@ -277,14 +278,20 @@ Phù hợp khi cần xử lý nhanh file âm thanh từ dòng lệnh hoặc tíc
 
 ### 5.4. Tái lập Bộ Benchmark Thực nghiệm (Đợt 1–3)
 
-Các script tái lập trong [`experiments/benchmark_20261118/`](experiments/benchmark_20261118/) xuất kết quả JSON/CSV về `reports/benchmark_20261118/`:
+Các file đầu vào thuần văn bản nhỏ (`text/manifest.json`, `graph-synthetic-v2.1/test/*`, `llm-next-round-v2/test.jsonl`, tổng `~836 KB`) đã được theo dõi sẵn trên Git để chạy ngay các bài benchmark văn bản/biểu mẫu (`run_wave1_clustering.py`, `run_wave1_structured_export.py`). Các bài âm thanh/OCR cần tải thêm bộ VIVOS (và LibriWASN cho đồng bộ thiết bị thật) rồi chuẩn bị manifest đầu vào trước:
 
 ```bash
-# Đợt 1 — 5 bài chạy nhanh (~5 phút)
-.venv-backend/bin/python experiments/benchmark_20261118/run_wave1_sync_timeline.py
-.venv-backend/bin/python experiments/benchmark_20261118/run_wave1_speaker_multisource.py
+# Bước 0 — Kiểm tra & sinh các manifest đầu vào theo từng đợt
+.venv-backend/bin/python experiments/benchmark_20261118/prepare_inputs.py --check
+# (Nếu cần chạy các bài audio/OCR: tải VIVOS trước, sau đó sinh manifest mô phỏng)
+.venv-backend/bin/meeting-pipeline data fetch --manifest manifests/vivos.json
+.venv-backend/bin/python experiments/benchmark_20261118/prepare_inputs.py --wave all
+
+# Đợt 1 — 5 bài chạy nhanh (~5 phút; clustering & structured_export chạy được ngay không cần VIVOS)
 .venv-backend/bin/python experiments/benchmark_20261118/run_wave1_clustering.py
 .venv-backend/bin/python experiments/benchmark_20261118/run_wave1_structured_export.py
+.venv-backend/bin/python experiments/benchmark_20261118/run_wave1_sync_timeline.py
+.venv-backend/bin/python experiments/benchmark_20261118/run_wave1_speaker_multisource.py
 .venv-backend/bin/python experiments/benchmark_20261118/run_wave1_ocr.py
 
 # Đợt 2 — ASR MLX, Multi-source Fusion & Core E2E Replay
@@ -299,7 +306,7 @@ Các script tái lập trong [`experiments/benchmark_20261118/`](experiments/ben
 .venv-backend/bin/python experiments/benchmark_20261118/run_wave3_asr_large.py
 ```
 
-*(Một số bài đối chiếu Đợt 1/3 có so sánh thêm các engine phụ như `easyocr`, `vietocr`, `funasr` hoặc checkpoint đối chứng ngoài `configs/default.yaml`.)*
+*(Các bài đối chiếu Đợt 1/3 tự động bỏ qua hoặc thông báo rõ nếu thiếu các mô hình đối chứng tùy chọn ngoài cấu hình production như `e5-base`, `bge-m3`, `easyocr`, `vietocr`, `funasr`, `PhoWhisper-large`.)*
 
 ---
 

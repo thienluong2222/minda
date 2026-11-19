@@ -1,0 +1,5042 @@
+[
+  {
+    "id": "development_000",
+    "split": "development",
+    "units": [
+      {
+        "text": "Dự toán mua thiết bị cho cổng thông tin cần giảm xuống 119 triệu đồng.",
+        "topic": "budget",
+        "template_id": "budget_0",
+        "id": "development_000_u00"
+      },
+      {
+        "text": "Dự toán mua thiết bị cho cổng thông tin cần giảm xuống 113 triệu đồng.",
+        "topic": "budget",
+        "template_id": "budget_0",
+        "id": "development_000_u01"
+      },
+      {
+        "text": "Nhóm phụ trách cổng thông tin đang thiếu người trực hỗ trợ vào cuối tuần trong tháng này.",
+        "topic": "staffing",
+        "template_id": "staffing_0",
+        "id": "development_000_u02"
+      },
+      {
+        "text": "Máy chủ phục vụ cổng thông tin cần được sao lưu trước ngày 5 tháng mười một.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_0",
+        "id": "development_000_u03"
+      },
+      {
+        "text": "Máy chủ phục vụ cổng thông tin cần được sao lưu trước ngày 11 tháng mười một.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_0",
+        "id": "development_000_u04"
+      },
+      {
+        "text": "Tổ kỹ thuật đề nghị thay ổ cứng bị lỗi để bảo đảm dữ liệu của cổng thông tin được an toàn.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_1",
+        "id": "development_000_u05"
+      },
+      {
+        "text": "Nhóm cần gửi báo cáo kết quả của cổng thông tin trước phiên họp kiểm tra vào tuần tới.",
+        "topic": "schedule",
+        "template_id": "schedule_2",
+        "id": "development_000_u06"
+      },
+      {
+        "text": "Tiến độ hoàn thành cổng thông tin đang chậm hai tuần so với kế hoạch đã thống nhất trước đó.",
+        "topic": "schedule",
+        "template_id": "schedule_1",
+        "id": "development_000_u07"
+      },
+      {
+        "text": "Chị Lan sẽ tiếp nhận bàn giao nhân sự của cổng thông tin từ ngày 19 tháng mười một.",
+        "topic": "staffing",
+        "template_id": "staffing_1",
+        "id": "development_000_u08"
+      },
+      {
+        "text": "Phòng tổ chức đề nghị bổ sung hai vị trí chuyên môn cho nhóm thực hiện cổng thông tin.",
+        "topic": "staffing",
+        "template_id": "staffing_2",
+        "id": "development_000_u09"
+      },
+      {
+        "text": "Đường truyền mạng của cổng thông tin thường mất kết nối vào giờ cao điểm sử dụng.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_2",
+        "id": "development_000_u10"
+      },
+      {
+        "text": "Phòng kế toán đề nghị kiểm tra lại nguồn kinh phí của cổng thông tin trong tháng này.",
+        "topic": "budget",
+        "template_id": "budget_2",
+        "id": "development_000_u11"
+      },
+      {
+        "text": "Mốc nghiệm thu cổng thông tin được chuyển sang ngày 13 tháng mười một theo đề nghị của các bên.",
+        "topic": "schedule",
+        "template_id": "schedule_0",
+        "id": "development_000_u12"
+      },
+      {
+        "text": "Khoản thanh toán của cổng thông tin phải có hóa đơn trước ngày 25 tháng mười một.",
+        "topic": "budget",
+        "template_id": "budget_1",
+        "id": "development_000_u13"
+      },
+      {
+        "text": "Mốc nghiệm thu cổng thông tin được chuyển sang ngày 22 tháng mười một theo đề nghị của các bên.",
+        "topic": "schedule",
+        "template_id": "schedule_0",
+        "id": "development_000_u14"
+      },
+      {
+        "text": "Nhóm phụ trách cổng thông tin đang thiếu người trực hỗ trợ vào cuối tuần trong tháng này.",
+        "topic": "staffing",
+        "template_id": "staffing_0",
+        "id": "development_000_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "development_001",
+    "split": "development",
+    "units": [
+      {
+        "text": "Dự toán mua thiết bị cho thư viện số cần giảm xuống 65 triệu đồng.",
+        "topic": "budget",
+        "template_id": "budget_0",
+        "id": "development_001_u00"
+      },
+      {
+        "text": "Chị Minh sẽ tiếp nhận bàn giao nhân sự của thư viện số từ ngày 20 tháng mười một.",
+        "topic": "staffing",
+        "template_id": "staffing_1",
+        "id": "development_001_u01"
+      },
+      {
+        "text": "Khoản thanh toán của thư viện số phải có hóa đơn trước ngày 14 tháng mười một.",
+        "topic": "budget",
+        "template_id": "budget_1",
+        "id": "development_001_u02"
+      },
+      {
+        "text": "Nhóm phụ trách thư viện số đang thiếu người trực hỗ trợ vào cuối tuần trong tháng này.",
+        "topic": "staffing",
+        "template_id": "staffing_0",
+        "id": "development_001_u03"
+      },
+      {
+        "text": "Mốc nghiệm thu thư viện số được chuyển sang ngày 18 tháng mười một theo đề nghị của các bên.",
+        "topic": "schedule",
+        "template_id": "schedule_0",
+        "id": "development_001_u04"
+      },
+      {
+        "text": "Mốc nghiệm thu thư viện số được chuyển sang ngày 8 tháng mười một theo đề nghị của các bên.",
+        "topic": "schedule",
+        "template_id": "schedule_0",
+        "id": "development_001_u05"
+      },
+      {
+        "text": "Nhóm phụ trách thư viện số đang thiếu người trực hỗ trợ vào cuối tuần trong tháng này.",
+        "topic": "staffing",
+        "template_id": "staffing_0",
+        "id": "development_001_u06"
+      },
+      {
+        "text": "Phòng tổ chức đề nghị bổ sung hai vị trí chuyên môn cho nhóm thực hiện thư viện số.",
+        "topic": "staffing",
+        "template_id": "staffing_2",
+        "id": "development_001_u07"
+      },
+      {
+        "text": "Tổ kỹ thuật đề nghị thay ổ cứng bị lỗi để bảo đảm dữ liệu của thư viện số được an toàn.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_1",
+        "id": "development_001_u08"
+      },
+      {
+        "text": "Tiến độ hoàn thành thư viện số đang chậm hai tuần so với kế hoạch đã thống nhất trước đó.",
+        "topic": "schedule",
+        "template_id": "schedule_1",
+        "id": "development_001_u09"
+      },
+      {
+        "text": "Nhóm cần gửi báo cáo kết quả của thư viện số trước phiên họp kiểm tra vào tuần tới.",
+        "topic": "schedule",
+        "template_id": "schedule_2",
+        "id": "development_001_u10"
+      },
+      {
+        "text": "Máy chủ phục vụ thư viện số cần được sao lưu trước ngày 13 tháng mười một.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_0",
+        "id": "development_001_u11"
+      },
+      {
+        "text": "Máy chủ phục vụ thư viện số cần được sao lưu trước ngày 21 tháng mười một.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_0",
+        "id": "development_001_u12"
+      },
+      {
+        "text": "Dự toán mua thiết bị cho thư viện số cần giảm xuống 81 triệu đồng.",
+        "topic": "budget",
+        "template_id": "budget_0",
+        "id": "development_001_u13"
+      },
+      {
+        "text": "Đường truyền mạng của thư viện số thường mất kết nối vào giờ cao điểm sử dụng.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_2",
+        "id": "development_001_u14"
+      },
+      {
+        "text": "Phòng kế toán đề nghị kiểm tra lại nguồn kinh phí của thư viện số trong tháng này.",
+        "topic": "budget",
+        "template_id": "budget_2",
+        "id": "development_001_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "development_002",
+    "split": "development",
+    "units": [
+      {
+        "text": "Máy chủ phục vụ phòng học thông minh cần được sao lưu trước ngày 23 tháng mười một.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_0",
+        "id": "development_002_u00"
+      },
+      {
+        "text": "Đường truyền mạng của phòng học thông minh thường mất kết nối vào giờ cao điểm sử dụng.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_2",
+        "id": "development_002_u01"
+      },
+      {
+        "text": "Phòng tổ chức đề nghị bổ sung hai vị trí chuyên môn cho nhóm thực hiện phòng học thông minh.",
+        "topic": "staffing",
+        "template_id": "staffing_2",
+        "id": "development_002_u02"
+      },
+      {
+        "text": "Mốc nghiệm thu phòng học thông minh được chuyển sang ngày 26 tháng mười một theo đề nghị của các bên.",
+        "topic": "schedule",
+        "template_id": "schedule_0",
+        "id": "development_002_u03"
+      },
+      {
+        "text": "Khoản thanh toán của phòng học thông minh phải có hóa đơn trước ngày 23 tháng mười một.",
+        "topic": "budget",
+        "template_id": "budget_1",
+        "id": "development_002_u04"
+      },
+      {
+        "text": "Nhóm phụ trách phòng học thông minh đang thiếu người trực hỗ trợ vào cuối tuần trong tháng này.",
+        "topic": "staffing",
+        "template_id": "staffing_0",
+        "id": "development_002_u05"
+      },
+      {
+        "text": "Máy chủ phục vụ phòng học thông minh cần được sao lưu trước ngày 8 tháng mười một.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_0",
+        "id": "development_002_u06"
+      },
+      {
+        "text": "Tiến độ hoàn thành phòng học thông minh đang chậm hai tuần so với kế hoạch đã thống nhất trước đó.",
+        "topic": "schedule",
+        "template_id": "schedule_1",
+        "id": "development_002_u07"
+      },
+      {
+        "text": "Nhóm phụ trách phòng học thông minh đang thiếu người trực hỗ trợ vào cuối tuần trong tháng này.",
+        "topic": "staffing",
+        "template_id": "staffing_0",
+        "id": "development_002_u08"
+      },
+      {
+        "text": "Dự toán mua thiết bị cho phòng học thông minh cần giảm xuống 149 triệu đồng.",
+        "topic": "budget",
+        "template_id": "budget_0",
+        "id": "development_002_u09"
+      },
+      {
+        "text": "Phòng kế toán đề nghị kiểm tra lại nguồn kinh phí của phòng học thông minh trong tháng này.",
+        "topic": "budget",
+        "template_id": "budget_2",
+        "id": "development_002_u10"
+      },
+      {
+        "text": "Nhóm cần gửi báo cáo kết quả của phòng học thông minh trước phiên họp kiểm tra vào tuần tới.",
+        "topic": "schedule",
+        "template_id": "schedule_2",
+        "id": "development_002_u11"
+      },
+      {
+        "text": "Tổ kỹ thuật đề nghị thay ổ cứng bị lỗi để bảo đảm dữ liệu của phòng học thông minh được an toàn.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_1",
+        "id": "development_002_u12"
+      },
+      {
+        "text": "Mốc nghiệm thu phòng học thông minh được chuyển sang ngày 15 tháng mười một theo đề nghị của các bên.",
+        "topic": "schedule",
+        "template_id": "schedule_0",
+        "id": "development_002_u13"
+      },
+      {
+        "text": "Dự toán mua thiết bị cho phòng học thông minh cần giảm xuống 71 triệu đồng.",
+        "topic": "budget",
+        "template_id": "budget_0",
+        "id": "development_002_u14"
+      },
+      {
+        "text": "Chị Minh sẽ tiếp nhận bàn giao nhân sự của phòng học thông minh từ ngày 14 tháng mười một.",
+        "topic": "staffing",
+        "template_id": "staffing_1",
+        "id": "development_002_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "validation_000",
+    "split": "validation",
+    "units": [
+      {
+        "text": "Đề nghị tuyển thêm một cộng tác viên có kinh nghiệm để hỗ trợ nhóm cổng thông tin trong đợt cao điểm.",
+        "topic": "staffing",
+        "template_id": "staffing_5",
+        "id": "validation_000_u00"
+      },
+      {
+        "text": "Quyền truy cập hệ thống cổng thông tin cần được rà soát vì một số tài khoản vẫn dùng mật khẩu cũ.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_4",
+        "id": "validation_000_u01"
+      },
+      {
+        "text": "Bộ lưu điện tại phòng máy của cổng thông tin chỉ duy trì được nguồn trong mười phút.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_5",
+        "id": "validation_000_u02"
+      },
+      {
+        "text": "Đề nghị chuyển 98 triệu đồng từ nguồn dự phòng sang khoản thuê dịch vụ của cổng thông tin.",
+        "topic": "budget",
+        "template_id": "budget_4",
+        "id": "validation_000_u03"
+      },
+      {
+        "text": "Chi phí duy trì cổng thông tin đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_000_u04"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong cổng thông tin bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_000_u05"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm cổng thông tin chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_000_u06"
+      },
+      {
+        "text": "Nhóm thống nhất chỉ giải ngân cho cổng thông tin khi đã hoàn tất thủ tục đối chiếu công nợ.",
+        "topic": "budget",
+        "template_id": "budget_5",
+        "id": "validation_000_u07"
+      },
+      {
+        "text": "Chi phí duy trì cổng thông tin đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_000_u08"
+      },
+      {
+        "text": "Các bên thống nhất lùi buổi trình bày kết quả cổng thông tin để có thêm thời gian kiểm tra sản phẩm.",
+        "topic": "schedule",
+        "template_id": "schedule_4",
+        "id": "validation_000_u09"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của cổng thông tin phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_000_u10"
+      },
+      {
+        "text": "Đề nghị tách cổng thông tin thành hai đợt nghiệm thu nhằm tránh chậm thời hạn hoàn thành chung.",
+        "topic": "schedule",
+        "template_id": "schedule_5",
+        "id": "validation_000_u11"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong cổng thông tin bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_000_u12"
+      },
+      {
+        "text": "Anh Dũng cần được hướng dẫn công việc trước khi thay người phụ trách liên hệ của cổng thông tin.",
+        "topic": "staffing",
+        "template_id": "staffing_4",
+        "id": "validation_000_u13"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm cổng thông tin chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_000_u14"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của cổng thông tin phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_000_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "validation_001",
+    "split": "validation",
+    "units": [
+      {
+        "text": "Chi phí duy trì thư viện số đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_001_u00"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm thư viện số chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_001_u01"
+      },
+      {
+        "text": "Các bên thống nhất lùi buổi trình bày kết quả thư viện số để có thêm thời gian kiểm tra sản phẩm.",
+        "topic": "schedule",
+        "template_id": "schedule_4",
+        "id": "validation_001_u02"
+      },
+      {
+        "text": "Đề nghị tuyển thêm một cộng tác viên có kinh nghiệm để hỗ trợ nhóm thư viện số trong đợt cao điểm.",
+        "topic": "staffing",
+        "template_id": "staffing_5",
+        "id": "validation_001_u03"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm thư viện số chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_001_u04"
+      },
+      {
+        "text": "Nhóm thống nhất chỉ giải ngân cho thư viện số khi đã hoàn tất thủ tục đối chiếu công nợ.",
+        "topic": "budget",
+        "template_id": "budget_5",
+        "id": "validation_001_u05"
+      },
+      {
+        "text": "Anh Hà cần được hướng dẫn công việc trước khi thay người phụ trách liên hệ của thư viện số.",
+        "topic": "staffing",
+        "template_id": "staffing_4",
+        "id": "validation_001_u06"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong thư viện số bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_001_u07"
+      },
+      {
+        "text": "Bộ lưu điện tại phòng máy của thư viện số chỉ duy trì được nguồn trong mười phút.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_5",
+        "id": "validation_001_u08"
+      },
+      {
+        "text": "Đề nghị tách thư viện số thành hai đợt nghiệm thu nhằm tránh chậm thời hạn hoàn thành chung.",
+        "topic": "schedule",
+        "template_id": "schedule_5",
+        "id": "validation_001_u09"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong thư viện số bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_001_u10"
+      },
+      {
+        "text": "Chi phí duy trì thư viện số đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_001_u11"
+      },
+      {
+        "text": "Quyền truy cập hệ thống thư viện số cần được rà soát vì một số tài khoản vẫn dùng mật khẩu cũ.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_4",
+        "id": "validation_001_u12"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của thư viện số phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_001_u13"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của thư viện số phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_001_u14"
+      },
+      {
+        "text": "Đề nghị chuyển 101 triệu đồng từ nguồn dự phòng sang khoản thuê dịch vụ của thư viện số.",
+        "topic": "budget",
+        "template_id": "budget_4",
+        "id": "validation_001_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "validation_002",
+    "split": "validation",
+    "units": [
+      {
+        "text": "Nhóm thống nhất chỉ giải ngân cho phòng học thông minh khi đã hoàn tất thủ tục đối chiếu công nợ.",
+        "topic": "budget",
+        "template_id": "budget_5",
+        "id": "validation_002_u00"
+      },
+      {
+        "text": "Đề nghị tách phòng học thông minh thành hai đợt nghiệm thu nhằm tránh chậm thời hạn hoàn thành chung.",
+        "topic": "schedule",
+        "template_id": "schedule_5",
+        "id": "validation_002_u01"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của phòng học thông minh phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_002_u02"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm phòng học thông minh chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_002_u03"
+      },
+      {
+        "text": "Anh Hà cần được hướng dẫn công việc trước khi thay người phụ trách liên hệ của phòng học thông minh.",
+        "topic": "staffing",
+        "template_id": "staffing_4",
+        "id": "validation_002_u04"
+      },
+      {
+        "text": "Bộ lưu điện tại phòng máy của phòng học thông minh chỉ duy trì được nguồn trong mười phút.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_5",
+        "id": "validation_002_u05"
+      },
+      {
+        "text": "Chi phí duy trì phòng học thông minh đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_002_u06"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm phòng học thông minh chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_002_u07"
+      },
+      {
+        "text": "Quyền truy cập hệ thống phòng học thông minh cần được rà soát vì một số tài khoản vẫn dùng mật khẩu cũ.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_4",
+        "id": "validation_002_u08"
+      },
+      {
+        "text": "Đề nghị tuyển thêm một cộng tác viên có kinh nghiệm để hỗ trợ nhóm phòng học thông minh trong đợt cao điểm.",
+        "topic": "staffing",
+        "template_id": "staffing_5",
+        "id": "validation_002_u09"
+      },
+      {
+        "text": "Các bên thống nhất lùi buổi trình bày kết quả phòng học thông minh để có thêm thời gian kiểm tra sản phẩm.",
+        "topic": "schedule",
+        "template_id": "schedule_4",
+        "id": "validation_002_u10"
+      },
+      {
+        "text": "Đề nghị chuyển 25 triệu đồng từ nguồn dự phòng sang khoản thuê dịch vụ của phòng học thông minh.",
+        "topic": "budget",
+        "template_id": "budget_4",
+        "id": "validation_002_u11"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong phòng học thông minh bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_002_u12"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong phòng học thông minh bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_002_u13"
+      },
+      {
+        "text": "Chi phí duy trì phòng học thông minh đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_002_u14"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của phòng học thông minh phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_002_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "validation_003",
+    "split": "validation",
+    "units": [
+      {
+        "text": "Anh Hà cần được hướng dẫn công việc trước khi thay người phụ trách liên hệ của hệ thống điều hành.",
+        "topic": "staffing",
+        "template_id": "staffing_4",
+        "id": "validation_003_u00"
+      },
+      {
+        "text": "Bộ lưu điện tại phòng máy của hệ thống điều hành chỉ duy trì được nguồn trong mười phút.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_5",
+        "id": "validation_003_u01"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm hệ thống điều hành chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_003_u02"
+      },
+      {
+        "text": "Quyền truy cập hệ thống hệ thống điều hành cần được rà soát vì một số tài khoản vẫn dùng mật khẩu cũ.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_4",
+        "id": "validation_003_u03"
+      },
+      {
+        "text": "Nhóm thống nhất chỉ giải ngân cho hệ thống điều hành khi đã hoàn tất thủ tục đối chiếu công nợ.",
+        "topic": "budget",
+        "template_id": "budget_5",
+        "id": "validation_003_u04"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong hệ thống điều hành bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_003_u05"
+      },
+      {
+        "text": "Chi phí duy trì hệ thống điều hành đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_003_u06"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm hệ thống điều hành chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_003_u07"
+      },
+      {
+        "text": "Đề nghị chuyển 24 triệu đồng từ nguồn dự phòng sang khoản thuê dịch vụ của hệ thống điều hành.",
+        "topic": "budget",
+        "template_id": "budget_4",
+        "id": "validation_003_u08"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của hệ thống điều hành phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_003_u09"
+      },
+      {
+        "text": "Đề nghị tuyển thêm một cộng tác viên có kinh nghiệm để hỗ trợ nhóm hệ thống điều hành trong đợt cao điểm.",
+        "topic": "staffing",
+        "template_id": "staffing_5",
+        "id": "validation_003_u10"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong hệ thống điều hành bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_003_u11"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của hệ thống điều hành phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_003_u12"
+      },
+      {
+        "text": "Đề nghị tách hệ thống điều hành thành hai đợt nghiệm thu nhằm tránh chậm thời hạn hoàn thành chung.",
+        "topic": "schedule",
+        "template_id": "schedule_5",
+        "id": "validation_003_u13"
+      },
+      {
+        "text": "Chi phí duy trì hệ thống điều hành đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_003_u14"
+      },
+      {
+        "text": "Các bên thống nhất lùi buổi trình bày kết quả hệ thống điều hành để có thêm thời gian kiểm tra sản phẩm.",
+        "topic": "schedule",
+        "template_id": "schedule_4",
+        "id": "validation_003_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "validation_004",
+    "split": "validation",
+    "units": [
+      {
+        "text": "Nhóm thống nhất chỉ giải ngân cho cổng thông tin khi đã hoàn tất thủ tục đối chiếu công nợ.",
+        "topic": "budget",
+        "template_id": "budget_5",
+        "id": "validation_004_u00"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong cổng thông tin bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_004_u01"
+      },
+      {
+        "text": "Quyền truy cập hệ thống cổng thông tin cần được rà soát vì một số tài khoản vẫn dùng mật khẩu cũ.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_4",
+        "id": "validation_004_u02"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của cổng thông tin phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_004_u03"
+      },
+      {
+        "text": "Các bên thống nhất lùi buổi trình bày kết quả cổng thông tin để có thêm thời gian kiểm tra sản phẩm.",
+        "topic": "schedule",
+        "template_id": "schedule_4",
+        "id": "validation_004_u04"
+      },
+      {
+        "text": "Anh Dũng cần được hướng dẫn công việc trước khi thay người phụ trách liên hệ của cổng thông tin.",
+        "topic": "staffing",
+        "template_id": "staffing_4",
+        "id": "validation_004_u05"
+      },
+      {
+        "text": "Đề nghị chuyển 65 triệu đồng từ nguồn dự phòng sang khoản thuê dịch vụ của cổng thông tin.",
+        "topic": "budget",
+        "template_id": "budget_4",
+        "id": "validation_004_u06"
+      },
+      {
+        "text": "Bộ lưu điện tại phòng máy của cổng thông tin chỉ duy trì được nguồn trong mười phút.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_5",
+        "id": "validation_004_u07"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm cổng thông tin chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_004_u08"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của cổng thông tin phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_004_u09"
+      },
+      {
+        "text": "Chi phí duy trì cổng thông tin đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_004_u10"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong cổng thông tin bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_004_u11"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm cổng thông tin chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_004_u12"
+      },
+      {
+        "text": "Đề nghị tách cổng thông tin thành hai đợt nghiệm thu nhằm tránh chậm thời hạn hoàn thành chung.",
+        "topic": "schedule",
+        "template_id": "schedule_5",
+        "id": "validation_004_u13"
+      },
+      {
+        "text": "Chi phí duy trì cổng thông tin đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_004_u14"
+      },
+      {
+        "text": "Đề nghị tuyển thêm một cộng tác viên có kinh nghiệm để hỗ trợ nhóm cổng thông tin trong đợt cao điểm.",
+        "topic": "staffing",
+        "template_id": "staffing_5",
+        "id": "validation_004_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "validation_005",
+    "split": "validation",
+    "units": [
+      {
+        "text": "Đề nghị tuyển thêm một cộng tác viên có kinh nghiệm để hỗ trợ nhóm thư viện số trong đợt cao điểm.",
+        "topic": "staffing",
+        "template_id": "staffing_5",
+        "id": "validation_005_u00"
+      },
+      {
+        "text": "Anh Lan cần được hướng dẫn công việc trước khi thay người phụ trách liên hệ của thư viện số.",
+        "topic": "staffing",
+        "template_id": "staffing_4",
+        "id": "validation_005_u01"
+      },
+      {
+        "text": "Đề nghị chuyển 69 triệu đồng từ nguồn dự phòng sang khoản thuê dịch vụ của thư viện số.",
+        "topic": "budget",
+        "template_id": "budget_4",
+        "id": "validation_005_u02"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm thư viện số chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_005_u03"
+      },
+      {
+        "text": "Nhóm thống nhất chỉ giải ngân cho thư viện số khi đã hoàn tất thủ tục đối chiếu công nợ.",
+        "topic": "budget",
+        "template_id": "budget_5",
+        "id": "validation_005_u04"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong thư viện số bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_005_u05"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong thư viện số bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_005_u06"
+      },
+      {
+        "text": "Chi phí duy trì thư viện số đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_005_u07"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của thư viện số phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_005_u08"
+      },
+      {
+        "text": "Các bên thống nhất lùi buổi trình bày kết quả thư viện số để có thêm thời gian kiểm tra sản phẩm.",
+        "topic": "schedule",
+        "template_id": "schedule_4",
+        "id": "validation_005_u09"
+      },
+      {
+        "text": "Đề nghị tách thư viện số thành hai đợt nghiệm thu nhằm tránh chậm thời hạn hoàn thành chung.",
+        "topic": "schedule",
+        "template_id": "schedule_5",
+        "id": "validation_005_u10"
+      },
+      {
+        "text": "Bộ lưu điện tại phòng máy của thư viện số chỉ duy trì được nguồn trong mười phút.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_5",
+        "id": "validation_005_u11"
+      },
+      {
+        "text": "Quyền truy cập hệ thống thư viện số cần được rà soát vì một số tài khoản vẫn dùng mật khẩu cũ.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_4",
+        "id": "validation_005_u12"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm thư viện số chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_005_u13"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của thư viện số phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_005_u14"
+      },
+      {
+        "text": "Chi phí duy trì thư viện số đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_005_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "validation_006",
+    "split": "validation",
+    "units": [
+      {
+        "text": "Quyền truy cập hệ thống phòng học thông minh cần được rà soát vì một số tài khoản vẫn dùng mật khẩu cũ.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_4",
+        "id": "validation_006_u00"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm phòng học thông minh chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_006_u01"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong phòng học thông minh bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_006_u02"
+      },
+      {
+        "text": "Các bên thống nhất lùi buổi trình bày kết quả phòng học thông minh để có thêm thời gian kiểm tra sản phẩm.",
+        "topic": "schedule",
+        "template_id": "schedule_4",
+        "id": "validation_006_u03"
+      },
+      {
+        "text": "Đề nghị chuyển 127 triệu đồng từ nguồn dự phòng sang khoản thuê dịch vụ của phòng học thông minh.",
+        "topic": "budget",
+        "template_id": "budget_4",
+        "id": "validation_006_u04"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong phòng học thông minh bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_006_u05"
+      },
+      {
+        "text": "Nhóm thống nhất chỉ giải ngân cho phòng học thông minh khi đã hoàn tất thủ tục đối chiếu công nợ.",
+        "topic": "budget",
+        "template_id": "budget_5",
+        "id": "validation_006_u06"
+      },
+      {
+        "text": "Đề nghị tuyển thêm một cộng tác viên có kinh nghiệm để hỗ trợ nhóm phòng học thông minh trong đợt cao điểm.",
+        "topic": "staffing",
+        "template_id": "staffing_5",
+        "id": "validation_006_u07"
+      },
+      {
+        "text": "Chi phí duy trì phòng học thông minh đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_006_u08"
+      },
+      {
+        "text": "Chi phí duy trì phòng học thông minh đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_006_u09"
+      },
+      {
+        "text": "Anh Hà cần được hướng dẫn công việc trước khi thay người phụ trách liên hệ của phòng học thông minh.",
+        "topic": "staffing",
+        "template_id": "staffing_4",
+        "id": "validation_006_u10"
+      },
+      {
+        "text": "Bộ lưu điện tại phòng máy của phòng học thông minh chỉ duy trì được nguồn trong mười phút.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_5",
+        "id": "validation_006_u11"
+      },
+      {
+        "text": "Đề nghị tách phòng học thông minh thành hai đợt nghiệm thu nhằm tránh chậm thời hạn hoàn thành chung.",
+        "topic": "schedule",
+        "template_id": "schedule_5",
+        "id": "validation_006_u12"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của phòng học thông minh phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_006_u13"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm phòng học thông minh chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_006_u14"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của phòng học thông minh phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_006_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "validation_007",
+    "split": "validation",
+    "units": [
+      {
+        "text": "Bản nâng cấp phần mềm của hệ thống điều hành phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_007_u00"
+      },
+      {
+        "text": "Đề nghị chuyển 43 triệu đồng từ nguồn dự phòng sang khoản thuê dịch vụ của hệ thống điều hành.",
+        "topic": "budget",
+        "template_id": "budget_4",
+        "id": "validation_007_u01"
+      },
+      {
+        "text": "Quyền truy cập hệ thống hệ thống điều hành cần được rà soát vì một số tài khoản vẫn dùng mật khẩu cũ.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_4",
+        "id": "validation_007_u02"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong hệ thống điều hành bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_007_u03"
+      },
+      {
+        "text": "Đề nghị tuyển thêm một cộng tác viên có kinh nghiệm để hỗ trợ nhóm hệ thống điều hành trong đợt cao điểm.",
+        "topic": "staffing",
+        "template_id": "staffing_5",
+        "id": "validation_007_u04"
+      },
+      {
+        "text": "Chi phí duy trì hệ thống điều hành đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_007_u05"
+      },
+      {
+        "text": "Đề nghị tách hệ thống điều hành thành hai đợt nghiệm thu nhằm tránh chậm thời hạn hoàn thành chung.",
+        "topic": "schedule",
+        "template_id": "schedule_5",
+        "id": "validation_007_u06"
+      },
+      {
+        "text": "Nhóm thống nhất chỉ giải ngân cho hệ thống điều hành khi đã hoàn tất thủ tục đối chiếu công nợ.",
+        "topic": "budget",
+        "template_id": "budget_5",
+        "id": "validation_007_u07"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm hệ thống điều hành chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_007_u08"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của hệ thống điều hành phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_007_u09"
+      },
+      {
+        "text": "Anh Lan cần được hướng dẫn công việc trước khi thay người phụ trách liên hệ của hệ thống điều hành.",
+        "topic": "staffing",
+        "template_id": "staffing_4",
+        "id": "validation_007_u10"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm hệ thống điều hành chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_007_u11"
+      },
+      {
+        "text": "Bộ lưu điện tại phòng máy của hệ thống điều hành chỉ duy trì được nguồn trong mười phút.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_5",
+        "id": "validation_007_u12"
+      },
+      {
+        "text": "Các bên thống nhất lùi buổi trình bày kết quả hệ thống điều hành để có thêm thời gian kiểm tra sản phẩm.",
+        "topic": "schedule",
+        "template_id": "schedule_4",
+        "id": "validation_007_u13"
+      },
+      {
+        "text": "Chi phí duy trì hệ thống điều hành đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_007_u14"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong hệ thống điều hành bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_007_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "validation_008",
+    "split": "validation",
+    "units": [
+      {
+        "text": "Giai đoạn thử nghiệm cổng thông tin chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_008_u00"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của cổng thông tin phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_008_u01"
+      },
+      {
+        "text": "Bản nâng cấp phần mềm của cổng thông tin phải được thử trên môi trường dự phòng trước khi cài đặt.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_3",
+        "id": "validation_008_u02"
+      },
+      {
+        "text": "Chi phí duy trì cổng thông tin đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_008_u03"
+      },
+      {
+        "text": "Giai đoạn thử nghiệm cổng thông tin chỉ bắt đầu sau khi toàn bộ hồ sơ bàn giao được xác nhận.",
+        "topic": "schedule",
+        "template_id": "schedule_3",
+        "id": "validation_008_u04"
+      },
+      {
+        "text": "Bộ lưu điện tại phòng máy của cổng thông tin chỉ duy trì được nguồn trong mười phút.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_5",
+        "id": "validation_008_u05"
+      },
+      {
+        "text": "Đề nghị tách cổng thông tin thành hai đợt nghiệm thu nhằm tránh chậm thời hạn hoàn thành chung.",
+        "topic": "schedule",
+        "template_id": "schedule_5",
+        "id": "validation_008_u06"
+      },
+      {
+        "text": "Quyền truy cập hệ thống cổng thông tin cần được rà soát vì một số tài khoản vẫn dùng mật khẩu cũ.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_4",
+        "id": "validation_008_u07"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong cổng thông tin bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_008_u08"
+      },
+      {
+        "text": "Đề nghị chuyển 78 triệu đồng từ nguồn dự phòng sang khoản thuê dịch vụ của cổng thông tin.",
+        "topic": "budget",
+        "template_id": "budget_4",
+        "id": "validation_008_u09"
+      },
+      {
+        "text": "Nhóm thống nhất chỉ giải ngân cho cổng thông tin khi đã hoàn tất thủ tục đối chiếu công nợ.",
+        "topic": "budget",
+        "template_id": "budget_5",
+        "id": "validation_008_u10"
+      },
+      {
+        "text": "Anh Hà cần được hướng dẫn công việc trước khi thay người phụ trách liên hệ của cổng thông tin.",
+        "topic": "staffing",
+        "template_id": "staffing_4",
+        "id": "validation_008_u11"
+      },
+      {
+        "text": "Các bên thống nhất lùi buổi trình bày kết quả cổng thông tin để có thêm thời gian kiểm tra sản phẩm.",
+        "topic": "schedule",
+        "template_id": "schedule_4",
+        "id": "validation_008_u12"
+      },
+      {
+        "text": "Đề nghị tuyển thêm một cộng tác viên có kinh nghiệm để hỗ trợ nhóm cổng thông tin trong đợt cao điểm.",
+        "topic": "staffing",
+        "template_id": "staffing_5",
+        "id": "validation_008_u13"
+      },
+      {
+        "text": "Chi phí duy trì cổng thông tin đang vượt mức đã được phê duyệt trong quý trước.",
+        "topic": "budget",
+        "template_id": "budget_3",
+        "id": "validation_008_u14"
+      },
+      {
+        "text": "Lịch nghỉ của các thành viên trong cổng thông tin bị trùng nhau nên cần sắp xếp lại ca trực.",
+        "topic": "staffing",
+        "template_id": "staffing_3",
+        "id": "validation_008_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_000",
+    "split": "test",
+    "units": [
+      {
+        "text": "Việc điều chuyển Minh sang bộ phận khác khiến nhóm cổng thông tin phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_000_u00"
+      },
+      {
+        "text": "Chứng từ quyết toán của cổng thông tin còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_000_u01"
+      },
+      {
+        "text": "Số dư tài khoản dành cho cổng thông tin chỉ còn 105 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_000_u02"
+      },
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 25 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_000_u03"
+      },
+      {
+        "text": "Các thành viên mới tham gia cổng thông tin cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_000_u04"
+      },
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_000_u05"
+      },
+      {
+        "text": "Thời gian chạy thử cổng thông tin được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_000_u06"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_000_u07"
+      },
+      {
+        "text": "Lịch kiểm tra cổng thông tin cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_000_u08"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_000_u09"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_000_u10"
+      },
+      {
+        "text": "Thiết bị định tuyến của cổng thông tin cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_000_u11"
+      },
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 9 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_000_u12"
+      },
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_000_u13"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_000_u14"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho cổng thông tin để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_000_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_001",
+    "split": "test",
+    "units": [
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_001_u00"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_001_u01"
+      },
+      {
+        "text": "Chứng từ quyết toán của thư viện số còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_001_u02"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_001_u03"
+      },
+      {
+        "text": "Số dư tài khoản dành cho thư viện số chỉ còn 20 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_001_u04"
+      },
+      {
+        "text": "Thiết bị định tuyến của thư viện số cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_001_u05"
+      },
+      {
+        "text": "Việc điều chuyển Dũng sang bộ phận khác khiến nhóm thư viện số phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_001_u06"
+      },
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 13 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_001_u07"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_001_u08"
+      },
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 6 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_001_u09"
+      },
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_001_u10"
+      },
+      {
+        "text": "Các thành viên mới tham gia thư viện số cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_001_u11"
+      },
+      {
+        "text": "Lịch kiểm tra thư viện số cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_001_u12"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho thư viện số để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_001_u13"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_001_u14"
+      },
+      {
+        "text": "Thời gian chạy thử thư viện số được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_001_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_002",
+    "split": "test",
+    "units": [
+      {
+        "text": "Thiết bị định tuyến của phòng học thông minh cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_002_u00"
+      },
+      {
+        "text": "Thời gian chạy thử phòng học thông minh được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_002_u01"
+      },
+      {
+        "text": "Lịch kiểm tra phòng học thông minh cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_002_u02"
+      },
+      {
+        "text": "Các thành viên mới tham gia phòng học thông minh cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_002_u03"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của phòng học thông minh bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_002_u04"
+      },
+      {
+        "text": "Đơn giá hợp đồng của phòng học thông minh chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_002_u05"
+      },
+      {
+        "text": "Chứng từ quyết toán của phòng học thông minh còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_002_u06"
+      },
+      {
+        "text": "Đơn giá hợp đồng của phòng học thông minh chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_002_u07"
+      },
+      {
+        "text": "Tổ thực hiện phòng học thông minh cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_002_u08"
+      },
+      {
+        "text": "Hạng mục cuối của phòng học thông minh phải được hoàn tất trước ngày 11 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_002_u09"
+      },
+      {
+        "text": "Việc điều chuyển Hà sang bộ phận khác khiến nhóm phòng học thông minh phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_002_u10"
+      },
+      {
+        "text": "Tổ thực hiện phòng học thông minh cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_002_u11"
+      },
+      {
+        "text": "Số dư tài khoản dành cho phòng học thông minh chỉ còn 74 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_002_u12"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của phòng học thông minh bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_002_u13"
+      },
+      {
+        "text": "Hạng mục cuối của phòng học thông minh phải được hoàn tất trước ngày 7 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_002_u14"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho phòng học thông minh để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_002_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_003",
+    "split": "test",
+    "units": [
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của hệ thống điều hành bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_003_u00"
+      },
+      {
+        "text": "Đơn giá hợp đồng của hệ thống điều hành chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_003_u01"
+      },
+      {
+        "text": "Chứng từ quyết toán của hệ thống điều hành còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_003_u02"
+      },
+      {
+        "text": "Tổ thực hiện hệ thống điều hành cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_003_u03"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho hệ thống điều hành để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_003_u04"
+      },
+      {
+        "text": "Thiết bị định tuyến của hệ thống điều hành cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_003_u05"
+      },
+      {
+        "text": "Lịch kiểm tra hệ thống điều hành cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_003_u06"
+      },
+      {
+        "text": "Số dư tài khoản dành cho hệ thống điều hành chỉ còn 95 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_003_u07"
+      },
+      {
+        "text": "Việc điều chuyển Hà sang bộ phận khác khiến nhóm hệ thống điều hành phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_003_u08"
+      },
+      {
+        "text": "Hạng mục cuối của hệ thống điều hành phải được hoàn tất trước ngày 8 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_003_u09"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của hệ thống điều hành bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_003_u10"
+      },
+      {
+        "text": "Các thành viên mới tham gia hệ thống điều hành cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_003_u11"
+      },
+      {
+        "text": "Tổ thực hiện hệ thống điều hành cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_003_u12"
+      },
+      {
+        "text": "Hạng mục cuối của hệ thống điều hành phải được hoàn tất trước ngày 23 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_003_u13"
+      },
+      {
+        "text": "Thời gian chạy thử hệ thống điều hành được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_003_u14"
+      },
+      {
+        "text": "Đơn giá hợp đồng của hệ thống điều hành chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_003_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_004",
+    "split": "test",
+    "units": [
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_004_u00"
+      },
+      {
+        "text": "Lịch kiểm tra cổng thông tin cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_004_u01"
+      },
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 17 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_004_u02"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_004_u03"
+      },
+      {
+        "text": "Số dư tài khoản dành cho cổng thông tin chỉ còn 25 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_004_u04"
+      },
+      {
+        "text": "Thiết bị định tuyến của cổng thông tin cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_004_u05"
+      },
+      {
+        "text": "Việc điều chuyển Minh sang bộ phận khác khiến nhóm cổng thông tin phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_004_u06"
+      },
+      {
+        "text": "Thời gian chạy thử cổng thông tin được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_004_u07"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho cổng thông tin để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_004_u08"
+      },
+      {
+        "text": "Các thành viên mới tham gia cổng thông tin cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_004_u09"
+      },
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 8 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_004_u10"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_004_u11"
+      },
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_004_u12"
+      },
+      {
+        "text": "Chứng từ quyết toán của cổng thông tin còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_004_u13"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_004_u14"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_004_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_005",
+    "split": "test",
+    "units": [
+      {
+        "text": "Chứng từ quyết toán của thư viện số còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_005_u00"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_005_u01"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_005_u02"
+      },
+      {
+        "text": "Lịch kiểm tra thư viện số cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_005_u03"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho thư viện số để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_005_u04"
+      },
+      {
+        "text": "Thiết bị định tuyến của thư viện số cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_005_u05"
+      },
+      {
+        "text": "Việc điều chuyển Dũng sang bộ phận khác khiến nhóm thư viện số phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_005_u06"
+      },
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 6 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_005_u07"
+      },
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 19 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_005_u08"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_005_u09"
+      },
+      {
+        "text": "Số dư tài khoản dành cho thư viện số chỉ còn 58 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_005_u10"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_005_u11"
+      },
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_005_u12"
+      },
+      {
+        "text": "Thời gian chạy thử thư viện số được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_005_u13"
+      },
+      {
+        "text": "Các thành viên mới tham gia thư viện số cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_005_u14"
+      },
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_005_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_006",
+    "split": "test",
+    "units": [
+      {
+        "text": "Việc điều chuyển Dũng sang bộ phận khác khiến nhóm phòng học thông minh phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_006_u00"
+      },
+      {
+        "text": "Hạng mục cuối của phòng học thông minh phải được hoàn tất trước ngày 18 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_006_u01"
+      },
+      {
+        "text": "Tổ thực hiện phòng học thông minh cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_006_u02"
+      },
+      {
+        "text": "Đơn giá hợp đồng của phòng học thông minh chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_006_u03"
+      },
+      {
+        "text": "Thiết bị định tuyến của phòng học thông minh cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_006_u04"
+      },
+      {
+        "text": "Số dư tài khoản dành cho phòng học thông minh chỉ còn 59 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_006_u05"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của phòng học thông minh bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_006_u06"
+      },
+      {
+        "text": "Tổ thực hiện phòng học thông minh cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_006_u07"
+      },
+      {
+        "text": "Thời gian chạy thử phòng học thông minh được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_006_u08"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho phòng học thông minh để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_006_u09"
+      },
+      {
+        "text": "Đơn giá hợp đồng của phòng học thông minh chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_006_u10"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của phòng học thông minh bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_006_u11"
+      },
+      {
+        "text": "Hạng mục cuối của phòng học thông minh phải được hoàn tất trước ngày 7 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_006_u12"
+      },
+      {
+        "text": "Các thành viên mới tham gia phòng học thông minh cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_006_u13"
+      },
+      {
+        "text": "Chứng từ quyết toán của phòng học thông minh còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_006_u14"
+      },
+      {
+        "text": "Lịch kiểm tra phòng học thông minh cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_006_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_007",
+    "split": "test",
+    "units": [
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của hệ thống điều hành bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_007_u00"
+      },
+      {
+        "text": "Chứng từ quyết toán của hệ thống điều hành còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_007_u01"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho hệ thống điều hành để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_007_u02"
+      },
+      {
+        "text": "Tổ thực hiện hệ thống điều hành cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_007_u03"
+      },
+      {
+        "text": "Đơn giá hợp đồng của hệ thống điều hành chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_007_u04"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của hệ thống điều hành bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_007_u05"
+      },
+      {
+        "text": "Thời gian chạy thử hệ thống điều hành được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_007_u06"
+      },
+      {
+        "text": "Lịch kiểm tra hệ thống điều hành cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_007_u07"
+      },
+      {
+        "text": "Số dư tài khoản dành cho hệ thống điều hành chỉ còn 63 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_007_u08"
+      },
+      {
+        "text": "Hạng mục cuối của hệ thống điều hành phải được hoàn tất trước ngày 6 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_007_u09"
+      },
+      {
+        "text": "Việc điều chuyển Minh sang bộ phận khác khiến nhóm hệ thống điều hành phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_007_u10"
+      },
+      {
+        "text": "Đơn giá hợp đồng của hệ thống điều hành chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_007_u11"
+      },
+      {
+        "text": "Các thành viên mới tham gia hệ thống điều hành cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_007_u12"
+      },
+      {
+        "text": "Hạng mục cuối của hệ thống điều hành phải được hoàn tất trước ngày 21 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_007_u13"
+      },
+      {
+        "text": "Thiết bị định tuyến của hệ thống điều hành cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_007_u14"
+      },
+      {
+        "text": "Tổ thực hiện hệ thống điều hành cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_007_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_008",
+    "split": "test",
+    "units": [
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_008_u00"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho cổng thông tin để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_008_u01"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_008_u02"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_008_u03"
+      },
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 19 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_008_u04"
+      },
+      {
+        "text": "Lịch kiểm tra cổng thông tin cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_008_u05"
+      },
+      {
+        "text": "Các thành viên mới tham gia cổng thông tin cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_008_u06"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_008_u07"
+      },
+      {
+        "text": "Số dư tài khoản dành cho cổng thông tin chỉ còn 134 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_008_u08"
+      },
+      {
+        "text": "Chứng từ quyết toán của cổng thông tin còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_008_u09"
+      },
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 18 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_008_u10"
+      },
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_008_u11"
+      },
+      {
+        "text": "Thời gian chạy thử cổng thông tin được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_008_u12"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_008_u13"
+      },
+      {
+        "text": "Thiết bị định tuyến của cổng thông tin cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_008_u14"
+      },
+      {
+        "text": "Việc điều chuyển Hà sang bộ phận khác khiến nhóm cổng thông tin phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_008_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_009",
+    "split": "test",
+    "units": [
+      {
+        "text": "Chứng từ quyết toán của thư viện số còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_009_u00"
+      },
+      {
+        "text": "Việc điều chuyển Hà sang bộ phận khác khiến nhóm thư viện số phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_009_u01"
+      },
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 7 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_009_u02"
+      },
+      {
+        "text": "Số dư tài khoản dành cho thư viện số chỉ còn 33 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_009_u03"
+      },
+      {
+        "text": "Thiết bị định tuyến của thư viện số cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_009_u04"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_009_u05"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho thư viện số để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_009_u06"
+      },
+      {
+        "text": "Lịch kiểm tra thư viện số cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_009_u07"
+      },
+      {
+        "text": "Các thành viên mới tham gia thư viện số cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_009_u08"
+      },
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_009_u09"
+      },
+      {
+        "text": "Thời gian chạy thử thư viện số được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_009_u10"
+      },
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 11 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_009_u11"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_009_u12"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_009_u13"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_009_u14"
+      },
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_009_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_010",
+    "split": "test",
+    "units": [
+      {
+        "text": "Thiết bị định tuyến của phòng học thông minh cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_010_u00"
+      },
+      {
+        "text": "Hạng mục cuối của phòng học thông minh phải được hoàn tất trước ngày 23 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_010_u01"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của phòng học thông minh bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_010_u02"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho phòng học thông minh để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_010_u03"
+      },
+      {
+        "text": "Đơn giá hợp đồng của phòng học thông minh chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_010_u04"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của phòng học thông minh bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_010_u05"
+      },
+      {
+        "text": "Lịch kiểm tra phòng học thông minh cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_010_u06"
+      },
+      {
+        "text": "Số dư tài khoản dành cho phòng học thông minh chỉ còn 35 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_010_u07"
+      },
+      {
+        "text": "Hạng mục cuối của phòng học thông minh phải được hoàn tất trước ngày 25 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_010_u08"
+      },
+      {
+        "text": "Đơn giá hợp đồng của phòng học thông minh chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_010_u09"
+      },
+      {
+        "text": "Chứng từ quyết toán của phòng học thông minh còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_010_u10"
+      },
+      {
+        "text": "Các thành viên mới tham gia phòng học thông minh cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_010_u11"
+      },
+      {
+        "text": "Tổ thực hiện phòng học thông minh cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_010_u12"
+      },
+      {
+        "text": "Thời gian chạy thử phòng học thông minh được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_010_u13"
+      },
+      {
+        "text": "Tổ thực hiện phòng học thông minh cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_010_u14"
+      },
+      {
+        "text": "Việc điều chuyển Lan sang bộ phận khác khiến nhóm phòng học thông minh phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_010_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_011",
+    "split": "test",
+    "units": [
+      {
+        "text": "Các thành viên mới tham gia hệ thống điều hành cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_011_u00"
+      },
+      {
+        "text": "Thời gian chạy thử hệ thống điều hành được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_011_u01"
+      },
+      {
+        "text": "Số dư tài khoản dành cho hệ thống điều hành chỉ còn 53 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_011_u02"
+      },
+      {
+        "text": "Tổ thực hiện hệ thống điều hành cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_011_u03"
+      },
+      {
+        "text": "Hạng mục cuối của hệ thống điều hành phải được hoàn tất trước ngày 16 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_011_u04"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của hệ thống điều hành bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_011_u05"
+      },
+      {
+        "text": "Đơn giá hợp đồng của hệ thống điều hành chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_011_u06"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho hệ thống điều hành để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_011_u07"
+      },
+      {
+        "text": "Thiết bị định tuyến của hệ thống điều hành cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_011_u08"
+      },
+      {
+        "text": "Hạng mục cuối của hệ thống điều hành phải được hoàn tất trước ngày 15 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_011_u09"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của hệ thống điều hành bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_011_u10"
+      },
+      {
+        "text": "Chứng từ quyết toán của hệ thống điều hành còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_011_u11"
+      },
+      {
+        "text": "Lịch kiểm tra hệ thống điều hành cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_011_u12"
+      },
+      {
+        "text": "Việc điều chuyển Minh sang bộ phận khác khiến nhóm hệ thống điều hành phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_011_u13"
+      },
+      {
+        "text": "Đơn giá hợp đồng của hệ thống điều hành chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_011_u14"
+      },
+      {
+        "text": "Tổ thực hiện hệ thống điều hành cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_011_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_012",
+    "split": "test",
+    "units": [
+      {
+        "text": "Việc điều chuyển Minh sang bộ phận khác khiến nhóm cổng thông tin phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_012_u00"
+      },
+      {
+        "text": "Lịch kiểm tra cổng thông tin cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_012_u01"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_012_u02"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_012_u03"
+      },
+      {
+        "text": "Thời gian chạy thử cổng thông tin được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_012_u04"
+      },
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 11 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_012_u05"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_012_u06"
+      },
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_012_u07"
+      },
+      {
+        "text": "Thiết bị định tuyến của cổng thông tin cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_012_u08"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_012_u09"
+      },
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 8 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_012_u10"
+      },
+      {
+        "text": "Số dư tài khoản dành cho cổng thông tin chỉ còn 76 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_012_u11"
+      },
+      {
+        "text": "Các thành viên mới tham gia cổng thông tin cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_012_u12"
+      },
+      {
+        "text": "Chứng từ quyết toán của cổng thông tin còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_012_u13"
+      },
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_012_u14"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho cổng thông tin để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_012_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_013",
+    "split": "test",
+    "units": [
+      {
+        "text": "Số dư tài khoản dành cho thư viện số chỉ còn 90 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_013_u00"
+      },
+      {
+        "text": "Việc điều chuyển Lan sang bộ phận khác khiến nhóm thư viện số phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_013_u01"
+      },
+      {
+        "text": "Lịch kiểm tra thư viện số cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_013_u02"
+      },
+      {
+        "text": "Thiết bị định tuyến của thư viện số cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_013_u03"
+      },
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 22 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_013_u04"
+      },
+      {
+        "text": "Các thành viên mới tham gia thư viện số cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_013_u05"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_013_u06"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho thư viện số để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_013_u07"
+      },
+      {
+        "text": "Chứng từ quyết toán của thư viện số còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_013_u08"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_013_u09"
+      },
+      {
+        "text": "Thời gian chạy thử thư viện số được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_013_u10"
+      },
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_013_u11"
+      },
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 13 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_013_u12"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_013_u13"
+      },
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_013_u14"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_013_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_014",
+    "split": "test",
+    "units": [
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của phòng học thông minh bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_014_u00"
+      },
+      {
+        "text": "Thời gian chạy thử phòng học thông minh được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_014_u01"
+      },
+      {
+        "text": "Việc điều chuyển Minh sang bộ phận khác khiến nhóm phòng học thông minh phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_014_u02"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho phòng học thông minh để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_014_u03"
+      },
+      {
+        "text": "Số dư tài khoản dành cho phòng học thông minh chỉ còn 131 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_014_u04"
+      },
+      {
+        "text": "Tổ thực hiện phòng học thông minh cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_014_u05"
+      },
+      {
+        "text": "Lịch kiểm tra phòng học thông minh cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_014_u06"
+      },
+      {
+        "text": "Hạng mục cuối của phòng học thông minh phải được hoàn tất trước ngày 10 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_014_u07"
+      },
+      {
+        "text": "Chứng từ quyết toán của phòng học thông minh còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_014_u08"
+      },
+      {
+        "text": "Thiết bị định tuyến của phòng học thông minh cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_014_u09"
+      },
+      {
+        "text": "Tổ thực hiện phòng học thông minh cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_014_u10"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của phòng học thông minh bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_014_u11"
+      },
+      {
+        "text": "Các thành viên mới tham gia phòng học thông minh cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_014_u12"
+      },
+      {
+        "text": "Hạng mục cuối của phòng học thông minh phải được hoàn tất trước ngày 26 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_014_u13"
+      },
+      {
+        "text": "Đơn giá hợp đồng của phòng học thông minh chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_014_u14"
+      },
+      {
+        "text": "Đơn giá hợp đồng của phòng học thông minh chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_014_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_015",
+    "split": "test",
+    "units": [
+      {
+        "text": "Hạng mục cuối của hệ thống điều hành phải được hoàn tất trước ngày 13 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_015_u00"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho hệ thống điều hành để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_015_u01"
+      },
+      {
+        "text": "Tổ thực hiện hệ thống điều hành cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_015_u02"
+      },
+      {
+        "text": "Tổ thực hiện hệ thống điều hành cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_015_u03"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của hệ thống điều hành bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_015_u04"
+      },
+      {
+        "text": "Chứng từ quyết toán của hệ thống điều hành còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_015_u05"
+      },
+      {
+        "text": "Việc điều chuyển Lan sang bộ phận khác khiến nhóm hệ thống điều hành phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_015_u06"
+      },
+      {
+        "text": "Lịch kiểm tra hệ thống điều hành cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_015_u07"
+      },
+      {
+        "text": "Đơn giá hợp đồng của hệ thống điều hành chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_015_u08"
+      },
+      {
+        "text": "Số dư tài khoản dành cho hệ thống điều hành chỉ còn 90 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_015_u09"
+      },
+      {
+        "text": "Đơn giá hợp đồng của hệ thống điều hành chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_015_u10"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của hệ thống điều hành bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_015_u11"
+      },
+      {
+        "text": "Hạng mục cuối của hệ thống điều hành phải được hoàn tất trước ngày 26 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_015_u12"
+      },
+      {
+        "text": "Thời gian chạy thử hệ thống điều hành được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_015_u13"
+      },
+      {
+        "text": "Thiết bị định tuyến của hệ thống điều hành cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_015_u14"
+      },
+      {
+        "text": "Các thành viên mới tham gia hệ thống điều hành cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_015_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_016",
+    "split": "test",
+    "units": [
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_016_u00"
+      },
+      {
+        "text": "Lịch kiểm tra cổng thông tin cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_016_u01"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_016_u02"
+      },
+      {
+        "text": "Thiết bị định tuyến của cổng thông tin cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_016_u03"
+      },
+      {
+        "text": "Chứng từ quyết toán của cổng thông tin còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_016_u04"
+      },
+      {
+        "text": "Việc điều chuyển Hà sang bộ phận khác khiến nhóm cổng thông tin phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_016_u05"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho cổng thông tin để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_016_u06"
+      },
+      {
+        "text": "Số dư tài khoản dành cho cổng thông tin chỉ còn 93 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_016_u07"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_016_u08"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_016_u09"
+      },
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 19 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_016_u10"
+      },
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_016_u11"
+      },
+      {
+        "text": "Các thành viên mới tham gia cổng thông tin cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_016_u12"
+      },
+      {
+        "text": "Thời gian chạy thử cổng thông tin được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_016_u13"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_016_u14"
+      },
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 15 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_016_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_017",
+    "split": "test",
+    "units": [
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 23 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_017_u00"
+      },
+      {
+        "text": "Chứng từ quyết toán của thư viện số còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_017_u01"
+      },
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_017_u02"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho thư viện số để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_017_u03"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_017_u04"
+      },
+      {
+        "text": "Việc điều chuyển Dũng sang bộ phận khác khiến nhóm thư viện số phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_017_u05"
+      },
+      {
+        "text": "Thời gian chạy thử thư viện số được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_017_u06"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_017_u07"
+      },
+      {
+        "text": "Các thành viên mới tham gia thư viện số cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_017_u08"
+      },
+      {
+        "text": "Lịch kiểm tra thư viện số cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_017_u09"
+      },
+      {
+        "text": "Số dư tài khoản dành cho thư viện số chỉ còn 45 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_017_u10"
+      },
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 26 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_017_u11"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_017_u12"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_017_u13"
+      },
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_017_u14"
+      },
+      {
+        "text": "Thiết bị định tuyến của thư viện số cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_017_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_018",
+    "split": "test",
+    "units": [
+      {
+        "text": "Tổ thực hiện phòng học thông minh cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_018_u00"
+      },
+      {
+        "text": "Hạng mục cuối của phòng học thông minh phải được hoàn tất trước ngày 27 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_018_u01"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của phòng học thông minh bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_018_u02"
+      },
+      {
+        "text": "Đơn giá hợp đồng của phòng học thông minh chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_018_u03"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của phòng học thông minh bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_018_u04"
+      },
+      {
+        "text": "Hạng mục cuối của phòng học thông minh phải được hoàn tất trước ngày 6 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_018_u05"
+      },
+      {
+        "text": "Chứng từ quyết toán của phòng học thông minh còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_018_u06"
+      },
+      {
+        "text": "Thời gian chạy thử phòng học thông minh được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_018_u07"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho phòng học thông minh để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_018_u08"
+      },
+      {
+        "text": "Số dư tài khoản dành cho phòng học thông minh chỉ còn 110 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_018_u09"
+      },
+      {
+        "text": "Đơn giá hợp đồng của phòng học thông minh chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_018_u10"
+      },
+      {
+        "text": "Thiết bị định tuyến của phòng học thông minh cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_018_u11"
+      },
+      {
+        "text": "Lịch kiểm tra phòng học thông minh cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_018_u12"
+      },
+      {
+        "text": "Việc điều chuyển Hà sang bộ phận khác khiến nhóm phòng học thông minh phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_018_u13"
+      },
+      {
+        "text": "Tổ thực hiện phòng học thông minh cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_018_u14"
+      },
+      {
+        "text": "Các thành viên mới tham gia phòng học thông minh cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_018_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_019",
+    "split": "test",
+    "units": [
+      {
+        "text": "Thiết bị định tuyến của hệ thống điều hành cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_019_u00"
+      },
+      {
+        "text": "Đơn giá hợp đồng của hệ thống điều hành chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_019_u01"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của hệ thống điều hành bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_019_u02"
+      },
+      {
+        "text": "Lịch kiểm tra hệ thống điều hành cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_019_u03"
+      },
+      {
+        "text": "Tổ thực hiện hệ thống điều hành cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_019_u04"
+      },
+      {
+        "text": "Tổ thực hiện hệ thống điều hành cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_019_u05"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của hệ thống điều hành bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_019_u06"
+      },
+      {
+        "text": "Thời gian chạy thử hệ thống điều hành được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_019_u07"
+      },
+      {
+        "text": "Hạng mục cuối của hệ thống điều hành phải được hoàn tất trước ngày 26 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_019_u08"
+      },
+      {
+        "text": "Đơn giá hợp đồng của hệ thống điều hành chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_019_u09"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho hệ thống điều hành để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_019_u10"
+      },
+      {
+        "text": "Việc điều chuyển Lan sang bộ phận khác khiến nhóm hệ thống điều hành phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_019_u11"
+      },
+      {
+        "text": "Các thành viên mới tham gia hệ thống điều hành cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_019_u12"
+      },
+      {
+        "text": "Hạng mục cuối của hệ thống điều hành phải được hoàn tất trước ngày 25 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_019_u13"
+      },
+      {
+        "text": "Chứng từ quyết toán của hệ thống điều hành còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_019_u14"
+      },
+      {
+        "text": "Số dư tài khoản dành cho hệ thống điều hành chỉ còn 148 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_019_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_020",
+    "split": "test",
+    "units": [
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_020_u00"
+      },
+      {
+        "text": "Số dư tài khoản dành cho cổng thông tin chỉ còn 38 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_020_u01"
+      },
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 25 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_020_u02"
+      },
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 27 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_020_u03"
+      },
+      {
+        "text": "Việc điều chuyển Dũng sang bộ phận khác khiến nhóm cổng thông tin phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_020_u04"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_020_u05"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_020_u06"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_020_u07"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_020_u08"
+      },
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_020_u09"
+      },
+      {
+        "text": "Các thành viên mới tham gia cổng thông tin cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_020_u10"
+      },
+      {
+        "text": "Thời gian chạy thử cổng thông tin được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_020_u11"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho cổng thông tin để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_020_u12"
+      },
+      {
+        "text": "Lịch kiểm tra cổng thông tin cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_020_u13"
+      },
+      {
+        "text": "Chứng từ quyết toán của cổng thông tin còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_020_u14"
+      },
+      {
+        "text": "Thiết bị định tuyến của cổng thông tin cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_020_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_021",
+    "split": "test",
+    "units": [
+      {
+        "text": "Thiết bị định tuyến của thư viện số cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_021_u00"
+      },
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_021_u01"
+      },
+      {
+        "text": "Thời gian chạy thử thư viện số được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_021_u02"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_021_u03"
+      },
+      {
+        "text": "Số dư tài khoản dành cho thư viện số chỉ còn 27 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_021_u04"
+      },
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 15 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_021_u05"
+      },
+      {
+        "text": "Các thành viên mới tham gia thư viện số cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_021_u06"
+      },
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 18 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_021_u07"
+      },
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_021_u08"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_021_u09"
+      },
+      {
+        "text": "Chứng từ quyết toán của thư viện số còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_021_u10"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho thư viện số để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_021_u11"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_021_u12"
+      },
+      {
+        "text": "Việc điều chuyển Hà sang bộ phận khác khiến nhóm thư viện số phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_021_u13"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_021_u14"
+      },
+      {
+        "text": "Lịch kiểm tra thư viện số cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_021_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_022",
+    "split": "test",
+    "units": [
+      {
+        "text": "Thời gian chạy thử phòng học thông minh được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_022_u00"
+      },
+      {
+        "text": "Lịch kiểm tra phòng học thông minh cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_022_u01"
+      },
+      {
+        "text": "Tổ thực hiện phòng học thông minh cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_022_u02"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho phòng học thông minh để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_022_u03"
+      },
+      {
+        "text": "Hạng mục cuối của phòng học thông minh phải được hoàn tất trước ngày 15 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_022_u04"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của phòng học thông minh bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_022_u05"
+      },
+      {
+        "text": "Các thành viên mới tham gia phòng học thông minh cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_022_u06"
+      },
+      {
+        "text": "Số dư tài khoản dành cho phòng học thông minh chỉ còn 36 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_022_u07"
+      },
+      {
+        "text": "Việc điều chuyển Lan sang bộ phận khác khiến nhóm phòng học thông minh phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_022_u08"
+      },
+      {
+        "text": "Hạng mục cuối của phòng học thông minh phải được hoàn tất trước ngày 19 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_022_u09"
+      },
+      {
+        "text": "Thiết bị định tuyến của phòng học thông minh cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_022_u10"
+      },
+      {
+        "text": "Đơn giá hợp đồng của phòng học thông minh chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_022_u11"
+      },
+      {
+        "text": "Đơn giá hợp đồng của phòng học thông minh chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_022_u12"
+      },
+      {
+        "text": "Chứng từ quyết toán của phòng học thông minh còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_022_u13"
+      },
+      {
+        "text": "Tổ thực hiện phòng học thông minh cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_022_u14"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của phòng học thông minh bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_022_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_023",
+    "split": "test",
+    "units": [
+      {
+        "text": "Lịch kiểm tra hệ thống điều hành cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_023_u00"
+      },
+      {
+        "text": "Chứng từ quyết toán của hệ thống điều hành còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_023_u01"
+      },
+      {
+        "text": "Hạng mục cuối của hệ thống điều hành phải được hoàn tất trước ngày 11 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_023_u02"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của hệ thống điều hành bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_023_u03"
+      },
+      {
+        "text": "Tổ thực hiện hệ thống điều hành cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_023_u04"
+      },
+      {
+        "text": "Thiết bị định tuyến của hệ thống điều hành cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_023_u05"
+      },
+      {
+        "text": "Thời gian chạy thử hệ thống điều hành được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_023_u06"
+      },
+      {
+        "text": "Các thành viên mới tham gia hệ thống điều hành cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_023_u07"
+      },
+      {
+        "text": "Việc điều chuyển Minh sang bộ phận khác khiến nhóm hệ thống điều hành phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_023_u08"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho hệ thống điều hành để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_023_u09"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của hệ thống điều hành bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_023_u10"
+      },
+      {
+        "text": "Đơn giá hợp đồng của hệ thống điều hành chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_023_u11"
+      },
+      {
+        "text": "Hạng mục cuối của hệ thống điều hành phải được hoàn tất trước ngày 14 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_023_u12"
+      },
+      {
+        "text": "Số dư tài khoản dành cho hệ thống điều hành chỉ còn 94 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_023_u13"
+      },
+      {
+        "text": "Tổ thực hiện hệ thống điều hành cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_023_u14"
+      },
+      {
+        "text": "Đơn giá hợp đồng của hệ thống điều hành chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_023_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_024",
+    "split": "test",
+    "units": [
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 24 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_024_u00"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_024_u01"
+      },
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_024_u02"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_024_u03"
+      },
+      {
+        "text": "Việc điều chuyển Minh sang bộ phận khác khiến nhóm cổng thông tin phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_024_u04"
+      },
+      {
+        "text": "Thời gian chạy thử cổng thông tin được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_024_u05"
+      },
+      {
+        "text": "Lịch kiểm tra cổng thông tin cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_024_u06"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_024_u07"
+      },
+      {
+        "text": "Thiết bị định tuyến của cổng thông tin cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_024_u08"
+      },
+      {
+        "text": "Các thành viên mới tham gia cổng thông tin cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_024_u09"
+      },
+      {
+        "text": "Chứng từ quyết toán của cổng thông tin còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_024_u10"
+      },
+      {
+        "text": "Số dư tài khoản dành cho cổng thông tin chỉ còn 114 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_024_u11"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_024_u12"
+      },
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 8 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_024_u13"
+      },
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_024_u14"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho cổng thông tin để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_024_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_025",
+    "split": "test",
+    "units": [
+      {
+        "text": "Thiết bị định tuyến của thư viện số cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_025_u00"
+      },
+      {
+        "text": "Các thành viên mới tham gia thư viện số cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_025_u01"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_025_u02"
+      },
+      {
+        "text": "Việc điều chuyển Minh sang bộ phận khác khiến nhóm thư viện số phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_025_u03"
+      },
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_025_u04"
+      },
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_025_u05"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_025_u06"
+      },
+      {
+        "text": "Thời gian chạy thử thư viện số được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_025_u07"
+      },
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 10 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_025_u08"
+      },
+      {
+        "text": "Lịch kiểm tra thư viện số cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_025_u09"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_025_u10"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho thư viện số để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_025_u11"
+      },
+      {
+        "text": "Số dư tài khoản dành cho thư viện số chỉ còn 115 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_025_u12"
+      },
+      {
+        "text": "Chứng từ quyết toán của thư viện số còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_025_u13"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_025_u14"
+      },
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 21 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_025_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_026",
+    "split": "test",
+    "units": [
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của phòng học thông minh bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_026_u00"
+      },
+      {
+        "text": "Hạng mục cuối của phòng học thông minh phải được hoàn tất trước ngày 25 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_026_u01"
+      },
+      {
+        "text": "Thiết bị định tuyến của phòng học thông minh cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_026_u02"
+      },
+      {
+        "text": "Tổ thực hiện phòng học thông minh cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_026_u03"
+      },
+      {
+        "text": "Tổ thực hiện phòng học thông minh cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_026_u04"
+      },
+      {
+        "text": "Số dư tài khoản dành cho phòng học thông minh chỉ còn 20 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_026_u05"
+      },
+      {
+        "text": "Hạng mục cuối của phòng học thông minh phải được hoàn tất trước ngày 23 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_026_u06"
+      },
+      {
+        "text": "Đơn giá hợp đồng của phòng học thông minh chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_026_u07"
+      },
+      {
+        "text": "Thời gian chạy thử phòng học thông minh được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_026_u08"
+      },
+      {
+        "text": "Chứng từ quyết toán của phòng học thông minh còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_026_u09"
+      },
+      {
+        "text": "Việc điều chuyển Lan sang bộ phận khác khiến nhóm phòng học thông minh phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_026_u10"
+      },
+      {
+        "text": "Lịch kiểm tra phòng học thông minh cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_026_u11"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho phòng học thông minh để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_026_u12"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của phòng học thông minh bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_026_u13"
+      },
+      {
+        "text": "Đơn giá hợp đồng của phòng học thông minh chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_026_u14"
+      },
+      {
+        "text": "Các thành viên mới tham gia phòng học thông minh cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_026_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_027",
+    "split": "test",
+    "units": [
+      {
+        "text": "Thời gian chạy thử hệ thống điều hành được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_027_u00"
+      },
+      {
+        "text": "Đơn giá hợp đồng của hệ thống điều hành chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_027_u01"
+      },
+      {
+        "text": "Tổ thực hiện hệ thống điều hành cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_027_u02"
+      },
+      {
+        "text": "Lịch kiểm tra hệ thống điều hành cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_027_u03"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của hệ thống điều hành bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_027_u04"
+      },
+      {
+        "text": "Hạng mục cuối của hệ thống điều hành phải được hoàn tất trước ngày 17 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_027_u05"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho hệ thống điều hành để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_027_u06"
+      },
+      {
+        "text": "Thiết bị định tuyến của hệ thống điều hành cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_027_u07"
+      },
+      {
+        "text": "Tổ thực hiện hệ thống điều hành cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_027_u08"
+      },
+      {
+        "text": "Chứng từ quyết toán của hệ thống điều hành còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_027_u09"
+      },
+      {
+        "text": "Các thành viên mới tham gia hệ thống điều hành cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_027_u10"
+      },
+      {
+        "text": "Hạng mục cuối của hệ thống điều hành phải được hoàn tất trước ngày 17 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_027_u11"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của hệ thống điều hành bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_027_u12"
+      },
+      {
+        "text": "Số dư tài khoản dành cho hệ thống điều hành chỉ còn 54 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_027_u13"
+      },
+      {
+        "text": "Việc điều chuyển Dũng sang bộ phận khác khiến nhóm hệ thống điều hành phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_027_u14"
+      },
+      {
+        "text": "Đơn giá hợp đồng của hệ thống điều hành chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_027_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_028",
+    "split": "test",
+    "units": [
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_028_u00"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của cổng thông tin bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_028_u01"
+      },
+      {
+        "text": "Việc điều chuyển Minh sang bộ phận khác khiến nhóm cổng thông tin phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_028_u02"
+      },
+      {
+        "text": "Số dư tài khoản dành cho cổng thông tin chỉ còn 128 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_028_u03"
+      },
+      {
+        "text": "Thiết bị định tuyến của cổng thông tin cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_028_u04"
+      },
+      {
+        "text": "Lịch kiểm tra cổng thông tin cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_028_u05"
+      },
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 7 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_028_u06"
+      },
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_028_u07"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_028_u08"
+      },
+      {
+        "text": "Tổ thực hiện cổng thông tin cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_028_u09"
+      },
+      {
+        "text": "Các thành viên mới tham gia cổng thông tin cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_028_u10"
+      },
+      {
+        "text": "Chứng từ quyết toán của cổng thông tin còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_028_u11"
+      },
+      {
+        "text": "Thời gian chạy thử cổng thông tin được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_028_u12"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho cổng thông tin để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_028_u13"
+      },
+      {
+        "text": "Hạng mục cuối của cổng thông tin phải được hoàn tất trước ngày 24 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_028_u14"
+      },
+      {
+        "text": "Đơn giá hợp đồng của cổng thông tin chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_028_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  },
+  {
+    "id": "test_029",
+    "split": "test",
+    "units": [
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_029_u00"
+      },
+      {
+        "text": "Việc điều chuyển Dũng sang bộ phận khác khiến nhóm thư viện số phải tìm người nhận bàn giao.",
+        "topic": "staffing",
+        "template_id": "staffing_7",
+        "id": "test_029_u01"
+      },
+      {
+        "text": "Số dư tài khoản dành cho thư viện số chỉ còn 56 triệu đồng, chưa đủ thanh toán nhà cung cấp.",
+        "topic": "budget",
+        "template_id": "budget_8",
+        "id": "test_029_u02"
+      },
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 19 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_029_u03"
+      },
+      {
+        "text": "Nhóm đề xuất cấu hình bản sao dự phòng cho thư viện số để khôi phục khi máy chính gặp sự cố.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_7",
+        "id": "test_029_u04"
+      },
+      {
+        "text": "Lịch kiểm tra thư viện số cần điều chỉnh vì đơn vị phối hợp chưa gửi kết quả thực hiện đúng hạn.",
+        "topic": "schedule",
+        "template_id": "schedule_7",
+        "id": "test_029_u05"
+      },
+      {
+        "text": "Các thành viên mới tham gia thư viện số cần hoàn thành khóa hướng dẫn nghiệp vụ trước khi nhận nhiệm vụ.",
+        "topic": "staffing",
+        "template_id": "staffing_8",
+        "id": "test_029_u06"
+      },
+      {
+        "text": "Hạng mục cuối của thư viện số phải được hoàn tất trước ngày 19 để kịp tổ chức cuộc họp tổng kết.",
+        "topic": "schedule",
+        "template_id": "schedule_6",
+        "id": "test_029_u07"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_029_u08"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_029_u09"
+      },
+      {
+        "text": "Chứng từ quyết toán của thư viện số còn thiếu phần xác nhận tiền tạm ứng từ đợt trước.",
+        "topic": "budget",
+        "template_id": "budget_7",
+        "id": "test_029_u10"
+      },
+      {
+        "text": "Thời gian chạy thử thư viện số được kéo dài thêm một tuần trước khi chuyển sang giai đoạn bàn giao chính thức.",
+        "topic": "schedule",
+        "template_id": "schedule_8",
+        "id": "test_029_u11"
+      },
+      {
+        "text": "Tổ thực hiện thư viện số cần phân công rõ người chịu trách nhiệm phản hồi yêu cầu vào buổi tối.",
+        "topic": "staffing",
+        "template_id": "staffing_6",
+        "id": "test_029_u12"
+      },
+      {
+        "text": "Đơn giá hợp đồng của thư viện số chưa bao gồm thuế nên cần tính lại tổng số phải trả.",
+        "topic": "budget",
+        "template_id": "budget_6",
+        "id": "test_029_u13"
+      },
+      {
+        "text": "Thiết bị định tuyến của thư viện số cần cập nhật bản vá trước khi mở lại cổng truy cập từ bên ngoài.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_8",
+        "id": "test_029_u14"
+      },
+      {
+        "text": "Nhật ký vận hành cho thấy cơ sở dữ liệu của thư viện số bị nghẽn khi có nhiều kết nối đồng thời.",
+        "topic": "infrastructure",
+        "template_id": "infrastructure_6",
+        "id": "test_029_u15"
+      }
+    ],
+    "queries": [
+      {
+        "text": "Nguồn kinh phí, số tiền phải trả và thủ tục thanh toán được bàn như thế nào?",
+        "topic": "budget"
+      },
+      {
+        "text": "Máy chủ, kết nối mạng, sao lưu và bảo vệ hệ thống cần xử lý những việc gì?",
+        "topic": "infrastructure"
+      },
+      {
+        "text": "Ai được phân công, cần bổ sung người nào và bố trí ca trực ra sao?",
+        "topic": "staffing"
+      },
+      {
+        "text": "Thời hạn, tiến độ, mốc nghiệm thu và lịch bàn giao thay đổi như thế nào?",
+        "topic": "schedule"
+      }
+    ]
+  }
+]

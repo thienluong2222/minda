@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
-WEB = ROOT / "web_app"
+WEB = ROOT
 OUT = ROOT / "reports/comparative_benchmark/20261104"
 CACHE = ROOT / "data/model_cache"
 SEED = 20261104

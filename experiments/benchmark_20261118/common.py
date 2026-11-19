@@ -81,13 +81,25 @@ def rss_mb() -> float:
     return val / (1e6 if sys.platform == "darwin" else 1e3)
 
 
+def require_input(path: Path, hint: str | None = None) -> Path:
+    if path.exists():
+        return path
+    rel = path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
+    default_hint = (
+        " Run: .venv-backend/bin/python experiments/benchmark_20261118/prepare_inputs.py"
+    )
+    extra = f" {hint}" if hint else default_hint
+    raise FileNotFoundError(f"Thiếu dữ liệu đầu vào benchmark: {rel}.{extra}")
+
+
 def snapshot(model_id: str, revision: str | None = None, *, minutes_hub: bool = False) -> Path:
-    hub = (CACHE / "minutes/hub") if minutes_hub else CACHE
-    cache = hub / ("models--" + model_id.replace("/", "--"))
-    if revision:
-        p = cache / "snapshots" / revision
-        if p.is_dir():
-            return p
+    hubs = [CACHE / "minutes/hub", CACHE] if minutes_hub else [CACHE, CACHE / "minutes/hub"]
+    for hub in hubs:
+        cache = hub / ("models--" + model_id.replace("/", "--"))
+        if revision:
+            p = cache / "snapshots" / revision
+            if p.is_dir():
+                return p
     inv_path = CB_DATA / "model_inventory.json"
     if inv_path.is_file():
         for row in read_json(inv_path):
@@ -95,10 +107,14 @@ def snapshot(model_id: str, revision: str | None = None, *, minutes_hub: bool = 
                 p = Path(row["path"])
                 if p.is_dir():
                     return p
-    snaps = sorted((cache / "snapshots").glob("*"))
-    if snaps:
-        return snaps[0]
-    raise FileNotFoundError(f"Cached model not found: {model_id}@{revision} in {cache}")
+    for hub in hubs:
+        cache = hub / ("models--" + model_id.replace("/", "--"))
+        snaps = sorted((cache / "snapshots").glob("*"))
+        if snaps:
+            return snaps[0]
+    raise FileNotFoundError(
+        f"Cached model not found: {model_id}@{revision} in {CACHE} or {CACHE / 'minutes/hub'}"
+    )
 
 
 def paired_bootstrap_ci(

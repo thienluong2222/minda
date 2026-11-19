@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import CB_DATA, OUT, ROOT, SEED, log, read_json, rss_mb, setup_root_src, snapshot, write_csv, write_json
+from common import CB_DATA, OUT, ROOT, SEED, log, read_json, require_input, rss_mb, setup_root_src, snapshot, write_csv, write_json
 
 ENCODERS = {
     "e5_small": "intfloat/multilingual-e5-small",
@@ -153,28 +154,56 @@ def run_method(vectors, method: str):
     return pred, time.perf_counter() - t0
 
 
+def _available_encoders(requested: list[str] | None) -> list[str]:
+    if requested:
+        return requested
+    available = []
+    for name, model_id in ENCODERS.items():
+        try:
+            snapshot(model_id)
+            available.append(name)
+        except FileNotFoundError:
+            log(f"[Clustering] Skipping uncached optional baseline encoder: {name} ({model_id})")
+    if not available:
+        raise FileNotFoundError(
+            "Không tìm thấy encoder embedding nào trong data/model_cache. "
+            "Chạy: .venv-backend/bin/python scripts/prepare_minutes_models.py"
+        )
+    return available
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Wave 1 Topic Clustering benchmark.")
+    parser.add_argument(
+        "--encoders",
+        nargs="+",
+        choices=list(ENCODERS),
+        default=None,
+        help="Optional subset of encoders to evaluate (defaults to all cached encoders).",
+    )
+    args = parser.parse_args()
+
     setup_root_src()
     import numpy as np
     from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score, silhouette_score
 
     t_all = time.perf_counter()
-    # Dataset 1: 42 synthetic topic docs (9 val, 30 test)
-    docs_42 = read_json(CB_DATA / "text/manifest.json")
+    # Dataset 1: 42 synthetic topic docs (9 val, 30 test) — auto-generate if missing
+    text_manifest = CB_DATA / "text/manifest.json"
+    if not text_manifest.is_file():
+        log("[Clustering] text/manifest.json missing; generating deterministically via comparative_benchmark.text.prepare() ...")
+        from experiments.comparative_benchmark import text as cb_text
+
+        cb_text.prepare()
+    docs_42 = read_json(require_input(text_manifest))
     docs_42 = [d for d in docs_42 if d["split"] in {"validation", "test"}]
 
     # Dataset 2: 60 graph-synthetic-v2.1 test transcripts (turn counts variable)
-    v21_rows = [
-        json.loads(line)
-        for line in (ROOT / "artifacts/graph-synthetic-v2.1/test/inputs/transcripts.jsonl").read_text().splitlines()
-        if line.strip()
-    ]
+    v21_path = require_input(ROOT / "artifacts/graph-synthetic-v2.1/test/inputs/transcripts.jsonl")
+    v21_rows = [json.loads(line) for line in v21_path.read_text().splitlines() if line.strip()]
     # Dataset 3: 84 llm-next-round-v2 test transcripts
-    nrv2_rows = [
-        json.loads(line)
-        for line in (ROOT / "artifacts/llm-next-round-v2-20261026/data/test.jsonl").read_text().splitlines()
-        if line.strip()
-    ]
+    nrv2_path = require_input(ROOT / "artifacts/llm-next-round-v2-20261026/data/test.jsonl")
+    nrv2_rows = [json.loads(line) for line in nrv2_path.read_text().splitlines() if line.strip()]
     nrv2_docs = []
     for row in nrv2_rows:
         payload = json.loads(next(m["content"] for m in row["messages"] if m["role"] == "user"))
@@ -185,7 +214,8 @@ def main() -> None:
     structural_rows = []
     encoder_meta = {}
 
-    for enc_name in ENCODERS:
+    selected_encoders = _available_encoders(args.encoders)
+    for enc_name in selected_encoders:
         log(f"[Clustering] Encoding with {enc_name} ...")
         t_enc0 = time.perf_counter()
 
